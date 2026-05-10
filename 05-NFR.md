@@ -27,31 +27,38 @@
 
 ---
 
-## 버전 B — ID·품질속성·요구사항명·설명 (NFR01~NFR21)
+## 버전 B — ID·품질속성·요구사항명·설명·관련 Stakeholder (NFR01~NFR26)
 
-| ID    | 품질 속성     | 요구사항명               | 설명                                                                                       |
-| ----- | ------------- | ------------------------ | ------------------------------------------------------------------------------------------ |
-| NFR01 | 성능          | 단순 처리 응답성         | ZeroClaw로 처리 가능한 단순 intent는 빠른 시간 내 첫 응답을 제공해야 한다.                 |
-| NFR02 | 성능          | 단순 협상 응답성         | 단일 상대 proxy agent와의 단순 negotiation은 사용자가 체감상 지연이 크지 않은 수준으로 수행되어야 한다. |
-| NFR03 | 성능          | UI 상태 반영성           | 협상 상태 변화는 사용자 UI에 신속하게 반영되어야 한다.                                     |
-| NFR04 | 상호운용성    | A2A 메시지 규약 준수     | Agent discovery, capability exchange, negotiation message는 표준화된 메시지 구조를 따라야 한다. |
-| NFR05 | 상호운용성    | 하이브리드 연동성        | 시스템은 ZeroClaw 기반 local runtime, Android capability, 외부 service proxy와 연동 가능한 구조여야 한다. |
-| NFR06 | 신뢰성        | 세션 복구 가능성         | 앱 재시작 또는 일시적 네트워크 장애 후에도 negotiation session을 복구할 수 있어야 한다.    |
-| NFR07 | 신뢰성        | 장애 격리성              | 특정 topic agent 또는 negotiation failure가 전체 시스템 장애로 확산되지 않아야 한다.       |
-| NFR08 | 신뢰성        | 결과 일관성              | 합의 후 캘린더, 예약, 알림 반영은 중복 또는 누락 없이 처리되어야 한다.                     |
-| NFR09 | 보안성        | 상호 인증                | agent 간 연결 시 상호 인증이 수행되어야 한다.                                              |
-| NFR10 | 보안성        | 암호화 통신              | agent 간 메시지와 민감 정보는 암호화되어야 한다.                                           |
-| NFR11 | 보안성        | 최소권한 접근제어        | agent는 위임받은 권한 범위 내에서만 데이터 접근 및 action 수행이 가능해야 한다.            |
-| NFR12 | 보안성        | 최소 데이터 보관         | 개인정보와 민감한 협상 정보는 최소한으로 저장 및 보관되어야 한다.                          |
-| NFR13 | 사용성        | 협상 설명 가능성         | 사용자는 협상 결과와 제안 근거를 이해할 수 있어야 한다.                                    |
-| NFR14 | 사용성        | 간단한 승인 UX           | 승인, 거절, 조건 수정 입력은 최소 단계로 처리 가능해야 한다.                               |
-| NFR15 | 사용성        | 선제 제안의 비침습성     | 비명시적 intent 기반 proactive 제안은 사용자에게 과도한 방해를 주지 않아야 한다.           |
-| NFR16 | 유지보수성    | Agent 확장 용이성        | 새로운 domain agent를 기존 구조 변경 최소화로 추가할 수 있어야 한다.                       |
-| NFR17 | 유지보수성    | 모듈 경계 명확성         | Intent, Orchestration, Negotiation, Memory, Security는 명확히 분리된 모듈이어야 한다.      |
-| NFR18 | 확장성        | 시나리오 확장성          | 일정 협상 중심 구조가 예약, 쇼핑, 가격 협상 등으로 확장 가능해야 한다.                     |
-| NFR19 | 확장성        | Agent 수 증가 대응       | 등록 agent 수와 동시 task 수가 증가해도 구조적으로 확장 가능해야 한다.                     |
-| NFR20 | 시험용이성    | 정량 평가 가능성         | 협상 성공률, 평균 협상 턴 수, 평균 응답시간, approval 전환율 등을 측정할 수 있어야 한다.   |
-| NFR21 | 시험용이성    | Mock 기반 테스트 가능성  | mock agent를 사용해 discovery, negotiation, failure case를 재현할 수 있어야 한다.          |
+> 📝 **2026-05-09 변경**: 표에 "관련 Stakeholder" 컬럼 추가, NFR12 설명 보완(보관 기간 정책 추가), VOC 갭 분석 결과에 따라 신규 항목 5개 추가(NFR22~NFR26). 근거는 [`03-Stakeholder.md`](03-Stakeholder.md) §3.2의 VOC.
+
+| ID    | 품질 속성     | 요구사항명               | 설명                                                                                       | 관련 Stakeholder |
+| ----- | ------------- | ------------------------ | ------------------------------------------------------------------------------------------ | ---------------- |
+| NFR01 | 성능          | 단순 처리 응답성         | ZeroClaw로 처리 가능한 단순 intent는 빠른 시간 내 첫 응답을 제공해야 한다.                 | End User · AI/ML Engineer |
+| NFR02 | 성능          | 단순 협상 응답성         | 단일 상대 proxy agent와의 단순 negotiation은 사용자가 체감상 지연이 크지 않은 수준으로 수행되어야 한다. | End User · AI/ML Engineer |
+| NFR03 | 성능          | UI 상태 반영성           | 협상 상태 변화는 사용자 UI에 신속하게 반영되어야 한다.                                     | End User · UX 디자인 팀 |
+| NFR04 | 상호운용성    | A2A 메시지 규약 준수     | Agent discovery, capability exchange, negotiation message는 표준화된 메시지 구조를 따라야 한다. | Multi-agent Framework Developer · Architect · Third-party Sub-Agent Developer |
+| NFR05 | 상호운용성    | 하이브리드 연동성        | 시스템은 ZeroClaw 기반 local runtime, Android capability, 외부 service proxy와 연동 가능한 구조여야 한다. | Architect · Service Proxy Agent Owner · Multi-agent Framework Developer |
+| NFR06 | 신뢰성        | 세션 복구 가능성         | 앱 재시작 또는 일시적 네트워크 장애 후에도 negotiation session을 복구할 수 있어야 한다.    | 운영/SRE · End User |
+| NFR07 | 신뢰성        | 장애 격리성              | 특정 topic agent 또는 negotiation failure가 전체 시스템 장애로 확산되지 않아야 한다.       | 운영/SRE · Cloud 담당자 |
+| NFR08 | 신뢰성        | 결과 일관성              | 합의 후 캘린더, 예약, 알림 반영은 중복 또는 누락 없이 처리되어야 한다.                     | End User · Service Proxy Agent Owner · 운영/SRE |
+| NFR09 | 보안성        | 상호 인증                | agent 간 연결 시 상호 인증이 수행되어야 한다.                                              | Security/Privacy 담당 · Service Proxy Agent Owner |
+| NFR10 | 보안성        | 암호화 통신              | agent 간 메시지와 민감 정보는 암호화되어야 한다.                                           | Security/Privacy 담당 · 개인정보 보안 담당자 |
+| NFR11 | 보안성        | 최소권한 접근제어        | agent는 위임받은 권한 범위 내에서만 데이터 접근 및 action 수행이 가능해야 한다.            | Security/Privacy 담당 · End User |
+| NFR12 | 보안성        | 최소 데이터 보관 + 보관 기간 정책 | 개인정보와 민감한 협상 정보는 최소한으로 저장·보관되어야 하며, 데이터 종류별 **보관 기간(retention period)** 과 **자동 삭제 정책**이 명시·집행되어야 한다. *(2026-05-09 보관 기간 문구 보완)* | 개인정보 보안 담당자 · Legal/Compliance |
+| NFR13 | 사용성        | 협상 설명 가능성         | 사용자는 협상 결과와 제안 근거를 이해할 수 있어야 한다.                                    | End User · UX 디자인 팀 · AI/ML Engineer |
+| NFR14 | 사용성        | 간단한 승인 UX           | 승인, 거절, 조건 수정 입력은 최소 단계로 처리 가능해야 한다.                               | End User · UX 디자인 팀 |
+| NFR15 | 사용성        | 선제 제안의 비침습성     | 비명시적 intent 기반 proactive 제안은 사용자에게 과도한 방해를 주지 않아야 한다.           | End User · UX 디자인 팀 |
+| NFR16 | 유지보수성    | Agent 확장 용이성        | 새로운 domain agent를 기존 구조 변경 최소화로 추가할 수 있어야 한다.                       | Architect · Multi-agent Framework Developer · Third-party Sub-Agent Developer |
+| NFR17 | 유지보수성    | 모듈 경계 명확성         | Intent, Orchestration, Negotiation, Memory, Security는 명확히 분리된 모듈이어야 한다.      | Architect · Multi-agent Framework Developer |
+| NFR18 | 확장성        | 시나리오 확장성          | 일정 협상 중심 구조가 예약, 쇼핑, 가격 협상 등으로 확장 가능해야 한다.                     | Architect · Project Leader |
+| NFR19 | 확장성        | Agent 수 증가 대응       | 등록 agent 수와 동시 task 수가 증가해도 구조적으로 확장 가능해야 한다.                     | Architect · MX H/W 담당자 · 운영/SRE |
+| NFR20 | 시험용이성    | 정량 평가 가능성         | 협상 성공률, 평균 협상 턴 수, 평균 응답시간, approval 전환율 등을 측정할 수 있어야 한다.   | 품질 검증팀 · Project Leader |
+| NFR21 | 시험용이성    | Mock 기반 테스트 가능성  | mock agent를 사용해 discovery, negotiation, failure case를 재현할 수 있어야 한다.          | 품질 검증팀 · Architect |
+| NFR22 | 보안성        | 메시지 무결성·변조 감지 *(신규)* | agent 간 통신 메시지는 서명 또는 MAC 등으로 무결성이 보장되어야 하며, 변조가 발생한 경우 감지·차단되어야 한다. | Security/Privacy 담당 · Multi-agent Framework Developer |
+| NFR23 | 시험용이성    | 실패 주입(Fault Injection) *(신규)* | 시스템은 네트워크 단절·타임아웃·malformed message·합의 실패 등 실패 케이스를 의도적으로 주입할 수 있는 테스트 인터페이스를 제공해야 한다. | 품질 검증팀 · 운영/SRE |
+| NFR24 | 유지보수성    | LLM 모델 어댑터 교체 용이성 *(신규)* | 온디바이스 및 서버 LLM은 어댑터 추상화 계층 뒤에서 동작해야 하며, 모델 교체 시 상위 모듈(Intent·Orchestration·Negotiation)의 변경이 최소화되어야 한다. | AI/ML Engineer · Architect · MX 상품화 의사결정 담당자 |
+| NFR25 | 상호운용성    | 외부 SDK 안정성·버전 호환 *(신규)* | Third-party Sub-Agent 등록용 SDK는 의미적 버전 관리(semantic versioning)와 backward compatibility 정책을 보장해야 하며, breaking change는 사전 deprecation 절차를 거쳐야 한다. | Third-party Sub-Agent Developer · Architect |
+| NFR26 | 성능 / 효율   | 서버 LLM 호출 비용 통제 *(신규)* | 서버 LLM 호출 빈도와 토큰 사용량은 사전 정의된 예측 모델·상한선 안에서 동작해야 하며, 임계치 초과 시 throttle 또는 escalation이 가능해야 한다. | Cloud 담당자 · MX 상품화 의사결정 담당자 |
 
 ---
 
