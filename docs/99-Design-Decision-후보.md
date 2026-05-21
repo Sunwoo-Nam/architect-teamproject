@@ -5,18 +5,21 @@
 - On-device에 Data sanitize 후 전송
 - On-device LLM 사용 (서버 LLM과 역할 분리)
 - Data를 Layer화해서...
+- Orchestrator 기능이 On-device와 Server에 나뉘어 구현된다면, 보안성/비용/성능을 고려하여 어느 지점에서 나뉘어야 하는가 
 
 ## 2. Agent / tool 생성 방식
 
 - 동적으로 생성하는게 정말 가능한가?
 - 동적 생성이 반드시 필요한가?
 - 코드까지 생성하는게 필요한가?
+- Agent와 Tool의 형상은 어떻게 되어야 하는가?
 
 ## 3. Single Agent VS Multi Agent
 
 - Latency / Accuracy / Cost 를 고려해야할듯
+- IDS에서 하는 동작과 Multi Agent Framework에서 하는 동작에 대한 구분은?
 
-## 4. 협상을 하나로 merge
+## 4. N-party 협상 시 협상을 하나로 merge 하는 방법
 
 - 각 Device에서 Intent를 각자 발생시킬 텐데, 어떻게 하나로 머지할 것인가
 - 이 때, 누군가가 Master 역할을 할 것인지? 아니면 각자가 N:N으로 할 것인지
@@ -49,8 +52,11 @@
 ## 11. 다중 Intent의 동시발생시 처리 방법
 
 - 동시에 여러 Intent가 들어올때, 하나의 Intent 처리중에 다른 것이 들어올때 등
+- IDS에서 Multi Agent Framework로 복수개의 요청 사항이 왔을 때의 처리 방법
 
 ## 12. Sub Agent의 life cycle
 
 - Sub Agent를 언제까지 메모리에 올려둘지
 - 어느 Data를 얼마나 오래 저장할지
+- 협상이 완료되었을 때의 Sub-agent 처리
+- 협상이 비정상 종료 되었을 때의 Sub-agent 처리
