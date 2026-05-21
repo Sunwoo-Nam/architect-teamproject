@@ -46,7 +46,7 @@ flowchart TB
 
     A["Intent 수신"] --> B["Intent 해석"]
     B --> C["Intent 상태 관리"]
-    C --> D["계획·정책 결정"]
+    C --> D["계획 및 실행 결정"]
     D --> E["Task 실행 제어"]
     E --> F["Device / Service Adapter"]
     F --> C
@@ -73,7 +73,7 @@ flowchart TB
 
 이 흐름에서는 `Intent 수신`이 사용자, 센서, 예약, 외부 Agent로부터 Intent를 받습니다.
 `Intent 해석`은 Intent 의미와 관계 후보를 해석하고, `Intent 상태 관리`는 Intent별 현재 상태와 `priority`, `supersedes`, `blocked-by` 같은 단순 metadata를 관리합니다.
-`계획·정책 결정`은 현재 상태 Store를 바탕으로 실행 계획 후보를 만들고, policy 검증을 거쳐 실행할지, 대기시킬지, 완료/실패/취소 처리할지를 확정합니다.
+`계획 및 실행 결정`은 현재 상태 Store를 바탕으로 실행 계획을 만들고, 실행할지, 대기시킬지, 완료/실패/취소 처리할지를 확정합니다.
 `Task 실행 제어`는 확정된 Task 실행을 제어하고, `Device / Service Adapter`를 통해 device, calendar, external API 같은 외부 상태를 변경합니다.
 실패, 취소, 변경이 발생하면 `실패·취소·변경 처리`가 이를 상태 변경으로 반영하고, 시스템은 주로 현재 상태값을 기준으로 유지, 재시도, 취소 여부를 판단합니다.
 즉 1안의 핵심 데이터 구조는 `IntentStateStore`이며, 여러 Intent의 현재 상태를 `byIntentId`, `byStatus`, `byResource` 같은 index로 빠르게 조회하는 방식입니다.
@@ -94,7 +94,7 @@ flowchart TB
     X --> B["Event Store"]
     B --> C["Projection 생성"]
     C --> D["Task Graph 관리"]
-    D --> F["계획·정책 결정"]
+    D --> F["계획 및 실행 결정"]
     F --> G["Task 실행 제어"]
     G --> H["Device / Service Adapter"]
     H --> B
@@ -124,7 +124,7 @@ flowchart TB
 
 이 흐름에서는 `Intent 수신`이 받은 raw Intent를 `Intent 해석`이 구조화된 event 후보로 변환하고, 이후 변경, 취소, 실행 결과가 모두 `Event Store`에 append-only event로 기록됩니다.
 `Projection 생성`은 Event Store를 deterministic하게 읽어 현재 graph view를 만들고, `Task Graph 관리`는 Intent/Task/Agent/Resource 관계, 실행 이력, 외부 상태 영향을 관리합니다.
-`계획·정책 결정`은 Task Graph를 바탕으로 실행 계획 후보를 만들고, graph의 기계적 제약과 policy 검증을 거쳐 최종 실행 계획과 복구 범위를 확정합니다.
+`계획 및 실행 결정`은 Task Graph를 바탕으로 실행 계획을 만들고, 실행할지, 대기시킬지, 취소할지, 복구 범위를 어떻게 잡을지를 확정합니다.
 `Task 실행 제어`는 확정된 실행을 수행하고, `Device / Service Adapter`를 통한 외부 상태 변경 결과는 다시 Event Store에 기록됩니다.
 실패, 취소, 변경이 발생하면 `실패·취소·변경 처리`가 이를 event로 기록하여, 이후 Projection과 Task Graph가 동일한 이력을 기준으로 재구성될 수 있게 합니다.
 즉 2안의 핵심 데이터 구조는 `Event Store`와 `Task Graph`이며, 현재 상태를 직접 덮어써서 보관하기보다 사건 이력을 replay하여 판단 가능한 graph view를 생성하는 방식입니다.
