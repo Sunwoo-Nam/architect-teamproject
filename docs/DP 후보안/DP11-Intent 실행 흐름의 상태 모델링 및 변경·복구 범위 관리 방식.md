@@ -43,30 +43,24 @@ Projection은 LLM이 아니라 Event Log를 정해진 규칙으로 읽어 현재
 flowchart TB
     classDef llm fill:#fff3cd,stroke:#d6a600,color:#1f1f1f
 
-    I["Intent 인입<br/>사용자 / 센서 / 예약 / 외부 Agent"] --> O["Orchestrator"]
+    A["Intent 수신"] --> B["LLM Intent 해석"]
+    B --> C["Intent 상태 관리"]
+    C --> D["Policy 결정"]
+    D --> E["Task 실행 제어"]
+    E --> F["Device / Service Adapter"]
+    F --> C
 
-    O --> LLM["LLM 판단<br/>Intent 해석 / 관계 후보 추론"]
-    LLM --> ST["Current State Table<br/>Intent별 현재 상태"]
-    LLM --> RM["Simple Relation Metadata<br/>priority / supersedes / blocked-by"]
+    G["실패·취소·변경 처리"] --> C
+    C --> D
 
-    ST --> D["Policy 기반 실행 판단<br/>queue / running / completed / failed / canceled"]
-    RM -. "관계 표현은 제한적" .-> D
-
-    D --> T["Task 실행"]
-    T --> E["Device / Calendar / External API<br/>외부 상태 변경"]
-
-    E --> ST
-    F["실패 / 취소 / 변경 발생"] --> ST
-    ST --> R["현재 상태 기준<br/>유지 / 재시도 / 취소 판단"]
-
-    class LLM llm
+    class B llm
 ```
 
-이 흐름에서는 새로운 Intent가 들어오면 Orchestrator가 LLM을 통해 Intent 의미와 관계 후보를 해석한 뒤, 해당 Intent의 현재 상태를 `Current State Table`에 기록합니다.
-Intent 간 관계는 별도의 graph가 아니라 `priority`, `supersedes`, `blocked-by` 같은 단순 metadata로만 보조 표현합니다.
-이후 Orchestrator는 각 Intent의 현재 상태와 policy를 기준으로 실행할지, 대기시킬지, 완료/실패/취소 처리할지를 결정합니다.
-Task 실행 결과로 device, calendar, external API 같은 외부 상태가 변경되면, 그 결과는 다시 해당 Intent의 현재 상태에 반영됩니다.
-실패, 취소, 변경이 발생했을 때도 시스템은 주로 현재 상태값을 기준으로 유지, 재시도, 취소 여부를 판단합니다.
+이 흐름에서는 `Intent 수신`이 사용자, 센서, 예약, 외부 Agent로부터 Intent를 받습니다.
+`LLM Intent 해석`은 Intent 의미와 관계 후보를 해석하고, `Intent 상태 관리`는 Intent별 현재 상태와 `priority`, `supersedes`, `blocked-by` 같은 단순 metadata를 관리합니다.
+`Policy 결정`은 현재 상태와 policy를 기준으로 실행할지, 대기시킬지, 완료/실패/취소 처리할지를 결정합니다.
+`Task 실행 제어`는 확정된 Task 실행을 제어하고, `Device / Service Adapter`를 통해 device, calendar, external API 같은 외부 상태를 변경합니다.
+실패, 취소, 변경이 발생하면 `실패·취소·변경 처리`가 이를 상태 변경으로 반영하고, 시스템은 주로 현재 상태값을 기준으로 유지, 재시도, 취소 여부를 판단합니다.
 따라서 빠르고 단순하지만, 하나의 사용자 목표가 여러 하위 Intent/Task로 분해되거나, 여러 Intent가 하나의 Task로 병합되거나, 변경·취소 시 과거 실행 결과를 기준으로 유지/취소 범위를 판단해야 하는 경우에는 판단 근거가 부족할 수 있습니다.
 
 ### 2안. Event Log 기반 Task Graph
@@ -80,39 +74,27 @@ Task 실행 결과로 device, calendar, external API 같은 외부 상태가 변
 flowchart TB
     classDef llm fill:#fff3cd,stroke:#d6a600,color:#1f1f1f
 
-    I["Intent 인입<br/>사용자 / 센서 / 예약 / 외부 Agent"] --> L["Append-only Event Log<br/>Intent 수신 / 변경 / 취소 기록"]
+    A["Intent 수신"] --> B["Event Store"]
+    B --> C["Projection 생성"]
+    C --> D["Task Graph 관리"]
+    D --> E["LLM 계획 보조"]
+    D --> F["Policy 결정"]
+    E --> F
+    F --> G["Task 실행 제어"]
+    G --> H["Device / Service Adapter"]
+    H --> B
 
-    L --> P["Projection<br/>deterministic graph 재구성"]
-    P --> G["Task Graph<br/>Intent / Task / Agent / Resource 관계"]
+    I["실패·취소·변경 처리"] --> B
 
-    G --> R1["관계/상태 Facts<br/>merge / supersedes / dependency / conflict"]
-    G --> R2["외부 상태 반영 범위<br/>Device / Calendar / External API"]
-    G --> R3["실행 이력<br/>누가 / 언제 / 무엇을 수행했는지"]
-
-    R1 --> LLM["LLM 판단<br/>관계 해석 / 실행 계획 후보"]
-    R2 --> LLM
-    R3 --> LLM
-
-    LLM --> D["Policy 검증 및 결정<br/>실행 계획 / 복구 범위 확정"]
-    R1 -. "기계적 제약" .-> D
-    R2 -. "기계적 제약" .-> D
-    R3 -. "기계적 제약" .-> D
-
-    D --> T["Task 실행"]
-    T --> E["Execution Event<br/>성공 / 실패 / 외부 상태 변경"]
-    E --> L
-
-    F["실패 / 취소 / 변경 발생"] --> L
-
-    class LLM llm
+    class E llm
 ```
 
-이 흐름에서는 Intent 수신, 변경, 취소, Task 실행 결과가 모두 `Append-only Event Log`에 먼저 기록됩니다.
-시스템은 event log를 그대로 현재 상태로 보지 않고, 이를 deterministic `Projection` 과정을 통해 `Task Graph`로 재구성합니다.
-Task Graph는 Intent가 서로 병합되었는지, 대체되었는지, 충돌 또는 종속 관계인지, 어떤 Task·Agent·Resource와 연결되는지를 표현합니다.
-또한 device 제어, calendar 변경, external API 호출처럼 외부 상태에 반영된 실행 결과도 graph의 판단 근거가 됩니다.
-실패, 취소, 변경이 발생하면 그 사실 역시 event로 기록되고, LLM은 graph와 실행 이력을 바탕으로 관계 해석과 실행 계획 후보를 제안합니다.
-다만 최종 실행 계획과 복구 범위는 policy 검증 로직이 확정하여, LLM 판단이 곧바로 상태 변경으로 이어지지 않도록 합니다.
+이 흐름에서는 `Intent 수신`이 받은 Intent와 이후 변경, 취소, 실행 결과가 모두 `Event Store`에 append-only event로 기록됩니다.
+`Projection 생성`은 Event Store를 deterministic하게 읽어 현재 graph view를 만들고, `Task Graph 관리`는 Intent/Task/Agent/Resource 관계, 실행 이력, 외부 상태 영향을 관리합니다.
+`LLM 계획 보조`는 graph를 바탕으로 관계 해석과 실행 계획 후보를 제안합니다.
+`Policy 결정`은 LLM 후보와 Task Graph의 기계적 제약을 검증해 최종 실행 계획과 복구 범위를 확정합니다.
+`Task 실행 제어`는 확정된 실행을 수행하고, `Device / Service Adapter`를 통한 외부 상태 변경 결과는 다시 Event Store에 기록됩니다.
+실패, 취소, 변경이 발생하면 `실패·취소·변경 처리`가 이를 event로 기록하여, 이후 Projection과 Task Graph가 동일한 이력을 기준으로 재구성될 수 있게 합니다.
 따라서 비용은 커지지만, 어떤 Intent가 어떤 실행을 유발했는지와 어디까지 되돌리거나 유지해야 하는지를 더 명확하게 판단할 수 있습니다.
 
 ## 참고 시나리오
