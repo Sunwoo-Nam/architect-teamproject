@@ -123,6 +123,9 @@ function project(events) {
 }
 ```
 
+위 코드는 Projection의 개념을 설명하기 위한 단순 예시입니다.
+실제 구현에서는 event schema validation, missing intent 처리, 중복 event 처리, idempotency 보장이 함께 필요합니다.
+
 중요한 전제는 Event가 구조화되어 있어야 한다는 점입니다.
 LLM이 자유 문장으로 “아마 이건 변경 같음”이라고 남기면 Projection이 어렵습니다.
 반대로 event type과 payload가 명확하면 Projection은 deterministic code로 충분히 구현할 수 있습니다.
@@ -131,10 +134,10 @@ LLM이 자유 문장으로 “아마 이건 변경 같음”이라고 남기면 
 
 | 역할 | 담당 |
 |---|---|
-| Intent 의미 해석, 관계 후보 추론 | LLM |
+| Intent 의미 해석, 관계 후보 추론 | Intent 해석 |
 | 해석 결과와 실행 결과의 구조화된 event 저장 | Event Store |
 | event replay를 통한 현재 view 생성 | Projection |
-| 생성된 graph를 기준으로 실행/복구 범위 확정 | Policy |
+| 생성된 graph를 기준으로 실행/복구 범위 확정 | 계획 및 실행 결정 |
 
 ## Task Graph
 
