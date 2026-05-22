@@ -1,0 +1,204 @@
+<mxfile host="app.diagrams.net" agent="Claude">
+  <diagram name="Infrastructure View (Deployment)" id="infra-view-deployment">
+    <mxGraphModel dx="2000" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1900" pageHeight="1150" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" parent="1" vertex="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rotatable=0;fontSize=18;fontStyle=1;" value="Ondevice Agentic Platform — Infrastructure View (Deployment)&#10;docs/DP 후보안의 Design Decision(DP06~DP11)을 인프라 요소에 매핑">
+          <mxGeometry x="450" y="20" width="1000" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="legend_box" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#999999;align=left;verticalAlign=top;fontSize=10;arcSize=6;" value="">
+          <mxGeometry x="40" y="90" width="300" height="185" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_title" parent="1" vertex="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontStyle=1;" value="범례 (Legend)">
+          <mxGeometry x="50" y="96" width="200" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_node" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=9;" value="배포 노드 (Device/Server)">
+          <mxGeometry x="50" y="120" width="160" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_artifact" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontSize=9;" value="배포 아티팩트 (Process/Module)">
+          <mxGeometry x="50" y="152" width="160" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_store" parent="1" vertex="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=9;boundedLbl=1;backgroundOutline=1;size=8;" value="저장소 (Local DB)">
+          <mxGeometry x="50" y="184" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_ext" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=9;" value="외부/클라우드 (Trust 경계 밖)">
+          <mxGeometry x="180" y="184" width="150" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ============ NODE A: 사용자 Android 단말 (Focus) ============ -->
+        <mxCell id="deviceA" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=13;align=center;verticalAlign=top;arcSize=4;strokeWidth=2;" value="&lt;b style=&quot;font-size:15px;&quot;&gt;&amp;laquo;device&amp;raquo; 사용자 Android 단말 (Trust 경계 = 단말 내부)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;OS: Android · 협상 canonical state 사본 보유 (Federated sovereign)&lt;/font&gt;">
+          <mxGeometry x="120" y="300" width="680" height="640" as="geometry" />
+        </mxCell>
+
+        <!-- A: IDS -->
+        <mxCell id="a_ids" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=11;align=center;verticalAlign=middle;arcSize=8;" value="&lt;b&gt;IDS&lt;/b&gt; (Intent Driven Secretary)&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;기기 활동 모니터링 · Intent 감지/라우팅 (Zero-claw)&lt;/font&gt;">
+          <mxGeometry x="150" y="350" width="300" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- A: MAF container -->
+        <mxCell id="a_maf" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=11;align=center;verticalAlign=top;arcSize=8;strokeWidth=1.5;" value="&lt;b&gt;MAF&lt;/b&gt; (Multi-Agent Framework)">
+          <mxGeometry x="150" y="430" width="620" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="a_orch" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3EFFB;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=10;align=center;verticalAlign=middle;arcSize=8;" value="&lt;b&gt;Orchestrator&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;Task 분해·계획&lt;/font&gt;">
+          <mxGeometry x="170" y="470" width="180" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="a_meta" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3EFFB;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=10;align=center;verticalAlign=middle;arcSize=8;" value="&lt;b&gt;Meta Agent (= PPA)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;A2A 협상 주체 · 협상 state 관리&lt;/font&gt;">
+          <mxGeometry x="370" y="470" width="180" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="a_sub" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3EFFB;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=10;align=center;verticalAlign=middle;arcSize=8;" value="&lt;b&gt;Sub-Agents&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;외부 Tool 호출&lt;/font&gt;">
+          <mxGeometry x="570" y="470" width="180" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="a_privacy" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3EFFB;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=10;align=center;verticalAlign=middle;arcSize=8;" value="&lt;b&gt;PrivacyMediator&lt;/b&gt; · &lt;b&gt;출구 게이트&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;LLMGateway · A2AProtocolAdapter (PII 토큰화·정보 최소화·암호화)&lt;/font&gt;">
+          <mxGeometry x="170" y="540" width="580" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- A: On-Device LLM -->
+        <mxCell id="a_llm" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE4E1;strokeColor=#B85450;fontColor=#7A2E2A;fontSize=11;align=center;verticalAlign=middle;arcSize=8;strokeWidth=1.5;" value="&lt;b&gt;On-Device LLM&lt;/b&gt; (NPU 가속)&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;민감 협상 추론 전담 (DP06 방안3: 추론 격리) · IDS·Meta·Sub 공유&lt;/font&gt;">
+          <mxGeometry x="150" y="630" width="400" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- A: Local Stores -->
+        <mxCell id="a_vault" parent="1" vertex="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#33502A;fontSize=9;boundedLbl=1;backgroundOutline=1;size=10;align=center;" value="&lt;b&gt;PrivacyVault&lt;/b&gt;&lt;br&gt;토큰↔원본 매핑">
+          <mxGeometry x="580" y="625" width="90" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="a_sessiondb" parent="1" vertex="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#33502A;fontSize=9;boundedLbl=1;backgroundOutline=1;size=10;align=center;" value="&lt;b&gt;협상 SessionDB&lt;/b&gt;&lt;br&gt;state 영속·복구">
+          <mxGeometry x="680" y="625" width="90" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="a_localnote" parent="1" vertex="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=10;fontStyle=2;fontColor=#33502A;" value="↑ 로컬 저장 (단말 밖 미반출 — 데이터 주권)">
+          <mxGeometry x="150" y="752" width="620" height="16" as="geometry" />
+        </mxCell>
+
+        <!-- A: appliance link node (DPA on-prem) -->
+        <mxCell id="a_homehub" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=10;align=center;verticalAlign=middle;arcSize=8;dashed=1;" value="&lt;b&gt;로컬 연결&lt;/b&gt; (홈 네트워크)&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;DPA 가전 컨텍스트 수집 (Wi-Fi/Matter)&lt;/font&gt;">
+          <mxGeometry x="150" y="775" width="300" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- ============ NODE: 가전 (DPA) ============ -->
+        <mxCell id="appliances" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#7A5C00;fontSize=12;align=center;verticalAlign=top;arcSize=6;strokeWidth=2;" value="&lt;b style=&quot;font-size:13px;&quot;&gt;&amp;laquo;device&amp;raquo; 사용자 소유 가전 (DPA)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;홈 네트워크 내부&lt;/font&gt;">
+          <mxGeometry x="120" y="990" width="300" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="appl_items" parent="1" vertex="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=10;fontColor=#7A5C00;" value="세탁기 · TV · 냉장고 — Device Proxy Agent 탑재 (상태/스케줄 제공)">
+          <mxGeometry x="120" y="1035" width="300" height="22" as="geometry" />
+        </mxCell>
+
+        <!-- ============ NODE: Broker (메시지 분배) ============ -->
+        <mxCell id="broker" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#7A2E2A;fontSize=12;align=center;verticalAlign=top;arcSize=6;strokeWidth=2;" value="&lt;b style=&quot;font-size:14px;&quot;&gt;&amp;laquo;cloud&amp;raquo; 메시지 분배 Broker&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;A2A 메시지 relay만 담당 · 협상 state는 모름&lt;br&gt;(MQTT / WebSocket / WebRTC signaling)&lt;/font&gt;">
+          <mxGeometry x="880" y="330" width="320" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- ============ NODE: Cloud LLM / Builder ============ -->
+        <mxCell id="cloud" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#7A2E2A;fontSize=12;align=center;verticalAlign=top;arcSize=6;strokeWidth=2;" value="&lt;b style=&quot;font-size:14px;&quot;&gt;&amp;laquo;cloud&amp;raquo; 서버 인프라 (Trust 경계 밖 — 민감 원본 미반입)&lt;/b&gt;">
+          <mxGeometry x="880" y="500" width="320" height="295" as="geometry" />
+        </mxCell>
+        <mxCell id="cloud_llm" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#7A2E2A;fontSize=10;align=center;verticalAlign=middle;arcSize=8;" value="&lt;b&gt;Server LLM&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;비민감 일반지식·무거운 계획만 (PII 0%)&lt;/font&gt;">
+          <mxGeometry x="900" y="545" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cloud_builder" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#7A2E2A;fontSize=10;align=center;verticalAlign=middle;arcSize=8;" value="&lt;b&gt;Capability Builder&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;Sub-Agent/Tool을 APK·모듈로 빌드 → 서명 → 배포&lt;/font&gt;">
+          <mxGeometry x="900" y="615" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cloud_registry" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#7A2E2A;fontSize=10;align=center;verticalAlign=middle;arcSize=8;" value="&lt;b&gt;Capability Registry&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;빌드 산출물·버전·서명 보관&lt;/font&gt;">
+          <mxGeometry x="900" y="685" width="280" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- ============ NODE: 상대방 단말 (Peer) ============ -->
+        <mxCell id="deviceB" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=12;align=center;verticalAlign=top;arcSize=4;strokeWidth=2;dashed=1;" value="&lt;b style=&quot;font-size:13px;&quot;&gt;&amp;laquo;device&amp;raquo; 상대방 Android 단말 (Peer)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;동일 스택 (대칭 배포) · 협상 state 자기 사본 보유&lt;/font&gt;">
+          <mxGeometry x="1280" y="330" width="330" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="b_ppa" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3EFFB;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=10;align=center;verticalAlign=middle;arcSize=8;" value="&lt;b&gt;상대 Meta Agent (= PPA)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;A2A 협상 상대 엔드포인트&lt;/font&gt;">
+          <mxGeometry x="1310" y="395" width="270" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="b_llm" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE4E1;strokeColor=#B85450;fontColor=#7A2E2A;fontSize=10;align=center;verticalAlign=middle;arcSize=8;" value="&lt;b&gt;상대 On-Device LLM&lt;/b&gt;">
+          <mxGeometry x="1310" y="460" width="270" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="b_store" parent="1" vertex="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#33502A;fontSize=8;boundedLbl=1;backgroundOutline=1;size=8;align=center;" value="상대 로컬 저장소">
+          <mxGeometry x="1310" y="510" width="270" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ============ NODE: 외부 서비스 ============ -->
+        <mxCell id="extservice" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#7A2E2A;fontSize=12;align=center;verticalAlign=middle;arcSize=6;strokeWidth=2;" value="&lt;b style=&quot;font-size:13px;&quot;&gt;&amp;laquo;external&amp;raquo; 외부 서비스&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;식당 예약 · 캘린더 · 결제 API&lt;br&gt;(Sub-Agent가 호출)&lt;/font&gt;">
+          <mxGeometry x="1280" y="620" width="330" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- ============ EDGES ============ -->
+        <!-- A.Meta <-> Broker (A2A) -->
+        <mxCell id="e_a_broker" parent="1" source="a_meta" target="broker" edge="1" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#B85450;strokeWidth=2;fontSize=9;fontColor=#7A2E2A;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_a_broker_lbl" parent="1" vertex="1" style="text;html=1;strokeColor=none;fillColor=#FFFFFF;align=center;fontSize=9;fontColor=#7A2E2A;" value="A2A 메시지&#10;(암호화 · TLS)">
+          <mxGeometry x="700" y="450" width="120" height="34" as="geometry" />
+        </mxCell>
+        <!-- Broker <-> B.PPA -->
+        <mxCell id="e_broker_b" parent="1" source="broker" target="b_ppa" edge="1" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#B85450;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- A.gate -> Cloud LLM -->
+        <mxCell id="e_a_cloudllm" parent="1" source="a_privacy" target="cloud_llm" edge="1" style="endArrow=classic;html=1;strokeColor=#B85450;strokeWidth=1.5;dashed=1;fontSize=9;fontColor=#7A2E2A;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_a_cloudllm_lbl" parent="1" vertex="1" style="text;html=1;strokeColor=none;fillColor=#FFFFFF;align=center;fontSize=9;fontColor=#7A2E2A;" value="비민감 질의만&#10;(PII 0%)">
+          <mxGeometry x="800" y="560" width="110" height="34" as="geometry" />
+        </mxCell>
+        <!-- Cloud Builder -> A.sub (배포) -->
+        <mxCell id="e_builder_a" parent="1" source="cloud_builder" target="a_sub" edge="1" style="endArrow=classic;html=1;strokeColor=#B85450;strokeWidth=1.5;fontSize=9;fontColor=#7A2E2A;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_builder_a_lbl" parent="1" vertex="1" style="text;html=1;strokeColor=none;fillColor=#FFFFFF;align=center;fontSize=9;fontColor=#7A2E2A;" value="서명된 APK/모듈 배포">
+          <mxGeometry x="790" y="490" width="120" height="20" as="geometry" />
+        </mxCell>
+        <!-- A.homehub -> appliances -->
+        <mxCell id="e_a_appl" parent="1" source="a_homehub" target="appliances" edge="1" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#D6B656;strokeWidth=1.5;fontSize=9;fontColor=#7A5C00;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_a_appl_lbl" parent="1" vertex="1" style="text;html=1;strokeColor=none;fillColor=#FFFFFF;align=center;fontSize=9;fontColor=#7A5C00;" value="로컬 컨텍스트&#10;(Matter/Wi-Fi)">
+          <mxGeometry x="240" y="818" width="110" height="30" as="geometry" />
+        </mxCell>
+        <!-- A.sub -> external service -->
+        <mxCell id="e_a_ext" parent="1" source="a_sub" target="extservice" edge="1" style="endArrow=classic;html=1;strokeColor=#B85450;strokeWidth=1.5;fontSize=9;fontColor=#7A2E2A;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_a_ext_lbl" parent="1" vertex="1" style="text;html=1;strokeColor=none;fillColor=#FFFFFF;align=center;fontSize=9;fontColor=#7A2E2A;" value="외부 API 호출&#10;(합의 후 실행)">
+          <mxGeometry x="820" y="660" width="110" height="34" as="geometry" />
+        </mxCell>
+        <!-- B.PPA -> external (대칭) -->
+        <mxCell id="e_b_ext" parent="1" source="b_store" target="extservice" edge="1" style="endArrow=classic;html=1;strokeColor=#B85450;strokeWidth=1;dashed=1;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- footer note -->
+        <mxCell id="footer" parent="1" vertex="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;fontStyle=2;fontColor=#555555;" value="※ Federated 토폴로지(DP08): 협상 canonical state는 각 단말에 N개 사본으로 존재하고 deterministic하게 같은 상태로 수렴. Broker는 메시지 relay만 하며 협상 내용·상태를 보지 못함.&#10;※ Trust 경계: PrivacyVault·SessionDB·On-Device LLM·원본 컨텍스트는 단말 내부에만 존재. 서버(LLM·Builder)로는 PII가 제거된 비민감 데이터만 흐름.">
+          <mxGeometry x="450" y="1000" width="1150" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dp_06" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=8;align=center;verticalAlign=middle;arcSize=20;spacing=2;fontStyle=1;" value="DP06 협상 민감정보 처리 (PII 토큰화·정보 최소화·암호화)">
+          <mxGeometry x="170" y="598" width="580" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_08tok" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=8;align=center;verticalAlign=middle;arcSize=20;spacing=2;fontStyle=1;" value="DP08 협상 토큰 효율화 (이력 미재주입·흐름 상태기계화)">
+          <mxGeometry x="150" y="695" width="400" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_07" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=8;align=center;verticalAlign=middle;arcSize=20;spacing=2;fontStyle=1;" value="DP07 장애 복구·완결성 (이벤트 소싱·체크포인트)">
+          <mxGeometry x="560" y="718" width="210" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_11" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=8;align=center;verticalAlign=middle;arcSize=20;spacing=2;fontStyle=1;" value="DP11 Intent 실행흐름 상태 모델링·복구범위">
+          <mxGeometry x="150" y="412" width="300" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_09" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=8;align=center;verticalAlign=middle;arcSize=20;spacing=2;fontStyle=1;" value="DP09 인텐트 변경·취소 동시성 제어">
+          <mxGeometry x="370" y="528" width="180" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_08dep_dev" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=8;align=center;verticalAlign=middle;arcSize=20;spacing=2;fontStyle=1;" value="DP08 협상테이블 Deployment (Federated: 단말이 sovereign)">
+          <mxGeometry x="470" y="322" width="330" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_08dep_brk" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=8;align=center;verticalAlign=middle;arcSize=20;spacing=2;fontStyle=1;" value="DP08 Deployment — Broker는 메시지 relay만 (state 미보유)">
+          <mxGeometry x="880" y="455" width="320" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_dp" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=9;fontStyle=1;" value="DP 후보안 (Design Decision) 매핑">
+          <mxGeometry x="50" y="240" width="280" height="26" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
