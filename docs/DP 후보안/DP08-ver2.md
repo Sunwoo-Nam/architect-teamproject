@@ -1,4 +1,4 @@
-# DD-08 / 협상 테이블 Deployment 아키텍처 (v2)
+# DD-08 / 협상 테이블 Deployment 아키텍처 (v4)
 
 > **문서 성격**: Design Decision 후보 (DP)
 >
@@ -217,20 +217,45 @@ A 폰 (initiator)              B·C·D 폰
 
 ## 4. QA Tradeoff 평가
 
-| 품질 속성 | 1. Federated | 2. Initiator-Hosted | 3. Home Hub |
+> 평가 기준: [`../QualityAttributes.md`](../QualityAttributes.md) 의 10개 정식 Quality Attribute
+>
+> 점수: ⭐⭐⭐ 강점 · ⭐⭐ 보통 · ⭐ 약점
+
+| # | QA (QualityAttributes.md) | 1. Federated | 2. Initiator-Hosted | 3. Home Hub |
+|---|---|---|---|---|
+| 1 | **기밀성** — 외부 PII 노출 0% | ⭐⭐⭐ E2E로 cloud 측 페이로드 차단 | ⭐⭐⭐ 동일 | ⭐⭐⭐ 가정 LAN 시 더 강함 |
+| 2 | **무결성** — 권한·위변조 차단 100% | ⭐⭐ Deterministic verify 가능하나 silent divergence 위험 | ⭐ Host가 결과 임의 위변조 가능, 검증 어려움 | ⭐⭐ Hub firmware 신뢰 + 가족 trust anchor |
+| 3 | **가용성** — 다중 Task 데드락 방지 | ⭐⭐⭐ 각 폰이 자기 협상만 관리 | ⭐⭐ Host 자주 되는 사람 폰에 부담 누적 | ⭐⭐⭐ Hub 자원이 폰보다 여유 |
+| 4 | **기능 정확성** — 노드 간 데이터 불일치 0 | ⭐ Silent divergence 위험 (algorithm version mismatch) | ⭐⭐⭐ Host SoT로 일관성 보장 | ⭐⭐⭐ Hub SoT로 일관성 보장 |
+| 5 | **결함 허용성** — 장애 전파율 0% | ⭐⭐⭐ 분산, N-1 살아 있으면 협상 가능 | ⭐ Host 단일 실패점 | ⭐⭐ Hub 단일 실패점 (단 폰보다 안정) |
+| 6 | **복구 용이성** — 보상 트랜잭션 100% | ⭐⭐ 분산 롤백 복잡 | ⭐⭐ Host에서 보상 트랜잭션 | ⭐⭐⭐ Hub 24/7 SoT, 가장 안정 |
+| 7 | **자원 활용성** — 메모리·배터리 통제 | ⭐⭐ 각 폰 부담 분산되나 모든 const 메모리 보유 | ⭐ Host 폰에 자원 비대칭 부담 | ⭐⭐⭐ 폰들 가벼움, hub가 부담 (폰 OOM·배터리 무영향) |
+| 8 | **수용성** — LLM 토큰 버짓 | ⭐⭐⭐ Constraint 추출 LLM 1회만 | ⭐⭐⭐ 동일 | ⭐⭐ Hub가 가전 데이터 종합 추론 → 더 무거움 |
+| 9 | **시간 반응성** — End-to-End latency | ⭐⭐⭐ 병렬 처리 (모든 폰 동시 solver) | ⭐⭐ Host 직렬 처리, RTT 1-2회 추가 | ⭐⭐ Hub 직렬 처리, RTT 1-2회 추가 |
+| 10 | **상호운용성** — 새 서비스 연동 비용 | ⭐⭐ 각 폰 어댑터 분산 관리 | ⭐⭐ Host 중앙 관리 | ⭐⭐⭐ Hub 통합 + 펌웨어 배포 |
+| | **합산 (정식 QA만)** | **24** | **20** | **26** |
+
+> **Solution 1 QA-2·QA-4 약점 메커니즘**: Federated의 deterministic local solver는 *모든 폰이 같은 algorithm version 을 실행한다는 전제* 위에서만 정합성이 보장됨. Algorithm version mismatch (강제 업데이트 실패·OS별 컴파일러 차이 등) 시 silent divergence 발생 — 서로 다른 결과를 같이 합의했다고 믿는 상태. QA-4 (기능 정확성) 의 "불일치 0" 목표를 본질적으로 위협함.
+
+> **Solution 1 QA-5 강점 메커니즘**: 분산 구조라 한 노드 crash 가 다른 노드 협상에 영향 안 줌. 단 silent divergence 가 발생하면 결함 자체가 *감지 안 됨* — 결함 허용성과 정확성이 트레이드오프 관계로 동작.
+
+### 전략적 고려사항 (정식 QA 외)
+
+정식 10개 QA에 안 들어가지만 product 단계 결정에 영향:
+
+| 항목 | Sol 1 (Federated) | Sol 2 (Initiator) | Sol 3 (Home Hub) |
 |---|---|---|---|
-| 외부 (cloud) 측 privacy | ◎ 메타만 노출 | ◎ 메타만 노출 | ○ 메타만 (가정 LAN 시 더 강함) |
-| 참여자 간 privacy | △ 모두가 모두 봄 | ○ host만 봄 | ○ hub만 봄 (가족 내) |
-| 확장성 (N 증가) | ◎ 한계 없음 | △ initiator 폰 한계 | ○ hub 용량 한계 |
-| 신뢰성 (단일 실패점) | ◎ 분산 | ✗ initiator 단일 | △ hub 단일 |
-| 운영 비용 | ◎ broker만 | ◎ infra 없음 | △ hub 펌웨어·cloud sync |
-| Samsung 차별화 | △ generic | △ generic | ◎ 유일 가능 |
-| Lock-in 잠재력 | △ 약함 | △ 약함 | ◎ ecosystem 강결합 |
-| Long-running 협상 | △ 어색 | ○ initiator 의존 | ◎ 자연 |
-| 데이터 풍부도 | △ user 데이터만 | △ user 데이터만 | ◎ + 가전 데이터 |
-| Trust 모델 명확성 | ◎ 자기만 | △ initiator 신뢰 | ○ 가족 신뢰 |
-| 버전 호환성 관리 | ✗ silent divergence 위험 | ◎ host 버전이 truth | ◎ hub 버전이 truth |
-| GDPR 부합 | ◎ 최소 데이터 | △ ownership 모호 | ○ 가족 단위 명확 |
+| Samsung ecosystem 차별화 | 불가 (generic) | 불가 (generic) | **유일 가능** (TV·가전·폰 통합) |
+| Lock-in 잠재력 | 약함 | 약함 | **강결합** |
+| Long-running·recurring 협상 적합도 | 어색 | Host 의존 | **자연** |
+| 데이터 풍부도 (협상 input) | User 데이터만 | User 데이터만 | **+ 가전 사용 패턴** |
+| GDPR data ownership 명확성 | 분산 (deletion 단순) | 모호 (host가 controller?) | 가족 단위 명확 |
+
+### 종합 평가
+
+- **정식 QA 합산만 보면 Sol 3 (26) vs Sol 1 (24) 가 근접** — 의외로 근접한 결과. Sol 1의 silent divergence 약점이 합산에 큰 영향
+- **전략적 고려사항이 더해지면 Sol 3로 기울게 됨** — Samsung 차별화·Lock-in·Long-running 적합도 모두 Sol 3 우위
+- **Sol 2는 어느 관점에서도 dominated** — 정식 QA·전략 양쪽 모두에서 최저점
 
 ### 종속·상충 관계
 
@@ -300,3 +325,5 @@ Intent 분류 → Tier 결정
 |---|---|---|---|
 | 2026-05-21 | v1 | 초안 작성 — 3개 후보 평등 비교 | 협의 결과 정리 |
 | 2026-05-22 | v2 | 결정 framing 재구성. 본질이 "분산 vs 중앙집중" 의 1단계 결정이고, 중앙집중 안에서의 위치 선택이 sub-결정임을 명확화. 후보 2 (Initiator-Hosted) 는 후보 3의 약화 버전으로 재분류, fallback으로 격하. 3축 분해 (Routing/State/Solver) 섹션 추가하여 routing 인프라가 implementation detail임을 명시 | 추가 협의 반영 |
+| 2026-05-22 | v3 | QA Tradeoff 표 정정. (1) 평가 표기를 ⭐ 1~3 별로 변경. (2) **운영 비용 점수 정정** — Sol 1 (MQTT broker, stateful) 과 Sol 2 (lightweight stateless relay) 가 동일 점수였던 게 잘못. Sol 2가 가장 가볍고 Sol 3 (hub stack) 가 가장 무거운 순서로 수정. (3) Solution 1 참여자 간 privacy 가 ⭐인 이유 (pub/sub fan-out 메커니즘 + 공유 세션 키) 를 표 하단 주석으로 명시 | 운영 비용·참여자 privacy 메커니즘 검토 |
+| 2026-05-22 | v4 | QA Tradeoff 표를 [`../QualityAttributes.md`](../QualityAttributes.md) 의 **정식 10개 Quality Attribute** 로 재구성. 이전 표는 ad-hoc 항목 (Samsung 차별화·Lock-in·운영 비용 등) 을 QA로 혼동해서 평가했음. v4에서는 정식 QA 평가와 "전략적 고려사항" 을 분리하여, QA 합산 결과가 의사결정의 1차 근거가 되고 전략 고려는 별도 보조 변수로 작동하도록 정리 | QualityAttributes.md 적용 |
