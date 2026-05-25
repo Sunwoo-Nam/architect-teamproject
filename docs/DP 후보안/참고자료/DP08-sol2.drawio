@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- ===== TITLE ===== -->
+    <mxCell id="t1" value="Sol.3 — Multi-round Commitment Protocol (FIPA Contract-Net 변형)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=20;fontStyle=1;fontColor=#1a1a1a;" vertex="1" parent="1">
+      <mxGeometry x="250" y="15" width="1100" height="35" as="geometry" />
+    </mxCell>
+    <mxCell id="t2" value="핵심: ① 라운드마다 각 디바이스 Local LLM이 응답 · ② Coordinator도 LLM으로 제안 생성 · ③ 최대 라운드 상한으로 교착 방지 (NFR-14)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=11;fontColor=#444444;" vertex="1" parent="1">
+      <mxGeometry x="100" y="52" width="1400" height="22" as="geometry" />
+    </mxCell>
+
+    <!-- ===== LEGEND (4개 도식 공통) ===== -->
+    <mxCell id="legbg" value="" style="rounded=1;fillColor=#fafafa;strokeColor=#cccccc;" vertex="1" parent="1">
+      <mxGeometry x="20" y="15" width="280" height="158" as="geometry" />
+    </mxCell>
+    <mxCell id="legT" value="범례 (4개 도식 공통)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="30" y="20" width="240" height="18" as="geometry" />
+    </mxCell>
+    <mxCell id="l1c" value="" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="30" y="44" width="18" height="14" as="geometry" />
+    </mxCell>
+    <mxCell id="l1t" value="사용자 디바이스 (실선 테두리)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="56" y="43" width="235" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="l2c" value="" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="30" y="64" width="18" height="14" as="geometry" />
+    </mxCell>
+    <mxCell id="l2t" value="Private Data (기기 밖 전송 금지)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="56" y="63" width="235" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="l3c" value="" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="30" y="84" width="18" height="14" as="geometry" />
+    </mxCell>
+    <mxCell id="l3t" value="Local LLM (디바이스 내 추론)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="56" y="83" width="235" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="l4c" value="" style="rounded=1;fillColor=#ffe0b2;strokeColor=#e65100;" vertex="1" parent="1">
+      <mxGeometry x="30" y="104" width="18" height="14" as="geometry" />
+    </mxCell>
+    <mxCell id="l4t" value="Coordinator (LLM 사용 — Sol.3만 해당)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="56" y="103" width="235" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="l5c" value="" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="30" y="124" width="18" height="14" as="geometry" />
+    </mxCell>
+    <mxCell id="l5t" value="최종 합의 / 2PC 커밋" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="56" y="123" width="235" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="l6c" value="" style="fillColor=#f0f0f0;strokeColor=#aaaaaa;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="30" y="144" width="18" height="14" as="geometry" />
+    </mxCell>
+    <mxCell id="l6t" value="A2A 네트워크 경계 영역" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="56" y="143" width="235" height="16" as="geometry" />
+    </mxCell>
+
+    <!-- ===== Sol.1/2와의 차이점 ===== -->
+    <mxCell id="diff" value="&lt;b&gt;Sol.1·2와 차이&lt;/b&gt;: Coordinator도 LLM 사용 (제안 생성) · 라운드 수가 가변적 (최대 M 라운드 상한) · 유연한 맥락 반영 가능하나 지연 증가" style="rounded=1;fillColor=#fffde7;strokeColor=#f9a825;fontSize=10;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="35" y="738" width="1450" height="32" as="geometry" />
+    </mxCell>
+
+    <!-- ===== A2A BOUNDARY ZONES ===== -->
+    <mxCell id="a2a_l" value="A2A" style="fillColor=#f0f0f0;strokeColor=#aaaaaa;dashed=1;dashPattern=6 3;fontSize=11;fontStyle=1;fontColor=#888888;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="453" y="90" width="54" height="640" as="geometry" />
+    </mxCell>
+    <mxCell id="a2a_r" value="A2A" style="fillColor=#f0f0f0;strokeColor=#aaaaaa;dashed=1;dashPattern=6 3;fontSize=11;fontStyle=1;fontColor=#888888;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="1013" y="90" width="54" height="580" as="geometry" />
+    </mxCell>
+
+    <!-- ===== DEVICE B (LEFT) ===== -->
+    <mxCell id="devB" value="Device B" style="swimlane;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;startSize=30;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="35" y="90" width="410" height="580" as="geometry" />
+    </mxCell>
+    <mxCell id="devB_d" value="🔒 Private Data&#xa;일정 · 선호도 · 위치 · 예산 등 원본 PII" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;verticalAlign=middle;" vertex="1" parent="devB">
+      <mxGeometry x="10" y="38" width="390" height="58" as="geometry" />
+    </mxCell>
+    <!-- LLM spans tall — called every round -->
+    <mxCell id="devB_l" value="🧠 Local LLM  (매 라운드 호출)&#xa;&#xa;Round 1: 가능 여부 + 최소 조건 응답&#xa;Round 2~N: 후보안 검토 →&#xa;              수락 / 역제안 결정&#xa;&#xa;(모든 추론은 기기 내부에서만&#xa; 원본 PII는 외부 전송 안 됨)" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=center;verticalAlign=middle;" vertex="1" parent="devB">
+      <mxGeometry x="10" y="108" width="390" height="450" as="geometry" />
+    </mxCell>
+
+    <!-- ===== DEVICE A (CENTER — TALL) ===== -->
+    <mxCell id="devA" value="Device A  (협상 개시자)" style="swimlane;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;startSize=30;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="515" y="90" width="490" height="640" as="geometry" />
+    </mxCell>
+    <mxCell id="pa_h" value="— Personal Proxy Agent —" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontStyle=2;fontColor=#4a6fa5;" vertex="1" parent="devA">
+      <mxGeometry x="5" y="37" width="480" height="18" as="geometry" />
+    </mxCell>
+    <mxCell id="devA_d" value="🔒 Private Data&#xa;일정 · 선호도 · 위치 · 예산 등 원본 PII" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;verticalAlign=middle;" vertex="1" parent="devA">
+      <mxGeometry x="10" y="59" width="470" height="58" as="geometry" />
+    </mxCell>
+    <mxCell id="devA_l" value="🧠 Local LLM  (매 라운드 참여, 기기 내)" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=center;verticalAlign=middle;" vertex="1" parent="devA">
+      <mxGeometry x="10" y="130" width="470" height="40" as="geometry" />
+    </mxCell>
+    <!-- Separator -->
+    <mxCell id="sep" value="" style="line;strokeColor=#e65100;strokeWidth=2;fillColor=none;" vertex="1" parent="devA">
+      <mxGeometry x="5" y="183" width="480" height="5" as="geometry" />
+    </mxCell>
+    <!-- Coordinator with LLM header -->
+    <mxCell id="coord_h" value="— Proposal Generator  (Device A 위에서 실행 · LLM 사용) —" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontStyle=2;fontColor=#e65100;" vertex="1" parent="devA">
+      <mxGeometry x="5" y="192" width="480" height="18" as="geometry" />
+    </mxCell>
+    <!-- Coordinator box — orange (LLM 사용, Sol.3 전용) -->
+    <mxCell id="coord_e" value="🧠 Proposal Generator  (LLM 사용 — Sol.1·2와의 핵심 차이)&#xa;&#xa;Round 1: 협상 주제(Agenda) 브로드캐스트&#xa;Round 2~N: 수신 응답 분석 →&#xa;                LLM으로 다음 제안 생성&#xa;&#xa;수렴 감지 → 합의 확정&#xa;교착 / 라운드 상한 초과 → 협상 실패 선언&#xa;최대 라운드 상한 적용 (NFR-14 교착 방지)" style="rounded=1;fillColor=#ffe0b2;strokeColor=#e65100;fontSize=9;align=left;spacingLeft=10;verticalAlign=middle;" vertex="1" parent="devA">
+      <mxGeometry x="10" y="214" width="470" height="300" as="geometry" />
+    </mxCell>
+    <!-- Max round indicator inside devA -->
+    <mxCell id="max_r" value="⚠ 최대 M 라운드 상한 → 초과 시 교착 선언 (NFR-14)" style="text;html=1;strokeColor=#e65100;fillColor=#fff8e1;rounded=1;fontSize=9;align=center;verticalAlign=middle;fontColor=#e65100;fontStyle=1;" vertex="1" parent="devA">
+      <mxGeometry x="10" y="524" width="470" height="28" as="geometry" />
+    </mxCell>
+    <!-- 2PC Commit -->
+    <mxCell id="devA_commit" value="✅ 2PC 커밋 — 합의 원자적 확정&#xa;전체 참여 디바이스에 최종 결과 동기화" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=center;verticalAlign=middle;fontStyle=1;" vertex="1" parent="devA">
+      <mxGeometry x="10" y="562" width="470" height="58" as="geometry" />
+    </mxCell>
+
+    <!-- ===== DEVICE C (RIGHT) ===== -->
+    <mxCell id="devC" value="Device C" style="swimlane;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;startSize=30;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="1075" y="90" width="410" height="580" as="geometry" />
+    </mxCell>
+    <mxCell id="devC_d" value="🔒 Private Data&#xa;일정 · 선호도 · 위치 · 예산 등 원본 PII" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;verticalAlign=middle;" vertex="1" parent="devC">
+      <mxGeometry x="10" y="38" width="390" height="58" as="geometry" />
+    </mxCell>
+    <mxCell id="devC_l" value="🧠 Local LLM  (매 라운드 호출)&#xa;&#xa;Round 1: 가능 여부 + 최소 조건 응답&#xa;Round 2~N: 후보안 검토 →&#xa;              수락 / 역제안 결정&#xa;&#xa;(모든 추론은 기기 내부에서만&#xa; 원본 PII는 외부 전송 안 됨)" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=center;verticalAlign=middle;" vertex="1" parent="devC">
+      <mxGeometry x="10" y="108" width="390" height="450" as="geometry" />
+    </mxCell>
+
+    <!-- ===== INTERNAL ARROWS (DevA) ===== -->
+    <!-- DevA LLM → Coordinator (internal, Round 1) -->
+    <mxCell id="arr_int1" value="매 라운드 참여" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#2e7d32;strokeWidth=1.5;endArrow=block;endFill=1;fontSize=8;fontColor=#2e7d32;align=right;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="devA_l" target="coord_e" parent="devA">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <!-- Coordinator → 2PC Commit -->
+    <mxCell id="arr_commit_int" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#9673a6;strokeWidth=2;endArrow=block;endFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="coord_e" target="devA_commit" parent="devA">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ===== ROUND 1 ARROWS ===== -->
+    <!-- Round 1: Coordinator → DevB (Agenda broadcast) -->
+    <mxCell id="r1_coord_B" value="Round 1: 협상 주제 Agenda (A2A)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;strokeWidth=2;endArrow=block;endFill=1;fontSize=9;fontColor=#4a6fa5;align=center;exitX=0;exitY=0.15;exitDx=0;exitDy=0;entryX=1;entryY=0.28;entryDx=0;entryDy=0;" edge="1" source="coord_e" target="devB_l" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <!-- Round 1: Coordinator → DevC (Agenda broadcast) -->
+    <mxCell id="r1_coord_C" value="Round 1: Agenda (A2A)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;strokeWidth=2;endArrow=block;endFill=1;fontSize=9;fontColor=#4a6fa5;align=center;exitX=1;exitY=0.15;exitDx=0;exitDy=0;entryX=0;entryY=0.28;entryDx=0;entryDy=0;" edge="1" source="coord_e" target="devC_l" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <!-- Round 1: DevB → Coordinator (가능 여부 + 최소 조건) -->
+    <mxCell id="r1_B_coord" value="Round 1: 가능 여부 + 최소 조건 (A2A)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#e65100;strokeWidth=2;endArrow=block;endFill=1;fontSize=9;fontColor=#e65100;align=center;exitX=1;exitY=0.38;exitDx=0;exitDy=0;entryX=0;entryY=0.26;entryDx=0;entryDy=0;" edge="1" source="devB_l" target="coord_e" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <!-- Round 1: DevC → Coordinator -->
+    <mxCell id="r1_C_coord" value="Round 1: 가능 여부 + 최소 조건 (A2A)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#e65100;strokeWidth=2;endArrow=block;endFill=1;fontSize=9;fontColor=#e65100;align=center;exitX=0;exitY=0.38;exitDx=0;exitDy=0;entryX=1;entryY=0.26;entryDx=0;entryDy=0;" edge="1" source="devC_l" target="coord_e" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ===== ROUND 2 ARROWS ===== -->
+    <!-- Round 2: Coordinator → DevB (Proposal) -->
+    <mxCell id="r2_coord_B" value="Round 2: 후보안 제안 (A2A)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;strokeWidth=2.5;endArrow=block;endFill=1;fontSize=9;fontColor=#4a6fa5;align=center;exitX=0;exitY=0.52;exitDx=0;exitDy=0;entryX=1;entryY=0.56;entryDx=0;entryDy=0;dashed=1;dashPattern=6 3;" edge="1" source="coord_e" target="devB_l" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <!-- Round 2: Coordinator → DevC (Proposal) -->
+    <mxCell id="r2_coord_C" value="Round 2: 후보안 제안 (A2A)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;strokeWidth=2.5;endArrow=block;endFill=1;fontSize=9;fontColor=#4a6fa5;align=center;exitX=1;exitY=0.52;exitDx=0;exitDy=0;entryX=0;entryY=0.56;entryDx=0;entryDy=0;dashed=1;dashPattern=6 3;" edge="1" source="coord_e" target="devC_l" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <!-- Round 2: DevB → Coordinator (수락/역제안) -->
+    <mxCell id="r2_B_coord" value="Round 2: 수락 / 역제안 (A2A)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#e65100;strokeWidth=2.5;endArrow=block;endFill=1;fontSize=9;fontColor=#e65100;align=center;exitX=1;exitY=0.68;exitDx=0;exitDy=0;entryX=0;entryY=0.64;entryDx=0;entryDy=0;dashed=1;dashPattern=6 3;" edge="1" source="devB_l" target="coord_e" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <!-- Round 2: DevC → Coordinator -->
+    <mxCell id="r2_C_coord" value="Round 2: 수락 / 역제안 (A2A)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#e65100;strokeWidth=2.5;endArrow=block;endFill=1;fontSize=9;fontColor=#e65100;align=center;exitX=0;exitY=0.68;exitDx=0;exitDy=0;entryX=1;entryY=0.64;entryDx=0;entryDy=0;dashed=1;dashPattern=6 3;" edge="1" source="devC_l" target="coord_e" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ===== "..." CONTINUATION LABEL ===== -->
+    <mxCell id="dots_l" value="Round 3~N 반복..." style="text;html=1;strokeColor=#aaaaaa;fillColor=#f9f9f9;rounded=1;align=center;verticalAlign=middle;fontSize=10;fontStyle=2;fontColor=#888888;" vertex="1" parent="1">
+      <mxGeometry x="453" y="587" width="54" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- ===== QA PROFILE ===== -->
+    <mxCell id="qa" value="&lt;b&gt;QA 프로파일&lt;/b&gt;: 프라이버시 ★★★★★ · 토큰 효율 ★★★☆☆ (라운드마다 LLM 호출) · 지연 ★★☆☆☆ (N라운드 × 왕복) · 일관성 ★★★★☆ · 협상 유연성 ★★★★★ · 장애 내성 ★★★★☆ (라운드 단위 재개 가능)" style="rounded=1;fillColor=#f8f8f8;strokeColor=#888888;fontSize=10;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="35" y="770" width="1450" height="36" as="geometry" />
+    </mxCell>
+
+  </root>
+</mxGraphModel>

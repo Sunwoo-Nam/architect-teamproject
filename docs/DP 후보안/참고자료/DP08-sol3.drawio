@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- ===== TITLE ===== -->
+    <mxCell id="t1" value="Sol.4 — Async Shared State Board (비동기 수렴)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=20;fontStyle=1;fontColor=#1a1a1a;" vertex="1" parent="1">
+      <mxGeometry x="300" y="15" width="1000" height="35" as="geometry" />
+    </mxCell>
+    <mxCell id="t2" value="핵심: ① Coordinator 없음 · ② 모든 디바이스가 동등한 참여자 · ③ Board에 비동기로 게시·읽기 · ④ 동시 온라인 불필요" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=11;fontColor=#444444;" vertex="1" parent="1">
+      <mxGeometry x="100" y="52" width="1400" height="22" as="geometry" />
+    </mxCell>
+
+    <!-- ===== LEGEND ===== -->
+    <mxCell id="legbg" value="" style="rounded=1;fillColor=#fafafa;strokeColor=#cccccc;" vertex="1" parent="1">
+      <mxGeometry x="20" y="15" width="280" height="175" as="geometry" />
+    </mxCell>
+    <mxCell id="legT" value="범례 (4개 도식 공통 + Sol.4 추가)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="30" y="20" width="255" height="18" as="geometry" />
+    </mxCell>
+    <mxCell id="l1c" value="" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="30" y="44" width="18" height="14" as="geometry" />
+    </mxCell>
+    <mxCell id="l1t" value="사용자 디바이스 (실선 테두리)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="56" y="43" width="235" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="l2c" value="" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="30" y="64" width="18" height="14" as="geometry" />
+    </mxCell>
+    <mxCell id="l2t" value="Private Data (기기 밖 전송 금지)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="56" y="63" width="235" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="l3c" value="" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="30" y="84" width="18" height="14" as="geometry" />
+    </mxCell>
+    <mxCell id="l3t" value="Local LLM (디바이스 내 추론)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="56" y="83" width="235" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="l4c" value="" style="rounded=1;fillColor=#e0f7fa;strokeColor=#006064;" vertex="1" parent="1">
+      <mxGeometry x="30" y="104" width="18" height="14" as="geometry" />
+    </mxCell>
+    <mxCell id="l4t" value="Shared Board (Sol.4 전용 — 중앙 저장소)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="56" y="103" width="235" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="l5c" value="" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="30" y="124" width="18" height="14" as="geometry" />
+    </mxCell>
+    <mxCell id="l5t" value="합의 감지 / 최종 결과" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="56" y="123" width="235" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="l6c" value="" style="fillColor=#6c8ebf;strokeColor=#6c8ebf;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="30" y="144" width="18" height="5" as="geometry" />
+    </mxCell>
+    <mxCell id="l6t" value="쓰기 (device → board)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="56" y="140" width="235" height="14" as="geometry" />
+    </mxCell>
+    <mxCell id="l7t" value="읽기·polling (board → device, 점선)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="56" y="156" width="235" height="14" as="geometry" />
+    </mxCell>
+
+    <!-- ===== Sol.1·2·3과의 차이점 ===== -->
+    <mxCell id="diff" value="&lt;b&gt;Sol.1~3과 핵심 차이&lt;/b&gt;: Coordinator 없음 (SPOF 제거) · 디바이스 간 직접 A2A 없음 · 모든 통신은 Board를 통해 중개 · 참여자 동시 온라인 불필요" style="rounded=1;fillColor=#fffde7;strokeColor=#f9a825;fontSize=10;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="35" y="700" width="1450" height="32" as="geometry" />
+    </mxCell>
+
+    <!-- ===== DEVICE A (LEFT — 동등한 참여자) ===== -->
+    <mxCell id="devA" value="Device A" style="swimlane;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;startSize=30;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="55" y="90" width="390" height="215" as="geometry" />
+    </mxCell>
+    <mxCell id="devA_d" value="🔒 Private Data&#xa;일정 · 선호도 · 위치 · 예산 등 원본 PII" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;verticalAlign=middle;" vertex="1" parent="devA">
+      <mxGeometry x="10" y="38" width="370" height="55" as="geometry" />
+    </mxCell>
+    <mxCell id="devA_l" value="🧠 Local LLM&#xa;Board 읽기 → 로컬 추론 → 가용 슬롯 요약 게시&#xa;합의 후보 감지 시 Claim 시도" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=center;verticalAlign=middle;" vertex="1" parent="devA">
+      <mxGeometry x="10" y="105" width="370" height="90" as="geometry" />
+    </mxCell>
+
+    <!-- ===== DEVICE B (CENTER — 동등한 참여자) ===== -->
+    <mxCell id="devB" value="Device B" style="swimlane;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;startSize=30;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="510" y="90" width="390" height="215" as="geometry" />
+    </mxCell>
+    <mxCell id="devB_d" value="🔒 Private Data&#xa;일정 · 선호도 · 위치 · 예산 등 원본 PII" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;verticalAlign=middle;" vertex="1" parent="devB">
+      <mxGeometry x="10" y="38" width="370" height="55" as="geometry" />
+    </mxCell>
+    <mxCell id="devB_l" value="🧠 Local LLM&#xa;Board 읽기 → 로컬 추론 → 가용 슬롯 요약 게시&#xa;합의 후보 감지 시 Claim 시도" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=center;verticalAlign=middle;" vertex="1" parent="devB">
+      <mxGeometry x="10" y="105" width="370" height="90" as="geometry" />
+    </mxCell>
+
+    <!-- ===== DEVICE C (RIGHT — 동등한 참여자) ===== -->
+    <mxCell id="devC" value="Device C" style="swimlane;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;startSize=30;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="965" y="90" width="390" height="215" as="geometry" />
+    </mxCell>
+    <mxCell id="devC_d" value="🔒 Private Data&#xa;일정 · 선호도 · 위치 · 예산 등 원본 PII" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;verticalAlign=middle;" vertex="1" parent="devC">
+      <mxGeometry x="10" y="38" width="370" height="55" as="geometry" />
+    </mxCell>
+    <mxCell id="devC_l" value="🧠 Local LLM&#xa;Board 읽기 → 로컬 추론 → 가용 슬롯 요약 게시&#xa;합의 후보 감지 시 Claim 시도" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=center;verticalAlign=middle;" vertex="1" parent="devC">
+      <mxGeometry x="10" y="105" width="370" height="90" as="geometry" />
+    </mxCell>
+
+    <!-- ===== SHARED BOARD (CENTER BOTTOM) ===== -->
+    <mxCell id="board" value="Shared Negotiation Board  (암호화된 임시 저장소 — P2P 또는 경량 클라우드)" style="swimlane;fillColor=#e0f7fa;strokeColor=#006064;fontStyle=1;fontSize=12;startSize=30;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="110" y="390" width="1140" height="250" as="geometry" />
+    </mxCell>
+    <!-- State entries per device -->
+    <mxCell id="st_A" value="Device A 상태&#xa;{가용시간: [월18-20], 선호요약: 한식}" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=center;verticalAlign=middle;" vertex="1" parent="board">
+      <mxGeometry x="10" y="40" width="340" height="65" as="geometry" />
+    </mxCell>
+    <mxCell id="st_B" value="Device B 상태&#xa;{가용시간: [화19-21], 선호요약: 양식}" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=center;verticalAlign=middle;" vertex="1" parent="board">
+      <mxGeometry x="400" y="40" width="340" height="65" as="geometry" />
+    </mxCell>
+    <mxCell id="st_C" value="Device C 상태&#xa;{가용시간: [월화18-22], 선호요약: 한식}" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=center;verticalAlign=middle;" vertex="1" parent="board">
+      <mxGeometry x="790" y="40" width="340" height="65" as="geometry" />
+    </mxCell>
+    <!-- Consensus Detector -->
+    <mxCell id="consensus" value="✅ 합의 감지 엔진  (결정론적)&#xa;전체 상태 비교 → 공통 가용 슬롯 존재 시 Claim 알림 전송&#xa;낙관적 잠금 (Optimistic Lock) — 충돌 시 재시도&#xa;항목별 접근제어 + 암호화 적용 (NFR09·NFR10)" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=left;spacingLeft=10;verticalAlign=middle;" vertex="1" parent="board">
+      <mxGeometry x="10" y="120" width="1120" height="115" as="geometry" />
+    </mxCell>
+
+    <!-- ===== WRITE ARROWS (device → board, solid blue) ===== -->
+    <mxCell id="w_A" value="쓰기 (비동기)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;strokeWidth=2.5;endArrow=block;endFill=1;fontSize=9;fontColor=#4a6fa5;align=left;exitX=0.3;exitY=1;exitDx=0;exitDy=0;entryX=0.13;entryY=0;entryDx=0;entryDy=0;" edge="1" source="devA_l" target="board" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="w_B" value="쓰기 (비동기)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;strokeWidth=2.5;endArrow=block;endFill=1;fontSize=9;fontColor=#4a6fa5;align=center;exitX=0.3;exitY=1;exitDx=0;exitDy=0;entryX=0.48;entryY=0;entryDx=0;entryDy=0;" edge="1" source="devB_l" target="board" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="w_C" value="쓰기 (비동기)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;strokeWidth=2.5;endArrow=block;endFill=1;fontSize=9;fontColor=#4a6fa5;align=right;exitX=0.3;exitY=1;exitDx=0;exitDy=0;entryX=0.85;entryY=0;entryDx=0;entryDy=0;" edge="1" source="devC_l" target="board" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ===== READ / POLL ARROWS (board → device, dashed gray) ===== -->
+    <mxCell id="r_A" value="읽기·polling" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#888888;strokeWidth=2;endArrow=block;endFill=1;fontSize=9;fontColor=#666666;align=right;dashed=1;dashPattern=6 3;exitX=0.18;exitY=0;exitDx=0;exitDy=0;entryX=0.7;entryY=1;entryDx=0;entryDy=0;" edge="1" source="board" target="devA_l" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="r_B" value="읽기·polling" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#888888;strokeWidth=2;endArrow=block;endFill=1;fontSize=9;fontColor=#666666;align=center;dashed=1;dashPattern=6 3;exitX=0.53;exitY=0;exitDx=0;exitDy=0;entryX=0.7;entryY=1;entryDx=0;entryDy=0;" edge="1" source="board" target="devB_l" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="r_C" value="읽기·polling" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#888888;strokeWidth=2;endArrow=block;endFill=1;fontSize=9;fontColor=#666666;align=left;dashed=1;dashPattern=6 3;exitX=0.88;exitY=0;exitDx=0;exitDy=0;entryX=0.7;entryY=1;entryDx=0;entryDy=0;" edge="1" source="board" target="devC_l" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ===== QA PROFILE ===== -->
+    <mxCell id="qa" value="&lt;b&gt;QA 프로파일&lt;/b&gt;: 프라이버시 ★★★☆☆ (Board에 요약 저장) · 토큰 효율 ★★★☆☆ · 지연 ★★★☆☆ (polling 주기 의존) · 일관성 ★★☆☆☆ (낙관적 잠금·충돌 해결 필요) · 장애 내성 ★★★★★ (SPOF 없음) · N-party 확장성 ★★★★★" style="rounded=1;fillColor=#f8f8f8;strokeColor=#888888;fontSize=10;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="35" y="660" width="1450" height="36" as="geometry" />
+    </mxCell>
+
+  </root>
+</mxGraphModel>
