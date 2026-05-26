@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" agent="DP11-alpha-v2" version="22.0">
+  <diagram name="Sol1-Server-Central" id="sol1">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="826" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="DP11-α Sol.1 — Server-Central Replanning&#10;(매 IntentEvent / TaskEvent마다 Orchestrator(서버 LLM)가 Plan 재생성)" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="240" y="10" width="700" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- On-device box -->
+        <mxCell id="device-box" value="온디바이스 (Android)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;dashed=1;verticalAlign=top;fontStyle=1;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="720" height="755" as="geometry" />
+        </mxCell>
+
+        <!-- Server box -->
+        <mxCell id="server-box" value="서버" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;dashed=1;verticalAlign=top;fontStyle=1;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="800" y="60" width="340" height="755" as="geometry" />
+        </mxCell>
+
+        <!-- User -->
+        <mxCell id="user" value="User&#10;(발화·행위)" style="rounded=20;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="300" y="100" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- IDS (scope 외 — 입력 소스 표시만) -->
+        <mxCell id="ids" value="IDS  (본 DP scope 외)&#10;━━━━━━━━━━━━━━━&#10;IntentEvent 생성 → Orchestrator로 전달&#10;{ intent_id, relation_label, target_intent_id, analysis_payload }" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="180" width="380" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Meta Agent Runtime (dumb executor) -->
+        <mxCell id="mar" value="Meta Agent Runtime — dumb executor" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;fontStyle=1;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="430" width="700" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="mar-pc" value="Plan Cache&#10;(Plan_vN 영속)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="80" y="470" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mar-pe" value="Plan Executor&#10;(dispatch·cancel·retry)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="280" y="470" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mar-pii" value="PII Filter&#10;(NFR-005 PII / NFR-006 불필요 정보 차단)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="500" y="470" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mar-tr" value="TaskEvent Reporter  (Task 완료·실패 → PII Filter → Orchestrator)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="80" y="545" width="660" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Sub-Agents -->
+        <mxCell id="sa1" value="Sub-Agent&#10;restaurant_finder" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="80" y="640" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="sa2" value="Sub-Agent&#10;calendar_writer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="300" y="640" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="sa3" value="Sub-Agent&#10;weather_query" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="520" y="640" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Tools -->
+        <mxCell id="tools" value="Local Tools  /  외부 서비스 API  /  DPA  /  A2A Transport" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="80" y="730" width="640" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Server: Orchestrator (Replanner) -->
+        <mxCell id="orch" value="Orchestrator (Server LLM)&#10;━━━ Replanner ━━━" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;verticalAlign=top;fontStyle=1;fontSize=12;align=center;" vertex="1" parent="1">
+          <mxGeometry x="820" y="180" width="300" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="orch-r1" value="Active Intent Set Reader&#10;(IDS 이벤트 + Meta Agent 이벤트 수신)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="840" y="225" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="orch-r2" value="Plan Generator&#10;(활성 Intent 전체 → Plan_vN+1&#10; 관계 라벨·무효화·회복 통합 처리)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="840" y="295" width="260" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="orch-r3" value="Plan Diff Emitter&#10;(전체 plan 또는 diff 반환)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="840" y="385" width="260" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Edges: intra-device -->
+        <mxCell id="e-user-ids" value="발화·행위" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;" edge="1" parent="1" source="user" target="ids">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-mar-sa1" value="dispatch" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;" edge="1" parent="1" source="mar-pe" target="sa1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-mar-sa2" value="dispatch" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;" edge="1" parent="1" source="mar-pe" target="sa2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-mar-sa3" value="dispatch" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;" edge="1" parent="1" source="mar-pe" target="sa3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-sa1-tools" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="sa1" target="tools">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-sa2-tools" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="sa2" target="tools">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-sa3-tools" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="sa3" target="tools">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- HOT cross-boundary edges: IDS→Orchestrator, Orchestrator→MAR, MAR→Orchestrator -->
+        <mxCell id="e-ids-orch" value="IntentEvent  🔴 매 IntentEvent" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;strokeWidth=3;fontSize=10;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.2;entryDx=0;entryDy=0;" edge="1" parent="1" source="ids" target="orch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-orch-mar" value="Plan_vN+1  🔴" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;strokeWidth=3;fontSize=10;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.2;entryDx=0;entryDy=0;" edge="1" parent="1" source="orch" target="mar">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-mar-orch" value="TaskEvent  🔴 매 TaskEvent&#10;(PII Filter 통과 후)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;strokeWidth=3;fontSize=10;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.8;entryDx=0;entryDy=0;" edge="1" parent="1" source="mar-tr" target="orch">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="790" y="570" />
+              <mxPoint x="790" y="430" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Key indicator note -->
+        <mxCell id="note" value="🔴 핵심 — 매 이벤트마다 서버 round-trip&#10;&#10;흐름: IDS → Orchestrator → Meta Agent Runtime&#10;       (§2.3 표준 계층 준수)&#10;&#10;• IntentEvent / TaskEvent 모든 이벤트가 서버 LLM 호출 유발&#10;• 활성 Intent 전체를 입력으로 Plan 생성&#10;• Meta Agent Runtime은 dumb executor&#10;&#10;⚠ 부담:&#10;  • NFR-005 (PII) / NFR-006 (불필요 정보)&#10;     → PII Filter에 전적 의존&#10;  • QA-001 응답 지연 ↑ (네트워크 왕복 누적)&#10;  • QA-003 배터리 ↑&#10;&#10;✓ 강점:&#10;  • QA-007 추적성 ★★★ (Plan_v1, v2…)&#10;  • 전역 최적화 ★★★&#10;  • QA-004 도메인 추가 ★★★&#10;  • NFR-007 시뮬레이션 ★★★" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;verticalAlign=top;fontSize=10;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="820" y="480" width="300" height="320" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
