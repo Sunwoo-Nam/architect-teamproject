@@ -15,7 +15,7 @@
 >   - **NFR-007 (시뮬레이션 가능 여부)**
 >   - QS-002, QS-007, QS-021, QS-011, QS-001, QS-015
 >
-> **작성일**: 2026-05-27 (v1) / 2026-05-27 개정 (v2: 흐름 정정·trade-off 통합·NFR 라벨 명시·Policy Table 발급 주체 명시) / 2026-05-27 개정 (v3: 제목 정정 — "결정권 위치 축 (서버 사전계획 vs 온디바이스 반응형)" → "다중 Intent 처리의 결정권 분담 (서버 vs 온디바이스)". 파일명 일치 갱신)
+> **작성일**: 2026-05-27 (v1) / 2026-05-27 개정 (v2: 흐름 정정·trade-off 통합·NFR 라벨 명시·Policy Table 발급 주체 명시) / 2026-05-27 개정 (v3: 제목 정정 — "결정권 위치 축 (서버 사전계획 vs 온디바이스 반응형)" → "다중 Intent 처리의 결정권 분담 (서버 vs 온디바이스)". 파일명 일치 갱신) / 2026-05-27 개정 (v4: drawio 도식 2개 삭제·본문 링크 제거 — 추후 재작성 예정)
 
 ---
 
@@ -68,8 +68,6 @@ IDS가 각 Intent에 관계 라벨(`병합·대체·차단·취소·무관`)을 
 
 새 Intent 도착, Task 완료, Task 실패 같은 모든 의미 있는 이벤트마다 Orchestrator(서버 LLM)가 **활성 Intent 집합 전체에 대한 Plan을 다시 생성**한다. 온디바이스 Meta Agent Runtime은 plan을 받아 실행만 하는 dumb executor 역할을 맡고, "무엇을 어떻게 할 것인가"의 의사결정은 매번 서버 LLM으로 위임된다. 활성 Intent 전체를 한 번에 보고 결정한다는 점에서 전역 최적화·추적성·새 도메인 확장에 강점이 있으나, **매 이벤트마다 서버 round-trip이 발생하므로 응답 지연·토큰 비용·PII 노출의 부담이 모두 서버 쪽으로 누적**된다.
 
-> 📐 설계도: [DP11-α-sol1.drawio](../참고자료/DP11-α-sol1.drawio)
-
 **구조:**
 
 ```
@@ -121,7 +119,7 @@ IDS가 각 Intent에 관계 라벨(`병합·대체·차단·취소·무관`)을 
   IDS → Orchestrator: IntentEvent(id=A, relation=신규,
                                   payload={domain=restaurant, time=Sat 18-20})
   Orchestrator (서버 LLM) → Plan_v1:
-    [T1_search(time=Sat 18-20), T2_filter ← T1, T3_present ← T2, T4_reserve ← T3]
+    [T1_search(time=Sat 18-20), T2_filter ← T1, T3_user_approval ← T2, T4_reserve ← T3]
   Orchestrator → Meta Agent Runtime: Plan_v1
   Runtime: T1 dispatch → restaurant Sub-Agent
 
@@ -203,8 +201,6 @@ IDS가 각 Intent에 관계 라벨(`병합·대체·차단·취소·무관`)을 
 ### Sol.2 — On-Device Reactive Runtime
 
 Orchestrator(서버 LLM)는 새 도메인 Intent가 **처음 등장할 때 1회**, *Skeleton — 필요한 Sub-Agent 타입 + 도메인별 초기 Policy Table 룰셋*을 자동 생성하여 Meta Agent Runtime에 발급한다. **Policy Table은 사람이 수작업으로 작성하는 것이 아니라 서버 LLM이 도메인 첫 등장 시 자동 생성하는 것이며**, 이후 모든 이벤트(관계 라벨 적용, 다른 Intent 도착, Task 실패) 처리는 온디바이스 Meta Agent Runtime이 그 정책표를 따라 즉시 결정한다. 정책표에 없는 새로운 상황(예: 처음 본 라벨 조합)에서는 Orchestrator의 Policy Fallback Resolver가 호출되어 일회성 해결안을 만들고, 그 응답은 새 룰로 정책표에 자동 추가되어 *점진적으로 보강*된다. 사용자 체감 응답성과 PII 보호에 강점이 있으나, **초기 정책 품질이 Orchestrator의 Skeleton 생성 능력에 좌우되고, 결정이 정책표·이벤트 시퀀스에 분산되어 추적성 보강에 별도 설계가 필요**하다.
-
-> 📐 설계도: [DP11-α-sol2.drawio](../참고자료/DP11-α-sol2.drawio)
 
 **구조:**
 
@@ -429,3 +425,4 @@ _본 문서는 DP11에 대한 대안 후보 쌍이며, 기존 `DP11-다중 Inten
 _작성 근거: `DP11 문제 정의.md`, `DP11_AGENT.md`, `02-과제-개요.md`, `06-QAS.md`, `QualityAttributes.md`, DP07·DP08·DP09 문서, 사용자와의 2026-05-27 설계 논의._
 _v2 개정: §2 핵심 긴장 관계를 §2 도입부 narrative와 §4 권고에 통합·삭제. IDS → Orchestrator → Meta Agent 표준 계층 준수로 흐름 정정. NFR/QA 아이디에 한~두 단어 설명 추가. Sol.2의 Policy Table 작성 주체를 *서버 LLM의 Skeleton 발급 시 자동 생성*으로 명시._
 _v3 개정: 제목 변경 (파일명·H1 일치). "결정권 위치 축 (서버 사전계획 vs 온디바이스 반응형)" → "다중 Intent 처리의 결정권 분담 (서버 vs 온디바이스)". 다른 후보 쌍과의 짝 패턴(상태 소유권 vs 결정권 분담)이 보이도록 정정. 내용 변경 없음._
+_v4 개정: drawio 도식 2개(`DP11-α-sol1.drawio`, `DP11-α-sol2.drawio`) 삭제 및 본문 §3 Sol.1·Sol.2 내 도식 링크 제거. 추후 재작성 예정._
