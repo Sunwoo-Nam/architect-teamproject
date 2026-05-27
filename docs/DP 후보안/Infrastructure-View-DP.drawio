@@ -1,0 +1,181 @@
+<mxfile host="app.diagrams.net" agent="Claude">
+  <diagram name="Infrastructure View (DP 기준)" id="infra-dp-view">
+    <mxGraphModel dx="2000" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1900" pageHeight="1250" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" parent="1" vertex="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=18;fontStyle=1;" value="Infrastructure View (DP 후보안 기준) — 각 배포 노드·연결에 작용하는 Design Decision(DP06~DP11) 매핑&#10;토폴로지: DP08 v3 — 협상 개시자 디바이스가 Coordinator (중앙 서버 LLM 결정 없음)">
+          <mxGeometry x="380" y="20" width="1150" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Legend ===== -->
+        <mxCell id="leg_box" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#999999;align=left;verticalAlign=top;arcSize=4;" value="">
+          <mxGeometry x="40" y="90" width="320" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_t" parent="1" vertex="1" style="text;html=1;align=left;fontSize=11;fontStyle=1;strokeColor=none;fillColor=none;" value="범례 (Legend)">
+          <mxGeometry x="50" y="96" width="200" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_node" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=9;" value="배포 노드 (Device/Server)">
+          <mxGeometry x="50" y="120" width="150" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_store" parent="1" vertex="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=9;boundedLbl=1;backgroundOutline=1;size=8;" value="로컬 저장소">
+          <mxGeometry x="210" y="118" width="130" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_ext" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=9;" value="외부/클라우드">
+          <mxGeometry x="50" y="152" width="150" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_dp" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontSize=9;fontStyle=1;" value="DP 적용 배지">
+          <mxGeometry x="210" y="152" width="130" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_note" parent="1" vertex="1" style="text;html=1;align=left;fontSize=9;fontStyle=2;strokeColor=none;fillColor=none;fontColor=#555;" value="보라 배지 = 이 노드/연결에 작용하는 DP&#10;점선 화살표 = A2A 협상 통신 (단말 간 직접)">
+          <mxGeometry x="50" y="182" width="300" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ============ NODE A: Coordinator(개시자) 디바이스 ============ -->
+        <mxCell id="deviceA" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=13;align=center;verticalAlign=top;arcSize=4;strokeWidth=2;" value="&lt;b style=&quot;font-size:15px;&quot;&gt;&amp;laquo;device&amp;raquo; 개시자 디바이스 A (= Coordinator)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Android · 협상 개시자가 조정자 역할 (DP08 v3) · canonical state 사본 보유&lt;/font&gt;">
+          <mxGeometry x="80" y="290" width="720" height="660" as="geometry" />
+        </mxCell>
+
+        <!-- A: IDS -->
+        <mxCell id="a_ids" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=11;align=center;" value="&lt;b&gt;IDS&lt;/b&gt; (Intent Driven Secretary)&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Intent 감지·분류(병합/대체/취소) · 변경 이벤트 발생&lt;/font&gt;">
+          <mxGeometry x="110" y="340" width="340" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_ids" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=8;fontStyle=1;arcSize=20;" value="DP09 변경 이벤트 · DP11 다중 Intent 분류">
+          <mxGeometry x="460" y="353" width="300" height="28" as="geometry" />
+        </mxCell>
+
+        <!-- A: MAF container -->
+        <mxCell id="a_maf" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=11;align=center;verticalAlign=top;arcSize=8;strokeWidth=1.5;" value="&lt;b&gt;MAF&lt;/b&gt; (Multi-Agent Framework)">
+          <mxGeometry x="110" y="410" width="660" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="a_orch" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3EFFB;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=10;align=center;" value="&lt;b&gt;Orchestrator&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;계획 수립·실행 흐름 재구성&lt;/font&gt;">
+          <mxGeometry x="130" y="450" width="190" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_orch" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=8;fontStyle=1;arcSize=20;" value="DP11 실행 상태 통합/격리 관리">
+          <mxGeometry x="130" y="503" width="190" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="a_meta" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3EFFB;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=10;align=center;" value="&lt;b&gt;Meta Agent (= PPA)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;A2A 협상 주체·상태기계&lt;/font&gt;">
+          <mxGeometry x="340" y="450" width="190" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_meta" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=8;fontStyle=1;arcSize=20;" value="DP09 in-flight 동시성 제어">
+          <mxGeometry x="340" y="503" width="190" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="a_solver" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontColor=#995C00;fontSize=10;align=center;" value="&lt;b&gt;Deterministic Solver&lt;/b&gt; (Coordinator)&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;Borda/가중합 집계 · LLM 미사용&lt;/font&gt;">
+          <mxGeometry x="550" y="450" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_solver" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=8;fontStyle=1;arcSize=20;" value="DP08 다자간 합의 집계 (결정론적)">
+          <mxGeometry x="550" y="503" width="200" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="a_gate" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE4E1;strokeColor=#B85450;fontColor=#7A2E2A;fontSize=10;align=center;" value="&lt;b&gt;PrivacyMediator · 출구 게이트&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;LLMGateway · A2AProtocolAdapter (PII 토큰화·정보 최소화·암호화)&lt;/font&gt;">
+          <mxGeometry x="130" y="540" width="620" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_gate" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=8;fontStyle=1;arcSize=20;" value="DP06 민감정보 처리 (출구 통제)">
+          <mxGeometry x="130" y="595" width="265" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- A: On-Device LLM -->
+        <mxCell id="a_llm" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE4E1;strokeColor=#B85450;fontColor=#7A2E2A;fontSize=11;align=center;strokeWidth=1.5;" value="&lt;b&gt;On-Device LLM&lt;/b&gt; (NPU)&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;로컬 선호 해석·협상 추론 (DP08: 판단은 로컬 우선)&lt;/font&gt;">
+          <mxGeometry x="110" y="630" width="380" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- A: Local Stores -->
+        <mxCell id="a_log" parent="1" vertex="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#33502A;fontSize=9;boundedLbl=1;backgroundOutline=1;size=10;align=center;" value="&lt;b&gt;협상 이벤트 로그&lt;/b&gt;&lt;br&gt;SessionDB (영속)">
+          <mxGeometry x="520" y="625" width="110" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="a_vault" parent="1" vertex="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#33502A;fontSize=9;boundedLbl=1;backgroundOutline=1;size=10;align=center;" value="&lt;b&gt;PrivacyVault&lt;/b&gt;&lt;br&gt;토큰 매핑">
+          <mxGeometry x="650" y="625" width="100" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_log" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=8;fontStyle=1;arcSize=20;" value="DP07 상태 복구·DP11 side-effect 보상 (이벤트 로그)">
+          <mxGeometry x="110" y="700" width="400" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- A: home network for DPA -->
+        <mxCell id="a_homehub" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=10;align=center;dashed=1;" value="&lt;b&gt;로컬 연결&lt;/b&gt; (홈 네트워크) — DPA 가전 컨텍스트 수집">
+          <mxGeometry x="110" y="760" width="340" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="a_exec" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3EFFB;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=10;align=center;" value="&lt;b&gt;Sub-Agents&lt;/b&gt; (외부 실행)">
+          <mxGeometry x="480" y="760" width="270" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_exec" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=8;fontStyle=1;arcSize=20;" value="DP11 합의 후 실행 실패 보상">
+          <mxGeometry x="480" y="803" width="270" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ============ NODE B/C: 참여자 디바이스 ============ -->
+        <mxCell id="deviceB" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=12;align=center;verticalAlign=top;arcSize=4;strokeWidth=2;dashed=1;" value="&lt;b style=&quot;font-size:13px;&quot;&gt;&amp;laquo;device&amp;raquo; 참여자 디바이스 B&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;동일 스택 (대칭) · 로컬 LLM으로 선호 벡터 산출&lt;/font&gt;">
+          <mxGeometry x="1080" y="290" width="320" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="b_ppa" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3EFFB;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=10;align=center;" value="&lt;b&gt;Meta Agent (PPA)&lt;/b&gt; · &lt;b&gt;On-Device LLM&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;선호 벡터 산출·반제안&lt;/font&gt;">
+          <mxGeometry x="1110" y="345" width="260" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="b_store" parent="1" vertex="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#33502A;fontSize=8;boundedLbl=1;backgroundOutline=1;size=8;align=center;" value="로컬 로그·Vault">
+          <mxGeometry x="1110" y="415" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="deviceC" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=12;align=center;verticalAlign=top;arcSize=4;strokeWidth=2;dashed=1;" value="&lt;b style=&quot;font-size:13px;&quot;&gt;&amp;laquo;device&amp;raquo; 참여자 디바이스 C&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;N-party 협상 참여 (DP08)&lt;/font&gt;">
+          <mxGeometry x="1080" y="520" width="320" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="c_ppa" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3EFFB;strokeColor=#6C8EBF;fontColor=#1A3E6E;fontSize=10;align=center;" value="&lt;b&gt;Meta Agent · On-Device LLM&lt;/b&gt;">
+          <mxGeometry x="1110" y="565" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ============ NODE: 서버 (보조) ============ -->
+        <mxCell id="cloud" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#7A2E2A;fontSize=12;align=center;verticalAlign=top;arcSize=6;strokeWidth=2;" value="&lt;b style=&quot;font-size:13px;&quot;&gt;&amp;laquo;cloud&amp;raquo; 서버 (보조 — 협상 결정 미참여)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;PII 미반입 · DP08 v3: 중앙 LLM이 협상 결정하지 않음&lt;/font&gt;">
+          <mxGeometry x="1080" y="650" width="320" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cloud_llm" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#7A2E2A;fontSize=9;align=center;" value="&lt;b&gt;Server LLM&lt;/b&gt; (비민감 일반지식·무거운 계획만)">
+          <mxGeometry x="1100" y="695" width="280" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="cloud_builder" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#7A2E2A;fontSize=9;align=center;" value="&lt;b&gt;Capability Builder&lt;/b&gt; (APK/모듈 빌드·서명·배포)">
+          <mxGeometry x="1100" y="750" width="280" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_cloud" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=8;fontStyle=1;arcSize=20;" value="DP06 서버 LLM PII 0% 출구">
+          <mxGeometry x="1410" y="697" width="180" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ============ NODE: 외부 서비스 / 가전 ============ -->
+        <mxCell id="extservice" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#7A2E2A;fontSize=12;align=center;verticalAlign=middle;arcSize=6;strokeWidth=2;" value="&lt;b style=&quot;font-size:13px;&quot;&gt;&amp;laquo;external&amp;raquo; 외부 서비스&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;식당 예약·캘린더·결제 API&lt;/font&gt;">
+          <mxGeometry x="1080" y="850" width="320" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="appliances" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#7A5C00;fontSize=11;align=center;verticalAlign=middle;arcSize=6;strokeWidth=2;" value="&lt;b style=&quot;font-size:12px;&quot;&gt;&amp;laquo;device&amp;raquo; 가전 (DPA)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;세탁기·TV·냉장고 — 상태/스케줄 제공&lt;/font&gt;">
+          <mxGeometry x="80" y="990" width="340" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ============ EDGES ============ -->
+        <!-- A(Coordinator) <-> B : A2A 협상 -->
+        <mxCell id="e_ab" parent="1" source="a_meta" target="b_ppa" edge="1" style="endArrow=classic;startArrow=classic;html=1;dashed=1;strokeColor=#D79B00;strokeWidth=2;fontSize=9;fontColor=#995C00;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_ab_lbl" parent="1" vertex="1" style="text;html=1;fillColor=#FFFFFF;align=center;fontSize=9;fontColor=#995C00;" value="A2A 협상&#10;(선호 벡터·암호화)">
+          <mxGeometry x="870" y="360" width="120" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="dp_ab" parent="1" vertex="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#5B2C6F;fontSize=8;fontStyle=1;arcSize=20;" value="DP07 단절 복구 · DP06 메시지 기밀성 · DP09 변경 제어 메시지">
+          <mxGeometry x="820" y="250" width="370" height="30" as="geometry" />
+        </mxCell>
+        <!-- A <-> C -->
+        <mxCell id="e_ac" parent="1" source="a_solver" target="c_ppa" edge="1" style="endArrow=classic;startArrow=classic;html=1;dashed=1;strokeColor=#D79B00;strokeWidth=2;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <!-- A.gate -> cloud LLM -->
+        <mxCell id="e_cloud" parent="1" source="a_gate" target="cloud_llm" edge="1" style="endArrow=classic;html=1;dashed=1;strokeColor=#B85450;strokeWidth=1.5;fontSize=9;fontColor=#7A2E2A;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_cloud_lbl" parent="1" vertex="1" style="text;html=1;fillColor=#FFFFFF;align=center;fontSize=9;fontColor=#7A2E2A;" value="비민감 질의만 (PII 0%)">
+          <mxGeometry x="830" y="640" width="130" height="20" as="geometry" />
+        </mxCell>
+        <!-- builder -> A.exec -->
+        <mxCell id="e_build" parent="1" source="cloud_builder" target="a_exec" edge="1" style="endArrow=classic;html=1;strokeColor=#B85450;strokeWidth=1.5;fontSize=9;fontColor=#7A2E2A;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_build_lbl" parent="1" vertex="1" style="text;html=1;fillColor=#FFFFFF;align=center;fontSize=9;fontColor=#7A2E2A;" value="서명된 APK/모듈 배포">
+          <mxGeometry x="830" y="775" width="130" height="20" as="geometry" />
+        </mxCell>
+        <!-- A.exec -> ext -->
+        <mxCell id="e_ext" parent="1" source="a_exec" target="extservice" edge="1" style="endArrow=classic;html=1;strokeColor=#B85450;strokeWidth=1.5;fontSize=9;fontColor=#7A2E2A;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_ext_lbl" parent="1" vertex="1" style="text;html=1;fillColor=#FFFFFF;align=center;fontSize=9;fontColor=#7A2E2A;" value="합의 후 실행">
+          <mxGeometry x="860" y="855" width="100" height="20" as="geometry" />
+        </mxCell>
+        <!-- A.homehub -> appliances -->
+        <mxCell id="e_appl" parent="1" source="a_homehub" target="appliances" edge="1" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#D6B656;strokeWidth=1.5;fontSize=9;fontColor=#7A5C00;"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- footer -->
+        <mxCell id="footer" parent="1" vertex="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=10;fontStyle=2;fontColor=#555;strokeColor=none;fillColor=none;" value="※ DP 매핑 요약 — DP06: 출구 게이트(서버 LLM·상대 PPA·빌드) 통제 / DP07: A2A 연결·로컬 이벤트 로그로 단절 복구 / DP08: 개시자 디바이스 Coordinator + 각 단말 로컬 LLM(중앙 LLM 결정 없음) / DP09: IDS↔Meta Agent in-flight 동시성 / DP11: Orchestrator·실행 상태 저장소·Sub-Agent 보상.">
+          <mxGeometry x="450" y="990" width="950" height="60" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
