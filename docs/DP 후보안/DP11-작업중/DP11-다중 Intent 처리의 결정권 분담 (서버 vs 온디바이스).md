@@ -45,7 +45,8 @@ IDS가 각 Intent에 **도메인**(Intent의 application 분야 — 예: `restau
 
 ### Sol.1 — Server-Central Replanning
 
-새 Intent 도착, Task 완료, Task 실패 같은 모든 의미 있는 이벤트마다 Orchestrator(서버 LLM)가 **활성 Intent 집합 전체에 대한 Plan을 다시 생성**한다. 온디바이스 Meta Agent Runtime은 plan을 받아 실행만 하는 dumb executor 역할을 맡고, "무엇을 어떻게 할 것인가"의 의사결정은 매번 서버 LLM으로 위임된다. 활성 Intent 전체를 한 번에 보고 결정한다는 점에서 전역 최적화·추적성·새 도메인 확장에 강점이 있으나, **매 이벤트마다 서버 round-trip이 발생하므로 응답 지연·토큰 비용·PII 노출의 부담이 모두 서버 쪽으로 누적**된다.
+새 Intent 도착, Task 완료, Task 실패 같은 모든 의미 있는 이벤트마다 Orchestrator(서버 LLM)가 **활성 Intent 집합 전체에 대한 Plan을 다시 생성**한다. 온디바이스 Meta Agent Runtime은 plan을 받아 실행만 하는 dumb executor 역할을 맡고, "무엇을 어떻게 할 것인가"의 의사결정은 매번 서버 LLM으로 위임된다. 
+활성 Intent 전체를 한 번에 보고 결정한다는 점에서 전역 최적화·추적성·새 도메인 확장에 강점이 있으나, **매 이벤트마다 서버 round-trip이 발생하므로 응답 지연·토큰 비용·PII 노출의 부담이 모두 서버 쪽으로 누적**된다.
 
 **구조:**
 
@@ -176,7 +177,8 @@ IDS가 각 Intent에 **도메인**(Intent의 application 분야 — 예: `restau
 
 ### Sol.2 — On-Device Reactive Runtime
 
-Orchestrator(서버 LLM)는 새 도메인 Intent가 **처음 등장할 때 1회**, *Skeleton — 필요한 Sub-Agent 타입 + 도메인별 초기 Policy Table 룰셋*을 자동 생성하여 Meta Agent Runtime에 발급한다. **Policy Table은 사람이 수작업으로 작성하는 것이 아니라 서버 LLM이 도메인 첫 등장 시 자동 생성하는 것이며**, 이후 모든 이벤트(관계 라벨 적용, 다른 Intent 도착, Task 실패) 처리는 온디바이스 Meta Agent Runtime이 그 정책표를 따라 즉시 결정한다. 정책표에 없는 새로운 상황(예: 처음 본 라벨 조합)에서는 Orchestrator의 Policy Fallback Resolver가 호출되어 일회성 해결안을 만들고, 그 응답은 새 룰로 정책표에 자동 추가되어 *점진적으로 보강*된다. 사용자 체감 응답성과 PII 보호에 강점이 있으나, **초기 정책 품질이 Orchestrator의 Skeleton 생성 능력에 좌우되고, 결정이 정책표·이벤트 시퀀스에 분산되어 추적성 보강에 별도 설계가 필요**하다.
+Orchestrator(서버 LLM)는 새 도메인의 Intent가 **처음 등장할 때 1회**, *Skeleton — 필요한 Sub-Agent 타입 + 도메인별 초기 Policy Table 룰셋*을 자동 생성하여 Meta Agent Runtime에 발급한다. **Policy Table은 사람이 수작업으로 작성하는 것이 아니라 서버 LLM이 도메인 첫 등장 시 자동 생성하는 것이며**, 이후 모든 이벤트(관계 라벨 적용, 다른 Intent 도착, Task 실패) 처리는 온디바이스 Meta Agent Runtime이 그 정책표를 따라 즉시 결정한다. 
+정책표에 없는 새로운 상황(예: 처음 본 라벨 조합)에서는 Orchestrator의 Policy Fallback Resolver가 호출되어 일회성 해결안을 만들고, 그 응답은 새 룰로 정책표에 자동 추가되어 *점진적으로 보강*된다. 사용자 체감 응답성과 PII 보호에 강점이 있으나, **초기 정책 품질이 Orchestrator의 Skeleton 생성 능력에 좌우**된다.
 
 **구조:**
 
