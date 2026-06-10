@@ -1,14 +1,8 @@
 # DP02 — 최소 공개 및 Private Knowledge 차단 방식
 
-> **문서 성격**: Design Decision 후보 (draft)
-> **솔루션 결정축**: 공개 가능한 사실을 보낼 것인가(Sanitized Fact Disclosure) vs 로컬 평가 결과만 보낼 것인가(Predicate-based Private Evaluation)
-> **제약 사항**: Android 스마트폰 기반, 상대방 기기 동일 MAF 탑재 전제
-> **근거 자료**: [`04-FR.md`](../04-FR.md), [`05-NFR.md`](../05-NFR.md), [`06-Constraints_20260608_창배.md`](../06-Constraints_20260608_창배.md), [`07-QAS.md`](../07-QAS.md), [`DP01-N명 커뮤니케이션 시나리오.md`](DP01-N명%20커뮤니케이션%20시나리오.md)
-> **범위**: MAF Communication에서 `Private Knowledge`를 외부로 전송하지 않으면서도 Negotiation, Collaboration, Knowledge Sharing, Remote Monitoring을 성립시키는 에이전트 간 공개 프로토콜을 결정한다. N-party 토폴로지와 Coordinator 선출은 DP01 범위로 제외한다.
-
 ---
 
-## 1. 결정 질문
+## 1. 풀고자 하는 문제
 
 최신 FR은 MAF가 사용자 에이전트 간 상호작용을 `Communication`으로 묶고, 그 하위에 Negotiation, Collaboration, Knowledge Sharing, Remote Monitoring을 둔다. 이 중 Knowledge Sharing은 `Shared/Public Knowledge`와 `Private Knowledge`를 구분하고, 외부 에이전트 요청 시 자동 필터링 및 익명화가 가능해야 한다.
 
@@ -20,7 +14,15 @@
 
 ---
 
-## 2. 공통 전제
+## 2. 아키텍처적 난제
+
+| 난제 | 내용 | 관련 FR/NFR/QAS |
+|---|---|---|
+| **Private Knowledge 0건 전송** | Private Knowledge가 외부 payload에 한 번이라도 포함되면 보안 요구를 위반한다. | FR-MAF-05, NFR-MAF-07, QAS-013 |
+| **유용성 vs 최소 공개** | 너무 적게 공개하면 협상·협업·지식 공유가 성립하지 않고, 너무 많이 공개하면 개인정보 노출 위험이 커진다. | FR-MAF-02~06, QAS-002, QAS-007 |
+| **추론 공격** | raw data가 아니어도 `score`, `severity`, `available_window` 같은 결과가 반복되면 생활 패턴이 역추론될 수 있다. | FR-MAF-05, QAS-013 |
+| **이력 추적** | 사용자는 무엇이 외부로 나갔고 무엇이 로컬 평가에만 쓰였는지 조회할 수 있어야 한다. | FR-MAF-07, NFR-MAF-08, QAS-015 |
+| **케이스별 공개 수준 차이** | Negotiation, Collaboration, Knowledge Sharing, Remote Monitoring은 필요한 정보량과 시간 제약이 다르다. | FR-MAF 공통 및 4대 케이스, QAS-002~003 |
 
 두 방안 모두 다음 전제를 공유한다.
 
@@ -96,7 +98,7 @@
 
 ---
 
-## 5. 품질 속성 비교
+## 5. 종합 비교 (Quality Attribute & 영향 정보)
 
 > 척도: ★★★ 강함 · ★★☆ 보통 · ★☆☆ 취약
 
@@ -109,31 +111,4 @@
 | QAS-014 온디바이스 자원 | ★★☆ | ★★☆ | A는 분류·익명화 비용, B는 로컬 평가·query budget 비용이 든다. |
 | QAS-015 이력 추적 | ★★★ | ★★☆ | A는 공개 payload 추적이 쉽다. B는 공개 결과와 비공개 평가 근거를 분리해 기록해야 한다. |
 
----
-
-## 6. 권고 방향
-
-현재 QAS 우선순위를 기준으로는 **B. Predicate-based Private Evaluation을 기본 프로토콜로 두는 방향**이 더 방어 가능하다.
-
-이유는 다음과 같다.
-
-- QAS-013의 `Private Knowledge 외부 전송 0건`은 실패 허용 폭이 거의 없는 보안 요구다.
-- 최신 제약상 양측이 동일 MAF를 탑재하므로, 제한된 질의·응답 프로토콜을 강제할 수 있다.
-- Sanitized payload는 유용하지만, 공개 스키마가 틀리면 곧바로 과공개가 된다.
-
-다만 B만으로 모든 Communication을 처리하면 QAS-002와 QAS-007이 약해질 수 있다. 따라서 최종 구조는 다음처럼 정리하는 것이 적절하다.
-
-- 기본값: **Predicate-based Private Evaluation**
-- 예외 경로: 사전 승인된 schema의 `Shared/Public Knowledge`에 한해 **Sanitized Fact Disclosure** 허용
-- 예외 조건: 공개 필드, 정밀도, 목적, 상대, TTL, 로그 항목이 정책으로 고정되어야 함
-
-이 결정은 단순한 "하이브리드"가 아니라, **B를 기본 아키텍처로 선택하고 A를 제한된 성능·성공률 보완 경로로 둔다**는 의미다.
-
----
-
-## 7. 열린 질문
-
-1. `Private Knowledge`의 기준을 필드 단위로 둘 것인가, 의미 단위로 둘 것인가?
-2. `score`, `severity`, `acceptable` 같은 평가 결과가 반복될 때 역추론 위험을 어떻게 제한할 것인가?
-3. Sanitized Fact Disclosure를 허용하는 공개 스키마는 누가 정의하고 검증할 것인가?
-4. 사용자 이력 조회 화면에는 "외부로 보낸 값"과 "로컬 평가에 사용했지만 보내지 않은 근거"를 어디까지 보여줄 것인가?
+**핵심 긴장:** A는 속도·성공률·추적성에 유리하지만 공개 스키마가 틀리면 과공개 위험이 커진다. B는 QAS-013에 가장 강하지만 후보 질의 반복과 설명 로그 부담이 생긴다. 따라서 이 DP의 실제 선택은 **QAS-013의 보안 보장을 더 우선할 것인가**, 아니면 **QAS-002/QAS-007의 Communication 속도와 성공률을 더 우선할 것인가**의 문제로 좁혀진다.
