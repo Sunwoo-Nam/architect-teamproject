@@ -55,4 +55,13 @@
 | CON-02 | 상대방 기기 동일 MAF 탑재 전제 | 기술·플랫폼 |
 
 
+---
+
+
+## 리뷰
+
+
+* Cloud LLM, On-device LLM의 사용에 대한 내용도 constraints로 넣을 수 있을 것
+  - MAF의 Orchestration만 Cloud LLM 사용
+  - 나머지는 모두 On-device LLM 사용
 
