@@ -1,0 +1,192 @@
+<mxfile host="app.diagrams.net" modified="2026-06-11T00:00:00.000Z" agent="Claude" version="24.0.0">
+  <diagram name="Fault-Isolation-Final" id="dp-fault-isolation-final">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="840" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="legend" value="★ = 온디바이스 LLM 로딩(메모리↑)　｜　[proc] = 별도 OS 프로세스　｜　🌐 외부·원격 의존성　｜　📱 Android　｜　점선 화살표 = IPC / 감독(supervise)" style="text;html=1;align=center;verticalAlign=middle;fontSize=12;fontStyle=2;fillColor=#fafafa;strokeColor=#d9d9d9" vertex="1" parent="1">
+          <mxGeometry x="30" y="8" width="1440" height="26" as="geometry" />
+        </mxCell>
+
+        <mxCell id="titleA" value="후보 A. 단일 프로세스 + 논리적 격리" style="text;html=1;align=center;verticalAlign=middle;fontSize=15;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="30" y="42" width="460" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="subA" value="재시작 단위 = 프로세스 전체 (거침)" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontStyle=2;fontColor=#0958d9" vertex="1" parent="1">
+          <mxGeometry x="30" y="64" width="460" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="titleB" value="후보 B. 단일 프로세스 + Supervision Tree　★조건부 권장" style="text;html=1;align=center;verticalAlign=middle;fontSize=15;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="520" y="42" width="460" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="subB" value="재시작 단위 = 모듈 task (in-process, 쌈)" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontStyle=2;fontColor=#1a7f37" vertex="1" parent="1">
+          <mxGeometry x="520" y="64" width="460" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="titleC" value="후보 C. 모듈/세션별 프로세스 분리" style="text;html=1;align=center;verticalAlign=middle;fontSize=15;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1010" y="42" width="460" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="subC" value="재시작 단위 = 프로세스 (고움, 비쌈)" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontStyle=2;fontColor=#d4380d" vertex="1" parent="1">
+          <mxGeometry x="1010" y="64" width="460" height="18" as="geometry" />
+        </mxCell>
+
+        <mxCell id="frameA" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#0958d9;dashed=1" vertex="1" parent="1">
+          <mxGeometry x="30" y="88" width="460" height="710" as="geometry" />
+        </mxCell>
+        <mxCell id="frameB" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#1a7f37;dashed=1;strokeWidth=2" vertex="1" parent="1">
+          <mxGeometry x="520" y="88" width="460" height="710" as="geometry" />
+        </mxCell>
+        <mxCell id="frameC" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#d4380d;dashed=1" vertex="1" parent="1">
+          <mxGeometry x="1010" y="88" width="460" height="710" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== A ===================== -->
+        <mxCell id="procA" value="OS 프로세스 1개　(격리: timeout · try/catch · 검증게이트)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#0958d9;dashed=1;verticalAlign=top;fontSize=11;fontStyle=2;spacingTop=4" vertex="1" parent="1">
+          <mxGeometry x="55" y="115" width="410" height="320" as="geometry" />
+        </mxCell>
+        <mxCell id="A_ids" value="IDS" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6f4ff;strokeColor=#0958d9;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="80" y="150" width="85" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="A_meta" value="Meta ★" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe7ba;strokeColor=#d48806;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="200" y="150" width="105" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="A_sub" value="Sub-Agent ★" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe7ba;strokeColor=#d48806;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="200" y="230" width="105" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="A_orch" value="Orchestrator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6f4ff;strokeColor=#0958d9;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="75" y="315" width="120" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="A_dev" value="Device I/O&#10;(in-process)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6f4ff;strokeColor=#0958d9;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="225" y="315" width="115" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="A_state" value="State&#10;(DP-A2)" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#e6f4ff;strokeColor=#0958d9;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="360" y="225" width="85" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="A_banner" value="① 장애(crash·hang) → watchdog이 프로세스 통째 재시작" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7e6;strokeColor=#d48806;fontSize=11;fontStyle=2" vertex="1" parent="1">
+          <mxGeometry x="70" y="460" width="380" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="A_phone" value="📱 Android" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#595959;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="80" y="560" width="105" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="A_peer" value="🌐 Peer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#595959;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="200" y="560" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="A_llm" value="🌐 서버 LLM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#595959;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="305" y="560" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="eA1" style="endArrow=classic;html=1;strokeColor=#595959;strokeWidth=1.5" edge="1" parent="1" source="A_ids" target="A_meta"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eA2" style="endArrow=classic;html=1;strokeColor=#595959;strokeWidth=1.5" edge="1" parent="1" source="A_meta" target="A_sub"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eA3" value="도구" style="endArrow=classic;html=1;strokeColor=#595959;strokeWidth=1.5;fontSize=10" edge="1" parent="1" source="A_sub" target="A_dev"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eA4" style="endArrow=classic;html=1;strokeColor=#595959;strokeWidth=1.5" edge="1" parent="1" source="A_dev" target="A_phone"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eA5" value="협상" style="endArrow=classic;html=1;strokeColor=#595959;strokeWidth=1.5;fontSize=10" edge="1" parent="1" source="A_sub" target="A_peer"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eA6" value="Task Plan" style="endArrow=classic;html=1;strokeColor=#595959;strokeWidth=1.5;fontSize=10" edge="1" parent="1" source="A_orch" target="A_llm"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eA7" value="상태저장" style="endArrow=classic;html=1;strokeColor=#595959;strokeWidth=1.5;fontSize=10" edge="1" parent="1" source="A_meta" target="A_state"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="capA" value="＋ 자원·지연·일관성 ◎ (단일 모델·IPC無·단일상태)　／　단순 ◎&#10;－ 막힌 모듈만 못 살림 → 통째 재시작뿐 (동시세션 blast radius △)&#10;－ 취소불가 네이티브 hang은 프로세스 통째 죽여야 회수" style="text;html=1;align=left;whiteSpace=wrap;fontSize=11;fillColor=#e6f4ff;strokeColor=#0958d9;spacingLeft=6;verticalAlign=top;spacingTop=6" vertex="1" parent="1">
+          <mxGeometry x="50" y="630" width="420" height="150" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== B (recommended) ===================== -->
+        <mxCell id="procB" value="OS 프로세스 1개" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#1a7f37;dashed=1;verticalAlign=top;fontSize=11;fontStyle=2;spacingTop=4" vertex="1" parent="1">
+          <mxGeometry x="545" y="115" width="410" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="B_sup" value="Supervisor (감독자) — 모듈 task abort + restart" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b7eb8f;strokeColor=#389e0d;fontSize=11;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="565" y="142" width="370" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="B_ids" value="IDS" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6ffed;strokeColor=#1a7f37;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="565" y="210" width="80" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="B_meta" value="Meta ★" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe7ba;strokeColor=#d48806;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="655" y="210" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="B_sub" value="Sub-Agent ★" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe7ba;strokeColor=#d48806;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="755" y="210" width="105" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="B_orch" value="Orchestrator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6ffed;strokeColor=#1a7f37;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="565" y="270" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="B_dev" value="Device I/O" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6ffed;strokeColor=#1a7f37;fontSize=11;dashed=1" vertex="1" parent="1">
+          <mxGeometry x="700" y="270" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="B_state" value="State&#10;(DP-A2)" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#e6ffed;strokeColor=#1a7f37;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="865" y="262" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="B_devnote" value="(조건부) 취소불가 네이티브 hang 위험 시&#10;Device 계층만 별도 proc로 분리 → kill 가능" style="text;html=1;align=center;whiteSpace=wrap;fontSize=10;fontColor=#d48806;fontStyle=2" vertex="1" parent="1">
+          <mxGeometry x="640" y="320" width="300" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="B_banner" value="② 막힌 모듈 task만 cancel + 재시작 (in-process)&#10;　 회수 불가 시 → 서비스 통째 auto-restart (escalation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f6ffed;strokeColor=#389e0d;fontSize=11;fontStyle=2" vertex="1" parent="1">
+          <mxGeometry x="560" y="420" width="380" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="B_phone" value="📱 Android" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#595959;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="560" y="555" width="105" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="B_peer" value="🌐 Peer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#595959;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="700" y="555" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="B_llm" value="🌐 서버 LLM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#595959;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="810" y="555" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="eBs1" style="endArrow=open;html=1;strokeColor=#389e0d;strokeWidth=1.2;dashed=1" edge="1" parent="1" source="B_sup" target="B_ids"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eBs2" value="abort+restart" style="endArrow=open;html=1;strokeColor=#389e0d;strokeWidth=1.2;dashed=1;fontSize=9;fontColor=#389e0d" edge="1" parent="1" source="B_sup" target="B_meta"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eBs3" style="endArrow=open;html=1;strokeColor=#389e0d;strokeWidth=1.2;dashed=1" edge="1" parent="1" source="B_sup" target="B_sub"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eBs4" style="endArrow=open;html=1;strokeColor=#389e0d;strokeWidth=1.2;dashed=1" edge="1" parent="1" source="B_sup" target="B_orch"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eB3" value="도구" style="endArrow=classic;html=1;strokeColor=#595959;strokeWidth=1.5;fontSize=10" edge="1" parent="1" source="B_sub" target="B_dev"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eB4" style="endArrow=classic;html=1;strokeColor=#595959;strokeWidth=1.5" edge="1" parent="1" source="B_dev" target="B_phone"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eB5" value="협상" style="endArrow=classic;html=1;strokeColor=#595959;strokeWidth=1.5;fontSize=10" edge="1" parent="1" source="B_sub" target="B_peer"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eB6" value="Task Plan" style="endArrow=classic;html=1;strokeColor=#595959;strokeWidth=1.5;fontSize=10" edge="1" parent="1" source="B_orch" target="B_llm"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eB7" style="endArrow=classic;html=1;strokeColor=#595959;strokeWidth=1.5" edge="1" parent="1" source="B_meta" target="B_state"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="capB" value="★ 조건부 권장 (B=A+supervision, A⊂B) — ZeroClaw식&#10;＋ 모듈 재시작 granularity를 in-process로 싸게 확보&#10;＋ QAS-008 복구율은 A=B(DP-A2) / 이점은 QAS-007·가용성&#10;－ 우위는 협조적 장애 한정 + supervision 레이어 자체가 위험원" style="text;html=1;align=left;whiteSpace=wrap;fontSize=11;fillColor=#f6ffed;strokeColor=#389e0d;spacingLeft=6;verticalAlign=top;spacingTop=6" vertex="1" parent="1">
+          <mxGeometry x="540" y="630" width="420" height="150" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== C ===================== -->
+        <mxCell id="C_ids" value="IDS&#10;[proc]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff1f0;strokeColor=#d4380d;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="1035" y="135" width="95" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="C_meta" value="Meta&#10;[proc]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff1f0;strokeColor=#d4380d;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="1150" y="135" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="C_orch" value="Orch&#10;[proc]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff1f0;strokeColor=#d4380d;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="1035" y="225" width="95" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="C_sub" value="Sub&#10;[proc]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff1f0;strokeColor=#d4380d;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="1150" y="225" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="C_dev" value="Device&#10;[proc]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff1f0;strokeColor=#d4380d;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="1035" y="315" width="110" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="C_model" value="Model-Server&#10;proc ★ (공유 모델)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe7ba;strokeColor=#d48806;fontSize=11;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1290" y="135" width="120" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="C_state" value="State&#10;(DP-A2)" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#fff1f0;strokeColor=#d4380d;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="1305" y="240" width="85" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="eC1" value="IPC" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#8c8c8c;strokeWidth=1.2;dashed=1;fontSize=9" edge="1" parent="1" source="C_ids" target="C_meta"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eC2" value="IPC" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#8c8c8c;strokeWidth=1.2;dashed=1;fontSize=9" edge="1" parent="1" source="C_meta" target="C_sub"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eC3" value="IPC" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#8c8c8c;strokeWidth=1.2;dashed=1;fontSize=9" edge="1" parent="1" source="C_meta" target="C_orch"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eC4" value="IPC" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#8c8c8c;strokeWidth=1.2;dashed=1;fontSize=9" edge="1" parent="1" source="C_sub" target="C_dev"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eCm1" value="추론요청" style="endArrow=classic;html=1;strokeColor=#d48806;strokeWidth=1.2;dashed=1;fontSize=9;fontColor=#d48806" edge="1" parent="1" source="C_meta" target="C_model"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eCm2" style="endArrow=classic;html=1;strokeColor=#d48806;strokeWidth=1.2;dashed=1" edge="1" parent="1" source="C_sub" target="C_model"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="C_phone" value="📱 Android" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#595959;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="1035" y="395" width="105" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="C_llm" value="🌐 서버 LLM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#595959;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="1155" y="395" width="110" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="C_peer" value="🌐 Peer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#595959;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="1285" y="395" width="95" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="eC5" style="endArrow=classic;html=1;strokeColor=#595959;strokeWidth=1.5" edge="1" parent="1" source="C_dev" target="C_phone"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eC6" value="Task Plan" style="endArrow=classic;html=1;strokeColor=#595959;strokeWidth=1.5;fontSize=9" edge="1" parent="1" source="C_orch" target="C_llm"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eC7" value="협상" style="endArrow=classic;html=1;strokeColor=#595959;strokeWidth=1.5;fontSize=9" edge="1" parent="1" source="C_sub" target="C_peer"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="C_banner" value="③ 막힌 proc만 강제 kill + 재시작 (재시작 단위 = proc)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2f0;strokeColor=#d4380d;fontSize=11;fontStyle=2" vertex="1" parent="1">
+          <mxGeometry x="1035" y="455" width="420" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="C_warn" value="⚠ ★모델: 각 proc 개별 로딩 불가 → 공유 Model-Server proc 필요 (QAS-014)&#10;⚠ 상태 분산 → 원자적 스냅샷·일관성 부담 (QAS-011/012)&#10;⚠ Android 백그라운드 프로세스 수명 관리(LMK)와 충돌" style="text;html=1;align=left;whiteSpace=wrap;fontSize=11;fontColor=#d4380d;fontStyle=2;spacingLeft=4" vertex="1" parent="1">
+          <mxGeometry x="1035" y="500" width="425" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="capC" value="＋ crash·hang 격리 최강 / 동시세션 blast radius ◎ (서로 무관)&#10;－ 자원·지연·일관성·복잡도 모두 비쌈&#10;－ 개인폰·저동시성에선 이득 대비 과함 (이득은 동시세션 수에 비례)" style="text;html=1;align=left;whiteSpace=wrap;fontSize=11;fillColor=#fff1f0;strokeColor=#d4380d;spacingLeft=6;verticalAlign=top;spacingTop=6" vertex="1" parent="1">
+          <mxGeometry x="1030" y="630" width="425" height="150" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
