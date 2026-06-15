@@ -38,7 +38,7 @@
 | E6 | **상태 일관성** | [QAS-011/012](../07-QAS.md) (불일치 0%) | 상태가 분산될수록 원자적 스냅샷·동기화가 어려움 |
 | E7 | **복잡도 / 유지보수** | (Maintainability) | 구현·디버깅·운영 난이도 |
 
-> 표기: ◎ 강함 · ○ 보통 · △ 약함 · ✕ 위배 위험
+> 표기: ★★★ 강함 · ★★ 보통 · ★ 약함/위배 위험
 
 ---
 
@@ -47,93 +47,250 @@
 세 후보는 **"막힌 단위를 어느 입자도로 강제종료·재시작하는가(재시작 단위)"** 축 위에 놓인다.
 공통적으로 복구는 **DP-A2 영속화**에 의존한다.
 
-> **후보 구조에 대한 주의 — A와 B는 동급 후보가 아니다.** 기능적으로 **B = A + supervision 레이어**이며 **A ⊂ B**이다(A는 B에서 supervision만 뺀 최소 부분집합). 따라서 실질 결정은 "A vs B 동급 선택"이 아니라 **2단 구조**로 읽어야 한다:
-> - **① A ↔ B**: supervision 기계장치에 투자할 것인가? (단순함·낮은 자체 위험 vs 정밀 회수)
-> - **② C**: 멀티프로세스로 갈 것인가? (별개의 축)
+> **후보 구조에 대한 주의 — 세 후보는 *누적 투자 스펙트럼* 위에 있다.** 기능적으로 **A ⊂ B ⊂ C**이다 (A는 supervision 없음, B는 A + in-process supervision, C는 B + 분리 자격 컴포넌트의 별도 proc 분리). 따라서 실질 결정은 다음 2단 질문으로 읽는다:
+> - **① A ↔ B**: in-process supervision 기계장치에 투자할 것인가? (단순함·낮은 자체 위험 vs 정밀 회수)
+> - **② B ↔ C**: 취소 불가 native blocking 컴포넌트를 별도 OS proc로 분리할 것인가? (in-process로는 회수 불가한 영역의 격리 vs 분리 경계 K개의 IPC·watchdog 비용)
 >
-> 즉 **A = 최소 투자 baseline**, **B = 투자한 단일 프로세스안**, **C = 멀티프로세스안**으로 본다.
+> 즉 **A = 최소 baseline**, **B = supervision 투자한 단일 proc안**, **C = supervision + 선택적 분리안**으로 본다. (초기 검토에 있던 *전면 분리*는 본 문서에서 탈락.)
+
+> **watchdog 구현 부담 — 모든 후보 공통.** Android는 systemd(`Restart=always`)·launchd(`KeepAlive`)·Kubernetes(`livenessProbe`) 같은 **표준 watchdog 서비스를 제공하지 않는다**. 따라서 본 문서의 모든 후보는 `ForegroundService` + `START_STICKY` + `AlarmManager`(자기-깨우기) + heartbeat 파일/Binder ping을 **직접 조립**해야 한다. 이 비용은 후보별로 다르게 누적된다(아래 각 단점 참조). 자세한 패턴은 8절 Android 레퍼런스.
 
 ### 후보 A. 단일 프로세스 + 논리적 격리
 - **구조**: 온디바이스 모듈(IDS·Meta·Sub·Orchestrator·Device I/O) 전체를 **한 OS 프로세스**에. 격리는 코드 레벨(timeout, try/catch, 검증 게이트).
 - **재시작 단위 = 프로세스 전체**. 장애 시 watchdog이 서비스를 통째 재시작 → DP-A2로 재개.
 - **장점**
-  - 단일 모델 인스턴스 공유 + IPC 없음 + 단일 상태 → **E1·E2·E6 ◎**.
-  - 구조가 단순해 추적·디버깅 용이 → **E7 ◎**.
+  - 단일 모델 인스턴스 공유 + IPC 없음 + 단일 상태 → **E1·E2·E6 ★★★**.
+  - 구조가 단순해 추적·디버깅 용이 → **E7 ★★★**.
 - **단점**
-  - 막힌 모듈 하나 때문에 **프로세스 전체를 재시작**해야 함 → 동시 세션이 같이 끊김 → **E4 △**.
-  - **취소 불가 네이티브 hang**은 in-process timeout으로 회수 불가 → 통째 재시작이 유일 수단 → **E3 △**.
+  - 막힌 모듈 하나 때문에 **프로세스 전체를 재시작**해야 함 → 동시 세션이 같이 끊김 → **E4 ★**.
+  - **취소 불가 네이티브 hang**은 in-process timeout으로 회수 불가 → 통째 재시작이 유일 수단 → **E3 ★**.
+  - **watchdog 구현 부담(소)**: ForegroundService + START_STICKY + AlarmManager 자기-깨우기 + heartbeat 파일. 1층 구조라 비교적 단순.
 
-### 후보 B. 단일 프로세스 + Supervision Tree　★ 권장
+### 후보 B. 단일 프로세스 + Supervision Tree
 - **구조**: 후보 A와 동일하게 단일 프로세스지만, 모듈을 **supervised actor/task**로 두고 **Supervisor(감독자)**가 관리. 막힌 모듈의 task만 **cancel + 재인스턴스화(in-process)**. 회수 불가 시 **서비스 통째 auto-restart**로 escalation. **(조건부)** 취소 불가 네이티브 hang 위험이 큰 **Device 계층만** 별도 proc로 분리해 kill 가능하게 함.
 - **재시작 단위 = 모듈 task (in-process, 저비용)**.
 - **실증 근거**: Android 에이전트 런타임(ZeroClaw)이 실제로 쓰는 패턴 — **FFI 경계마다 panic catch(in-process 격리) + auto-restart 서비스**. 모듈을 프로세스로 쪼개지 않는다. (8절)
 - **가치 명제 (중요)**: B가 A 대비 개선하는 것은 **QAS-008(복구율)이 아니다.** 복구율 자체는 두 안 모두 DP-A2가 결정한다(아래 3절 주1 참조). B의 이점은 **"전체 재시작을 덜 일으켜서 task를 덜 끊고 무고한 세션을 덜 끊는 것"** — 즉 **QAS-007(task 성공률)·가용성**에 기여한다.
 - **장점**
   - **모듈 단위 재시작 granularity를 프로세스 분리 없이** 확보 → **E3 개선(단, 협조적 장애 한정)**.
-  - 자원·지연·일관성은 A와 동일하게 유지 → **E1·E2·E6 ◎**.
+  - 자원·지연·일관성은 A와 동일하게 유지 → **E1·E2·E6 ★★★**.
   - Device 계층만 조건부 격리로 취소 불가 hang에 대응 가능.
 - **단점**
   - in-process 취소는 **협조적(cooperative)** — 모듈이 비협조적 네이티브 코드에 박히면 강제 abort 불가. 이 경우엔 B도 A와 똑같이 통째 재시작으로 떨어짐(Device proc 격리가 있어야 회수) → **E3/E4 우위는 협조적 장애에만 적용**.
-  - **supervision 레이어 자체가 위험원**이 될 수 있음: restart storm(결정론적 실패 모듈의 무한 재시작), 에러 은폐, 오재시작 → max-restart 제한 등 추가 기계장치 필요 → **E7 비용**.
-  - 동시 세션 blast radius는 escalation(통째 재시작) 시 여전히 동시 세션 영향 → **E4는 협조적 장애에 한해서만 A보다 우위**.
+  - **supervision 레이어 자체가 위험원**이 될 수 있음: restart storm(결정론적 실패 모듈의 무한 재시작), 에러 은폐, 오재시작 → max-restart 제한 등 추가 기계장치 필요 → **E7 비용 ★**.
+  - 동시 세션 blast radius는 escalation(통째 재시작) 시 여전히 동시 세션 영향 → **E4 ★★는 협조적 장애에 한해서만 A보다 우위**.
+  - **watchdog 구현 부담(중)**: A의 외부 watchdog **+** in-process Supervisor 레이어(Kotlin Coroutines `SupervisorJob` / `withTimeout` 활용 가능) **+** max-restart 정책. Device 계층을 별도 proc로 분리하는 조건부 옵션을 켜면 C 수준의 IPC·Binder 부담이 추가됨.
 
-### 후보 C. 모듈/세션별 프로세스 분리
-- **구조**: 모듈(또는 세션)을 각각 **별도 OS 프로세스**로. 막힌 proc만 강제 kill + 재시작. ★ 모델을 각 proc가 개별 로딩할 수 없으므로 **공유 Model-Server proc** 필요.
-- **재시작 단위 = 프로세스 (고움, 고비용)**.
+### 후보 C. 선택적 프로세스 분리 (Selective Process Isolation)　★ 권장
+
+> **이전 버전과의 차이**: 초기 검토에서 C는 *모듈별/세션별 전면 분리*로 정의됐다. 검토 결과 전면 분리는 본 프로젝트 제약(온디바이스 자원·저동시성·Android LMK)과 정면 충돌하면서도 *대부분 모듈에서는 격리 이득이 없다*는 결론이 나왔다. 동시에, **B만으로는 회수 불가능한 native blocking**(LLM 추론·Accessibility Service)이 본 프로젝트에서 *불가피*하다는 점이 드러났다. 그래서 C를 **"B를 베이스로 두고, 분리 자격(취소 불가 native blocking)이 있는 컴포넌트만 별도 프로세스로 빼는"** 형태로 재정의한다. 이는 Chrome 사이트 격리·Android 시스템 서비스(mediaserver·audioserver)·Erlang OTP의 NIF 분리 등 산업 표준 패턴(**bulkhead pattern**)과 동일한 사고다.
+
+- **구조**: 메인 프로세스는 B(supervision tree)로 운영하고, **취소 불가 native blocking 컴포넌트만 별도 OS 프로세스**로 분리. 본 프로젝트의 분리 후보는 **(a) LLM 추론(Model-Server proc)** 와 **(b) Accessibility Service**(Android 정책상 별도 proc 가능 여부는 5절 미결 변수). 분리 경계는 *2~3개*로 한정.
+- **재시작 단위 = 일반 모듈은 task(in-process), 분리 컴포넌트는 그 proc만 kill+재기동**.
+- **분리 자격 결정 트리** (모듈을 분리할지 판단할 때 적용):
+
+  ```
+  모듈 X를 별도 프로세스로 분리해야 하는가?
+
+  ① X가 cooperative cancellation을 지원하는가?
+     (cancel 토큰/timeout에 반응해 정해진 시간 내에 깔끔하게 멈출 수 있는가)
+     ├─ 예 → supervision tree(B)로 충분. 분리하지 말 것.
+     └─ 아니오 → X는 native blocking. 분리 후보로 진행 ↓
+
+  ② X의 장애가 잦은가, 또는 통째 재시작이 다른 진행 중인 작업에
+     큰 충격을 주는가?
+     ├─ 아니오 → 분리 비용 > 회수 이득. A 수준 통째 재시작 수용.
+     └─ 예 → 분리 결정. AIDL/Binder 인터페이스 정의 + watchdog 추가.
+  ```
+  → 본 프로젝트에서 ①·② 모두 통과하는 모듈: **LLM 추론**(거의 확정), **Accessibility Service**(분리 가능성 검증 후 결정 — 5절).
+
 - **장점**
-  - crash·hang 격리 최강, 동시 세션이 서로 무관 → **E3 ◎ · E4 ◎**.
+  - **취소 불가 native blocking 회수 가능** → **E3 ★★★** (B의 ★★ 한계 돌파).
+  - 분리된 컴포넌트의 hang이 메인을 끌고 가지 않음 → 메인은 계속 동작 → **E4 ★★** (분리 영역에 한해 격리).
+  - 일반 모듈은 여전히 B와 동일한 단일 프로세스라 자원·일관성 부담은 *분리 경계 K개*에만 비례 (전면 분리 대비 압도적으로 작음).
+  - 산업 표준 패턴(Chrome·Android system service·Erlang)으로 검증됨.
 - **단점**
-  - ★모델 공유 서버 + 다중 프로세스 + IPC → **E1 ✕ · E2 △**.
-  - 상태 분산 → 원자적 스냅샷·동기화 부담 → **E6 △**, 오히려 **E5(복구) 복잡화**.
-  - **Android 백그라운드 프로세스 수명 관리(LMK)와 충돌** → 격리하려던 것이 장애 원인이 되는 자기모순.
-  - 복잡도 최고 → **E7 △**.
+  - 분리 경계 K개당 비용: AIDL/Binder 인터페이스, watchdog ping, restart storm 방지, Model-Server proc의 모델 로딩 라이프사이클 관리 → **E1·E2 ★★** (B보다 약간 부담↑, 하지만 전면 분리보다 훨씬 작음).
+  - 분리 경계에서의 시점 동기화 비용은 *경계 수에 비례* — K=2~3이라 누적 부담 제한적이지만 0은 아님 → **E6 ★★**.
+  - **watchdog 구현 부담(중)**: B의 외부 watchdog **+** in-process Supervisor **+** 분리 컴포넌트별 AIDL ping watchdog. B 대비 분리 경계 K개의 watchdog 인프라가 추가. C(전면 분리)의 *Manager 단일 SPOF*는 없음 — 메인 프로세스가 각 분리 컴포넌트의 watchdog 역할을 직접 수행.
+  - Android Accessibility Service의 별도 proc 분리 가능성은 *프레임워크 제약*에 종속 → 5절 미결 변수.
 
 ---
 
 ## 3. 비교표
 
-| 평가축 | A. 단일+논리 | B. 단일+Supervision ★ | C. 프로세스 분리 |
+| 평가축 | A. 단일+논리 | B. 단일+Supervision | C. 선택적 분리 ★ |
 |---|:---:|:---:|:---:|
-| E1 온디바이스 자원 (QAS-014) | ◎ | ◎ | ✕ |
-| E2 지연 (QAS-002) | ◎ | ◎ | △ |
-| E3 hang/runaway 회수 ※2 | △ | ○~◎ | ◎ |
-| E4 동시세션 blast radius ※2 | △ | ○ | ◎ |
-| E5 세션 복구 적합성 (QAS-008) ※1 | ○ | ○ | △ |
-| E6 상태 일관성 (QAS-011/012) | ◎ | ◎ | △ |
-| E7 복잡도 / 자체 위험 | ◎ | △~○ | △ |
+| E1 온디바이스 자원 (QAS-014) | ★★★ | ★★★ | ★★ |
+| E2 지연 (QAS-002) | ★★★ | ★★★ | ★★ |
+| E3 hang/runaway 회수 ※2 | ★ | ★★ | ★★★ |
+| E4 동시세션 blast radius ※2 | ★ | ★★ | ★★ |
+| E5 세션 복구 적합성 (QAS-008) ※1 | ★★ | ★★ | ★★ |
+| E6 상태 일관성 (QAS-011/012) | ★★★ | ★★★ | ★★ |
+| E7 복잡도 / 자체 위험 | ★★★ | ★★ | ★★ |
 
-> **※1 — E5는 A=B이다.** QAS-008(복구율 95%)은 "세션이 *이미 중단된 후* 재개 성공률"이며, 그 수치는 A·B 모두 **전적으로 DP-A2(영속화)가 결정**한다. Supervisor 유무는 복구율을 바꾸지 않는다. B의 이점은 복구율이 아니라 **전체 재시작 빈도 감소(QAS-007·가용성)**에 있다. (C는 상태 분산으로 원자적 스냅샷이 어려워 복구가 오히려 복잡 → △)
+> **※1 — E5는 세 후보가 동급.** QAS-008(복구율 95%)은 "세션이 *이미 중단된 후* 재개 성공률"이며, 그 수치는 모든 후보가 **전적으로 DP-A2(영속화)가 결정**한다. Supervisor 유무·프로세스 분리 유무는 *복구율 자체*를 바꾸지 않는다. C의 분리 경계 K=2~3에서의 시점 동기화 비용은 *복구 정합성에는* 부담이 되지만 K가 작아 ★★ 유지 가능. (초기 검토의 *전면 분리* C가 ★였던 것은 K가 모듈 수만큼 컸기 때문.)
 >
-> **※2 — E3/E4에서 B의 A 대비 우위는 "협조적으로 취소 가능한 장애"에만 적용된다.** 취소 불가 네이티브 hang·프로세스 freeze에서는 **B도 A와 동일하게 통째 재시작**으로 떨어진다. 따라서 B의 실효 우위 크기 = *전체 장애 중 협조적으로 가둘 수 있는 비율*에 비례한다.
+> **※2 — E3에서 후보 간 차이는 "어떤 종류의 장애를 회수할 수 있는가"에 있다.** A는 어떤 hang도 in-process로 회수 불가 → 통째 재시작. B는 *협조적으로 취소 가능한* 장애를 모듈 단위로 회수 가능 (그러나 native blocking은 통째 재시작으로 떨어짐). C는 *취소 불가 native blocking*까지 분리된 프로세스 kill로 회수 가능. 본 프로젝트는 LLM 추론·Accessibility라는 *불가피한 native blocking 컴포넌트*가 있어 B의 ★★는 *그 영역에 한해 ★*로 떨어진다 — 이게 C가 권장되는 결정적 근거.
 
 ---
 
 ## 4. 권고 (Recommendation)
 
-**먼저 C(멀티프로세스)를 1차 탈락**시키고, **A↔B는 "supervision 투자 여부"의 조건부 결정**으로 본다.
+본 프로젝트에서는 **C(선택적 분리)를 권장**한다. 그 근거를 정리하면:
 
-**C 탈락 근거**: 온디바이스·저동시성·자기 폰 조건에서 C가 추가로 사주는 것은 사실상 **E4(동시세션 blast radius) 하나**뿐이고, 그 가치는 **동시 세션 수에 비례**한다(개인 폰은 본질적으로 작음). 반면 비용(E1 자원 ✕, E6 일관성, E7 복잡도, Android LMK 충돌)은 크다. → **동시 세션이 많고 + 한 세션 장애가 다른 세션을 잠깐 끊는 것조차 불허**일 때만 정당화되며, 그 경우에도 *모듈별*이 아니라 *세션별* 프로세스 + 공유 모델 서비스가 정확한 처방이다.
+### 4.1 본 프로젝트가 native blocking을 *불가피하게* 가진다
 
-**A vs B는 동급 비교가 아니다(A ⊂ B).** 그래서 결정은 단순한 선택이 아니라 다음 부등식으로 환원된다:
+A·B는 모두 *cooperative cancellation* 가정 위에 서 있다. 즉 모든 모듈이 timeout/cancel 토큰에 *반응해서* 정해진 시간 내에 멈출 수 있어야 in-process 회수가 성립한다. 그러나 본 프로젝트는 다음 두 컴포넌트를 *반드시* 포함한다:
 
-> **supervision 기계장치를 만들 가치 ≷ 그 비용**
-> = (장애 빈도) × (그중 *협조적으로* 가둘 수 있는 비율) × (전체 재시작이 task·동시세션에 주는 충격)
->   **vs**  (supervision 레이어 구현·유지 비용 + 그 레이어 자체의 버그 위험)
+| 컴포넌트 | 왜 native blocking인가 |
+|---|---|
+| **LLM 추론** | 모델의 native(C++/CUDA/NNAPI) 추론 루프는 한 번 시작하면 *cooperative cancel 지원 없음*. 추론이 hang하면 프로세스 통째 kill 외에 회수 수단이 없다 |
+| **Accessibility Service** | Android 시스템과 직접 결합. 무한 루프·deadlock 시 *앱이 응답성을 잃지 않은 채* 모듈만 끊는 in-process 메커니즘이 없음 |
 
-- **장애가 드물거나, 주로 취소 불가 네이티브 hang** → **A(최소 baseline) 권고.** B를 만들어봐야 거의 안 쓰는 기계장치이고, supervision 레이어 자체가 새 위험원이 됨. ZeroClaw의 "얇은 코어 + auto-restart"도 사실상 이 지점에 가깝다.
-- **장애가 잦고 + 대부분 협조적으로 가둘 수 있음** → **B 권고.** 모듈 단위 정밀 회수의 투자가 QAS-007·가용성으로 회수됨. (현장 사례: ZeroClaw의 FFI 경계 panic catch + auto-restart.)
+이 두 컴포넌트에 한해서는 **B의 supervision tree가 ★를 받는다** — in-process 회수가 원리적으로 불가능하기 때문. 그래서 본 프로젝트에서 *순수* B는 native blocking 영역에서 A 수준으로 떨어진다.
 
-**중요**: 어느 쪽을 택하든 **QAS-008(복구율 95%) 달성 여부는 동일하게 DP-A2(영속화)에 달려 있다.** A↔B 선택은 복구율이 아니라 *가용성·중단 빈도*의 문제다. 따라서 **QAS-008 관점만 보면 A로 시작해도 무방**하며, 가용성 요구가 강해지면 B로 증분 투자하는 경로가 합리적이다.
+### 4.2 C(선택적 분리)가 정합한 처방
+
+- 일반 모듈(IDS·Meta·Sub·Orchestrator 등)은 cooperative cancellation을 지원하므로 **B와 동일하게 in-process supervision**으로 처리
+- LLM 추론·Accessibility만 **별도 OS 프로세스로 분리**해 kill 회수 가능하게 함 (K=2)
+- 분리 경계 비용(E1·E2·E6 각 ★★)이 누적되지만, K=2라 한정적
+- 전면 분리(이전 C)의 자기모순(Android LMK 충돌, 자원 폭증, 일관성 붕괴)은 발생하지 않음
+
+### 4.3 산업 표준과의 일관성
+
+C가 채택하는 *선택적 분리(bulkhead pattern)* 는 Chrome 사이트 격리, Android 시스템 서비스(mediaserver·audioserver·surfaceflinger), Erlang OTP의 NIF 분리에서 동일하게 쓰이는 패턴이다. "취소 불가 native blocking만 분리"라는 원칙은 *원리적*으로 정당화된다 (전제 4: "OS 프로세스 분리가 *유일한* 회수 수단인 경우는 취소 불가능한 네이티브 blocking뿐").
+
+### 4.4 A·B는 언제 선택되는가
+
+C를 권장한다고 A·B가 무가치한 것은 아니다. **native blocking 컴포넌트가 *없는* 프로젝트** — 예: 순수 비즈니스 로직 + 외부 API 호출만으로 구성된 시스템 — 에서는 A 또는 B가 더 정합하다:
+
+- **장애가 드물거나 통째 재시작 비용이 작음** → A (최소 baseline)
+- **장애가 잦고 대부분 cooperative cancellation 가능** → B (supervision 투자)
+
+본 프로젝트는 두 경우 모두에 해당하지 않으므로 C로 간다.
+
+### 4.5 중요 — QAS-008과의 관계
+
+어느 후보를 택하든 **QAS-008(복구율 95%) 달성 여부는 동일하게 DP-A2(영속화)에 달려 있다.** A·B·C 사이의 차이는 *복구율*이 아니라 *어떤 장애를 회수할 수 있는가*와 *재시작 빈도가 가용성에 주는 충격*이다. C가 추가로 회수하는 것은 **취소 불가 native blocking**으로, 본 프로젝트의 LLM·Accessibility라는 *불가피한* 특성에 직접 대응한다.
+
+---
+
+## 4-1. 감시 계층(Watchdog / Supervisor)의 위치와 동작
+
+후보 비교의 ★ 점수는 **"감시 계층이 제대로 동작한다"**는 전제 위에 서 있다. 이 절은 그 전제를 명시한다. Android는 systemd·launchd·Kubernetes 같은 표준 watchdog을 제공하지 않으므로, **모든 후보가 감시 계층을 직접 조립해야** 한다.
+
+### 4-1.1 Watchdog vs Supervisor — 무엇이 다른가
+
+| 축 | **Watchdog** | **Supervisor** |
+|---|---|---|
+| 실행 위치 | **별도 프로세스 / OS / 외부** | **같은 프로세스 안 (in-process)** |
+| 감시 대상 | 프로세스 1개의 생사 (살아있나) | 프로세스 안의 N개 모듈/액터/태스크 |
+| 감시 방법 | heartbeat 파일 mtime · health-ping · AlarmManager 자기-깨우기 | 모듈의 예외·timeout·panic을 직접 catch |
+| 재시작 단위 | **프로세스 전체** (콜드 스타트) | **모듈 task 하나** (in-process 재인스턴스화, 저비용) |
+| 회수 가능한 장애 | crash, freeze, 무응답 (강제 kill 가능) | **협조적**으로 취소 가능한 장애만 (예외·async timeout) |
+| 한계 | granularity 거침 — 무고한 모듈까지 같이 죽음 | **취소 불가 네이티브 hang은 회수 불가** (자신도 freeze) |
+
+**핵심 원리**: Supervisor는 자기 프로세스가 freeze되면 같이 freeze되므로 watchdog을 대체할 수 없다. Watchdog은 반드시 **다른 실행 컨텍스트(별도 proc 또는 OS 알람)**에 있어야 한다.
+
+### 4-1.2 후보별 감시 계층 배치
+
+#### 후보 A — Watchdog 1층 (단일층)
+
+```
+┌─ [Watchdog]  (별도 컨텍스트: FG-Service + AlarmManager + heartbeat 파일)
+│       │ 매 N초 heartbeat mtime 검사
+│       │ 무응답 시
+│       ↓
+│  ┌─ [App proc]  (IDS · Meta · Sub · Orch · Device 전부 한 곳)
+│  │   ← Process.killProcess(myPid())
+│  └─ ← START_STICKY로 OS가 재기동 → DP-A2 영속화로 세션 재개
+```
+
+- **감시 계층**: 1개 (외부 watchdog만)
+- **재시작 단위**: 프로세스 전체
+- **구현 부품**: `ForegroundService` + `START_STICKY` + `AlarmManager.setExactAndAllowWhileIdle` + heartbeat 파일
+
+#### 후보 B — Supervisor(in-process) + Watchdog(외부) 2층
+
+```
+┌─ [Watchdog]  (외부, A와 동일 구조)
+│       ↑ escalation (Supervisor도 회수 못 한 경우)
+│       │
+│  ┌─ [App proc]
+│  │    ┌─ [Supervisor]  (in-process, Kotlin Coroutines SupervisorJob 등)
+│  │    │      │ abort + restart (모듈 task 단위)
+│  │    │      ↓
+│  │    │  ┌─ IDS task ─┐
+│  │    │  ├─ Meta task ─┤  ← 예외/timeout → Supervisor가 그 task만 재생성
+│  │    │  ├─ Sub task  ─┤
+│  │    │  └─ Device task ┘
+│  │    └─ (조건부) Device 계층만 별도 proc로 분리 → kill 가능
+```
+
+- **감시 계층**: 2개 (in-process supervisor 1층 + 외부 watchdog 2층)
+- **재시작 단위**: 1층은 모듈 task, 2층은 프로세스
+- **escalation 규칙**: Supervisor가 N회 재시도 실패 또는 비협조적 장애 감지 → Watchdog으로 escalate → 프로세스 통째 재시작
+- **추가 부품 (A 대비)**: `SupervisorJob` + `withTimeout` + max-restart 정책
+
+#### 후보 C — B의 2층 + 분리 컴포넌트별 AIDL watchdog
+
+```
+┌─ [Watchdog]  (외부, A·B와 동일 구조)
+│       ↑ escalation (Supervisor도 회수 못 한 경우)
+│       │
+│  ┌─ [Main proc]
+│  │    ┌─ [Supervisor]  (in-process, B와 동일)
+│  │    │      │ abort + restart (모듈 task 단위)
+│  │    │      ├─ IDS · Meta · Sub · Orchestrator task ─┘
+│  │    │
+│  │    └─ [Per-isolate Watchdog]  (분리 컴포넌트별 AIDL ping)
+│  │         │ AIDL ping() 매 N초
+│  │         ├─→ [Model-Server proc]  (LLM 추론 전담)
+│  │         │       └─ 무응답 시 Main이 killProcess + bind 재시작
+│  │         └─→ [Accessibility Service proc]  (분리 가능 시)
+│  │                 └─ 무응답 시 Main이 unbind + 재시작
+```
+
+- **감시 계층**: 2개 (in-process Supervisor + 외부 watchdog) **+** 분리 컴포넌트별 in-process AIDL watchdog
+- **재시작 단위**: 일반 모듈은 task (B와 동일), 분리 컴포넌트는 그 proc만 kill+재기동
+- **SPOF 구조**: 전면 분리 C(이전 버전)의 *Manager 단일 SPOF*는 없음 — Main이 죽으면 외부 watchdog이 처리(B와 동일). 분리 컴포넌트는 Main의 자식으로 관리.
+- **추가 부품 (B 대비)**: 분리 컴포넌트당 **AIDL/Binder** 인터페이스(`ping()`·요청·응답) + `onServiceDisconnected` 콜백 + `bindService` 재바인딩 + Model-Server proc의 모델 로딩 라이프사이클 관리 (cold start vs 미리 로드) + restart storm 방지 정책. *분리 경계 K개에만 비례*.
+
+### 4-1.3 공통 동작 시퀀스 (장애 발생 → 복구)
+
+```
+1. 모듈/proc에서 hang·crash·예외 발생
+2. 감시 계층이 감지
+   - Supervisor(B): 모듈의 예외·timeout을 직접 catch
+   - Watchdog: heartbeat 미수신 N초 또는 AIDL ping 무응답
+3. 회수 시도 (granularity 작은 것부터)
+   - 1층: 모듈 task abort + 재인스턴스화 (B만 가능)
+   - 2층: 프로세스 강제 kill (Process.killProcess / SIGKILL)
+4. OS 재기동
+   - START_STICKY 플래그로 서비스 자동 재시작
+   - 또는 AlarmManager가 PendingIntent로 부활 트리거
+5. 재기동된 proc가 DP-A2(영속화)에서 세션 상태 로드 → 중단 지점부터 재개
+   ↑ QAS-008 복구율 95%를 실제로 결정하는 단계 (감시 계층은 여기까지 도달하는 길을 만들 뿐)
+```
+
+### 4-1.4 왜 이 절이 ★ 점수에 영향을 주는가
+
+- **A·B·C 모두 ★ 점수는 "감시 계층이 동작한다"는 전제 위에 있다.** 감시 계층 구현이 부실하면 모든 후보의 E3·E4·E5가 동시에 추락한다.
+- **C(선택적 분리)의 ★ 점수는 위 토폴로지(B의 2층 + 분리 컴포넌트별 AIDL watchdog)를 모두 포함한 값**이다. 분리 경계 K=2~3에 한정되므로 *전면 분리* 시나리오의 비용 폭증(Manager SPOF, 모든 모듈 IPC, restart storm 다발)은 발생하지 않는다.
+- 다이어그램([DP-fault-isolation-candidates.drawio](./DP-fault-isolation-candidates.drawio))의 하단 "감시 계층" 영역에 본 절의 토폴로지가 시각화되어 있다.
 
 ---
 
 ## 5. 결정을 가르는 미결 변수 (Open Questions)
 
-본 권고의 강도는 아래 값에 따라 달라진다. **확정 필요.**
+본 권고(C 선택적 분리)의 구체 형태는 아래 값에 따라 결정된다. **확정 필요.**
 
-1. **동시 세션 수**: 보통 1~2개인가, 더 많은가? → 1~2개면 B로 확정. 많고 격리가 필수면 C(세션별)를 재검토.
-2. **hang의 성격**: 모듈이 주로 (a) 취소 가능 지점(네트워크/추론/로직)에서 막히는가, (b) 취소 불가 네이티브 호출(Device 계층)에서 막히는가? → (b)가 잦으면 B의 **Device 계층 조건부 프로세스 격리**를 기본 포함으로 승격.
-3. **Accessibility Service의 별도 프로세스 분리 가능성**: 앱 바인딩 제약 하에서 Device 계층만 killable proc로 빼는 것이 기술적으로 가능한지 검증 필요.
+1. **Accessibility Service의 별도 프로세스 분리 가능성**: Android 프레임워크 제약 하에서 Accessibility Service를 메인 앱과 다른 OS proc에 띄우는 것이 기술적으로 가능한지 검증 필요. 불가하면 C의 분리 경계는 K=1(LLM 추론만)로 축소되고, Accessibility 영역은 A 수준의 통째 재시작으로 떨어진다.
+2. **Model-Server proc의 모델 로딩 정책**: cold start(요청 시 로드, 메모리 절약·지연↑) vs 항상 로드(메모리 소비·지연↓). 본 프로젝트의 QAS-002(≤180s)·QAS-014(Memory 300MB) 부등식에 맞춰 결정 필요.
+3. **분리 자격 추가 후보 검증**: LLM·Accessibility 외에 *취소 불가 native blocking* 자격이 있는 모듈이 더 있는가? (예: 외부 SDK·센서 통합 중 cooperative cancellation 미지원 사례 발견 시 분리 후보 추가)
+4. **동시 세션 수**: 본 프로젝트가 실제로 동시 N세션을 운영하는가, 보통 1~2세션인가? → 1~2개면 C로 충분. 많고 *세션 간* 격리가 추가로 필요하면 *세션별 분리*를 C 위에 얹는 추가 결정 필요(현재는 범위 밖).
+5. **hang의 성격 분포**: native blocking의 발생 빈도가 *드물면* A로 회귀해도 무방. C의 분리 비용을 정당화하려면 native blocking이 *실제로 발생*한다는 운영 데이터(또는 합리적 가정)가 필요.
 
 ---
 
@@ -141,19 +298,30 @@
 
 [DP-fault-isolation-candidates.drawio](./DP-fault-isolation-candidates.drawio) — A/B/C 3안을 "재시작 단위" 축으로 나란히 비교. (draw.io로 열어 편집 가능)
 
+> **갱신 예정**: 다이어그램은 이전 C(전면 분리) 기준으로 작성되어 있다. 본 문서의 *선택적 분리* C로 갱신 필요 — Main proc(supervision tree) + 분리 컴포넌트 K개(LLM·Accessibility) 토폴로지 반영.
+
 ---
 
 ## 7. 다음 단계
 
-- 5절 미결 변수(특히 동시 세션 수)를 확정 → 후보 B/C 중 택일.
+- 5절 미결 변수(특히 **Accessibility Service 분리 가능성**과 **Model-Server 모델 로딩 정책**)를 확정 → C의 구체 분리 경계 K 확정.
 - 확정 시 본 문서를 [08-DP_풀어야할문제.md](../08-DP_풀어야할문제.md)에 **정식 DP("장애 격리 전략")로 등록**할지 결정.
-- 격리(본 문서)와 짝을 이루는 **복구 설계(DP-A2: 영속화 — Event Sourcing / Snapshot / Hybrid)**를 후속 논의로 진행.
+- 격리(본 문서)와 짝을 이루는 **복구 설계(DP-A2: 영속화 — Event Sourcing / Snapshot / Hybrid)**를 후속 논의로 진행. 분리된 Model-Server proc의 *세션 상태 영속화 책임 분배*를 함께 다뤄야 함.
+- 다이어그램(6절) 갱신.
 
 ---
 
 ## 8. 근거 / 출처
 
 - 프로젝트 문서: [05-NFR.md](../05-NFR.md), [07-QAS.md](../07-QAS.md), [08-DP_풀어야할문제.md](../08-DP_풀어야할문제.md)
+- Android watchdog / 서비스 생존 패턴 (표준 watchdog 부재로 직접 조립 필요):
+  - `Service.START_STICKY` (서비스 강제 종료 시 OS 자동 재기동): https://developer.android.com/reference/android/app/Service#START_STICKY
+  - ForegroundService 수명/제약: https://developer.android.com/develop/background-work/services/foreground-services
+  - `AlarmManager.setExactAndAllowWhileIdle` (Doze 상태에서도 정시 발동): https://developer.android.com/reference/android/app/AlarmManager#setExactAndAllowWhileIdle(int,%20long,%20android.app.PendingIntent)
+  - `Process.killProcess(myPid())` (자기 자신 강제 종료): https://developer.android.com/reference/android/os/Process#killProcess(int)
+  - AIDL / Binder (proc 간 ping·수명 콜백 `onServiceDisconnected`): https://developer.android.com/develop/background-work/services/aidl
+  - Kotlin Coroutines `SupervisorJob` (in-process Supervisor 부품): https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-supervisor-job.html
+  - WorkManager `BackoffPolicy` (재시작 백오프): https://developer.android.com/reference/androidx/work/BackoffPolicy
 - Android 에이전트 제어 방식 (Accessibility + VLM, ZeroClaw식 격리/복구) — 외부 조사:
   - ZeroClaw-Android: https://github.com/Natfii/ZeroClaw-Android
   - ZeroClaw 공식: https://zeroclaw.net/
