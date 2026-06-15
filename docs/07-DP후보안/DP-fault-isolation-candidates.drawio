@@ -452,54 +452,51 @@
                 <mxCell id="nSep" value="" style="line;strokeWidth=3;strokeColor=#888888;dashed=1" vertex="1" parent="1">
                     <mxGeometry x="50" y="1500" width="1400" height="10" as="geometry"/>
                 </mxCell>
-                <mxCell id="nTitle" value="◆ 신규 (2026-06-15) — B vs C 2-안 비교 (본 버전 권고 구조)" style="text;html=1;align=center;verticalAlign=middle;fontSize=20;fontStyle=1;fontColor=#1f1f1f;fillColor=#fafafa;strokeColor=#888888" vertex="1" parent="1">
+                <mxCell id="nTitle" value="◆ 신규 (2026-06-16) — K=2 vs K=3 비교 (핵심 결정: MAF를 IDS에서 분리할 것인가)" style="text;html=1;align=center;verticalAlign=middle;fontSize=20;fontStyle=1;fontColor=#1f1f1f;fillColor=#fafafa;strokeColor=#888888" vertex="1" parent="1">
                     <mxGeometry x="50" y="1520" width="1400" height="40" as="geometry"/>
                 </mxCell>
                 <!-- ===== B Panel (Left) ===== -->
-                <mxCell id="nBTitle" value="B. 단일 프로세스 + 감독자 트리" style="text;html=1;align=center;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#0958d9" vertex="1" parent="1">
+                <mxCell id="nBTitle" value="B. 최소 분리 (K=2) — 자격 A만 분리" style="text;html=1;align=center;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#0958d9" vertex="1" parent="1">
                     <mxGeometry x="50" y="1580" width="650" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="nBFrame" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#0958d9;strokeWidth=2;dashed=1" vertex="1" parent="1">
                     <mxGeometry x="60" y="1620" width="630" height="760" as="geometry"/>
                 </mxCell>
-                <mxCell id="nBExt" value="외부 감시자 (Watchdog)&#10;ForegroundService + AlarmManager + 살아있음 파일 mtime 검사" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7e6;strokeColor=#d48806;strokeWidth=2;fontSize=11" vertex="1" parent="1">
+                <mxCell id="nBExt" value="외부 감시자 (Watchdog) — Main Process 생사 감시" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7e6;strokeColor=#d48806;strokeWidth=2;fontSize=11" vertex="1" parent="1">
                     <mxGeometry x="170" y="1645" width="410" height="55" as="geometry"/>
                 </mxCell>
-                <mxCell id="nBApp" value="App Process (단일 OS 프로세스)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6f4ff;strokeColor=#0958d9;strokeWidth=2;fontSize=13;fontStyle=1;verticalAlign=top;spacingTop=10" vertex="1" parent="1">
-                    <mxGeometry x="90" y="1740" width="570" height="380" as="geometry"/>
+                <mxCell id="nBMain" value="Main Process — IDS + MAF (같이 거주)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6f4ff;strokeColor=#0958d9;strokeWidth=2;fontSize=13;fontStyle=1;verticalAlign=top;spacingTop=10" vertex="1" parent="1">
+                    <mxGeometry x="90" y="1740" width="570" height="170" as="geometry"/>
                 </mxCell>
-                <mxCell id="nBSup" value="Supervisor (같은 프로세스 안 감독자) — 예외/시간 초과 catch → 그 task만 재생성" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bae0ff;strokeColor=#0958d9;strokeWidth=1.5;fontSize=11;fontStyle=1" vertex="1" parent="1">
-                    <mxGeometry x="120" y="1790" width="510" height="50" as="geometry"/>
+                <mxCell id="nBSup" value="Supervisor — IDS · Meta · Sub · Orchestrator task (모두 함수 호출로 통신)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bae0ff;strokeColor=#0958d9;strokeWidth=1.5;fontSize=11;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="120" y="1785" width="510" height="55" as="geometry"/>
                 </mxCell>
-                <mxCell id="nBT1" value="IDS task" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0958d9;fontSize=11" vertex="1" parent="1">
-                    <mxGeometry x="140" y="1870" width="150" height="45" as="geometry"/>
+                <mxCell id="nBPiw" value="Per-isolate Watchdog — LLM·Accessibility AIDL ping 감시 (자격 A 2개)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7e6;strokeColor=#d48806;fontSize=11;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="120" y="1850" width="510" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="nBT2" value="Meta task" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0958d9;fontSize=11" vertex="1" parent="1">
-                    <mxGeometry x="310" y="1870" width="150" height="45" as="geometry"/>
+                <mxCell id="nBMS" value="Model-Server 프로세스&#10;LLM 추론 전담&#10;(자격 A)&#10;✓ 멈춤 시 kill+재기동" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff0f6;strokeColor=#c41d7f;strokeWidth=2;fontSize=10;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="130" y="1970" width="260" height="110" as="geometry"/>
                 </mxCell>
-                <mxCell id="nBT3" value="Sub task" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0958d9;fontSize=11" vertex="1" parent="1">
-                    <mxGeometry x="480" y="1870" width="150" height="45" as="geometry"/>
+                <mxCell id="nBAcc2" value="Accessibility Service 프로세스&#10;Device 제어 (분리 가능 시)&#10;(자격 A)&#10;✓ 멈춤 시 unbind+재시작" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff0f6;strokeColor=#c41d7f;strokeWidth=2;fontSize=10;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="400" y="1970" width="260" height="110" as="geometry"/>
                 </mxCell>
-                <mxCell id="nBT4" value="Orchestrator task" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0958d9;fontSize=11" vertex="1" parent="1">
-                    <mxGeometry x="140" y="1935" width="320" height="45" as="geometry"/>
-                </mxCell>
-                <mxCell id="nBT5" value="Device task&#10;⚠ 취소 불가 → 통째 재시작" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff1f0;strokeColor=#cf1322;fontSize=10;fontStyle=2" vertex="1" parent="1">
-                    <mxGeometry x="480" y="1935" width="150" height="45" as="geometry"/>
-                </mxCell>
-                <mxCell id="nBLLM" value="LLM 추론 호출&#10;⚠ 취소 불가 → 통째 재시작" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff1f0;strokeColor=#cf1322;fontSize=10;fontStyle=2" vertex="1" parent="1">
-                    <mxGeometry x="140" y="2000" width="320" height="45" as="geometry"/>
-                </mxCell>
-                <mxCell id="nBAcc" value="Accessibility 호출&#10;⚠ 취소 불가" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff1f0;strokeColor=#cf1322;fontSize=10;fontStyle=2" vertex="1" parent="1">
-                    <mxGeometry x="480" y="2000" width="150" height="45" as="geometry"/>
-                </mxCell>
-                <mxCell id="nBArr" style="endArrow=classic;html=1;strokeColor=#d48806;strokeWidth=1.5;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" edge="1" parent="1" source="nBExt" target="nBApp">
+                <mxCell id="nBArrMS" value="AIDL ping" style="endArrow=classic;html=1;strokeColor=#d48806;strokeWidth=1.5;fontSize=9;fontColor=#d48806" edge="1" parent="1" source="nBPiw" target="nBMS">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="nBNote" value="• 재시작 단위: 모듈 task (같은 프로세스 안 재생성)&#10;• 분리 경계 K=0 — 자원·복잡도 부담 가장 작음&#10;• ⚠ 약점: 취소 불가 네이티브 멈춤(LLM·Accessibility)은 회수 불가 → 프로세스 통째 재시작으로 격상" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#999999;fontSize=11;align=left;spacing=10;verticalAlign=top" vertex="1" parent="1">
-                    <mxGeometry x="80" y="2200" width="590" height="160" as="geometry"/>
+                <mxCell id="nBArrAcc" value="AIDL ping" style="endArrow=classic;html=1;strokeColor=#d48806;strokeWidth=1.5;fontSize=9;fontColor=#d48806" edge="1" parent="1" source="nBPiw" target="nBAcc2">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="nBArr" style="endArrow=classic;html=1;strokeColor=#d48806;strokeWidth=1.5;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" edge="1" parent="1" source="nBExt" target="nBMain">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="nBLabel" value="(자격 A — 취소 불가 네이티브 멈춤: kill로 회수)" style="text;html=1;align=center;fontSize=10;fontStyle=2;fontColor=#c41d7f" vertex="1" parent="1">
+                    <mxGeometry x="130" y="2085" width="530" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="nBNote" value="• 재시작 단위: 메인 모듈은 task / 자격 A 분리 컴포넌트는 그 프로세스만 강제 종료&#10;• 분리 경계 K=2 (LLM, Accessibility) — IDS↔MAF는 함수 호출 (IPC 지연 없음, E2 유리)&#10;• ⚠ 약점: MAF idle 시 메모리가 같은 프로세스에 누적 (E1), MAF crash 시 IDS perception 손실 (E4)&#10;• 데몬형(IDS)과 태스크형(MAF)이 한 컨테이너에 묶임 — Chrome·Android·Erlang 표준과 어긋남" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#999999;fontSize=11;align=left;spacing=10;verticalAlign=top" vertex="1" parent="1">
+                    <mxGeometry x="80" y="2125" width="590" height="180" as="geometry"/>
                 </mxCell>
                 <!-- ===== C Panel (Right) ===== -->
-                <mxCell id="nCTitle" value="C. 메인 프로세스 + 선택적 분리　★ 권장" style="text;html=1;align=center;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#389e0d" vertex="1" parent="1">
+                <mxCell id="nCTitle" value="C. 확장 분리 (K=3) — B + MAF 추가　★ 권장" style="text;html=1;align=center;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#389e0d" vertex="1" parent="1">
                     <mxGeometry x="800" y="1580" width="650" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="nCFrame" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#389e0d;strokeWidth=2;dashed=1" vertex="1" parent="1">
