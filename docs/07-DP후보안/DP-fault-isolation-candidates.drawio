@@ -508,41 +508,50 @@
                 <mxCell id="nCExt" value="외부 감시자 (Watchdog) — Main Process 생사 감시" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7e6;strokeColor=#d48806;strokeWidth=2;fontSize=11" vertex="1" parent="1">
                     <mxGeometry x="920" y="1645" width="410" height="55" as="geometry"/>
                 </mxCell>
-                <mxCell id="nCMain" value="Main Process (감독자 트리)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f6ffed;strokeColor=#389e0d;strokeWidth=2;fontSize=13;fontStyle=1;verticalAlign=top;spacingTop=10" vertex="1" parent="1">
-                    <mxGeometry x="840" y="1740" width="570" height="200" as="geometry"/>
+                <mxCell id="nCMain" value="Main Process — IDS (상시 데몬)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f6ffed;strokeColor=#389e0d;strokeWidth=2;fontSize=13;fontStyle=1;verticalAlign=top;spacingTop=10" vertex="1" parent="1">
+                    <mxGeometry x="840" y="1740" width="570" height="150" as="geometry"/>
                 </mxCell>
-                <mxCell id="nCSup" value="Supervisor — IDS · Meta · Sub · Orchestrator task" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d9f7be;strokeColor=#389e0d;fontSize=11;fontStyle=1" vertex="1" parent="1">
-                    <mxGeometry x="870" y="1785" width="510" height="60" as="geometry"/>
+                <mxCell id="nCSup" value="Supervisor — IDS task (perception 누적·사용자 요청 대기)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d9f7be;strokeColor=#389e0d;fontSize=11;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="870" y="1785" width="510" height="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="nCPiw" value="Per-isolate Watchdog — 분리된 컴포넌트 AIDL ping 감시" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7e6;strokeColor=#d48806;fontSize=11;fontStyle=1" vertex="1" parent="1">
-                    <mxGeometry x="870" y="1860" width="510" height="60" as="geometry"/>
+                <mxCell id="nCPiw" value="Per-isolate Watchdog — MAF·Model-Server·Accessibility AIDL ping 감시" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7e6;strokeColor=#d48806;fontSize=11;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="870" y="1835" width="510" height="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="nCMS" value="Model-Server 프로세스&#10;(LLM 추론 전담)&#10;✓ 멈춤 시 kill + 재기동" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff0f6;strokeColor=#c41d7f;strokeWidth=2;fontSize=11;fontStyle=1" vertex="1" parent="1">
-                    <mxGeometry x="840" y="1990" width="270" height="95" as="geometry"/>
+                <mxCell id="nCMAF" value="MAF 프로세스&#10;Meta·Sub·Orchestrator&#10;(태스크형, 자격 B)&#10;✓ idle 시 OS가 메모리 회수" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6fffb;strokeColor=#08979c;strokeWidth=2;fontSize=10;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="820" y="1940" width="195" height="110" as="geometry"/>
                 </mxCell>
-                <mxCell id="nCAS" value="Accessibility Service 프로세스&#10;(분리 가능 시)&#10;✓ 멈춤 시 unbind + 재시작" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff0f6;strokeColor=#c41d7f;strokeWidth=2;fontSize=11;fontStyle=1" vertex="1" parent="1">
-                    <mxGeometry x="1140" y="1990" width="270" height="95" as="geometry"/>
+                <mxCell id="nCMS" value="Model-Server 프로세스&#10;LLM 추론 전담&#10;(자격 A)&#10;✓ 멈춤 시 kill+재기동" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff0f6;strokeColor=#c41d7f;strokeWidth=2;fontSize=10;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="1025" y="1940" width="195" height="110" as="geometry"/>
                 </mxCell>
-                <mxCell id="nCArrMS" value="AIDL ping" style="endArrow=classic;html=1;strokeColor=#d48806;strokeWidth=1.5;fontSize=10;fontColor=#d48806" edge="1" parent="1" source="nCPiw" target="nCMS">
+                <mxCell id="nCAS" value="Accessibility Service 프로세스&#10;Device 제어 (분리 가능 시)&#10;(자격 A)&#10;✓ 멈춤 시 unbind+재시작" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff0f6;strokeColor=#c41d7f;strokeWidth=2;fontSize=10;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="1230" y="1940" width="200" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="nCArrMAF" value="AIDL ping&#10;+ bind/unbind" style="endArrow=classic;html=1;strokeColor=#d48806;strokeWidth=1.5;fontSize=9;fontColor=#d48806" edge="1" parent="1" source="nCPiw" target="nCMAF">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="nCArrAS" value="AIDL ping" style="endArrow=classic;html=1;strokeColor=#d48806;strokeWidth=1.5;fontSize=10;fontColor=#d48806" edge="1" parent="1" source="nCPiw" target="nCAS">
+                <mxCell id="nCArrMS" value="AIDL ping" style="endArrow=classic;html=1;strokeColor=#d48806;strokeWidth=1.5;fontSize=9;fontColor=#d48806" edge="1" parent="1" source="nCPiw" target="nCMS">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="nCArrAS" value="AIDL ping" style="endArrow=classic;html=1;strokeColor=#d48806;strokeWidth=1.5;fontSize=9;fontColor=#d48806" edge="1" parent="1" source="nCPiw" target="nCAS">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="nCArrIDSMAF" value="intent → MAF 시작&#10;context 질의" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#389e0d;strokeWidth=1.2;dashed=1;fontSize=9;fontColor=#389e0d" edge="1" parent="1" source="nCSup" target="nCMAF">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="nCArrW" style="endArrow=classic;html=1;strokeColor=#d48806;strokeWidth=1.5;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" edge="1" parent="1" source="nCExt" target="nCMain">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="nCLabel1" value="(B와 동일: 일반 모듈은 같은 프로세스 안 감독)" style="text;html=1;align=center;fontSize=10;fontStyle=2;fontColor=#389e0d" vertex="1" parent="1">
-                    <mxGeometry x="840" y="1950" width="570" height="20" as="geometry"/>
+                <mxCell id="nCLabel1" value="(자격 B — 생애주기 비대칭: 상시 IDS와 태스크형 MAF 분리)" style="text;html=1;align=center;fontSize=10;fontStyle=2;fontColor=#08979c" vertex="1" parent="1">
+                    <mxGeometry x="820" y="2055" width="195" height="20" as="geometry"/>
                 </mxCell>
-                <mxCell id="nCLabel2" value="(C가 추가: 취소 불가 네이티브 멈춤 컴포넌트만 별도 OS 프로세스로 분리)" style="text;html=1;align=center;fontSize=10;fontStyle=2;fontColor=#c41d7f" vertex="1" parent="1">
-                    <mxGeometry x="840" y="2095" width="570" height="20" as="geometry"/>
+                <mxCell id="nCLabel2" value="(자격 A — 취소 불가 네이티브 멈춤: kill로 회수)" style="text;html=1;align=center;fontSize=10;fontStyle=2;fontColor=#c41d7f" vertex="1" parent="1">
+                    <mxGeometry x="1025" y="2055" width="405" height="20" as="geometry"/>
                 </mxCell>
-                <mxCell id="nCNote" value="• 재시작 단위: 일반 모듈은 task / 분리 컴포넌트는 그 프로세스만 강제 종료&#10;• 분리 경계 K=2 — 비용은 경계 수에만 비례 (전면 분리 대비 압도적으로 작음)&#10;• ✓ 강점: 취소 불가 네이티브 멈춤도 강제 종료로 회수 가능&#10;• 패턴: Chrome 사이트 격리·Android 시스템 서비스(mediaserver 등)·Erlang OTP NIF 분리" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#999999;fontSize=11;align=left;spacing=10;verticalAlign=top" vertex="1" parent="1">
-                    <mxGeometry x="830" y="2200" width="600" height="160" as="geometry"/>
+                <mxCell id="nCNote" value="• 재시작 단위: IDS는 task / 분리 컴포넌트는 그 프로세스만 강제 종료&#10;• 분리 경계 K=3 (MAF, Model-Server, Accessibility) — 비용은 경계 수에만 비례&#10;• ✓ 강점 A: 취소 불가 네이티브 멈춤(LLM·Accessibility)도 강제 종료로 회수 가능&#10;• ✓ 강점 B: MAF idle 시 메모리 결정론적 회수, IDS의 perception 상태 보존&#10;• 패턴: Chrome(network proc 상시 vs renderer 태스크형) · Android(system_server vs 앱 proc) · Erlang OTP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#999999;fontSize=11;align=left;spacing=10;verticalAlign=top" vertex="1" parent="1">
+                    <mxGeometry x="830" y="2110" width="600" height="180" as="geometry"/>
                 </mxCell>
                 <!-- ===== Bottom legend ===== -->
-                <mxCell id="nLeg" value="범례 — 점선 화살표: 감시(ping/heartbeat) · 빨강 박스: 취소 불가 네이티브 멈춤 위험 영역 · 분홍 박스: 별도 OS 프로세스로 분리된 컴포넌트" style="text;html=1;align=center;fontSize=10;fontStyle=2;fontColor=#595959" vertex="1" parent="1">
+                <mxCell id="nLeg" value="범례 — 점선 화살표: 감시(ping/heartbeat) · 빨강 박스(B): 취소 불가 네이티브 멈춤 위험 영역 · 분홍 박스(C): 자격 A로 분리된 OS 프로세스 · 청록 박스(C): 자격 B(생애주기 비대칭)로 분리된 OS 프로세스" style="text;html=1;align=center;fontSize=10;fontStyle=2;fontColor=#595959" vertex="1" parent="1">
                     <mxGeometry x="50" y="2400" width="1400" height="30" as="geometry"/>
                 </mxCell>
             </root>
