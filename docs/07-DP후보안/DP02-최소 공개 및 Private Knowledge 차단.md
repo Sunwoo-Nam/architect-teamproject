@@ -6,7 +6,7 @@
 
 최신 FR은 MAF가 사용자 에이전트 간 상호작용을 `Communication`으로 묶고, 그 하위에 Negotiation, Collaboration, Knowledge Sharing, Remote Monitoring을 둔다. 이 중 Knowledge Sharing은 `Shared/Public Knowledge`와 `Private Knowledge`를 구분하고, 외부 에이전트 요청 시 자동 필터링 및 익명화가 가능해야 한다.
 
-동시에 QAS-013은 **Private Knowledge 외부 전송 0건**을 요구한다. 따라서 이 DP의 핵심 질문은 다음이다.
+동시에 QAS-012은 **Private Knowledge 외부 전송 0건**을 요구한다. 따라서 이 DP의 핵심 질문은 다음이다.
 
 > 상대 에이전트가 판단에 필요한 정보를 요구할 때, 우리 MAF는 **공개 가능한 추상 사실을 payload로 보낼 것인가**, 아니면 **Private Knowledge는 끝까지 로컬에 두고 평가 결과만 보낼 것인가?**
 
@@ -18,18 +18,18 @@
 
 | 난제 | 내용 | 관련 FR/NFR/QAS |
 |---|---|---|
-| **Private Knowledge 0건 전송** | Private Knowledge가 외부 payload에 한 번이라도 포함되면 보안 요구를 위반한다. | FR-MAF-05, NFR-MAF-07, QAS-013 |
-| **유용성 vs 최소 공개** | 너무 적게 공개하면 협상·협업·지식 공유가 성립하지 않고, 너무 많이 공개하면 개인정보 노출 위험이 커진다. | FR-MAF-02~06, QAS-002, QAS-007 |
-| **추론 공격** | raw data가 아니어도 `score`, `severity`, `available_window` 같은 결과가 반복되면 생활 패턴이 역추론될 수 있다. | FR-MAF-05, QAS-013 |
-| **이력 추적** | 사용자는 무엇이 외부로 나갔고 무엇이 로컬 평가에만 쓰였는지 조회할 수 있어야 한다. | FR-MAF-07, NFR-MAF-08, QAS-015 |
-| **케이스별 공개 수준 차이** | Negotiation, Collaboration, Knowledge Sharing, Remote Monitoring은 필요한 정보량과 시간 제약이 다르다. | FR-MAF 공통 및 4대 케이스, QAS-002~003 |
+| **Private Knowledge 0건 전송** | Private Knowledge가 외부 payload에 한 번이라도 포함되면 보안 요구를 위반한다. | FR-MAF-05, NFR-MAF-07, QAS-012 |
+| **유용성 vs 최소 공개** | 너무 적게 공개하면 협상·협업·지식 공유가 성립하지 않고, 너무 많이 공개하면 개인정보 노출 위험이 커진다. | FR-MAF-02~06, QAS-009, QAS-007 |
+| **추론 공격** | raw data가 아니어도 `score`, `severity`, `available_window` 같은 결과가 반복되면 생활 패턴이 역추론될 수 있다. | FR-MAF-05, QAS-012 |
+| **이력 추적** | 사용자는 무엇이 외부로 나갔고 무엇이 로컬 평가에만 쓰였는지 조회할 수 있어야 한다. | FR-MAF-07, NFR-MAF-08, QAS-013 |
+| **케이스별 공개 수준 차이** | Negotiation, Collaboration, Knowledge Sharing, Remote Monitoring은 필요한 정보량과 시간 제약이 다르다. | FR-MAF 공통 및 4대 케이스, QAS-009 |
 
 두 방안 모두 다음 전제를 공유한다.
 
 1. TLS 1.3 이상 암호화는 공통 필수 조건이며, 본 DP의 비교 대상이 아니다.
 2. 데이터는 정책에 따라 `Public / Shared / Private`으로 분류될 수 있어야 한다.
 3. 상대 기기도 동일 MAF를 탑재하므로 메시지 스키마와 상태 전이 규칙을 양측에 강제할 수 있다.
-4. 공개, 차단, 평가, 전송 이벤트는 QAS-015를 위해 로그로 남긴다.
+4. 공개, 차단, 평가, 전송 이벤트는 QAS-013를 위해 로그로 남긴다.
 
 ---
 
@@ -86,7 +86,7 @@
 
 ### 장점
 
-- Private Knowledge가 외부 payload로 직렬화되지 않아 QAS-013을 구조적으로 만족시키기 쉽다.
+- Private Knowledge가 외부 payload로 직렬화되지 않아 QAS-012을 구조적으로 만족시키기 쉽다.
 - 정보 집중 위험이 작고, DP01의 중앙형/탈중앙형 어느 토폴로지에도 붙일 수 있다.
 - Remote Monitoring처럼 `알림 여부`, `심각도`만 필요한 케이스에 잘 맞는다.
 
@@ -104,8 +104,8 @@
 
 | QAS / NFR | A. Sanitized Fact Disclosure | B. Predicate-based Private Evaluation | 판단 |
 |---|:---:|:---:|---|
-| QAS-013 개인정보 보안 | ★★☆ | ★★★ | A는 공개 스키마와 sanitizer 정확성에 의존한다. B는 Private Knowledge를 외부 payload로 만들지 않는다. |
-| QAS-002 Communication 180초 | ★★★ | ★★☆ | A는 round 수를 줄이기 쉽다. B는 후보 질의 반복으로 시간이 늘 수 있다. |
-| QAS-014 온디바이스 자원 | ★★☆ | ★★☆ | A는 분류·익명화 비용, B는 로컬 평가·query budget 비용이 든다. |
+| QAS-012 개인정보 보안 | ★★☆ | ★★★ | A는 공개 스키마와 sanitizer 정확성에 의존한다. B는 Private Knowledge를 외부 payload로 만들지 않는다. |
+| QAS-009 Communication 180초 | ★★★ | ★★☆ | A는 round 수를 줄이기 쉽다. B는 후보 질의 반복으로 시간이 늘 수 있다. |
+| QAS-011 온디바이스 자원 | ★★☆ | ★★☆ | A는 분류·익명화 비용, B는 로컬 평가·query budget 비용이 든다. |
 
-**핵심 긴장:** A는 Communication 시간에 유리하지만 공개 스키마가 틀리면 과공개 위험이 커진다. B는 QAS-013에 가장 강하지만 후보 질의 반복으로 Communication 시간이 늘 수 있다. 따라서 이 DP의 실제 선택은 **QAS-013의 보안 보장을 더 우선할 것인가**, 아니면 **QAS-002의 Communication 시간을 더 우선할 것인가**의 문제로 좁혀진다.
+**핵심 긴장:** A는 Communication 시간에 유리하지만 공개 스키마가 틀리면 과공개 위험이 커진다. B는 QAS-012에 가장 강하지만 후보 질의 반복으로 Communication 시간이 늘 수 있다. 따라서 이 DP의 실제 선택은 **QAS-012의 보안 보장을 더 우선할 것인가**, 아니면 **QAS-009의 Communication 시간을 더 우선할 것인가**의 문제로 좁혀진다.
