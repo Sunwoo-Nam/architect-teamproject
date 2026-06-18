@@ -1,0 +1,94 @@
+<mxfile host="65bd71144e">
+    <diagram name="MAF-LLM-Placement-Candidates" id="dp-maf-llm-placement">
+        <mxGraphModel dx="1000" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="800" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="legend" value="컴포넌트 = 온디바이스 LLM 추론 엔진(NPU 구동, QAS-011 Artifact)　｜　모델 = 엔진이 로드하는 자산　｜　제약(P2): MAF용 추론 엔진의 상주 모델 ≤ 1　｜　IDS 전용 엔진은 별도 상주(본 DP 범위 밖)" style="text;html=1;align=center;verticalAlign=middle;fontSize=12;fontStyle=2;fillColor=#fafafa;strokeColor=#d9d9d9" parent="1" vertex="1">
+                    <mxGeometry x="30" y="8" width="1410" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="titleA" value="후보 A — 추론 유형별 전용 모델 온디맨드 swap" style="text;html=1;align=center;verticalAlign=middle;fontSize=15;fontStyle=1;fontColor=#d46b08" parent="1" vertex="1">
+                    <mxGeometry x="30" y="44" width="680" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="titleB" value="후보 B — 단일 범용 모델 상주" style="text;html=1;align=center;verticalAlign=middle;fontSize=15;fontStyle=1;fontColor=#0958d9" parent="1" vertex="1">
+                    <mxGeometry x="760" y="44" width="680" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="frameA" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#d46b08;dashed=1;strokeWidth=2" parent="1" vertex="1">
+                    <mxGeometry x="30" y="78" width="680" height="666" as="geometry"/>
+                </mxCell>
+                <mxCell id="frameB" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#0958d9;dashed=1;strokeWidth=2" parent="1" vertex="1">
+                    <mxGeometry x="760" y="78" width="680" height="666" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_ids" value="&lt;i style=&quot;font-size:9px;&quot;&gt;«Container: 추론 엔진»&lt;/i&gt;　&lt;b&gt;IDS 전용 온디바이스 LLM 추론 엔진&lt;/b&gt;　·　상주　·　&lt;b&gt;본 DP 범위 밖&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#8c8c8c;dashed=1;fontSize=11;fontColor=#595959;verticalAlign=middle;align=center" parent="1" vertex="1">
+                    <mxGeometry x="55" y="96" width="630" height="52" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_ma" value="&lt;i style=&quot;font-size:9px;&quot;&gt;«Agent»&lt;/i&gt;&#10;&lt;b&gt;Meta Agent&lt;/b&gt;&#10;협상 · 지식판정 · 원격이상 · 요약" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
+                    <mxGeometry x="55" y="160" width="300" height="56" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_sa" value="&lt;i style=&quot;font-size:9px;&quot;&gt;«Agent»&lt;/i&gt;&#10;&lt;b&gt;Sub-Agent&lt;/b&gt;&#10;툴 호출 · 협업 (독립 추론, 동적 생성)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
+                    <mxGeometry x="385" y="160" width="300" height="56" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_engine" value="&lt;i style=&quot;font-size:10px;&quot;&gt;«Container: 추론 엔진»&lt;/i&gt;&#10;&lt;b&gt;MAF용 온디바이스 LLM 추론 엔진 (NPU)&lt;/b&gt;&#10;상주 모델 ≤ 1　·　현재 적재: 협상 모델" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff7e6;strokeColor=#d46b08;strokeWidth=3;fontSize=12;verticalAlign=middle;align=center" parent="1" vertex="1">
+                    <mxGeometry x="55" y="256" width="630" height="92" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_store" value="&lt;b&gt;모델 저장소 (디스크)&lt;/b&gt; — 추론 유형별 전용 모델 (자산)" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#f0f5ff;strokeColor=#597ef7;fontSize=12;verticalAlign=top;align=center;boundedLbl=1;backgroundOutline=1;size=12;spacingTop=4" parent="1" vertex="1">
+                    <mxGeometry x="55" y="440" width="630" height="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_m1" value="협상 모델&#10;&lt;b&gt;(현재 로드됨)&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffd591;strokeColor=#d46b08;strokeWidth=2;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
+                    <mxGeometry x="85" y="492" width="180" height="84" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_m2" value="툴 호출 모델" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d46b08;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
+                    <mxGeometry x="285" y="492" width="170" height="84" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_m3" value="판정 모델 (선택)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d46b08;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
+                    <mxGeometry x="475" y="492" width="180" height="84" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_swap" value="추론 유형 전환 시  언로드 → 로드 (reload)" style="endArrow=classic;startArrow=classic;html=1;dashed=1;strokeColor=#d46b08;strokeWidth=2;fontSize=11;fontColor=#d46b08;fontStyle=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" parent="1" source="a_engine" target="a_store" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_ma_engine" value="추론 요청" style="endArrow=classic;html=1;strokeColor=#d46b08;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.3;entryY=0;entryDx=0;entryDy=0" parent="1" source="a_ma" target="a_engine" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_sa_engine" value="추론 요청" style="endArrow=classic;html=1;strokeColor=#d46b08;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.7;entryY=0;entryDx=0;entryDy=0" parent="1" source="a_sa" target="a_engine" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_note" value="• 경량 추론 유형엔 작은 모델 → 평균 메모리·에너지 ↓ (M2 ★★★)&#10;• 추론 유형별 적합 모델 → 품질 ↑ (M3 ★★★)&#10;• 전환마다 reload → 협상 중 thrash (M4 ★)&#10;　단, 백그라운드·비동기라 &lt;b&gt;지연 부담은 작음&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;spacingLeft=8;fillColor=#fffbe6;strokeColor=#ffe58f" parent="1" vertex="1">
+                    <mxGeometry x="55" y="620" width="630" height="92" as="geometry"/>
+                </mxCell>
+                <mxCell id="b_ids" value="&lt;i style=&quot;font-size:9px;&quot;&gt;«Container: 추론 엔진»&lt;/i&gt;　&lt;b&gt;IDS 전용 온디바이스 LLM 추론 엔진&lt;/b&gt;　·　상주　·　&lt;b&gt;본 DP 범위 밖&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#8c8c8c;dashed=1;fontSize=11;fontColor=#595959;verticalAlign=middle;align=center" parent="1" vertex="1">
+                    <mxGeometry x="785" y="96" width="630" height="52" as="geometry"/>
+                </mxCell>
+                <mxCell id="b_ma" value="&lt;i style=&quot;font-size:9px;&quot;&gt;«Agent»&lt;/i&gt;&#10;&lt;b&gt;Meta Agent&lt;/b&gt;&#10;협상 · 지식판정 · 원격이상 · 요약" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
+                    <mxGeometry x="785" y="160" width="300" height="56" as="geometry"/>
+                </mxCell>
+                <mxCell id="b_sa" value="&lt;i style=&quot;font-size:9px;&quot;&gt;«Agent»&lt;/i&gt;&#10;&lt;b&gt;Sub-Agent&lt;/b&gt;&#10;툴 호출 · 협업 (독립 추론, 동적 생성)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;fontSize=11;verticalAlign=middle;align=center" parent="1" vertex="1">
+                    <mxGeometry x="1115" y="160" width="300" height="56" as="geometry"/>
+                </mxCell>
+                <mxCell id="b_engine" value="&lt;i style=&quot;font-size:10px;&quot;&gt;«Container: 추론 엔진»&lt;/i&gt;&#10;&lt;b&gt;MAF용 온디바이스 LLM 추론 엔진 (NPU)&lt;/b&gt;&#10;상주 모델 ≤ 1　·　현재 적재: 범용 모델 (고정)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6f4ff;strokeColor=#0958d9;strokeWidth=3;fontSize=12;verticalAlign=middle;align=center" parent="1" vertex="1">
+                    <mxGeometry x="785" y="256" width="630" height="92" as="geometry"/>
+                </mxCell>
+                <mxCell id="b_model" value="&lt;b&gt;범용 모델&lt;/b&gt;&#10;(상주 · 교체 없음)&#10;협상·툴호출·판정 모두 처리" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#bae0ff;strokeColor=#0958d9;strokeWidth=2;fontSize=12;verticalAlign=middle;align=center" parent="1" vertex="1">
+                    <mxGeometry x="940" y="440" width="320" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="b_load" value="적재 1회 · 고정 상주 (교체 없음)" style="endArrow=classic;html=1;strokeColor=#0958d9;strokeWidth=2;fontSize=11;fontColor=#0958d9;fontStyle=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" parent="1" source="b_engine" target="b_model" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="b_ma_engine" value="추론 요청 (프롬프트만 다름)" style="endArrow=classic;html=1;strokeColor=#0958d9;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.3;entryY=0;entryDx=0;entryDy=0" parent="1" source="b_ma" target="b_engine" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="b_sa_engine" value="추론 요청 (프롬프트만 다름)" style="endArrow=classic;html=1;strokeColor=#0958d9;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.7;entryY=0;entryDx=0;entryDy=0" parent="1" source="b_sa" target="b_engine" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="b_noswap" value="모델 저장소·swap 없음 — 세션 내 모델 교체 0 (시분할)" style="text;html=1;align=center;verticalAlign=middle;fontSize=12;fontStyle=2;fontColor=#0958d9" parent="1" vertex="1">
+                    <mxGeometry x="785" y="556" width="630" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="b_note" value="• 전환 시 재로딩 0 (시분할) → M4 ★★★&#10;• 모델 1개 → 가장 단순 (M5 ★★★), 동적 SA 자연 흡수&#10;• 범용 1개가 협상까지 → &lt;b&gt;협상 품질 리스크&lt;/b&gt; (M3 ★★)&#10;• 항상 범용 大 모델 상주 → 평균 메모리·에너지 ↑ (M2 ★★)" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;spacingLeft=8;fillColor=#e6f4ff;strokeColor=#91caff" parent="1" vertex="1">
+                    <mxGeometry x="785" y="592" width="630" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="footnote" value="공통 컴포넌트 = &lt;b&gt;MAF용 온디바이스 LLM 추론 엔진&lt;/b&gt; (Ollama·llama.cpp·MLC 등으로 구현). 차이는 그 엔진이 모델을 &lt;b&gt;교체하며 쓰나(A)&lt;/b&gt; vs &lt;b&gt;범용 1개를 고정 상주하나(B)&lt;/b&gt;. 피크 메모리는 동일(IDS 1 + MAF 1)." style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontStyle=2;fontColor=#595959;fillColor=#fafafa;strokeColor=#d9d9d9" parent="1" vertex="1">
+                    <mxGeometry x="30" y="756" width="1410" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
