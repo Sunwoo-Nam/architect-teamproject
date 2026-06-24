@@ -1,8 +1,8 @@
 # AGENTS.md — DP02 민감정보 처리 구조 PoC
 
 이 디렉토리(`poc/dp02-privacy/`)에서 작업하는 에이전트는 본 지침을 우선 따른다.
-상위 `CLAUDE.md` 원칙(사전 동의·근거 기반·비판적 사고·한국어)을 그대로 상속하되,
-**예외: 이 디렉토리 내 다이어그램은 mermaid로 그려도 된다**(상위 6항 drawio 규칙 미적용).
+상위 `CLAUDE.md` 원칙(사전 동의·근거 기반·비판적 사고·한국어)을 그대로 상속한다.
+도식은 상위 6항대로 **`.drawio`** 로 작성한다(터미널 뷰어에서 mermaid가 렌더되지 않음).
 
 ## 1. 목적
 
@@ -56,42 +56,9 @@
 **LLM-cp의 일 (집 밖)**
 4. (매 라운드) **상대역**: 우리 메시지를 받아 답·캐묻기 생성. 우리가 여기로 보내는 모든 텍스트가 **유일한 유출 측정 지점**.
 
-### 라운드 흐름 — 방안 1 (출구 제거)
+### 라운드 흐름 도식
 
-```mermaid
-sequenceDiagram
-  participant RAW as 원본(로컬)
-  participant ON as LLM-on (온디바이스·신뢰)
-  participant GATE as EgressGate(필터, 불완전)
-  participant CP as LLM-cp (외부 상대)
-  Note over RAW,ON: 세션 시작 — 분류만, 변환 없음
-  loop 라운드 N
-    CP-->>ON: 상대 메시지/캐묻기
-    RAW->>ON: 원본 제공(정확 시간·예산·기기맥락)
-    ON->>ON: 판단+작성 (원본 그대로 사용)
-    ON->>GATE: 초안 (원본 섞일 수 있음)
-    GATE->>CP: 필터 통과분  ※누설 = 필터가 놓친 원본 조각
-  end
-```
+두 방안의 라운드 흐름은 [DP02-PoC-라운드흐름.drawio](./DP02-PoC-라운드흐름.drawio)에 있다(2개 페이지 — `방안1 출구제거`, `방안2 사전변환`). draw.io에서 열어 확인·수정한다.
 
-### 라운드 흐름 — 방안 2 (사전 변환)
-
-```mermaid
-sequenceDiagram
-  participant RAW as 원본(로컬)
-  participant PM as PrivacyMediator(+LLM-on)
-  participant V as PrivacyVault
-  participant ON as LLM-on (협상 추론)
-  participant GATE as EgressGate(검증)
-  participant CP as LLM-cp (외부 상대)
-  Note over RAW,V: 세션 시작 1회 — 변환 후 원본 폐기
-  RAW->>PM: 원본
-  PM->>V: PII 토큰 매핑 저장
-  PM->>ON: SafeScope(토큰·coarse 사실) — 원본은 폐기
-  loop 라운드 N
-    CP-->>ON: 상대 메시지/캐묻기
-    ON->>ON: 판단+작성 (안전형만 사용)
-    ON->>GATE: 메시지 (원본 없음)
-    GATE->>CP: 통과  ※거를 원본 자체가 경로에 없음
-  end
-```
+- **방안 1:** 매 라운드 LLM-on이 **원본 그대로** 판단·작성 → EgressGate(불완전 필터)가 출구에서 거름. 누설 = 필터가 놓친 원본 조각.
+- **방안 2:** 세션 시작 1회 변환 후 원본 폐기 → LLM-on은 **안전형만** 사용 → 거를 원본이 경로에 없음.
