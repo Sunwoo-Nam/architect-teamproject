@@ -43,6 +43,8 @@
 
 엔드포인트는 둘. 둘 다 물리적으로는 로컬 Ollama 프로세스지만, 모델링 상 위치가 다르다 — **단말 안**(원본이 머물러도 되는 쪽)과 **단말 밖**(원본이 나가면 곧 유출인 쪽).
 
+단말 안의 입력 출처는 둘이다 — **IDS 구조화 커맨드**(인텐트·제약·위임 범위)와 **Sub-Agent tool calling 결과**(개인정보 값). v0에서 tool은 로컬·신뢰(개인정보를 가져오기만)로 한정한다.
+
 | 엔드포인트 | 모델 | 위치 | 원본 접근 |
 |---|---|---|---|
 | **LLM-on** | Qwen3.5-4B | 단말 안(우리 에이전트 두뇌) | 방안1: O / 방안2: X |
@@ -50,48 +52,54 @@
 
 **LLM-on의 일 (단말 안)**
 1. (세션 시작·realistic 모드) **분류**: 원본 → (a)/(b)/(c). perfect 모드면 정답지 주입·생략.
-2. (세션 시작·**방안 2 한정**) **변환**: 원본 → 안전형(PII 토큰화, 기기맥락→사실값, 권한범위로 정밀도 저하). 방안 1엔 없음.
+2. (**방안 2 한정**) **변환 (transform-at-ingress)**: tool 결과가 들어올 때마다 원본 → 안전형(PII 토큰화, 기기맥락→사실값, 권한범위로 정밀도 저하)으로 바꿔 추론 컨텍스트에 넣는다. 방안 1엔 없음.
 3. (매 라운드·공통) **협상 추론**: 상대 메시지 읽고 수용/역제안 판단 + 나갈 메시지 작성.
 
 **LLM-cp의 일 (단말 밖)**
-4. (매 라운드) **상대역**: 우리 메시지를 받아 답·캐묻기 생성. 우리가 여기로 보내는 모든 텍스트가 **유일한 유출 측정 지점**.
+4. (매 라운드) **상대역**: 우리 메시지를 받아 답·캐묻기 생성. 우리가 여기로 보내는 메시지가 **유일한 유출 측정 지점**.
+
+**출구 범위 (v0):** 단말 밖으로 나가는 것은 상대행 A2A 메시지(㉡) 하나뿐이며 **구조화 필드만** 쓴다(자유 텍스트 없음 — 정보 공개 모드 공통 전제). 외부 LLM 호출(㉠)과 외부 tool 호출은 v2로 미룬다.
 
 ### 라운드 흐름 — 방안 1 (출구 제거)
 
 ```mermaid
 sequenceDiagram
-  participant RAW as 원본(단말 안)
+  participant TOOL as Sub-Agent tool (로컬·신뢰)
   participant ON as LLM-on (단말 안)
-  participant GATE as EgressGate(필터, 불완전)
+  participant GATE as EgressGate(구조화 필드 새니타이저, 불완전)
   participant CP as LLM-cp (단말 밖 상대)
-  Note over RAW,ON: 세션 시작 — 분류만, 변환 없음
   loop 라운드 N
-    CP-->>ON: 상대 메시지/캐묻기
-    RAW->>ON: 원본 제공(정확 시간·예산·기기맥락)
-    ON->>ON: 판단+작성 (원본 그대로 사용)
-    ON->>GATE: 초안 (원본 섞일 수 있음)
-    GATE->>CP: 필터 통과분  ※누설 = 필터가 놓친 원본 조각
+    CP-->>ON: 상대 구조화 메시지/캐묻기
+    TOOL->>ON: 원본 개인정보(정확 시각·금액·기기값)
+    ON->>ON: 판단 (원본 그대로 사용)
+    ON->>GATE: 구조화 제안(필드에 원본값 가능)
+    GATE->>CP: coarsening·authcheck 통과분
+    Note over GATE,CP: 게이트가 못 덮는 필드 → 원본값이 단말 밖으로 전송
   end
 ```
 
-### 라운드 흐름 — 방안 2 (사전 변환)
+### 라운드 흐름 — 방안 2 (사전 변환 / transform-at-ingress)
 
 ```mermaid
 sequenceDiagram
-  participant RAW as 원본(단말 안)
+  participant TOOL as Sub-Agent tool (로컬·신뢰)
   participant PM as PrivacyMediator(+LLM-on)
   participant V as PrivacyVault
   participant ON as LLM-on (협상 추론)
   participant GATE as EgressGate(검증)
   participant CP as LLM-cp (단말 밖 상대)
-  Note over RAW,V: 세션 시작 1회 — 변환 후 원본 폐기
-  RAW->>PM: 원본
-  PM->>V: PII 토큰 매핑 저장
-  PM->>ON: SafeScope(토큰·coarse 사실) — 원본은 폐기
   loop 라운드 N
-    CP-->>ON: 상대 메시지/캐묻기
-    ON->>ON: 판단+작성 (안전형만 사용)
-    ON->>GATE: 메시지 (원본 없음)
-    GATE->>CP: 통과  ※거를 원본 자체가 경로에 없음
+    CP-->>ON: 상대 구조화 메시지/캐묻기
+    TOOL->>PM: 원본 개인정보
+    PM->>V: PII 토큰 매핑 저장
+    PM->>ON: SafeScope(토큰·coarse 사실) — 원본 폐기
+    ON->>ON: 판단 (안전형만 사용)
+    ON->>GATE: 구조화 제안(원본값 부재)
+    GATE->>CP: 통과
+    Note over ON,GATE: 추론 컨텍스트에 원본값이 없음
   end
 ```
+
+## 7. 표현 원칙
+
+서술은 추상적·비유적 표현 대신 구체적·정확한 표현을 쓴다. 메커니즘을 비유나 모호한 동사로 대체하지 않는다. 문서·코드 주석·로그 전반에 적용한다.
