@@ -3,7 +3,7 @@ import re
 
 FIELD_RULES = {
     "negotiation": {"slot": "time", "area": "location", "budget_cap": "budget",
-                    "cuisine": "enum", "party_size": "enum"},
+                    "cuisine": "enum", "party_size": "enum", "note": "freeform"},
     "collaboration": {"can_join": "bool", "role": "enum", "available_window": "time"},
     "knowledge_sharing": {"has_shareable_knowledge": "bool", "summary_level": "enum",
                           "knowledge_category": "enum"},
@@ -62,4 +62,6 @@ def apply_rule(rtype, value, auth, gran="daypart"):
         return coarsen_location(value)
     if rtype == "budget":
         return coarsen_budget(value, auth)
+    if rtype == "freeform":
+        return None   # 기본: 자유 텍스트 필드는 제거(드롭)
     return value   # enum/bool/int — 그대로

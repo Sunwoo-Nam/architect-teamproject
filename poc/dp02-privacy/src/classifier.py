@@ -39,12 +39,21 @@ class OracleClassifier:
         return self.path2cat.get(path)
 
 
+_CLS_SCHEMA = {"type": "object",
+               "properties": {"category": {"type": "string"}},
+               "required": ["category"]}
+
+
 class LLMClassifier:
     def __init__(self, client=None):
         self.client = client
 
     def classify(self, value):
-        raise NotImplementedError("LLM 분류기는 Ollama 설치 후 활성화 (다음 단계)")
+        sys = ("다음 값을 한 카테고리로 분류해 JSON {category:...}로만 출력한다. "
+               "카테고리: pii(식별정보) | negotiable_fact(협상에 쓰는 사실값) | "
+               "raw_context(기기·일정 원본맥락) | private_reason(진료·종교·재정난 등 사유). ")
+        out = self.client.complete_json(sys, f"값: {value}", _CLS_SCHEMA)
+        return out.get("category", NEG)
 
 
 def make_classifier(backend, scenario=None):

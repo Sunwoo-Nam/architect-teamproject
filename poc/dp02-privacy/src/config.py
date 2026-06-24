@@ -16,4 +16,5 @@ GATE_PRESETS = {
     "complete":    GateConfig("complete"),
     "extra_field": GateConfig("extra_field", allow_extra_fields=True),
     "granularity": GateConfig("granularity", granularity_override={"slot": "30m"}),
+    "freeform_note": GateConfig("freeform_note", freeform_subfields=["note"]),  # note 자유텍스트 통과
 }

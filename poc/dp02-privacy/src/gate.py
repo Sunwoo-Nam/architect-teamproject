@@ -17,7 +17,9 @@ def sanitize(payload, case, auth, gc):
             out[f] = v                       # 결함: free-form sub-field
         else:
             gran = gc.granularity_override.get(f, "daypart")
-            out[f] = apply_rule(rules[f], v, auth, gran)
+            val = apply_rule(rules[f], v, auth, gran)
+            if val is not None:                 # freeform 등 드롭 결과는 제외
+                out[f] = val
     return out
 
 
