@@ -177,30 +177,52 @@ def run_bench_once(scenario, approach, classifier_backend, on_client, n_rounds):
             "cpu_pct": round(proc.cpu_percent(None), 1)}
 
 
+def _bench_key(r):
+    return (r["phase"], r["scenario"], r["approach"], r["classifier"], r["n_rounds"], r["rep"])
+
+
 def run_bench(ids, R=10):
     on_client = OllamaClient(ON_MODEL, seed=0)
-    rows = []
-    # 워밍업(모델 로드 시간 제외)
-    sc0 = load_scenario(os.path.join(SCEN, f"{ids[0]}.yaml"))
-    LLMEngine(on_client).propose("filter_at_egress", sc0, None, None)
+    os.makedirs(RESULTS, exist_ok=True)
+    jsonl = os.path.join(RESULTS, "bench.jsonl")
 
-    # 메인: 고정 N=3, 분류기 {rule, llm}
-    for sid in ids:
+    rows, done = [], set()
+    if os.path.exists(jsonl):                      # 이어하기: 기존 진행분 로드
+        with open(jsonl, encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    r = json.loads(line)
+                    rows.append(r)
+                    done.add(_bench_key(r))
+    fout = open(jsonl, "a", encoding="utf-8")
+
+    def do(phase, sid, sc, approach, clf, n, rep):
+        key = (phase, sid, approach, clf, n, rep)
+        if key in done:
+            return
+        print(f"... {phase} {sid} {approach} {clf} N{n} rep{rep+1}", flush=True)
+        r = {**run_bench_once(sc, approach, clf, on_client, n), "rep": rep, "phase": phase}
+        rows.append(r)
+        fout.write(json.dumps(r, ensure_ascii=False) + "\n")
+        fout.flush()
+
+    # 워밍업(모델 로드 시간 제외)
+    LLMEngine(on_client).propose(
+        "filter_at_egress", load_scenario(os.path.join(SCEN, f"{ids[0]}.yaml")), None, None)
+
+    for sid in ids:                                # 메인: N=3, 분류기 {rule, llm}
         sc = load_scenario(os.path.join(SCEN, f"{sid}.yaml"))
         for approach in APPROACHES:
             for clf in ("rule", "llm"):
                 for rep in range(R):
-                    print(f"... bench {sid} {approach} {clf} rep{rep+1}", flush=True)
-                    rows.append({**run_bench_once(sc, approach, clf, on_client, 3),
-                                 "rep": rep, "phase": "main"})
-    # 크로스오버: rule, N=1/3/5
-    for sid in ids:
+                    do("main", sid, sc, approach, clf, 3, rep)
+    for sid in ids:                                # 크로스오버: rule, N=1/3/5
         sc = load_scenario(os.path.join(SCEN, f"{sid}.yaml"))
         for approach in APPROACHES:
             for n in (1, 3, 5):
                 for rep in range(5):
-                    rows.append({**run_bench_once(sc, approach, "rule", on_client, n),
-                                 "rep": rep, "phase": "crossover"})
+                    do("crossover", sid, sc, approach, "rule", n, rep)
+    fout.close()
     _save("bench.json", rows)
     _bench_summary(rows)
 
