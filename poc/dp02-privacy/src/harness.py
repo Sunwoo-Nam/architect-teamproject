@@ -156,34 +156,42 @@ def run_bench_once(scenario, approach, classifier_backend, on_client, n_rounds):
         t_classify_llm, classify_calls = s1["t_llm_s"], s1["calls"]
         t_transform_cpu = max(0.0, t_transform_wall - t_classify_llm)
 
-    # ── 라운드: 제안(LLM) + 게이트(CPU) ──
+    # ── 라운드: 제안(LLM) + 게이트(CPU) — 라운드별로 시간 분해 저장 ──
     engine = LLMEngine(on_client)
-    incoming, t_gate = None, 0.0
+    incoming, per_round = None, []
+    prev = on_client.stats()                          # 변환(classify) 이후 시점
     for r in range(n_rounds):
         proposal = engine.propose(approach, scenario, safescope, incoming)
+        cur = on_client.stats()
+        p_llm = max(0.0, cur["t_llm_s"] - prev["t_llm_s"])
+        p_tok_in = cur["tokens_in"] - prev["tokens_in"]
         t0 = perf_counter()
         if approach == "filter_at_egress":
             sanitize(proposal["payload"], scenario.case, scenario.authorization,
                      GATE_PRESETS["complete"])
         else:
             verify(proposal["payload"], vault)
-        t_gate += perf_counter() - t0
+        g = perf_counter() - t0
+        per_round.append({"round": r + 1, "propose_llm_s": round(p_llm, 4),
+                          "gate_cpu_s": round(g, 6), "tokens_in": p_tok_in})
         rss_peak = max(rss_peak, ollama_rss_bytes())
-        incoming = _PROBE
+        incoming, prev = _PROBE, cur
 
     st = on_client.stats()
-    t_propose_llm = max(0.0, st["t_llm_s"] - t_classify_llm)
+    t_propose_llm = sum(x["propose_llm_s"] for x in per_round)
+    t_gate = sum(x["gate_cpu_s"] for x in per_round)
     t_priv_cpu = t_transform_cpu + t_gate
     vault_bytes = sum(len(str(k)) + len(str(v)) for k, v in vault.map.items())
     return {"scenario": scenario.id, "approach": approach, "classifier": classifier_backend,
             "n_rounds": n_rounds,
             "t_session_s": round(st["t_llm_s"] + t_priv_cpu, 4),
-            "t_llm_total_s": round(st["t_llm_s"], 4),
+            "t_setup_s": round(t_classify_llm + t_transform_cpu, 4),  # ingress 1회 비용
             "t_classify_llm_s": round(t_classify_llm, 4),    # ingress 분류 LLM(방안2·llm)
-            "t_propose_llm_s": round(t_propose_llm, 4),       # 협상 제안 LLM
+            "t_propose_llm_s": round(t_propose_llm, 4),       # 협상 제안 LLM(라운드 합)
             "t_transform_cpu_s": round(t_transform_cpu, 6),   # 변환 순수 처리
             "t_gate_cpu_s": round(t_gate, 6),                 # 게이트 순수 처리(라운드 합)
             "t_privacy_cpu_s": round(t_priv_cpu, 6),
+            "per_round": per_round,                           # ← N별 누적 재구성용(크로스오버 대체)
             "llm_calls": st["calls"], "classify_calls": classify_calls,
             "propose_calls": st["calls"] - classify_calls,
             "tokens_in": st["tokens_in"], "tokens_out": st["tokens_out"],
@@ -229,8 +237,8 @@ def run_bench(ids, R=10):
         for approach in APPROACHES:
             for clf in ("rule", "llm"):
                 for rep in range(R):
-                    do("main", sid, sc, approach, clf, 3, rep)
-    fout.close()  # 크로스오버는 제외(사용자 요청)
+                    do("main", sid, sc, approach, clf, 5, rep)   # N=5 (라운드별 분해로 N=1..5 도출)
+    fout.close()  # 별도 크로스오버 불필요 — per_round로 N별 누적 재구성
     _save("bench.json", rows)
     _bench_summary(rows)
 
@@ -261,6 +269,21 @@ def _bench_summary(rows):
                   f"{_mean([r['tokens_in'] for r in g]):<7} "
                   f"{_mean([r['ollama_rss_mb'] for r in g]):<7} "
                   f"{_mean([r['vault_bytes'] for r in g]):<6}")
+
+    print("\n[라운드 누적 t_session vs N — N=5 run의 per-round로 도출(크로스오버 대체)]  단위 초")
+    print(f"{'approach':<22} {'clf':<5} " + "".join(f"{'N='+str(k):<8}" for k in range(1, 6)))
+    for approach in APPROACHES:
+        for clf in ("rule", "llm"):
+            g = [r for r in main if r["approach"] == approach
+                 and r["classifier"] == clf and r.get("per_round")]
+            if not g:
+                continue
+            cums = []
+            for k in range(1, 6):
+                vals = [r["t_setup_s"] + sum(x["propose_llm_s"] + x["gate_cpu_s"]
+                                             for x in r["per_round"][:k]) for r in g]
+                cums.append(_mean(vals))
+            print(f"{approach:<22} {clf:<5} " + "".join(f"{c:<8}" for c in cums))
 
 
 # ───────────────────────── 공통 ─────────────────────────
