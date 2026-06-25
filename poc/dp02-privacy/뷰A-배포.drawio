@@ -1,0 +1,35 @@
+<mxfile host="Electron">
+  <diagram id="deploy" name="A 배포 뷰">
+    <mxGraphModel dx="1100" dy="680" grid="0" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="520" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="t" value="뷰 A — 배포 뷰 (신뢰 경계 · 출구)" style="text;html=1;fontSize=17;fontStyle=1;fontColor=#222222;" vertex="1" parent="1"><mxGeometry x="40" y="14" width="520" height="26" as="geometry"/></mxCell>
+
+        <mxCell id="bnd" value="" style="endArrow=none;html=1;dashed=1;dashPattern=6 4;strokeColor=#b85450;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="450" y="60" as="sourcePoint"/><mxPoint x="450" y="440" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="bndlbl" value="« trust boundary »" style="text;html=1;align=center;fontSize=11;fontStyle=2;fontColor=#b85450;" vertex="1" parent="1"><mxGeometry x="386" y="42" width="128" height="16" as="geometry"/></mxCell>
+
+        <mxCell id="trust" value="« trusted »   단말 (사용자 기기)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#6c8ebf;verticalAlign=top;align=left;spacingLeft=12;spacingTop=8;fontSize=13;fontStyle=1;fontColor=#3b5b86;" vertex="1" parent="1"><mxGeometry x="40" y="62" width="390" height="376" as="geometry"/></mxCell>
+        <mxCell id="tool" value="로컬 Tool · DPA (가전·캘린더·결제·건강)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="62" y="100" width="346" height="44" as="geometry"/></mxCell>
+        <mxCell id="agent" value="개인 대리 에이전트   « LLM »&#10;LLM-on (온디바이스)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1"><mxGeometry x="62" y="162" width="346" height="56" as="geometry"/></mxCell>
+        <mxCell id="medg" value="PrivacyMediator /&#10;EgressGate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="62" y="238" width="210" height="54" as="geometry"/></mxCell>
+        <mxCell id="vault" value="PrivacyVault&#10;(토큰 보관)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="288" y="238" width="120" height="54" as="geometry"/></mxCell>
+        <mxCell id="tnote" value="0% 유출 검증 지점 = 출구 (단말 경계). 민감 추론은 단말 내부에 유지." style="text;html=1;align=left;fontSize=11;fontColor=#3b5b86;" vertex="1" parent="1"><mxGeometry x="62" y="306" width="346" height="34" as="geometry"/></mxCell>
+
+        <mxCell id="cpc" value="« external · 비신뢰 »   상대 사용자 단말" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#b85450;dashed=1;dashPattern=8 4;verticalAlign=top;align=left;spacingLeft=12;spacingTop=8;fontSize=12;fontStyle=1;fontColor=#9c3a36;" vertex="1" parent="1"><mxGeometry x="470" y="92" width="390" height="92" as="geometry"/></mxCell>
+        <mxCell id="cp" value="상대 에이전트   « LLM »&#10;LLM-cp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;dashed=1;dashPattern=6 4;fontSize=12;" vertex="1" parent="1"><mxGeometry x="492" y="126" width="346" height="44" as="geometry"/></mxCell>
+
+        <mxCell id="srvc" value="« external · 비신뢰 »   클라우드 서버 LLM   (v2)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#b85450;dashed=1;dashPattern=8 4;verticalAlign=top;align=left;spacingLeft=12;spacingTop=8;fontSize=12;fontStyle=1;fontColor=#9c3a36;" vertex="1" parent="1"><mxGeometry x="470" y="236" width="390" height="92" as="geometry"/></mxCell>
+        <mxCell id="srv" value="서버 LLM   « LLM »" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;dashed=1;dashPattern=6 4;fontSize=12;" vertex="1" parent="1"><mxGeometry x="492" y="270" width="346" height="44" as="geometry"/></mxCell>
+
+        <mxCell id="e2" value="출구 ㉡ · A2A 구조화 메시지 · TLS 1.3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#444444;fontSize=11;fontColor=#444444;exitX=1;exitY=0.4;entryX=0;entryY=0.5;" edge="1" parent="1" source="medg" target="cpc"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e1" value="출구 ㉠ · 서버 LLM 프롬프트 (v2 · 현재 미사용)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;dashed=1;dashPattern=6 4;strokeColor=#9c3a36;fontSize=11;fontColor=#9c3a36;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="agent" target="srvc"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="et" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="tool" target="agent"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ea" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;exitX=0.3;exitY=1;entryX=0.3;entryY=0;" edge="1" parent="1" source="agent" target="medg"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="leg" value="범례 :  ■ 파랑 = 단말 모듈(신뢰)    ■ 보라 = LLM    ┄ 빨강 점선 = 외부(비신뢰)    « » = 스테레오타입" style="text;html=1;align=left;fontSize=11;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="40" y="466" width="820" height="22" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
