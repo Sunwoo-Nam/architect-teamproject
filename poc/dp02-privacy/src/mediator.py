@@ -37,7 +37,7 @@ class PrivacyMediator:
     def __init__(self, backend="rule"):
         self.backend = backend
 
-    def transform(self, scenario, vault, secrets=None):
+    def transform(self, scenario, vault, secrets=None, client=None):
         free = first_free(scenario) or {}
         slot = coarsen_time(f"{free.get('day', '')} {free.get('from', '')}-{free.get('to', '')}")
         area = coarsen_location(pref_area(scenario))
@@ -45,7 +45,10 @@ class PrivacyMediator:
 
         tokens = {raw: vault.tokenize(raw) for raw in collect_pii(scenario)}
         blocked = collect_private_reason(scenario)
-        summary = self._safe_summary(scenario, secrets, slot, area, budget)
+        if self.backend == "llm" and client is not None:
+            summary = self._safe_summary_llm(scenario, client, slot, area, budget)  # 값마다 LLM 분류(비용↑)
+        else:
+            summary = self._safe_summary(scenario, secrets, slot, area, budget)
 
         return SafeScope(
             fields={"slot": slot, "area": area, "budget_cap": budget, "slot_daypart": slot},
@@ -72,5 +75,24 @@ class PrivacyMediator:
                     continue                            # 비밀 포함 → 제외
                 if re.search(r"\d{1,2}:\d{2}", s):
                     v = coarsen_time(s)                 # 시각 → 정밀도 저하
+                lines.append(f"{tool}.{k}: {v}")
+        return "\n".join(lines)
+
+    def _safe_summary_llm(self, scenario, client, slot, area, budget):
+        """llm 백엔드: 값마다 LLM-on으로 분류해 pii·private_reason은 제외(비용 측정 대상)."""
+        from classifier import LLMClassifier
+        clf = LLMClassifier(client)
+        lines = [f"가능 시간(대략): {slot}", f"지역: {area}"]
+        if budget:
+            lines.append(f"예산 상한: {budget}")
+        for tr in scenario.tool_results:
+            tool = tr.get("tool")
+            for k, v in _flatten(tr.get("data") or {}):
+                cat = clf.classify(v)                   # ← on-device LLM 호출
+                if cat in ("pii", "private_reason"):
+                    continue
+                s = str(v)
+                if re.search(r"\d{1,2}:\d{2}", s):
+                    v = coarsen_time(s)
                 lines.append(f"{tool}.{k}: {v}")
         return "\n".join(lines)

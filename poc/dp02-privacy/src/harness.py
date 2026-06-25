@@ -11,6 +11,8 @@ LLM 모드(Ollama + qwen3.5):
 import os
 import sys
 import json
+import statistics
+from time import perf_counter
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -23,7 +25,7 @@ from counterpart import StubCounterpart, LLMCounterpart  # noqa: E402
 from gate import sanitize, verify           # noqa: E402
 from egress_monitor import EgressMonitor    # noqa: E402
 from leak_oracle import LeakOracle, LLMJudge  # noqa: E402
-from ollama_client import OllamaClient, available_models  # noqa: E402
+from ollama_client import OllamaClient, available_models, ollama_rss_bytes  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCEN = os.path.join(ROOT, "scenarios")
@@ -127,6 +129,111 @@ def run_llm(ids):
               f"{', '.join(r['leaks'])}")
 
 
+# ───────────────────────── 벤치(속도·리소스) 모드 ─────────────────────────
+# 상대(9b)는 stub 처리 — LLM-on(4b)+프라이버시 처리만 깨끗하게 계측한다.
+_PROBE = "상대가 더 구체적인 시간/이유를 물었습니다."
+
+
+def run_bench_once(scenario, approach, classifier_backend, on_client, n_rounds):
+    import psutil
+    on_client.reset()
+    vault = PrivacyVault()
+    safescope = None
+    t_priv = 0.0
+    rss_peak = ollama_rss_bytes()
+    proc = psutil.Process()
+    proc.cpu_percent(None)
+
+    if approach == "transform_at_ingress":
+        t0 = perf_counter()
+        safescope = PrivacyMediator(classifier_backend).transform(
+            scenario, vault, scenario.secrets,
+            client=on_client if classifier_backend == "llm" else None)
+        t_priv += perf_counter() - t0
+
+    engine = LLMEngine(on_client)
+    incoming = None
+    for r in range(n_rounds):
+        proposal = engine.propose(approach, scenario, safescope, incoming)   # LLM-on 호출
+        t0 = perf_counter()
+        if approach == "filter_at_egress":
+            sanitize(proposal["payload"], scenario.case, scenario.authorization,
+                     GATE_PRESETS["complete"])
+        else:
+            verify(proposal["payload"], vault)
+        t_priv += perf_counter() - t0
+        rss_peak = max(rss_peak, ollama_rss_bytes())
+        incoming = _PROBE
+
+    st = on_client.stats()
+    vault_bytes = sum(len(str(k)) + len(str(v)) for k, v in vault.map.items())
+    return {"scenario": scenario.id, "approach": approach, "classifier": classifier_backend,
+            "n_rounds": n_rounds,
+            "t_llm_on_s": round(st["t_llm_s"], 4), "t_privacy_s": round(t_priv, 6),
+            "t_session_s": round(st["t_llm_s"] + t_priv, 4),
+            "llm_on_calls": st["calls"], "tokens_in": st["tokens_in"],
+            "tokens_out": st["tokens_out"], "vault_bytes": vault_bytes,
+            "ollama_rss_mb": round(rss_peak / 1e6, 1),
+            "cpu_pct": round(proc.cpu_percent(None), 1)}
+
+
+def run_bench(ids, R=10):
+    on_client = OllamaClient(ON_MODEL, seed=0)
+    rows = []
+    # 워밍업(모델 로드 시간 제외)
+    sc0 = load_scenario(os.path.join(SCEN, f"{ids[0]}.yaml"))
+    LLMEngine(on_client).propose("filter_at_egress", sc0, None, None)
+
+    # 메인: 고정 N=3, 분류기 {rule, llm}
+    for sid in ids:
+        sc = load_scenario(os.path.join(SCEN, f"{sid}.yaml"))
+        for approach in APPROACHES:
+            for clf in ("rule", "llm"):
+                for rep in range(R):
+                    print(f"... bench {sid} {approach} {clf} rep{rep+1}", flush=True)
+                    rows.append({**run_bench_once(sc, approach, clf, on_client, 3),
+                                 "rep": rep, "phase": "main"})
+    # 크로스오버: rule, N=1/3/5
+    for sid in ids:
+        sc = load_scenario(os.path.join(SCEN, f"{sid}.yaml"))
+        for approach in APPROACHES:
+            for n in (1, 3, 5):
+                for rep in range(5):
+                    rows.append({**run_bench_once(sc, approach, "rule", on_client, n),
+                                 "rep": rep, "phase": "crossover"})
+    _save("bench.json", rows)
+    _bench_summary(rows)
+
+
+def _mean(xs):
+    return round(statistics.mean(xs), 4) if xs else 0
+
+
+def _bench_summary(rows):
+    main = [r for r in rows if r["phase"] == "main"]
+    print("\n[메인 — 방안×분류기 평균 (전 시나리오·R회)]")
+    print(f"{'approach':<22} {'clf':<5} {'t_sess':<8} {'t_llm':<8} {'t_priv':<9} "
+          f"{'calls':<6} {'tok_in':<7} {'rss_mb':<7} {'vault':<6}")
+    for approach in APPROACHES:
+        for clf in ("rule", "llm"):
+            g = [r for r in main if r["approach"] == approach and r["classifier"] == clf]
+            if not g:
+                continue
+            print(f"{approach:<22} {clf:<5} {_mean([r['t_session_s'] for r in g]):<8} "
+                  f"{_mean([r['t_llm_on_s'] for r in g]):<8} {_mean([r['t_privacy_s'] for r in g]):<9} "
+                  f"{_mean([r['llm_on_calls'] for r in g]):<6} {_mean([r['tokens_in'] for r in g]):<7} "
+                  f"{_mean([r['ollama_rss_mb'] for r in g]):<7} {_mean([r['vault_bytes'] for r in g]):<6}")
+    cross = [r for r in rows if r["phase"] == "crossover"]
+    print("\n[크로스오버 — 방안별 t_session vs N (rule)]")
+    print(f"{'approach':<22} {'N=1':<8} {'N=3':<8} {'N=5':<8}")
+    for approach in APPROACHES:
+        cells = []
+        for n in (1, 3, 5):
+            g = [r for r in cross if r["approach"] == approach and r["n_rounds"] == n]
+            cells.append(_mean([r['t_session_s'] for r in g]))
+        print(f"{approach:<22} {cells[0]:<8} {cells[1]:<8} {cells[2]:<8}")
+
+
 # ───────────────────────── 공통 ─────────────────────────
 def _save(name, rows):
     os.makedirs(RESULTS, exist_ok=True)
@@ -144,7 +251,10 @@ def _print(rows):
 
 def main():
     args = sys.argv[1:]
-    if "--llm" in args:
+    if "--bench" in args:
+        ids = [a for a in args if not a.startswith("--")] or [f"S{i}" for i in range(1, 11)]
+        run_bench(ids)
+    elif "--llm" in args:
         ids = [a for a in args if not a.startswith("--")] or [f"S{i}" for i in range(1, 11)]
         run_llm(ids)
     else:
