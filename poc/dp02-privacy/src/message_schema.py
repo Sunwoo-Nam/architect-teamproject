@@ -4,10 +4,11 @@ import re
 FIELD_RULES = {
     "negotiation": {"slot": "time", "area": "location", "budget_cap": "budget",
                     "cuisine": "enum", "party_size": "enum", "note": "freeform"},
-    "collaboration": {"can_join": "bool", "role": "enum", "available_window": "time"},
+    "collaboration": {"can_join": "bool", "role": "enum", "available_window": "time",
+                      "note": "freeform"},
     "knowledge_sharing": {"has_shareable_knowledge": "bool", "summary_level": "enum",
-                          "knowledge_category": "enum"},
-    "remote_monitoring": {"alert": "bool", "severity": "enum"},
+                          "knowledge_category": "enum", "note": "freeform"},
+    "remote_monitoring": {"alert": "bool", "severity": "enum", "note": "freeform"},
 }
 
 DISTRICTS = ["강남", "서초", "송파", "분당", "마포", "용산", "수성", "신촌", "합정", "여의도", "을지로"]

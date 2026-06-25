@@ -70,7 +70,9 @@ def run_llm_once(scenario, approach, gate, on_client, cp_client, judge_client,
     vault = PrivacyVault()
     safescope = None
     if approach == "transform_at_ingress":
-        safescope = PrivacyMediator(classifier_backend).transform(scenario, vault)
+        # perfect 모드: 정답지로 비밀을 제외(변환 분류 완벽 가정 — 메커니즘 격리)
+        safescope = PrivacyMediator(classifier_backend).transform(
+            scenario, vault, scenario.secrets)
 
     engine, cp = LLMEngine(on_client), LLMCounterpart(cp_client)
     mon = EgressMonitor()
@@ -114,7 +116,8 @@ def run_llm(ids):
             for gp in ("complete", "freeform_note"):
                 print(f"... {sid} {approach} {gp}", flush=True)
                 rows.append(run_llm_once(sc, approach, GATE_PRESETS[gp],
-                                         on_client, cp_client, judge_client))
+                                         on_client, cp_client, judge_client,
+                                         max_rounds=2))
     _save("llm_run.json", rows)
     print(f"\n{'scn':<4} {'approach':<22} {'gate':<14} {'leak':<4} {'det':<3} {'jdg':<3} {'rnd':<3} leaks")
     print("-" * 80)
@@ -142,7 +145,7 @@ def _print(rows):
 def main():
     args = sys.argv[1:]
     if "--llm" in args:
-        ids = [a for a in args if not a.startswith("--")] or ["S1", "S3"]
+        ids = [a for a in args if not a.startswith("--")] or [f"S{i}" for i in range(1, 11)]
         run_llm(ids)
     else:
         ids = args or [f"S{i}" for i in range(1, 11)]
