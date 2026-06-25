@@ -34,6 +34,12 @@ try:
 except ImportError:
     sys.exit("psutil 필요: pip install psutil")
 
+try:  # 콘솔 인코딩(cp949 등)에서 기호/한글 출력이 깨지거나 죽지 않도록
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
 PROC = psutil.Process(os.getpid())
 
 
