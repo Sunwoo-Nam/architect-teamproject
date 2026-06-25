@@ -49,7 +49,8 @@ class OllamaClient:
             model=self.model,
             messages=[{"role": "system", "content": system},
                       {"role": "user", "content": user}],
-            options={"temperature": self.temperature, "seed": self.seed},
+            options={"temperature": self.temperature, "seed": self.seed,
+                     "num_predict": 512, "num_ctx": 4096},
             format=(schema or "json"),
         )
         try:

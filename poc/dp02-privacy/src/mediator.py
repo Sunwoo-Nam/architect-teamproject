@@ -79,20 +79,20 @@ class PrivacyMediator:
         return "\n".join(lines)
 
     def _safe_summary_llm(self, scenario, client, slot, area, budget):
-        """llm 백엔드: 값마다 LLM-on으로 분류해 pii·private_reason은 제외(비용 측정 대상)."""
+        """llm 백엔드: 값들을 LLM-on으로 '한 번에' 일괄 분류해 pii·private_reason은 제외."""
         from classifier import LLMClassifier
-        clf = LLMClassifier(client)
+        items = [(tr.get("tool"), k, v)
+                 for tr in scenario.tool_results
+                 for k, v in _flatten(tr.get("data") or {})]
+        cats = LLMClassifier(client).classify_batch([v for _, _, v in items])  # ← 1회 LLM 호출
         lines = [f"가능 시간(대략): {slot}", f"지역: {area}"]
         if budget:
             lines.append(f"예산 상한: {budget}")
-        for tr in scenario.tool_results:
-            tool = tr.get("tool")
-            for k, v in _flatten(tr.get("data") or {}):
-                cat = clf.classify(v)                   # ← on-device LLM 호출
-                if cat in ("pii", "private_reason"):
-                    continue
-                s = str(v)
-                if re.search(r"\d{1,2}:\d{2}", s):
-                    v = coarsen_time(s)
-                lines.append(f"{tool}.{k}: {v}")
+        for (tool, k, v), cat in zip(items, cats):
+            if cat in ("pii", "private_reason"):
+                continue
+            s = str(v)
+            if re.search(r"\d{1,2}:\d{2}", s):
+                v = coarsen_time(s)
+            lines.append(f"{tool}.{k}: {v}")
         return "\n".join(lines)

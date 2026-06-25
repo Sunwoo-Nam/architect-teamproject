@@ -135,45 +135,59 @@ _PROBE = "상대가 더 구체적인 시간/이유를 물었습니다."
 
 
 def run_bench_once(scenario, approach, classifier_backend, on_client, n_rounds):
+    """단계별 분해 계측: LLM 시간(분류/제안)과 순수 처리 시간(변환/게이트)을 분리."""
     import psutil
     on_client.reset()
     vault = PrivacyVault()
     safescope = None
-    t_priv = 0.0
     rss_peak = ollama_rss_bytes()
     proc = psutil.Process()
     proc.cpu_percent(None)
 
+    # ── ingress 변환(방안2): LLM 분류 시간과 순수 처리 시간을 분리 ──
+    t_classify_llm, classify_calls, t_transform_cpu = 0.0, 0, 0.0
     if approach == "transform_at_ingress":
         t0 = perf_counter()
         safescope = PrivacyMediator(classifier_backend).transform(
             scenario, vault, scenario.secrets,
             client=on_client if classifier_backend == "llm" else None)
-        t_priv += perf_counter() - t0
+        t_transform_wall = perf_counter() - t0
+        s1 = on_client.stats()                       # 변환이 쓴 LLM 시간/호출
+        t_classify_llm, classify_calls = s1["t_llm_s"], s1["calls"]
+        t_transform_cpu = max(0.0, t_transform_wall - t_classify_llm)
 
+    # ── 라운드: 제안(LLM) + 게이트(CPU) ──
     engine = LLMEngine(on_client)
-    incoming = None
+    incoming, t_gate = None, 0.0
     for r in range(n_rounds):
-        proposal = engine.propose(approach, scenario, safescope, incoming)   # LLM-on 호출
+        proposal = engine.propose(approach, scenario, safescope, incoming)
         t0 = perf_counter()
         if approach == "filter_at_egress":
             sanitize(proposal["payload"], scenario.case, scenario.authorization,
                      GATE_PRESETS["complete"])
         else:
             verify(proposal["payload"], vault)
-        t_priv += perf_counter() - t0
+        t_gate += perf_counter() - t0
         rss_peak = max(rss_peak, ollama_rss_bytes())
         incoming = _PROBE
 
     st = on_client.stats()
+    t_propose_llm = max(0.0, st["t_llm_s"] - t_classify_llm)
+    t_priv_cpu = t_transform_cpu + t_gate
     vault_bytes = sum(len(str(k)) + len(str(v)) for k, v in vault.map.items())
     return {"scenario": scenario.id, "approach": approach, "classifier": classifier_backend,
             "n_rounds": n_rounds,
-            "t_llm_on_s": round(st["t_llm_s"], 4), "t_privacy_s": round(t_priv, 6),
-            "t_session_s": round(st["t_llm_s"] + t_priv, 4),
-            "llm_on_calls": st["calls"], "tokens_in": st["tokens_in"],
-            "tokens_out": st["tokens_out"], "vault_bytes": vault_bytes,
-            "ollama_rss_mb": round(rss_peak / 1e6, 1),
+            "t_session_s": round(st["t_llm_s"] + t_priv_cpu, 4),
+            "t_llm_total_s": round(st["t_llm_s"], 4),
+            "t_classify_llm_s": round(t_classify_llm, 4),    # ingress 분류 LLM(방안2·llm)
+            "t_propose_llm_s": round(t_propose_llm, 4),       # 협상 제안 LLM
+            "t_transform_cpu_s": round(t_transform_cpu, 6),   # 변환 순수 처리
+            "t_gate_cpu_s": round(t_gate, 6),                 # 게이트 순수 처리(라운드 합)
+            "t_privacy_cpu_s": round(t_priv_cpu, 6),
+            "llm_calls": st["calls"], "classify_calls": classify_calls,
+            "propose_calls": st["calls"] - classify_calls,
+            "tokens_in": st["tokens_in"], "tokens_out": st["tokens_out"],
+            "vault_bytes": vault_bytes, "ollama_rss_mb": round(rss_peak / 1e6, 1),
             "cpu_pct": round(proc.cpu_percent(None), 1)}
 
 
@@ -216,13 +230,7 @@ def run_bench(ids, R=10):
             for clf in ("rule", "llm"):
                 for rep in range(R):
                     do("main", sid, sc, approach, clf, 3, rep)
-    for sid in ids:                                # 크로스오버: rule, N=1/3/5
-        sc = load_scenario(os.path.join(SCEN, f"{sid}.yaml"))
-        for approach in APPROACHES:
-            for n in (1, 3, 5):
-                for rep in range(5):
-                    do("crossover", sid, sc, approach, "rule", n, rep)
-    fout.close()
+    fout.close()  # 크로스오버는 제외(사용자 요청)
     _save("bench.json", rows)
     _bench_summary(rows)
 
@@ -233,27 +241,26 @@ def _mean(xs):
 
 def _bench_summary(rows):
     main = [r for r in rows if r["phase"] == "main"]
-    print("\n[메인 — 방안×분류기 평균 (전 시나리오·R회)]")
-    print(f"{'approach':<22} {'clf':<5} {'t_sess':<8} {'t_llm':<8} {'t_priv':<9} "
-          f"{'calls':<6} {'tok_in':<7} {'rss_mb':<7} {'vault':<6}")
+    print("\n[메인 — 방안×분류기 평균 (단계별 분해, 전 시나리오·R회)]  단위 초")
+    h = (f"{'approach':<22} {'clf':<5} {'t_sess':<7} {'propose':<8} {'classfy':<8} "
+         f"{'gate':<7} {'transf':<7} {'calls':<6} {'tok_in':<7} {'rss_mb':<7} {'vault':<6}")
+    print(h)
+    print("-" * len(h))
     for approach in APPROACHES:
         for clf in ("rule", "llm"):
             g = [r for r in main if r["approach"] == approach and r["classifier"] == clf]
             if not g:
                 continue
-            print(f"{approach:<22} {clf:<5} {_mean([r['t_session_s'] for r in g]):<8} "
-                  f"{_mean([r['t_llm_on_s'] for r in g]):<8} {_mean([r['t_privacy_s'] for r in g]):<9} "
-                  f"{_mean([r['llm_on_calls'] for r in g]):<6} {_mean([r['tokens_in'] for r in g]):<7} "
-                  f"{_mean([r['ollama_rss_mb'] for r in g]):<7} {_mean([r['vault_bytes'] for r in g]):<6}")
-    cross = [r for r in rows if r["phase"] == "crossover"]
-    print("\n[크로스오버 — 방안별 t_session vs N (rule)]")
-    print(f"{'approach':<22} {'N=1':<8} {'N=3':<8} {'N=5':<8}")
-    for approach in APPROACHES:
-        cells = []
-        for n in (1, 3, 5):
-            g = [r for r in cross if r["approach"] == approach and r["n_rounds"] == n]
-            cells.append(_mean([r['t_session_s'] for r in g]))
-        print(f"{approach:<22} {cells[0]:<8} {cells[1]:<8} {cells[2]:<8}")
+            print(f"{approach:<22} {clf:<5} "
+                  f"{_mean([r['t_session_s'] for r in g]):<7} "
+                  f"{_mean([r['t_propose_llm_s'] for r in g]):<8} "
+                  f"{_mean([r['t_classify_llm_s'] for r in g]):<8} "
+                  f"{_mean([r['t_gate_cpu_s'] for r in g]):<7} "
+                  f"{_mean([r['t_transform_cpu_s'] for r in g]):<7} "
+                  f"{_mean([r['llm_calls'] for r in g]):<6} "
+                  f"{_mean([r['tokens_in'] for r in g]):<7} "
+                  f"{_mean([r['ollama_rss_mb'] for r in g]):<7} "
+                  f"{_mean([r['vault_bytes'] for r in g]):<6}")
 
 
 # ───────────────────────── 공통 ─────────────────────────

@@ -43,6 +43,10 @@ _CLS_SCHEMA = {"type": "object",
                "properties": {"category": {"type": "string"}},
                "required": ["category"]}
 
+_BATCH_SCHEMA = {"type": "object",
+                 "properties": {"categories": {"type": "array", "items": {"type": "string"}}},
+                 "required": ["categories"]}
+
 
 class LLMClassifier:
     def __init__(self, client=None):
@@ -57,6 +61,20 @@ class LLMClassifier:
         except Exception:
             return "private_reason"   # 파싱 실패 시 보수적으로 차단(호출 비용은 이미 계측됨)
         return out.get("category", NEG) if isinstance(out, dict) else NEG
+
+    def classify_batch(self, values):
+        """값 목록을 한 번의 LLM 호출로 일괄 분류(속도 개선)."""
+        if not values:
+            return []
+        sys = ("아래 번호 매긴 값들을 각각 한 카테고리로 분류해 JSON {categories:[...]}로만 출력한다"
+               "(입력 순서대로, 같은 개수). 카테고리: pii | negotiable_fact | raw_context | private_reason.")
+        listing = "\n".join(f"{i}. {v}" for i, v in enumerate(values))
+        try:
+            out = self.client.complete_json(sys, listing, _BATCH_SCHEMA)
+            cats = out.get("categories", []) if isinstance(out, dict) else (out if isinstance(out, list) else [])
+        except Exception:
+            cats = []
+        return (list(cats) + ["private_reason"] * len(values))[:len(values)]
 
 
 def make_classifier(backend, scenario=None):
