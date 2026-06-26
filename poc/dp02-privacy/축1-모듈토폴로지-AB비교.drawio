@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net">
+
+  <!-- ============================================================ -->
+  <!-- PAGE 1: 후보 A — 중앙 집중형 (현재안 07)                      -->
+  <!-- ============================================================ -->
+  <diagram name="후보 A — 중앙 집중형" id="pageA">
+    <mxGraphModel dx="1240" dy="860" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1240" pageHeight="860">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ── 온디바이스 신뢰경계 ── -->
+        <mxCell id="a_trust" value="온디바이스 신뢰경계" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=#64748b;fontColor=#94a3b8;fontSize=14;fontStyle=1;verticalAlign=top;align=left;spacingTop=8;spacingLeft=14;dashed=1;dashPattern=8 4;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="20" y="20" width="1100" height="540" as="geometry"/>
+        </mxCell>
+
+        <!-- ── 입력 출처 (왼쪽) ── -->
+        <mxCell id="a_ids" value="IDS&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Intent 감지&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#475569;strokeColor=#334155;fontColor=#ffffff;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="110" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_sa" value="Sub-Agent&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;tool 호출 결과&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#475569;strokeColor=#334155;fontColor=#ffffff;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="230" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_dpa" value="DPA&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;가전 기기 상태&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#475569;strokeColor=#334155;fontColor=#ffffff;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="350" width="140" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- ── 프라이버시 게이트웨이 (중앙, 단일 enforcement) ── -->
+        <mxCell id="a_gw" value="프라이버시 게이트웨이&lt;br&gt;&lt;font style=&quot;font-size:10px;font-weight:normal&quot;&gt;— 단일 enforcement 지점 —&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#083344;strokeColor=#0e7490;fontColor=#e2e8f0;fontSize=13;fontStyle=1;verticalAlign=top;align=center;spacingTop=8;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="280" y="70" width="330" height="400" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_norm" value="정규화기&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;분류 · 권한결속 · 어휘매핑&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0e7490;strokeColor=#155e75;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="310" y="140" width="160" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_build" value="출력 빌더&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;OutcomeSpace · 계획 요청&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0e7490;strokeColor=#155e75;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="310" y="290" width="160" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_vault" value="PII 금고" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#b45309;strokeColor=#92400e;fontColor=#ffffff;fontSize=11;fontStyle=1;boundedLbl=1;size=10;" vertex="1" parent="1">
+          <mxGeometry x="510" y="195" width="80" height="65" as="geometry"/>
+        </mxCell>
+
+        <!-- ── Meta Agent (오른쪽) ── -->
+        <mxCell id="a_maf" value="Meta Agent&lt;br&gt;&lt;font style=&quot;font-size:10px;font-weight:normal&quot;&gt;협상 두뇌&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#14532d;strokeColor=#22c55e;fontColor=#e2e8f0;fontSize=13;fontStyle=1;verticalAlign=top;align=center;spacingTop=8;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="700" y="70" width="220" height="210" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_ufun" value="ufun&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;선호 · 유보값 (비공개)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#15803d;strokeColor=#166534;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="730" y="130" width="160" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_neg" value="협상 엔진 (NegMAS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#15803d;strokeColor=#166534;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="730" y="205" width="160" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- ── Orchestrator · Sub-Agent 실행 ── -->
+        <mxCell id="a_orch" value="Orchestrator&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;계획 작성&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#475569;strokeColor=#334155;fontColor=#ffffff;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="740" y="340" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_exec" value="Sub-Agent&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;실행 (예약·결제)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#475569;strokeColor=#334155;fontColor=#ffffff;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="740" y="430" width="140" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- ── 외부 (신뢰경계 밖) ── -->
+        <mxCell id="a_ppa" value="상대 PPA&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;(외부, 불투명)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;strokeColor=#5b21b6;fontColor=#ffffff;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="720" y="640" width="160" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_cloud" value="Cloud LLM&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;(외부)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;strokeColor=#5b21b6;fontColor=#ffffff;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="420" y="640" width="160" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- ══ 엣지: 원본 (빨간 점선) ══ -->
+        <mxCell id="a_e1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#ef4444;strokeWidth=2;dashed=1;dashPattern=5 3;fontColor=#ef4444;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=0.3;" edge="1" source="a_ids" target="a_norm" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_e1_l" value="원본" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#ef4444;fontStyle=1;labelBackgroundColor=#1e293b;" vertex="1" connectable="0" parent="a_e1">
+          <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="a_e2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#ef4444;strokeWidth=2;dashed=1;dashPattern=5 3;fontColor=#ef4444;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="a_sa" target="a_norm" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_e2_l" value="원본" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#ef4444;fontStyle=1;labelBackgroundColor=#1e293b;" vertex="1" connectable="0" parent="a_e2">
+          <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="a_e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#ef4444;strokeWidth=2;dashed=1;dashPattern=5 3;fontColor=#ef4444;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=0.8;" edge="1" source="a_dpa" target="a_norm" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_e3_l" value="원본" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#ef4444;fontStyle=1;labelBackgroundColor=#1e293b;" vertex="1" connectable="0" parent="a_e3">
+          <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- ══ 엣지: 게이트웨이 내부 (안전형, 초록) ══ -->
+        <mxCell id="a_e4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#22c55e;strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" source="a_norm" target="a_build" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_e4_l" value="안전형" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;fontColor=#22c55e;fontStyle=1;labelBackgroundColor=#083344;" vertex="1" connectable="0" parent="a_e4">
+          <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- 정규화기 → PII 금고 -->
+        <mxCell id="a_e5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#f59e0b;strokeWidth=2;dashed=1;dashPattern=4 3;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="a_norm" target="a_vault" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_e5_l" value="PII" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;fontColor=#f59e0b;fontStyle=1;labelBackgroundColor=#083344;" vertex="1" connectable="0" parent="a_e5">
+          <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- ══ 엣지: 게이트웨이 → 소비처 (초록) ══ -->
+        <!-- 정규화기 → ufun -->
+        <mxCell id="a_e6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#22c55e;strokeWidth=2;exitX=1;exitY=0.3;entryX=0;entryY=0.5;" edge="1" source="a_gw" target="a_ufun" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="610" y="180" as="sourcePoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a_e6_l" value="안전 사실값" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;fontColor=#22c55e;fontStyle=1;labelBackgroundColor=#1e293b;" vertex="1" connectable="0" parent="a_e6">
+          <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- 출력 빌더 → NegMAS (OutcomeSpace) -->
+        <mxCell id="a_e7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#22c55e;strokeWidth=2;exitX=1;exitY=0.55;entryX=0;entryY=0.5;" edge="1" source="a_gw" target="a_neg" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="610" y="310" as="sourcePoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a_e7_l" value="OutcomeSpace" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;fontColor=#22c55e;fontStyle=1;labelBackgroundColor=#1e293b;" vertex="1" connectable="0" parent="a_e7">
+          <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- 출력 빌더 → Orchestrator (계획 요청) -->
+        <mxCell id="a_e8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#22c55e;strokeWidth=2;exitX=1;exitY=0.8;entryX=0;entryY=0.5;" edge="1" source="a_gw" target="a_orch" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="610" y="390" as="sourcePoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a_e8_l" value="계획 요청" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;fontColor=#22c55e;fontStyle=1;labelBackgroundColor=#1e293b;" vertex="1" connectable="0" parent="a_e8">
+          <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- ══ 출구 (파란색) ══ -->
+        <!-- NegMAS → 상대 PPA -->
+        <mxCell id="a_e9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#3b82f6;strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" source="a_neg" target="a_ppa" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_e9_l" value="출구 ①  오퍼" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#3b82f6;fontStyle=1;labelBackgroundColor=none;" vertex="1" connectable="0" parent="a_e9">
+          <mxGeometry x="0.15" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- Orchestrator → Cloud LLM -->
+        <mxCell id="a_e10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#3b82f6;strokeWidth=2;dashed=1;dashPattern=6 3;exitX=0;exitY=1;entryX=0.5;entryY=0;" edge="1" source="a_orch" target="a_cloud" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_e10_l" value="출구 ②  계획 요청" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#3b82f6;fontStyle=1;labelBackgroundColor=none;" vertex="1" connectable="0" parent="a_e10">
+          <mxGeometry x="0.15" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- PII 금고 → Sub-Agent (복원) -->
+        <mxCell id="a_e11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#9ca3af;strokeWidth=1;dashed=1;dashPattern=3 3;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="a_vault" target="a_exec" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="660" y="228"/><mxPoint x="660" y="455"/></Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a_e11_l" value="PII 복원&lt;br&gt;(합의 후)" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;fontColor=#9ca3af;labelBackgroundColor=none;" vertex="1" connectable="0" parent="a_e11">
+          <mxGeometry x="0.3" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- ── 주석: 핵심 특성 ── -->
+        <mxCell id="a_note" value="✓ &lt;b&gt;단일 enforcement 지점&lt;/b&gt;&lt;br&gt;&lt;br&gt;• 감사·검증이 결정론적&lt;br&gt;• 어휘 변경이 한 곳에 국소화&lt;br&gt;• 교차 일관성 자연 보장&lt;br&gt;&lt;br&gt;⚠ 원본이 게이트웨이까지&lt;br&gt;   이동하는 동안 메모리 체류" style="shape=note;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=#334155;fontColor=#cbd5e1;fontSize=10;align=left;spacingLeft=8;spacingTop=4;size=14;" vertex="1" parent="1">
+          <mxGeometry x="60" y="430" width="200" height="130" as="geometry"/>
+        </mxCell>
+
+        <!-- ── 범례 ── -->
+        <mxCell id="a_leg" value="범례" style="text;html=1;fontSize=11;fontStyle=1;fontColor=#94a3b8;align=left;" vertex="1" parent="1">
+          <mxGeometry x="980" y="620" width="60" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_leg1" value="" style="endArrow=classic;strokeColor=#ef4444;strokeWidth=2;dashed=1;dashPattern=5 3;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="980" y="655" as="sourcePoint"/>
+            <mxPoint x="1040" y="655" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a_leg1t" value="원본 데이터" style="text;html=1;fontSize=10;fontColor=#ef4444;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="645" width="80" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_leg2" value="" style="endArrow=classic;strokeColor=#22c55e;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="980" y="680" as="sourcePoint"/>
+            <mxPoint x="1040" y="680" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a_leg2t" value="안전형 데이터" style="text;html=1;fontSize=10;fontColor=#22c55e;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="670" width="80" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="a_leg3" value="" style="endArrow=classic;strokeColor=#3b82f6;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="980" y="705" as="sourcePoint"/>
+            <mxPoint x="1040" y="705" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a_leg3t" value="출구 (외부)" style="text;html=1;fontSize=10;fontColor=#3b82f6;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="695" width="80" height="20" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ============================================================ -->
+  <!-- PAGE 2: 후보 B — 분산 인라인형                                -->
+  <!-- ============================================================ -->
+  <diagram name="후보 B — 분산 인라인형" id="pageB">
+    <mxGraphModel dx="1240" dy="860" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1240" pageHeight="860">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ── 온디바이스 신뢰경계 ── -->
+        <mxCell id="b_trust" value="온디바이스 신뢰경계" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=#64748b;fontColor=#94a3b8;fontSize=14;fontStyle=1;verticalAlign=top;align=left;spacingTop=8;spacingLeft=14;dashed=1;dashPattern=8 4;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="20" y="20" width="1100" height="540" as="geometry"/>
+        </mxCell>
+
+        <!-- ── 입력 출처 (왼쪽, A와 동일 위치) ── -->
+        <mxCell id="b_ids" value="IDS&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Intent 감지&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#475569;strokeColor=#334155;fontColor=#ffffff;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="100" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_sa" value="Sub-Agent&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;tool 호출 결과&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#475569;strokeColor=#334155;fontColor=#ffffff;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="240" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_dpa" value="DPA&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;가전 기기 상태&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#475569;strokeColor=#334155;fontColor=#ffffff;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="380" width="130" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- ── 인라인 어댑터 × 3 (enforcement 분산) ── -->
+        <mxCell id="b_adp1" value="어댑터 ①&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;정규화 + 토큰화&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0e7490;strokeColor=#155e75;fontColor=#ffffff;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="260" y="90" width="150" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_adp2" value="어댑터 ②&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;정규화 + 토큰화&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0e7490;strokeColor=#155e75;fontColor=#ffffff;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="260" y="230" width="150" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_adp3" value="어댑터 ③&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;정규화 + 토큰화&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0e7490;strokeColor=#155e75;fontColor=#ffffff;fontSize=11;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="260" y="370" width="150" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- ── 공유 PII Vault ── -->
+        <mxCell id="b_vault" value="PII 금고&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;(공유 서비스)&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#b45309;strokeColor=#92400e;fontColor=#ffffff;fontSize=11;fontStyle=1;boundedLbl=1;size=10;" vertex="1" parent="1">
+          <mxGeometry x="480" y="90" width="100" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- ── 출력 빌더 (여전히 중앙) ── -->
+        <mxCell id="b_build" value="출력 빌더&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;OutcomeSpace · 계획 요청&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0e7490;strokeColor=#155e75;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="470" y="260" width="170" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ── Meta Agent ── -->
+        <mxCell id="b_maf" value="Meta Agent&lt;br&gt;&lt;font style=&quot;font-size:10px;font-weight:normal&quot;&gt;협상 두뇌&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#14532d;strokeColor=#22c55e;fontColor=#e2e8f0;fontSize=13;fontStyle=1;verticalAlign=top;align=center;spacingTop=8;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="720" y="70" width="220" height="210" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_ufun" value="ufun&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;선호 · 유보값 (비공개)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#15803d;strokeColor=#166534;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="750" y="130" width="160" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_neg" value="협상 엔진 (NegMAS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#15803d;strokeColor=#166534;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="750" y="205" width="160" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- ── Orchestrator · Sub-Agent ── -->
+        <mxCell id="b_orch" value="Orchestrator&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;계획 작성&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#475569;strokeColor=#334155;fontColor=#ffffff;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="760" y="340" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_exec" value="Sub-Agent&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;실행 (예약·결제)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#475569;strokeColor=#334155;fontColor=#ffffff;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="760" y="430" width="140" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- ── 외부 ── -->
+        <mxCell id="b_ppa" value="상대 PPA&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;(외부, 불투명)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;strokeColor=#5b21b6;fontColor=#ffffff;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="740" y="640" width="160" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_cloud" value="Cloud LLM&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;(외부)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;strokeColor=#5b21b6;fontColor=#ffffff;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="440" y="640" width="160" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- ══ 엣지: 원본 → 어댑터 (빨간 점선, 짧은 경로) ══ -->
+        <mxCell id="b_e1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#ef4444;strokeWidth=2;dashed=1;dashPattern=5 3;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="b_ids" target="b_adp1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_e1_l" value="원본" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#ef4444;fontStyle=1;labelBackgroundColor=#1e293b;" vertex="1" connectable="0" parent="b_e1">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="b_e2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#ef4444;strokeWidth=2;dashed=1;dashPattern=5 3;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="b_sa" target="b_adp2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_e2_l" value="원본" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#ef4444;fontStyle=1;labelBackgroundColor=#1e293b;" vertex="1" connectable="0" parent="b_e2">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="b_e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#ef4444;strokeWidth=2;dashed=1;dashPattern=5 3;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="b_dpa" target="b_adp3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_e3_l" value="원본" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#ef4444;fontStyle=1;labelBackgroundColor=#1e293b;" vertex="1" connectable="0" parent="b_e3">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- ══ 어댑터 → Vault (PII, 주황) ══ -->
+        <mxCell id="b_e4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#f59e0b;strokeWidth=2;dashed=1;dashPattern=4 3;exitX=1;exitY=0.3;entryX=0;entryY=0.5;" edge="1" source="b_adp1" target="b_vault" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_e5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#f59e0b;strokeWidth=2;dashed=1;dashPattern=4 3;exitX=1;exitY=0.3;entryX=0;entryY=0.8;" edge="1" source="b_adp2" target="b_vault" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_e6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#f59e0b;strokeWidth=2;dashed=1;dashPattern=4 3;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" edge="1" source="b_adp3" target="b_vault" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="335" y="350"/><mxPoint x="530" y="350"/><mxPoint x="530" y="160"/></Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b_e4_l" value="PII" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;fontColor=#f59e0b;fontStyle=1;labelBackgroundColor=#1e293b;" vertex="1" connectable="0" parent="b_e4">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- ══ 어댑터 → 출력 빌더 (안전형, 초록) ══ -->
+        <mxCell id="b_e7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#22c55e;strokeWidth=2;exitX=1;exitY=0.7;entryX=0;entryY=0.3;" edge="1" source="b_adp1" target="b_build" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_e8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#22c55e;strokeWidth=2;exitX=1;exitY=0.7;entryX=0;entryY=0.5;" edge="1" source="b_adp2" target="b_build" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_e9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#22c55e;strokeWidth=2;exitX=1;exitY=0.7;entryX=0;entryY=0.8;" edge="1" source="b_adp3" target="b_build" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_e7_l" value="안전형" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;fontColor=#22c55e;fontStyle=1;labelBackgroundColor=#1e293b;" vertex="1" connectable="0" parent="b_e7">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- ══ 출력 빌더 / 어댑터 → 소비처 (초록) ══ -->
+        <mxCell id="b_e10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#22c55e;strokeWidth=2;exitX=1;exitY=0.3;entryX=0;entryY=0.5;" edge="1" source="b_build" target="b_ufun" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_e10_l" value="안전 사실값" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;fontColor=#22c55e;fontStyle=1;labelBackgroundColor=#1e293b;" vertex="1" connectable="0" parent="b_e10">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="b_e11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#22c55e;strokeWidth=2;exitX=1;exitY=0.7;entryX=0;entryY=0.5;" edge="1" source="b_build" target="b_neg" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_e11_l" value="OutcomeSpace" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;fontColor=#22c55e;fontStyle=1;labelBackgroundColor=#1e293b;" vertex="1" connectable="0" parent="b_e11">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="b_e12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#22c55e;strokeWidth=2;exitX=1;exitY=1;entryX=0;entryY=0.5;" edge="1" source="b_build" target="b_orch" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_e12_l" value="계획 요청" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;fontColor=#22c55e;fontStyle=1;labelBackgroundColor=#1e293b;" vertex="1" connectable="0" parent="b_e12">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- ══ 출구 (파란색) ══ -->
+        <mxCell id="b_e13" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#3b82f6;strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" source="b_neg" target="b_ppa" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_e13_l" value="출구 ①  오퍼" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#3b82f6;fontStyle=1;labelBackgroundColor=none;" vertex="1" connectable="0" parent="b_e13">
+          <mxGeometry x="0.15" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="b_e14" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#3b82f6;strokeWidth=2;dashed=1;dashPattern=6 3;exitX=0;exitY=1;entryX=0.5;entryY=0;" edge="1" source="b_orch" target="b_cloud" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_e14_l" value="출구 ②  계획 요청" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#3b82f6;fontStyle=1;labelBackgroundColor=none;" vertex="1" connectable="0" parent="b_e14">
+          <mxGeometry x="0.15" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- PII 금고 → Sub-Agent -->
+        <mxCell id="b_e15" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#9ca3af;strokeWidth=1;dashed=1;dashPattern=3 3;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="b_vault" target="b_exec" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="680" y="125"/><mxPoint x="680" y="455"/></Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b_e15_l" value="PII 복원&lt;br&gt;(합의 후)" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=9;fontColor=#9ca3af;labelBackgroundColor=none;" vertex="1" connectable="0" parent="b_e15">
+          <mxGeometry x="0.3" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- ── 주석: 핵심 특성·위험 ── -->
+        <mxCell id="b_note1" value="⚠ &lt;b&gt;N개 독립 enforcement&lt;/b&gt;&lt;br&gt;&lt;br&gt;• 동일 규칙을 3곳에 복제&lt;br&gt;  → 한 곳 갱신 누락 = 유출 경로&lt;br&gt;• 교차 일관성 별도 조율 필요&lt;br&gt;• 감사 시 N개 모두 확인 필요" style="shape=note;whiteSpace=wrap;html=1;fillColor=#451a03;strokeColor=#b45309;fontColor=#fbbf24;fontSize=10;align=left;spacingLeft=8;spacingTop=4;size=14;" vertex="1" parent="1">
+          <mxGeometry x="60" y="460" width="210" height="100" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="b_note2" value="출력 빌더는 여전히 중앙&lt;br&gt;→ 완전 분산이 아닌 하이브리드" style="shape=callout;whiteSpace=wrap;html=1;fillColor=#1e1b4b;strokeColor=#6366f1;fontColor=#a5b4fc;fontSize=9;align=center;size=20;position=0.3;position2=1;base=15;" vertex="1" parent="1">
+          <mxGeometry x="415" y="340" width="190" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- ── 범례 ── -->
+        <mxCell id="b_leg" value="범례" style="text;html=1;fontSize=11;fontStyle=1;fontColor=#94a3b8;align=left;" vertex="1" parent="1">
+          <mxGeometry x="980" y="620" width="60" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_leg1" value="" style="endArrow=classic;strokeColor=#ef4444;strokeWidth=2;dashed=1;dashPattern=5 3;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="980" y="655" as="sourcePoint"/>
+            <mxPoint x="1040" y="655" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b_leg1t" value="원본 데이터" style="text;html=1;fontSize=10;fontColor=#ef4444;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="645" width="80" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_leg2" value="" style="endArrow=classic;strokeColor=#22c55e;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="980" y="680" as="sourcePoint"/>
+            <mxPoint x="1040" y="680" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b_leg2t" value="안전형 데이터" style="text;html=1;fontSize=10;fontColor=#22c55e;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="670" width="80" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_leg3" value="" style="endArrow=classic;strokeColor=#3b82f6;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="980" y="705" as="sourcePoint"/>
+            <mxPoint x="1040" y="705" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b_leg3t" value="출구 (외부)" style="text;html=1;fontSize=10;fontColor=#3b82f6;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="695" width="80" height="20" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+</mxfile>
