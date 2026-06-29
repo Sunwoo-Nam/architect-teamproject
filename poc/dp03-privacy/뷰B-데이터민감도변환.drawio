@@ -1,0 +1,45 @@
+<mxfile host="Electron">
+  <diagram id="dataflow" name="B 데이터 민감도 변환">
+    <mxGraphModel dx="1100" dy="680" grid="0" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="920" pageHeight="540" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="t" value="뷰 B — 데이터 민감도 변환 (단말 안 → 출구)" style="text;html=1;fontSize=17;fontStyle=1;fontColor=#222222;" vertex="1" parent="1"><mxGeometry x="40" y="14" width="560" height="26" as="geometry"/></mxCell>
+
+        <mxCell id="h1" value="원본 (단말 안)" style="text;html=1;align=left;fontSize=12;fontStyle=1;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="40" y="58" width="200" height="18" as="geometry"/></mxCell>
+        <mxCell id="h2" value="처리" style="text;html=1;align=center;fontSize=12;fontStyle=1;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="430" y="58" width="150" height="18" as="geometry"/></mxCell>
+        <mxCell id="h3" value="출구 값 (단말 밖)" style="text;html=1;align=left;fontSize=12;fontStyle=1;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="620" y="58" width="240" height="18" as="geometry"/></mxCell>
+        <mxCell id="bnd" value="" style="endArrow=none;html=1;dashed=1;dashPattern=6 4;strokeColor=#b85450;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="600" y="80" as="sourcePoint"/><mxPoint x="600" y="450" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="bndl" value="« trust boundary »" style="text;html=1;align=center;fontSize=10;fontStyle=2;fontColor=#b85450;" vertex="1" parent="1"><mxGeometry x="536" y="62" width="128" height="14" as="geometry"/></mxCell>
+
+        <mxCell id="a_l" value="(a) PII — 이름·전화·주소" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="92" width="380" height="44" as="geometry"/></mxCell>
+        <mxCell id="a_r" value="토큰 &lt;tok&gt; · 실행 때만 복원" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1"><mxGeometry x="620" y="92" width="260" height="44" as="geometry"/></mxCell>
+        <mxCell id="a_e" value="토큰화" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;fontSize=11;fontColor=#444444;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="a_l" target="a_r"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="b1_l" value="(b) 사실값·시간 — 토 19:30–22:00" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="152" width="380" height="44" as="geometry"/></mxCell>
+        <mxCell id="b1_r" value="토요일 저녁" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1"><mxGeometry x="620" y="152" width="260" height="44" as="geometry"/></mxCell>
+        <mxCell id="b1_e" value="정밀도↓ (1h/daypart)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;fontSize=11;fontColor=#444444;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="b1_l" target="b1_r"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="b2_l" value="(b) 사실값·위치 — 강남역 도보 5분" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="212" width="380" height="44" as="geometry"/></mxCell>
+        <mxCell id="b2_r" value="강남" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1"><mxGeometry x="620" y="212" width="260" height="44" as="geometry"/></mxCell>
+        <mxCell id="b2_e" value="구 단위" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;fontSize=11;fontColor=#444444;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="b2_l" target="b2_r"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="b3_l" value="(b) 사실값·예산 — 47,000원" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="272" width="380" height="44" as="geometry"/></mxCell>
+        <mxCell id="b3_r" value="5만원 이하" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1"><mxGeometry x="620" y="272" width="260" height="44" as="geometry"/></mxCell>
+        <mxCell id="b3_e" value="상한만" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;fontSize=11;fontColor=#444444;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="b3_l" target="b3_r"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="c_l" value="(c) 원본맥락 — 세탁기 19:30 종료 (집안일 끝)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="332" width="380" height="44" as="geometry"/></mxCell>
+        <mxCell id="c_r" value="저녁 이후 가능" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1"><mxGeometry x="620" y="332" width="260" height="44" as="geometry"/></mxCell>
+        <mxCell id="c_e" value="사실값 변환 · 원본 폐기" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;fontSize=11;fontColor=#444444;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="c_l" target="c_r"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="d_l" value="(d) 사유 — 정신과 진료·불안장애·권고사직" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="392" width="380" height="44" as="geometry"/></mxCell>
+        <mxCell id="d_r" value="✕  전송 안 함 (차단)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="620" y="392" width="260" height="44" as="geometry"/></mxCell>
+        <mxCell id="d_e" value="차단 (어떤 형태로도 미전송)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;dashed=1;strokeColor=#b85450;fontSize=11;fontColor=#9c3a36;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="d_l" target="d_r"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="note" value="처리 위치 :  방안1 = 출구(egress)에서  ·  방안2 = 입력(ingress)에서 (원본이 추론에 미도달)" style="text;html=1;align=left;fontSize=12;fontStyle=1;fontColor=#8e44ad;" vertex="1" parent="1"><mxGeometry x="40" y="452" width="840" height="20" as="geometry"/></mxCell>
+        <mxCell id="leg" value="범례 :  민감도 색 — 빨강(a)PII · 파랑(b)사실값 · 주황(c)원본맥락 · 보라(d)사유    /    초록 = 전송 가능(안전형) · 빨강 = 차단" style="text;html=1;align=left;fontSize=11;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="40" y="482" width="840" height="22" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

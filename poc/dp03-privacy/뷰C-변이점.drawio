@@ -1,0 +1,30 @@
+<mxfile host="Electron">
+  <diagram id="variation" name="C 변이점 뷰">
+    <mxGraphModel dx="1100" dy="680" grid="0" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="960" pageHeight="430" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="t" value="뷰 C — 변이점 (위생화를 어디서? : ingress = 방안2  vs  egress = 방안1)" style="text;html=1;fontSize=17;fontStyle=1;fontColor=#222222;" vertex="1" parent="1"><mxGeometry x="40" y="14" width="780" height="26" as="geometry"/></mxCell>
+        <mxCell id="sub" value="두 방안은 같은 골격을 공유한다. 단 하나의 결정 — 위생화(변환/필터)를 추론 앞(ingress)에 둘지, 출구(egress)에 둘지 — 만 다르다." style="text;html=1;align=left;fontSize=12;fontColor=#5a6470;" vertex="1" parent="1"><mxGeometry x="40" y="48" width="880" height="20" as="geometry"/></mxCell>
+
+        <mxCell id="in" value="입력&#10;(원본)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="120" width="120" height="66" as="geometry"/></mxCell>
+        <mxCell id="v1" value="« variation point »&#10;방안 2 : Transform @ ingress&#10;원본 → 안전형" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;dashed=1;dashPattern=6 4;fontSize=11;" vertex="1" parent="1"><mxGeometry x="196" y="114" width="196" height="78" as="geometry"/></mxCell>
+        <mxCell id="llm" value="« LLM »&#10;LLM-on 추론&#10;(제안 생성)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1"><mxGeometry x="428" y="120" width="150" height="66" as="geometry"/></mxCell>
+        <mxCell id="v2" value="« variation point »&#10;방안 1 : Filter @ egress&#10;출구에서 거름" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;dashed=1;dashPattern=6 4;fontSize=11;" vertex="1" parent="1"><mxGeometry x="614" y="114" width="196" height="78" as="geometry"/></mxCell>
+        <mxCell id="out" value="출구&#10;(A2A 구조화)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="846" y="120" width="114" height="66" as="geometry"/></mxCell>
+
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="in" target="v1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="v1" target="llm"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="llm" target="v2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="v2" target="out"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="n2" value="방안 2 선택 (① 활성) :  추론엔 안전형만 → 흘릴 원본이 없음" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1"><mxGeometry x="120" y="226" width="360" height="38" as="geometry"/></mxCell>
+        <mxCell id="n1" value="방안 1 선택 (② 활성) :  원본이 추론까지 흐름 → 게이트가 유일 방어선" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1"><mxGeometry x="500" y="226" width="380" height="38" as="geometry"/></mxCell>
+
+        <mxCell id="meas" value="측정 결과 (PoC) :  방안 1 유출 5/10 시나리오 (게이트 빈틈 시)  ·  방안 2 유출 0/10" style="text;html=1;align=left;fontSize=12;fontStyle=1;fontColor=#8e44ad;" vertex="1" parent="1"><mxGeometry x="40" y="290" width="880" height="20" as="geometry"/></mxCell>
+        <mxCell id="leg" value="범례 :  파랑 = 단말 모듈    보라 = LLM    주황 점선 = 변이점(방안별 택일)    초록/빨강 = 선택의 결과" style="text;html=1;align=left;fontSize=11;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="40" y="330" width="880" height="22" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

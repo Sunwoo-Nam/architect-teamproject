@@ -1,0 +1,74 @@
+<mxfile host="Electron">
+  <diagram id="b1" name="방안1 출구제거 구조">
+    <mxGraphModel dx="1000" dy="640" grid="0" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="840" pageHeight="540" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title" value="방안 1 — 출구 제거 (Filter-at-Egress)" style="text;html=1;fontSize=17;fontStyle=1;fontColor=#222222;" vertex="1" parent="1"><mxGeometry x="40" y="14" width="520" height="26" as="geometry"/></mxCell>
+
+        <mxCell id="creal" value="단말 안 · 실제 제품 모듈" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9aa6b2;dashed=1;dashPattern=8 4;verticalAlign=top;align=left;spacingLeft=12;spacingTop=8;fontSize=13;fontStyle=1;fontColor=#5a6470;" vertex="1" parent="1"><mxGeometry x="40" y="54" width="330" height="404" as="geometry"/></mxCell>
+        <mxCell id="ceval" value="단말 밖 · 시뮬레이션 / 평가 (제품 외)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9aa6b2;dashed=1;dashPattern=8 4;verticalAlign=top;align=left;spacingLeft=12;spacingTop=8;fontSize=13;fontStyle=1;fontColor=#5a6470;" vertex="1" parent="1"><mxGeometry x="430" y="54" width="370" height="266" as="geometry"/></mxCell>
+
+        <mxCell id="in" value="입력&#10;IDS 커맨드 + Tool 결과 (원본)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1"><mxGeometry x="62" y="90" width="286" height="44" as="geometry"/></mxCell>
+        <mxCell id="cls" value="Classifier&#10;원본 분류 (PII·사실값·사유)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1"><mxGeometry x="62" y="152" width="286" height="44" as="geometry"/></mxCell>
+        <mxCell id="eng" value="NegotiationEngine + LLM-on&#10;원본 그대로 보고 제안 생성&#10;⏱ t_propose · LLM · 라운드별" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1"><mxGeometry x="62" y="214" width="286" height="66" as="geometry"/></mxCell>
+        <mxCell id="gate" value="EgressGate.sanitize (+Auth)&#10;⏱ t_gate · CPU · ≈0" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1"><mxGeometry x="62" y="298" width="286" height="52" as="geometry"/></mxCell>
+        <mxCell id="note1" value="※ 원본이 추론까지 흐름 → 게이트가 유일한 방어선" style="text;html=1;align=left;fontColor=#C0392B;fontSize=11;" vertex="1" parent="1"><mxGeometry x="62" y="368" width="296" height="34" as="geometry"/></mxCell>
+
+        <mxCell id="mon" value="EgressMonitor&#10;나가는 메시지 가로채기 · 측정 탭" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#9aa6b2;dashed=1;dashPattern=6 4;fontSize=11;" vertex="1" parent="1"><mxGeometry x="450" y="92" width="332" height="48" as="geometry"/></mxCell>
+        <mxCell id="cp" value="상대 에이전트&#10;LLM-cp (벤치=stub)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;dashed=1;dashPattern=6 4;fontSize=11;" vertex="1" parent="1"><mxGeometry x="450" y="178" width="160" height="52" as="geometry"/></mxCell>
+        <mxCell id="ora" value="유출 오라클&#10;+ LLM-judge" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;dashed=1;dashPattern=6 4;fontSize=11;" vertex="1" parent="1"><mxGeometry x="632" y="178" width="150" height="52" as="geometry"/></mxCell>
+        <mxCell id="met" value="Metrics · Harness" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#9aa6b2;dashed=1;dashPattern=6 4;fontSize=11;" vertex="1" parent="1"><mxGeometry x="632" y="258" width="150" height="40" as="geometry"/></mxCell>
+
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="in" target="cls"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cls" target="eng"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="eng" target="gate"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" value="출구 (A2A 구조화 메시지)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;fontSize=11;fontColor=#5a6470;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="gate" target="mon"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e5" value="전송" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;fontSize=11;fontColor=#5a6470;exitX=0.25;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="mon" target="cp"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6" value="채점" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;fontSize=11;fontColor=#5a6470;exitX=0.75;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="mon" target="ora"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="ora" target="met"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="decomp" value="⏱ 측정 분해 (on-device) :  t_session = t_propose (LLM · 라운드별) + t_gate (CPU · ≈0)   —  LLM 호출 시간을 분리해 계측" style="text;html=1;align=left;fontSize=12;fontColor=#8e44ad;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="40" y="474" width="760" height="22" as="geometry"/></mxCell>
+        <mxCell id="leg" value="범례 :  ■ 파랑 = 실제 제품 모듈    ■ 보라 = LLM 호출 지점    ┄ 점선 테두리 = 시뮬레이션·평가(제품 외)    ⏱ = 시간 측정 구간" style="text;html=1;align=left;fontSize=11;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="40" y="504" width="760" height="22" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="b2" name="방안2 사전변환 구조">
+    <mxGraphModel dx="1000" dy="640" grid="0" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="540" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title2" value="방안 2 — 사전 변환 (Transform-at-Ingress)" style="text;html=1;fontSize=17;fontStyle=1;fontColor=#222222;" vertex="1" parent="1"><mxGeometry x="40" y="14" width="560" height="26" as="geometry"/></mxCell>
+
+        <mxCell id="creal2" value="단말 안 · 실제 제품 모듈" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9aa6b2;dashed=1;dashPattern=8 4;verticalAlign=top;align=left;spacingLeft=12;spacingTop=8;fontSize=13;fontStyle=1;fontColor=#5a6470;" vertex="1" parent="1"><mxGeometry x="40" y="54" width="430" height="404" as="geometry"/></mxCell>
+        <mxCell id="ceval2" value="단말 밖 · 시뮬레이션 / 평가 (제품 외)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9aa6b2;dashed=1;dashPattern=8 4;verticalAlign=top;align=left;spacingLeft=12;spacingTop=8;fontSize=13;fontStyle=1;fontColor=#5a6470;" vertex="1" parent="1"><mxGeometry x="490" y="54" width="370" height="266" as="geometry"/></mxCell>
+
+        <mxCell id="in2" value="입력&#10;IDS 커맨드 + Tool 결과 (원본)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1"><mxGeometry x="62" y="90" width="250" height="44" as="geometry"/></mxCell>
+        <mxCell id="med" value="PrivacyMediator&#10;변환·차단·토큰화 (ingress 1회)&#10;⏱ t_transform · CPU  +  t_classify · LLM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1"><mxGeometry x="62" y="150" width="250" height="68" as="geometry"/></mxCell>
+        <mxCell id="vault" value="PrivacyVault&#10;토큰 보관" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1"><mxGeometry x="338" y="162" width="108" height="46" as="geometry"/></mxCell>
+        <mxCell id="eng2" value="NegotiationEngine + LLM-on&#10;SafeScope(coarse)만 보고 제안&#10;⏱ t_propose · LLM · 라운드별" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1"><mxGeometry x="62" y="240" width="250" height="66" as="geometry"/></mxCell>
+        <mxCell id="ver" value="EgressGate.verify (원본 부재 확인)&#10;⏱ t_verify · CPU · ≈0" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1"><mxGeometry x="62" y="324" width="250" height="52" as="geometry"/></mxCell>
+        <mxCell id="note2" value="※ 원본 폐기 → 추론엔 안전형만 → 흘릴 원본이 없음" style="text;html=1;align=left;fontColor=#1a7f37;fontSize=11;" vertex="1" parent="1"><mxGeometry x="62" y="394" width="390" height="34" as="geometry"/></mxCell>
+
+        <mxCell id="mon2" value="EgressMonitor&#10;나가는 메시지 가로채기 · 측정 탭" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#9aa6b2;dashed=1;dashPattern=6 4;fontSize=11;" vertex="1" parent="1"><mxGeometry x="510" y="92" width="332" height="48" as="geometry"/></mxCell>
+        <mxCell id="cp2" value="상대 에이전트&#10;LLM-cp (벤치=stub)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;dashed=1;dashPattern=6 4;fontSize=11;" vertex="1" parent="1"><mxGeometry x="510" y="178" width="160" height="52" as="geometry"/></mxCell>
+        <mxCell id="ora2" value="유출 오라클&#10;+ LLM-judge" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;dashed=1;dashPattern=6 4;fontSize=11;" vertex="1" parent="1"><mxGeometry x="692" y="178" width="150" height="52" as="geometry"/></mxCell>
+        <mxCell id="met2" value="Metrics · Harness" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#9aa6b2;dashed=1;dashPattern=6 4;fontSize=11;" vertex="1" parent="1"><mxGeometry x="692" y="258" width="150" height="40" as="geometry"/></mxCell>
+
+        <mxCell id="f1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="in2" target="med"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="f2" value="토큰↔원본" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;fontSize=11;fontColor=#5a6470;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="med" target="vault"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="f3" value="SafeScope" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;fontSize=11;fontColor=#5a6470;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="med" target="eng2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="f4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="eng2" target="ver"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="f5" value="출구 (A2A 구조화 메시지)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;fontSize=11;fontColor=#5a6470;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="ver" target="mon2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="f6" value="전송" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;fontSize=11;fontColor=#5a6470;exitX=0.25;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="mon2" target="cp2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="f7" value="채점" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;fontSize=11;fontColor=#5a6470;exitX=0.75;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="mon2" target="ora2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="f8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;strokeColor=#7a8694;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="ora2" target="met2"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="decomp2" value="⏱ 측정 분해 (on-device) :  t_session = t_classify (LLM · ingress) + t_propose (LLM · 라운드별) + t_transform·t_verify (CPU)   —  LLM 호출 시간 분리 계측" style="text;html=1;align=left;fontSize=12;fontColor=#8e44ad;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="40" y="474" width="820" height="22" as="geometry"/></mxCell>
+        <mxCell id="leg2" value="범례 :  ■ 파랑 = 실제 제품 모듈    ■ 보라 = LLM 호출 지점    ┄ 점선 테두리 = 시뮬레이션·평가(제품 외)    ⏱ = 시간 측정 구간" style="text;html=1;align=left;fontSize=11;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="40" y="504" width="800" height="22" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
