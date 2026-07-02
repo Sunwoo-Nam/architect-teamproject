@@ -1,0 +1,153 @@
+schema_version: scenario.v1
+scenario_id: S001
+task_family: schedule_coordination
+complexity_level: issue_4
+tension_pattern: one_hard_constraint
+variant_id: v01
+domain:
+  issues:
+    - name: slot
+      type: enum
+      values: [weekday_evening, saturday_lunch, sunday_evening]
+      public: true
+      outcome_space: true
+      hintable: true
+    - name: area
+      type: enum
+      values: [near_home, midpoint, near_office]
+      public: true
+      outcome_space: true
+      hintable: true
+    - name: budget_band
+      type: bucket
+      values: [low, medium, high]
+      order: [low, medium, high]
+      public: true
+      outcome_space: true
+      hintable: true
+    - name: notice_period
+      type: bucket
+      values: [same_day, one_day, three_days]
+      order: [same_day, one_day, three_days]
+      public: true
+      outcome_space: true
+      hintable: true
+agents:
+  - id: ppa_a
+    role: initiator
+    capability:
+      preference_hint: true
+      hint_schema_version: hint.v1
+    private_profile:
+      utility_model: linear_additive
+      utility_weights:
+        slot: 0.40
+        area: 0.25
+        budget_band: 0.25
+        notice_period: 0.10
+      value_scores:
+        slot:
+          weekday_evening: 0.4
+          saturday_lunch: 1.0
+          sunday_evening: 0.7
+        area:
+          near_home: 1.0
+          midpoint: 0.7
+          near_office: 0.3
+        budget_band:
+          low: 1.0
+          medium: 0.7
+          high: 0.2
+        notice_period:
+          same_day: 0.4
+          one_day: 0.7
+          three_days: 1.0
+      hard_constraints:
+        - issue: slot
+          allowed_values: [saturday_lunch, sunday_evening]
+      reservation_value: 0.62
+      concession_policy:
+        type: linear
+        start_threshold: 0.92
+        end_threshold: 0.62
+    allowed_hint_projection:
+      schema_version: hint.v1
+      issue_preferences:
+        slot: high
+        area: medium
+        budget_band: medium
+        notice_period: low
+      issue_flexibility:
+        slot: low
+        area: medium
+        budget_band: medium
+        notice_period: high
+      hard_constraints: [slot]
+      concession_phase_allowed: true
+  - id: ppa_b
+    role: responder
+    capability:
+      preference_hint: true
+      hint_schema_version: hint.v1
+    private_profile:
+      utility_model: linear_additive
+      utility_weights:
+        slot: 0.25
+        area: 0.35
+        budget_band: 0.20
+        notice_period: 0.20
+      value_scores:
+        slot:
+          weekday_evening: 0.6
+          saturday_lunch: 0.8
+          sunday_evening: 1.0
+        area:
+          near_home: 0.2
+          midpoint: 0.8
+          near_office: 1.0
+        budget_band:
+          low: 0.5
+          medium: 1.0
+          high: 0.8
+        notice_period:
+          same_day: 1.0
+          one_day: 0.7
+          three_days: 0.4
+      hard_constraints: []
+      reservation_value: 0.58
+      concession_policy:
+        type: linear
+        start_threshold: 0.90
+        end_threshold: 0.58
+    allowed_hint_projection:
+      schema_version: hint.v1
+      issue_preferences:
+        slot: medium
+        area: high
+        budget_band: medium
+        notice_period: medium
+      issue_flexibility:
+        slot: medium
+        area: medium
+        budget_band: high
+        notice_period: high
+      hard_constraints: []
+      concession_phase_allowed: true
+privacy_labels:
+  pii_raw: false
+  sensitive_reason_present: false
+  exact_value_present: false
+  hint_accumulation_risk: medium
+  external_hint_allowed: true
+expected_checks:
+  has_agreement_region: true
+  expected_fallback: false
+  expected_timeout_possible: false
+  min_valid_outcomes: 3
+  min_pareto_candidates: 1
+  llm_schema_required: true
+generation_meta:
+  generator_version: gen.v1
+  seed: 1001
+  source: synthetic
+  created_from_legacy_poc: false
