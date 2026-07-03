@@ -106,7 +106,7 @@ class Scenario:
     tension_pattern: str
     variant_id: str
     issues: Tuple[IssueSpec, ...]
-    agents: Tuple[AgentSpec, AgentSpec]
+    agents: Tuple[AgentSpec, ...]
     privacy_labels: PrivacyLabels
     expected_checks: ExpectedChecks
     generation_meta: GenerationMeta
@@ -164,11 +164,15 @@ class RunResult:
     repeat_id: str
     agreement_success: bool
     agreement_outcome: Optional[OutcomeDict]
+    steps_to_agreement: Optional[int]
     rounds_to_agreement: Optional[int]
     atomic_actions_to_agreement: int
     utility_a: Optional[float]
     utility_b: Optional[float]
     joint_utility: Optional[float]
+    utilities: Dict[str, float]
+    min_utility: Optional[float]
+    utility_spread: Optional[float]
     pareto_dominated: Optional[bool]
     pareto_joint_gap: Optional[float]
     constraint_hint_message_count: int

@@ -7,6 +7,9 @@ from dp03_a2a_hints.scenario_generator import (
     FIXED_HIGH_COMPLEXITY_ROLE_MODES,
     FIXED_ONLY_DIFFICULTY_STRATA,
     FIXED_ONLY_PATTERNS,
+    FIXED_THREE_PARTY_DIFFICULTY_STRATA,
+    FIXED_THREE_PARTY_LEVELS,
+    FIXED_THREE_PARTY_PARTICIPATION_PATTERNS,
     HINT_POLICY_STRATA,
     TASK_FAMILIES,
     TENSION_PATTERNS,
@@ -14,6 +17,7 @@ from dp03_a2a_hints.scenario_generator import (
     generate_augmented_scenarios,
     generate_fixed_high_complexity_scenarios,
     generate_fixed_only_scenarios,
+    generate_fixed_three_party_scenarios,
     generate_orthogonal_augmented_scenarios,
     generate_scenarios,
 )
@@ -216,6 +220,54 @@ def test_fixed_high_complexity_scenario_matrix_focuses_on_different_issue_constr
         }
 
     assert no_agreement_count == 160
+
+
+def test_fixed_three_party_scenario_matrix_adds_multilateral_constraint_cases():
+    scenarios = generate_fixed_three_party_scenarios()
+
+    assert len(scenarios) == 120
+    assert {scenario["generation_meta"]["generator_version"] for scenario in scenarios} == {
+        "gen.fixed_three_party.v1"
+    }
+    assert _meta_counts(scenarios, "party_count") == {3: 120}
+    assert _meta_counts(scenarios, "participation_pattern") == {
+        pattern: 40 for pattern in FIXED_THREE_PARTY_PARTICIPATION_PATTERNS
+    }
+    assert _meta_counts(scenarios, "difficulty_stratum") == {
+        difficulty: 30 for difficulty in FIXED_THREE_PARTY_DIFFICULTY_STRATA
+    }
+    assert {scenario["complexity_level"] for scenario in scenarios} == set(FIXED_THREE_PARTY_LEVELS)
+
+    no_agreement_count = 0
+    for raw in scenarios:
+        scenario = scenario_from_dict(raw)
+        validate_scenario(scenario)
+        assert len(scenario.agents) == 3
+        assert raw["privacy_labels"]["external_constraint_hint_allowed"]
+        assert raw["privacy_labels"]["constraint_hint_accumulation_risk"] == "high"
+        if scenario.expected_checks.has_agreement_region:
+            assert agreement_region(scenario)
+        else:
+            no_agreement_count += 1
+            assert not agreement_region(scenario)
+
+        participation_pattern = raw["generation_meta"]["participation_pattern"]
+        fixed_agents = [
+            agent
+            for agent in raw["agents"]
+            if agent["private_profile"]["hard_constraints"]
+        ]
+        if participation_pattern == "two_agents_fixed":
+            assert len(fixed_agents) == 2
+        elif participation_pattern == "all_agents_fixed":
+            assert len(fixed_agents) == 3
+        elif participation_pattern == "single_bottleneck":
+            assert [agent["id"] for agent in fixed_agents] == ["ppa_c"]
+        for agent in fixed_agents:
+            hard_issue = agent["private_profile"]["hard_constraints"][0]["issue"]
+            assert agent["allowed_constraint_hint"]["issue_constraints"] == {hard_issue: "fixed"}
+
+    assert no_agreement_count == 30
 
 
 def _meta_counts(scenarios: list[dict], key: str) -> dict[str, int]:

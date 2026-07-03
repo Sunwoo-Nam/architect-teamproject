@@ -28,8 +28,8 @@ def load_scenario(path: str | Path) -> Scenario:
 def scenario_from_dict(data: Mapping[str, Any]) -> Scenario:
     issues = tuple(_issue_from_dict(raw) for raw in data["domain"]["issues"])
     agents = tuple(_agent_from_dict(raw) for raw in data["agents"])
-    if len(agents) != 2:
-        raise ValueError("Track A expects exactly two agents")
+    if len(agents) < 2:
+        raise ValueError("Track A expects at least two agents")
     return Scenario(
         schema_version=data["schema_version"],
         scenario_id=data["scenario_id"],
@@ -38,7 +38,7 @@ def scenario_from_dict(data: Mapping[str, Any]) -> Scenario:
         tension_pattern=data["tension_pattern"],
         variant_id=data["variant_id"],
         issues=issues,
-        agents=(agents[0], agents[1]),
+        agents=agents,
         privacy_labels=_privacy_from_dict(data["privacy_labels"]),
         expected_checks=_expected_from_dict(data["expected_checks"]),
         generation_meta=_generation_meta_from_dict(data["generation_meta"]),

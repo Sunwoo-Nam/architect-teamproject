@@ -1,0 +1,235 @@
+schema_version: scenario.v1
+scenario_id: TP1S055
+task_family: venue_reservation
+complexity_level: issue_5
+tension_pattern: three_party_fixed_constraint
+variant_id: v01_tp01_location_quality_two_agents_fixed_hard_sharp_s1
+domain:
+  issues:
+  - name: slot
+    type: enum
+    values:
+    - weekday_evening
+    - saturday_lunch
+    - sunday_evening
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+  - name: area
+    type: enum
+    values:
+    - near_home
+    - midpoint
+    - near_office
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+  - name: budget_band
+    type: bucket
+    values:
+    - low
+    - medium
+    - high
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - low
+    - medium
+    - high
+  - name: crowding_level
+    type: bucket
+    values:
+    - low
+    - medium
+    - high
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - low
+    - medium
+    - high
+  - name: option_level
+    type: ordinal
+    values:
+    - basic
+    - standard
+    - premium
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - basic
+    - standard
+    - premium
+agents:
+- id: ppa_a
+  role: initiator
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      slot: 0.145
+      area: 0.42
+      budget_band: 0.145
+      crowding_level: 0.145
+      option_level: 0.145
+    value_scores:
+      slot:
+        weekday_evening: 1.0
+        saturday_lunch: 0.45
+        sunday_evening: 0.1
+      area:
+        near_home: 0.45
+        midpoint: 1.0
+        near_office: 0.45
+      budget_band:
+        low: 0.1
+        medium: 0.45
+        high: 1.0
+      crowding_level:
+        low: 1.0
+        medium: 0.45
+        high: 0.1
+      option_level:
+        basic: 0.45
+        standard: 1.0
+        premium: 0.45
+    hard_constraints:
+    - issue: area
+      allowed_values:
+      - midpoint
+    reservation_value: 0.598
+    concession_policy:
+      type: linear
+      start_threshold: 0.918
+      end_threshold: 0.598
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      area: fixed
+- id: ppa_b
+  role: responder
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      slot: 0.145
+      area: 0.145
+      budget_band: 0.145
+      crowding_level: 0.145
+      option_level: 0.42
+    value_scores:
+      slot:
+        weekday_evening: 0.45
+        saturday_lunch: 1.0
+        sunday_evening: 0.45
+      area:
+        near_home: 0.1
+        midpoint: 0.45
+        near_office: 1.0
+      budget_band:
+        low: 1.0
+        medium: 0.45
+        high: 0.1
+      crowding_level:
+        low: 0.45
+        medium: 1.0
+        high: 0.45
+      option_level:
+        basic: 0.1
+        standard: 0.45
+        premium: 1.0
+    hard_constraints:
+    - issue: option_level
+      allowed_values:
+      - premium
+    reservation_value: 0.598
+    concession_policy:
+      type: linear
+      start_threshold: 0.918
+      end_threshold: 0.598
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      option_level: fixed
+- id: ppa_c
+  role: participant
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      slot: 0.1538
+      area: 0.1538
+      budget_band: 0.3846
+      crowding_level: 0.1538
+      option_level: 0.154
+    value_scores:
+      slot:
+        weekday_evening: 0.1
+        saturday_lunch: 0.45
+        sunday_evening: 1.0
+      area:
+        near_home: 1.0
+        midpoint: 0.45
+        near_office: 0.1
+      budget_band:
+        low: 0.45
+        medium: 1.0
+        high: 0.45
+      crowding_level:
+        low: 0.1
+        medium: 0.45
+        high: 1.0
+      option_level:
+        basic: 1.0
+        standard: 0.45
+        premium: 0.1
+    hard_constraints: []
+    reservation_value: 0.598
+    concession_policy:
+      type: linear
+      start_threshold: 0.918
+      end_threshold: 0.598
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints: {}
+privacy_labels:
+  pii_raw: false
+  sensitive_reason_present: false
+  exact_value_present: false
+  constraint_hint_accumulation_risk: high
+  external_constraint_hint_allowed: true
+expected_checks:
+  has_agreement_region: true
+  expected_fallback: false
+  expected_timeout_possible: false
+  min_valid_outcomes: 3
+  min_pareto_candidates: 1
+  llm_schema_required: true
+generation_meta:
+  generator_version: gen.fixed_three_party.v1
+  seed: 700055
+  source: synthetic_fixed_three_party_matrix
+  created_from_legacy_poc: false
+  party_count: 3
+  fixed_pattern: three_party_fixed
+  participation_pattern: two_agents_fixed
+  difficulty_stratum: hard
+  utility_shape: sharp
+  fixed_strength: 1
+  issue_pair_pattern: location_quality
+  constraint_issues:
+    ppa_a: area
+    ppa_b: option_level
+  complexity_focus: high

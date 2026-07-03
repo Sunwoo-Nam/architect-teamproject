@@ -77,12 +77,16 @@ def result_record(result: RunResult, scenario: Scenario, path: Path) -> dict[str
         "variant_id": scenario.variant_id,
         "experiment_group": result.experiment_group.value,
         "agreement_success": result.agreement_success,
+        "steps_to_agreement": result.steps_to_agreement,
         "rounds_to_agreement": result.rounds_to_agreement,
         "atomic_actions_to_agreement": result.atomic_actions_to_agreement,
         "agreement_outcome": result.agreement_outcome,
         "utility_a": result.utility_a,
         "utility_b": result.utility_b,
         "joint_utility": result.joint_utility,
+        "utilities": result.utilities,
+        "min_utility": result.min_utility,
+        "utility_spread": result.utility_spread,
         "pareto_dominated": result.pareto_dominated,
         "pareto_joint_gap": result.pareto_joint_gap,
         "constraint_hint_message_count": result.constraint_hint_message_count,
@@ -115,8 +119,14 @@ def scenario_comparisons(
                 "variant_id": scenario.variant_id,
                 "a1_success": a1["agreement_success"],
                 "a2_success": a2["agreement_success"],
+                "step_delta_a2_minus_a1": _delta(a2["steps_to_agreement"], a1["steps_to_agreement"]),
                 "round_delta_a2_minus_a1": _delta(a2["rounds_to_agreement"], a1["rounds_to_agreement"]),
                 "joint_utility_delta_a2_minus_a1": _delta(a2["joint_utility"], a1["joint_utility"]),
+                "min_utility_delta_a2_minus_a1": _delta(a2["min_utility"], a1["min_utility"]),
+                "utility_spread_delta_a2_minus_a1": _delta(
+                    a2["utility_spread"],
+                    a1["utility_spread"],
+                ),
                 "pareto_joint_gap_delta_a2_minus_a1": _delta(
                     a2["pareto_joint_gap"],
                     a1["pareto_joint_gap"],
@@ -137,10 +147,25 @@ def batch_summary(records: list[dict[str, Any]], comparisons: list[dict[str, Any
         for item in comparisons
         if item["round_delta_a2_minus_a1"] is not None
     ]
+    step_deltas = [
+        item["step_delta_a2_minus_a1"]
+        for item in comparisons
+        if item["step_delta_a2_minus_a1"] is not None
+    ]
     utility_deltas = [
         item["joint_utility_delta_a2_minus_a1"]
         for item in comparisons
         if item["joint_utility_delta_a2_minus_a1"] is not None
+    ]
+    min_utility_deltas = [
+        item["min_utility_delta_a2_minus_a1"]
+        for item in comparisons
+        if item["min_utility_delta_a2_minus_a1"] is not None
+    ]
+    spread_deltas = [
+        item["utility_spread_delta_a2_minus_a1"]
+        for item in comparisons
+        if item["utility_spread_delta_a2_minus_a1"] is not None
     ]
     return {
         "group_summary": summarize(synthetic_results),
@@ -149,10 +174,19 @@ def batch_summary(records: list[dict[str, Any]], comparisons: list[dict[str, Any
             "a2_faster_count": sum(1 for value in round_deltas if value < 0),
             "a2_slower_count": sum(1 for value in round_deltas if value > 0),
             "a2_same_round_count": sum(1 for value in round_deltas if value == 0),
+            "a2_faster_step_count": sum(1 for value in step_deltas if value < 0),
+            "a2_slower_step_count": sum(1 for value in step_deltas if value > 0),
+            "a2_same_step_count": sum(1 for value in step_deltas if value == 0),
+            "mean_step_delta_a2_minus_a1": mean(step_deltas) if step_deltas else None,
+            "median_step_delta_a2_minus_a1": median(step_deltas) if step_deltas else None,
             "mean_round_delta_a2_minus_a1": mean(round_deltas) if round_deltas else None,
             "median_round_delta_a2_minus_a1": median(round_deltas) if round_deltas else None,
             "mean_joint_utility_delta_a2_minus_a1": mean(utility_deltas) if utility_deltas else None,
             "median_joint_utility_delta_a2_minus_a1": median(utility_deltas) if utility_deltas else None,
+            "mean_min_utility_delta_a2_minus_a1": mean(min_utility_deltas) if min_utility_deltas else None,
+            "median_min_utility_delta_a2_minus_a1": median(min_utility_deltas) if min_utility_deltas else None,
+            "mean_utility_spread_delta_a2_minus_a1": mean(spread_deltas) if spread_deltas else None,
+            "median_utility_spread_delta_a2_minus_a1": median(spread_deltas) if spread_deltas else None,
         },
         "breakdown_by": {
             "task_family": _breakdown(comparisons, "task_family"),
@@ -174,19 +208,41 @@ def _breakdown(comparisons: list[dict[str, Any]], axis: str) -> dict[str, dict[s
             for item in items
             if item["round_delta_a2_minus_a1"] is not None
         ]
+        step_deltas = [
+            item["step_delta_a2_minus_a1"]
+            for item in items
+            if item["step_delta_a2_minus_a1"] is not None
+        ]
         utility_deltas = [
             item["joint_utility_delta_a2_minus_a1"]
             for item in items
             if item["joint_utility_delta_a2_minus_a1"] is not None
+        ]
+        min_utility_deltas = [
+            item["min_utility_delta_a2_minus_a1"]
+            for item in items
+            if item["min_utility_delta_a2_minus_a1"] is not None
+        ]
+        spread_deltas = [
+            item["utility_spread_delta_a2_minus_a1"]
+            for item in items
+            if item["utility_spread_delta_a2_minus_a1"] is not None
         ]
         summary[value] = {
             "scenario_count": len(items),
             "a2_faster_count": sum(1 for delta in round_deltas if delta < 0),
             "a2_slower_count": sum(1 for delta in round_deltas if delta > 0),
             "a2_same_round_count": sum(1 for delta in round_deltas if delta == 0),
+            "a2_faster_step_count": sum(1 for delta in step_deltas if delta < 0),
+            "a2_slower_step_count": sum(1 for delta in step_deltas if delta > 0),
+            "a2_same_step_count": sum(1 for delta in step_deltas if delta == 0),
+            "mean_step_delta_a2_minus_a1": mean(step_deltas) if step_deltas else None,
+            "median_step_delta_a2_minus_a1": median(step_deltas) if step_deltas else None,
             "mean_round_delta_a2_minus_a1": mean(round_deltas) if round_deltas else None,
             "median_round_delta_a2_minus_a1": median(round_deltas) if round_deltas else None,
             "mean_joint_utility_delta_a2_minus_a1": mean(utility_deltas) if utility_deltas else None,
+            "mean_min_utility_delta_a2_minus_a1": mean(min_utility_deltas) if min_utility_deltas else None,
+            "mean_utility_spread_delta_a2_minus_a1": mean(spread_deltas) if spread_deltas else None,
             "mean_a2_constraint_hint_message_count": mean(
                 item["a2_constraint_hint_message_count"] for item in items
             ),
@@ -205,11 +261,15 @@ def _record_to_result(record: dict[str, Any]) -> RunResult:
         repeat_id="r01",
         agreement_success=record["agreement_success"],
         agreement_outcome=record["agreement_outcome"],
+        steps_to_agreement=record.get("steps_to_agreement"),
         rounds_to_agreement=record["rounds_to_agreement"],
         atomic_actions_to_agreement=record["atomic_actions_to_agreement"],
         utility_a=record["utility_a"],
         utility_b=record["utility_b"],
         joint_utility=record["joint_utility"],
+        utilities=record.get("utilities") or {},
+        min_utility=record.get("min_utility"),
+        utility_spread=record.get("utility_spread"),
         pareto_dominated=record["pareto_dominated"],
         pareto_joint_gap=record["pareto_joint_gap"],
         constraint_hint_message_count=record["constraint_hint_message_count"],

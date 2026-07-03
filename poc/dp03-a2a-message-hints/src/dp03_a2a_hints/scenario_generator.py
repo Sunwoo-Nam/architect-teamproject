@@ -54,6 +54,13 @@ FIXED_HIGH_COMPLEXITY_PAIR_PATTERNS = (
     "time_quality",
 )
 FIXED_HIGH_COMPLEXITY_ROLE_MODES = ("ppa_a_dominant", "ppa_b_dominant")
+FIXED_THREE_PARTY_LEVELS = ("issue_4", "issue_5")
+FIXED_THREE_PARTY_PARTICIPATION_PATTERNS = (
+    "two_agents_fixed",
+    "all_agents_fixed",
+    "single_bottleneck",
+)
+FIXED_THREE_PARTY_DIFFICULTY_STRATA = ("medium", "hard", "borderline", "no_agreement")
 
 ISSUE_CATALOG: dict[str, tuple[dict[str, Any], ...]] = {
     "schedule_coordination": (
@@ -312,6 +319,77 @@ def generate_fixed_high_complexity_scenarios() -> list[dict[str, Any]]:
                 "fixed_strength": fixed_strength,
                 "issue_pair_pattern": issue_pair_pattern,
                 "role_mode": role_mode,
+                "constraint_issues": constraint_issues,
+                "complexity_focus": "high",
+            }
+        )
+        scenarios.append(scenario)
+        sequence += 1
+    return scenarios
+
+
+def generate_fixed_three_party_scenarios() -> list[dict[str, Any]]:
+    scenarios = []
+    sequence = 1
+    for task_family, complexity_level, issue_pair_pattern, participation_pattern in product(
+        TASK_FAMILIES,
+        FIXED_THREE_PARTY_LEVELS,
+        FIXED_HIGH_COMPLEXITY_PAIR_PATTERNS,
+        FIXED_THREE_PARTY_PARTICIPATION_PATTERNS,
+    ):
+        task_index = TASK_FAMILIES.index(task_family)
+        complexity_index = FIXED_THREE_PARTY_LEVELS.index(complexity_level)
+        pair_index = FIXED_HIGH_COMPLEXITY_PAIR_PATTERNS.index(issue_pair_pattern)
+        participation_index = FIXED_THREE_PARTY_PARTICIPATION_PATTERNS.index(participation_pattern)
+        difficulty = FIXED_THREE_PARTY_DIFFICULTY_STRATA[
+            (task_index + complexity_index + pair_index + participation_index)
+            % len(FIXED_THREE_PARTY_DIFFICULTY_STRATA)
+        ]
+        utility_shape = UTILITY_SCORE_SHAPES[
+            (task_index + 2 * complexity_index + pair_index + participation_index)
+            % len(UTILITY_SCORE_SHAPES)
+        ]
+        fixed_strength = ((task_index + pair_index + participation_index) % 2) + 1
+        variant_index = (pair_index + participation_index) % len(VARIANTS)
+
+        scenario = build_scenario(
+            scenario_id=f"TP1S{sequence:03d}",
+            task_family=task_family,
+            complexity_level=complexity_level,
+            tension_pattern="three_party_fixed_constraint",
+            variant_id=VARIANTS[variant_index],
+            seed=700000 + sequence,
+        )
+        _add_third_party_agent(scenario, variant_index=variant_index)
+        _apply_utility_score_shape(scenario, utility_shape)
+        constraint_issues = _apply_fixed_three_party_pattern(
+            scenario,
+            issue_pair_pattern=issue_pair_pattern,
+            participation_pattern=participation_pattern,
+            fixed_strength=fixed_strength,
+            fallback_offset=pair_index + participation_index,
+        )
+        _apply_difficulty_stratum(scenario, difficulty)
+        _refresh_generation_meta(
+            scenario,
+            scenario_id=f"TP1S{sequence:03d}",
+            seed=700000 + sequence,
+            variant_suffix=(
+                f"tp01_{issue_pair_pattern}_{participation_pattern}_"
+                f"{difficulty}_{utility_shape}_s{fixed_strength}"
+            ),
+            generator_version="gen.fixed_three_party.v1",
+            source="synthetic_fixed_three_party_matrix",
+        )
+        scenario["generation_meta"].update(
+            {
+                "party_count": 3,
+                "fixed_pattern": "three_party_fixed",
+                "participation_pattern": participation_pattern,
+                "difficulty_stratum": difficulty,
+                "utility_shape": utility_shape,
+                "fixed_strength": fixed_strength,
+                "issue_pair_pattern": issue_pair_pattern,
                 "constraint_issues": constraint_issues,
                 "complexity_focus": "high",
             }
@@ -747,6 +825,94 @@ def _apply_fixed_only_pattern(
         _add_fixed_constraint(scenario["agents"][1], issues, secondary_issue, fixed_strength)
     else:
         raise ValueError(f"Unsupported fixed-only pattern: {fixed_pattern}")
+
+
+def _add_third_party_agent(scenario: dict[str, Any], *, variant_index: int) -> None:
+    issues = scenario["domain"]["issues"]
+    issue_names = [issue["name"] for issue in issues]
+    preferences = {
+        name: (index + variant_index + 2) % 3
+        for index, name in enumerate(issue_names)
+    }
+    emphasis = (issue_names[(variant_index + 2) % len(issue_names)],)
+    profile = _profile(issues, preferences, emphasis, hard_constraints={})
+    ppa_c = _agent(
+        "ppa_c",
+        "participant",
+        profile,
+        _allowed_constraint_hint(issue_names, profile, preferences),
+    )
+    scenario["agents"] = tuple(list(scenario["agents"]) + [ppa_c])
+
+
+def _apply_fixed_three_party_pattern(
+    scenario: dict[str, Any],
+    *,
+    issue_pair_pattern: str,
+    participation_pattern: str,
+    fixed_strength: int,
+    fallback_offset: int,
+) -> dict[str, str]:
+    issues = scenario["domain"]["issues"]
+    issue_names = [issue["name"] for issue in issues]
+    ppa_a_issue, ppa_b_issue, ppa_c_issue = _three_party_constraint_issues(
+        issue_names,
+        issue_pair_pattern,
+        fallback_offset=fallback_offset,
+    )
+    agents_by_id = {agent["id"]: agent for agent in scenario["agents"]}
+
+    scenario["privacy_labels"]["external_constraint_hint_allowed"] = True
+    scenario["privacy_labels"]["constraint_hint_accumulation_risk"] = "high"
+
+    for agent in scenario["agents"]:
+        agent["capability"]["constraint_hint"] = True
+        agent["capability"]["constraint_hint_schema_version"] = "constraint_hint.v1"
+        agent["private_profile"]["hard_constraints"] = []
+        agent["allowed_constraint_hint"]["issue_constraints"] = {}
+
+    constraint_issues: dict[str, str] = {}
+    if participation_pattern == "two_agents_fixed":
+        _add_fixed_constraint(agents_by_id["ppa_a"], issues, ppa_a_issue, fixed_strength)
+        _add_fixed_constraint(agents_by_id["ppa_b"], issues, ppa_b_issue, fixed_strength)
+        _set_issue_weight(agents_by_id["ppa_a"]["private_profile"], ppa_a_issue, target_weight=0.42)
+        _set_issue_weight(agents_by_id["ppa_b"]["private_profile"], ppa_b_issue, target_weight=0.42)
+        constraint_issues = {"ppa_a": ppa_a_issue, "ppa_b": ppa_b_issue}
+    elif participation_pattern == "all_agents_fixed":
+        _add_fixed_constraint(agents_by_id["ppa_a"], issues, ppa_a_issue, fixed_strength)
+        _add_fixed_constraint(agents_by_id["ppa_b"], issues, ppa_b_issue, fixed_strength)
+        _add_fixed_constraint(agents_by_id["ppa_c"], issues, ppa_c_issue, fixed_strength)
+        _set_issue_weight(agents_by_id["ppa_a"]["private_profile"], ppa_a_issue, target_weight=0.38)
+        _set_issue_weight(agents_by_id["ppa_b"]["private_profile"], ppa_b_issue, target_weight=0.38)
+        _set_issue_weight(agents_by_id["ppa_c"]["private_profile"], ppa_c_issue, target_weight=0.38)
+        constraint_issues = {"ppa_a": ppa_a_issue, "ppa_b": ppa_b_issue, "ppa_c": ppa_c_issue}
+    elif participation_pattern == "single_bottleneck":
+        _add_fixed_constraint(agents_by_id["ppa_c"], issues, ppa_c_issue, fixed_strength)
+        _set_issue_weight(agents_by_id["ppa_c"]["private_profile"], ppa_c_issue, target_weight=0.52)
+        constraint_issues = {"ppa_c": ppa_c_issue}
+    else:
+        raise ValueError(f"Unsupported three-party participation pattern: {participation_pattern}")
+    return constraint_issues
+
+
+def _three_party_constraint_issues(
+    issue_names: list[str],
+    issue_pair_pattern: str,
+    *,
+    fallback_offset: int,
+) -> tuple[str, str, str]:
+    ppa_a_issue, ppa_b_issue = _high_complexity_issue_pair(
+        issue_names,
+        issue_pair_pattern,
+        fallback_offset=fallback_offset,
+    )
+    ppa_c_issue = _find_axis_or_fallback(
+        issue_names,
+        TIME_HINTS + LOCATION_HINTS + BUDGET_HINTS + QUALITY_HINTS,
+        fallback_offset + 2,
+        exclude=(ppa_a_issue, ppa_b_issue),
+    )
+    return ppa_a_issue, ppa_b_issue, ppa_c_issue
 
 
 def _apply_fixed_high_complexity_pattern(

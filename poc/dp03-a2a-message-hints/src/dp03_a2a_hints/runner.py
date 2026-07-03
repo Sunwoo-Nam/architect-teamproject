@@ -37,12 +37,23 @@ def run_scenario(scenario: Scenario, config: RunConfig) -> RunResult:
     state = mechanism.run()
     agreement_tuple = mechanism.agreement or getattr(state, "agreement", None)
     agreement = to_dict(agreement_tuple, scenario.issues) if agreement_tuple else None
-    utility_a = utility(scenario.agents[0].private_profile, agreement) if agreement else None
-    utility_b = utility(scenario.agents[1].private_profile, agreement) if agreement else None
-    joint_utility = (utility_a + utility_b) / 2 if utility_a is not None and utility_b is not None else None
+    utilities = (
+        {
+            agent.id: utility(agent.private_profile, agreement)
+            for agent in scenario.agents
+        }
+        if agreement
+        else {}
+    )
+    utility_a = utilities.get(scenario.agents[0].id)
+    utility_b = utilities.get(scenario.agents[1].id)
+    joint_utility = sum(utilities.values()) / len(utilities) if utilities else None
+    min_utility = min(utilities.values()) if utilities else None
+    utility_spread = max(utilities.values()) - min(utilities.values()) if utilities else None
     pareto_dominated, pareto_joint_gap = pareto_metrics(scenario, agreement)
     failures = _failure_reasons(scenario, agreement, constraint_hint_enabled, context)
     success = not failures and agreement is not None
+    steps = int(getattr(state, "step", 0)) if success else None
     rounds = len(mechanism.offers) if success else None
     return RunResult(
         run_id=f"{config.experiment_group.value}__{scenario.scenario_id}__{config.repeat_id}",
@@ -51,11 +62,15 @@ def run_scenario(scenario: Scenario, config: RunConfig) -> RunResult:
         repeat_id=config.repeat_id,
         agreement_success=success,
         agreement_outcome=agreement,
+        steps_to_agreement=steps,
         rounds_to_agreement=rounds,
         atomic_actions_to_agreement=len(context.events),
         utility_a=utility_a,
         utility_b=utility_b,
         joint_utility=joint_utility,
+        utilities=utilities,
+        min_utility=min_utility,
+        utility_spread=utility_spread,
         pareto_dominated=pareto_dominated,
         pareto_joint_gap=pareto_joint_gap,
         constraint_hint_message_count=len(context.sent_constraint_hints),
@@ -68,11 +83,14 @@ def run_scenario(scenario: Scenario, config: RunConfig) -> RunResult:
 def _constraint_hint_enabled_for(scenario: Scenario, group: ExperimentGroup) -> bool:
     if group in {ExperimentGroup.A1_DET_OFFER_ONLY, ExperimentGroup.A3_DET_FALLBACK}:
         return False
-    first, second = scenario.agents
     return (
         scenario.privacy_labels.external_constraint_hint_allowed
-        and constraint_hints_supported(first, second)
-        and constraint_hints_supported(second, first)
+        and all(
+            constraint_hints_supported(local, remote)
+            for local in scenario.agents
+            for remote in scenario.agents
+            if local.id != remote.id
+        )
     )
 
 

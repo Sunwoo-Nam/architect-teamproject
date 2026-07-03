@@ -31,11 +31,22 @@ class NegotiationContext:
     sent_constraint_hints: list[ConstraintHintMessage] = field(default_factory=list)
     events: list[EventLog] = field(default_factory=list)
 
-    def opponent_of(self, actor_id: str) -> AgentSpec:
+    def agent_by_id(self, actor_id: str | None) -> AgentSpec | None:
+        if actor_id is None:
+            return None
         for agent in self.scenario.agents:
-            if agent.id != actor_id:
+            if agent.id == actor_id:
                 return agent
-        raise ValueError(f"No opponent found for {actor_id}")
+        return None
+
+    def opponents_of(self, actor_id: str) -> tuple[AgentSpec, ...]:
+        return tuple(agent for agent in self.scenario.agents if agent.id != actor_id)
+
+    def opponent_of(self, actor_id: str) -> AgentSpec:
+        opponents = self.opponents_of(actor_id)
+        if len(opponents) != 1:
+            raise ValueError(f"Expected one opponent for {actor_id}, found {len(opponents)}")
+        return opponents[0]
 
     def record_event(
         self,
@@ -109,7 +120,7 @@ class OfferOnlyNegotiator(SAONegotiator):
             if current_offer and validate_outcome_tuple(current_offer, self.context.scenario)
             else None
         )
-        opponent = self.context.opponent_of(self.agent.id)
+        opponent = self.context.agent_by_id(source) or self._fallback_opponent()
         if outcome:
             self.context.last_offer_by_actor[opponent.id] = outcome
         constraint_hint_valid = (
@@ -183,21 +194,30 @@ class OfferOnlyNegotiator(SAONegotiator):
     def _maybe_publish_constraint_hint(self, outcome: OutcomeDict | None) -> ConstraintHintMessage | None:
         return None
 
+    def _fallback_opponent(self) -> AgentSpec:
+        return self.context.opponents_of(self.agent.id)[0]
+
 
 class HintAwareNegotiator(OfferOnlyNegotiator):
     def _proposal_score(self, outcome_tuple: OutcomeTuple, outcome: OutcomeDict, own_utility: float) -> float:
         score = super()._proposal_score(outcome_tuple, outcome, own_utility)
         if not self.context.constraint_hint_enabled:
             return score
-        opponent = self.context.opponent_of(self.agent.id)
-        opponent_hint = self.context.constraint_hints_by_actor.get(opponent.id)
-        opponent_last_offer = self.context.last_offer_by_actor.get(opponent.id)
-        fit = opponent_constraint_hint_fit(outcome, opponent_last_offer, opponent_hint)
+        fits = []
+        for opponent in self.context.opponents_of(self.agent.id):
+            opponent_hint = self.context.constraint_hints_by_actor.get(opponent.id)
+            opponent_last_offer = self.context.last_offer_by_actor.get(opponent.id)
+            fits.append(opponent_constraint_hint_fit(outcome, opponent_last_offer, opponent_hint))
+        fit = sum(fits) / len(fits) if fits else 0.0
         return score + self.context.constraint_hint_weight * fit
 
     def _maybe_publish_constraint_hint(self, outcome: OutcomeDict | None) -> ConstraintHintMessage | None:
-        opponent = self.context.opponent_of(self.agent.id)
-        if not self.context.constraint_hint_enabled or not constraint_hints_supported(self.agent, opponent):
+        if not self.context.constraint_hint_enabled:
+            return None
+        if not any(
+            constraint_hints_supported(self.agent, opponent)
+            for opponent in self.context.opponents_of(self.agent.id)
+        ):
             return None
         hint = build_constraint_hint(self.agent, outcome)
         if hint is None:

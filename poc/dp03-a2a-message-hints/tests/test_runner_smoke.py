@@ -1,6 +1,8 @@
 from dp03_a2a_hints import ExperimentGroup, RunConfig, run_scenario
 from dp03_a2a_hints.metrics import summarize
+from dp03_a2a_hints.scenario_generator import generate_fixed_three_party_scenarios
 from dp03_a2a_hints.scenario_loader import load_scenario
+from dp03_a2a_hints.scenario_loader import scenario_from_dict
 
 
 def test_runner_executes_a1_and_a2():
@@ -68,3 +70,22 @@ def test_runner_can_extend_deadline_without_slowing_concession():
 
     assert not baseline.agreement_success
     assert extended.agreement_success
+
+
+def test_runner_handles_three_party_constraint_hint_scenario():
+    scenario = scenario_from_dict(generate_fixed_three_party_scenarios()[0])
+
+    result = run_scenario(
+        scenario,
+        RunConfig(
+            ExperimentGroup.A2_DET_HINT_AWARE,
+            n_steps=100,
+            concession_steps=30,
+        ),
+    )
+
+    assert len(scenario.agents) == 3
+    assert result.agreement_success
+    assert set(result.utilities) == {"ppa_a", "ppa_b", "ppa_c"}
+    assert result.min_utility is not None
+    assert result.utility_spread is not None
