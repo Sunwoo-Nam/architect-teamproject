@@ -1,0 +1,198 @@
+schema_version: scenario.v1
+scenario_id: H1S402
+task_family: group_purchase
+complexity_level: issue_5
+tension_pattern: mutual_hard_constraint_conflict
+variant_id: v02_hc01_time_location_medium_plateau_s1_ppa_b_dominant
+domain:
+  issues:
+  - name: price_band
+    type: bucket
+    values:
+    - low
+    - medium
+    - high
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - low
+    - medium
+    - high
+  - name: quality_tier
+    type: ordinal
+    values:
+    - basic
+    - standard
+    - premium
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - basic
+    - standard
+    - premium
+  - name: delivery_window
+    type: bucket
+    values:
+    - express
+    - standard
+    - flexible
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - express
+    - standard
+    - flexible
+  - name: warranty_level
+    type: ordinal
+    values:
+    - none
+    - basic
+    - extended
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - none
+    - basic
+    - extended
+  - name: privacy_option
+    type: ordinal
+    values:
+    - minimal
+    - standard
+    - enhanced
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - minimal
+    - standard
+    - enhanced
+agents:
+- id: ppa_a
+  role: initiator
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      price_band: 0.12
+      quality_tier: 0.3
+      delivery_window: 0.34
+      warranty_level: 0.12
+      privacy_option: 0.12
+    value_scores:
+      price_band:
+        low: 0.95
+        medium: 1.0
+        high: 0.95
+      quality_tier:
+        basic: 0.45
+        standard: 0.95
+        premium: 1.0
+      delivery_window:
+        express: 0.95
+        standard: 1.0
+        flexible: 0.95
+      warranty_level:
+        none: 0.95
+        basic: 1.0
+        extended: 0.95
+      privacy_option:
+        minimal: 0.45
+        standard: 0.95
+        enhanced: 1.0
+    hard_constraints:
+    - issue: delivery_window
+      allowed_values:
+      - standard
+    reservation_value: 0.853
+    concession_policy:
+      type: linear
+      start_threshold: 0.99
+      end_threshold: 0.853
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      delivery_window: fixed
+- id: ppa_b
+  role: responder
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      price_band: 0.0945
+      quality_tier: 0.0945
+      delivery_window: 0.2363
+      warranty_level: 0.48
+      privacy_option: 0.0947
+    value_scores:
+      price_band:
+        low: 0.45
+        medium: 0.95
+        high: 1.0
+      quality_tier:
+        basic: 1.0
+        standard: 0.95
+        premium: 0.45
+      delivery_window:
+        express: 0.95
+        standard: 1.0
+        flexible: 0.95
+      warranty_level:
+        none: 0.45
+        basic: 0.95
+        extended: 1.0
+      privacy_option:
+        minimal: 1.0
+        standard: 0.95
+        enhanced: 0.45
+    hard_constraints:
+    - issue: warranty_level
+      allowed_values:
+      - extended
+    reservation_value: 0.853
+    concession_policy:
+      type: linear
+      start_threshold: 0.99
+      end_threshold: 0.853
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      warranty_level: fixed
+privacy_labels:
+  pii_raw: false
+  sensitive_reason_present: false
+  exact_value_present: false
+  constraint_hint_accumulation_risk: high
+  external_constraint_hint_allowed: true
+expected_checks:
+  has_agreement_region: true
+  expected_fallback: false
+  expected_timeout_possible: false
+  min_valid_outcomes: 3
+  min_pareto_candidates: 1
+  llm_schema_required: true
+generation_meta:
+  generator_version: gen.fixed_high_complexity.v1
+  seed: 600402
+  source: synthetic_fixed_high_complexity_matrix
+  created_from_legacy_poc: false
+  fixed_pattern: both_agents_different_issue
+  difficulty_stratum: medium
+  utility_shape: plateau
+  fixed_strength: 1
+  issue_pair_pattern: time_location
+  role_mode: ppa_b_dominant
+  constraint_issues:
+    ppa_a: delivery_window
+    ppa_b: warranty_level
+  complexity_focus: high

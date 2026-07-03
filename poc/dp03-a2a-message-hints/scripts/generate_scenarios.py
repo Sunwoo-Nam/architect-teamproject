@@ -6,6 +6,7 @@ from pathlib import Path
 
 from dp03_a2a_hints.scenario_generator import (
     generate_augmented_scenarios,
+    generate_fixed_high_complexity_scenarios,
     generate_fixed_only_scenarios,
     generate_orthogonal_augmented_scenarios,
     generate_scenarios,
@@ -15,7 +16,7 @@ from dp03_a2a_hints.scenario_generator import (
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate DP03 synthetic scenario matrix.")
-    parser.add_argument("--count", type=int, choices=(120, 180, 360, 480, 600), default=120)
+    parser.add_argument("--count", type=int, choices=(120, 180, 360, 480, 600, 640), default=120)
     parser.add_argument(
         "--output-dir",
         type=Path,
@@ -31,9 +32,12 @@ def main() -> None:
         360: "scenarios/generated_v3",
         480: "scenarios/generated_fixed_only_v1",
         600: "scenarios/generated_v4",
+        640: "scenarios/generated_fixed_high_complexity_v1",
     }[args.count]
     output_dir = args.output_dir or root / output_name
-    if args.count == 600:
+    if args.count == 640:
+        scenarios = generate_fixed_high_complexity_scenarios()
+    elif args.count == 600:
         scenarios = generate_orthogonal_augmented_scenarios()
     elif args.count == 480:
         scenarios = generate_fixed_only_scenarios()

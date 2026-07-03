@@ -44,6 +44,16 @@ FIXED_ONLY_TENSION_BY_PATTERN = {
     "both_agents_different_issue": "mutual_hard_constraint_conflict",
     "none_control": "aligned_preferences",
 }
+FIXED_HIGH_COMPLEXITY_LEVELS = ("issue_4", "issue_5")
+FIXED_HIGH_COMPLEXITY_DIFFICULTY_STRATA = ("medium", "hard", "borderline", "no_agreement")
+FIXED_HIGH_COMPLEXITY_PAIR_PATTERNS = (
+    "time_location",
+    "time_budget",
+    "budget_quality",
+    "location_quality",
+    "time_quality",
+)
+FIXED_HIGH_COMPLEXITY_ROLE_MODES = ("ppa_a_dominant", "ppa_b_dominant")
 
 ISSUE_CATALOG: dict[str, tuple[dict[str, Any], ...]] = {
     "schedule_coordination": (
@@ -237,6 +247,73 @@ def generate_fixed_only_scenarios() -> list[dict[str, Any]]:
                 "difficulty_stratum": difficulty,
                 "utility_shape": utility_shape,
                 "fixed_strength": fixed_strength,
+            }
+        )
+        scenarios.append(scenario)
+        sequence += 1
+    return scenarios
+
+
+def generate_fixed_high_complexity_scenarios() -> list[dict[str, Any]]:
+    scenarios = []
+    sequence = 1
+    for task_family, complexity_level, issue_pair_pattern, difficulty, fixed_strength, role_mode in product(
+        TASK_FAMILIES,
+        FIXED_HIGH_COMPLEXITY_LEVELS,
+        FIXED_HIGH_COMPLEXITY_PAIR_PATTERNS,
+        FIXED_HIGH_COMPLEXITY_DIFFICULTY_STRATA,
+        (1, 2),
+        FIXED_HIGH_COMPLEXITY_ROLE_MODES,
+    ):
+        task_index = TASK_FAMILIES.index(task_family)
+        complexity_index = FIXED_HIGH_COMPLEXITY_LEVELS.index(complexity_level)
+        pair_index = FIXED_HIGH_COMPLEXITY_PAIR_PATTERNS.index(issue_pair_pattern)
+        difficulty_index = FIXED_HIGH_COMPLEXITY_DIFFICULTY_STRATA.index(difficulty)
+        strength_index = fixed_strength - 1
+        role_index = FIXED_HIGH_COMPLEXITY_ROLE_MODES.index(role_mode)
+        utility_shape = UTILITY_SCORE_SHAPES[
+            (task_index + complexity_index + pair_index + difficulty_index + strength_index + role_index)
+            % len(UTILITY_SCORE_SHAPES)
+        ]
+        variant_index = (pair_index + role_index) % len(VARIANTS)
+
+        scenario = build_scenario(
+            scenario_id=f"H1S{sequence:03d}",
+            task_family=task_family,
+            complexity_level=complexity_level,
+            tension_pattern="mutual_hard_constraint_conflict",
+            variant_id=VARIANTS[variant_index],
+            seed=600000 + sequence,
+        )
+        _apply_utility_score_shape(scenario, utility_shape)
+        constraint_issues = _apply_fixed_high_complexity_pattern(
+            scenario,
+            issue_pair_pattern=issue_pair_pattern,
+            fixed_strength=fixed_strength,
+            role_mode=role_mode,
+            fallback_offset=pair_index + role_index,
+        )
+        _apply_difficulty_stratum(scenario, difficulty)
+        _refresh_generation_meta(
+            scenario,
+            scenario_id=f"H1S{sequence:03d}",
+            seed=600000 + sequence,
+            variant_suffix=(
+                f"hc01_{issue_pair_pattern}_{difficulty}_{utility_shape}_s{fixed_strength}_{role_mode}"
+            ),
+            generator_version="gen.fixed_high_complexity.v1",
+            source="synthetic_fixed_high_complexity_matrix",
+        )
+        scenario["generation_meta"].update(
+            {
+                "fixed_pattern": "both_agents_different_issue",
+                "difficulty_stratum": difficulty,
+                "utility_shape": utility_shape,
+                "fixed_strength": fixed_strength,
+                "issue_pair_pattern": issue_pair_pattern,
+                "role_mode": role_mode,
+                "constraint_issues": constraint_issues,
+                "complexity_focus": "high",
             }
         )
         scenarios.append(scenario)
@@ -670,6 +747,154 @@ def _apply_fixed_only_pattern(
         _add_fixed_constraint(scenario["agents"][1], issues, secondary_issue, fixed_strength)
     else:
         raise ValueError(f"Unsupported fixed-only pattern: {fixed_pattern}")
+
+
+def _apply_fixed_high_complexity_pattern(
+    scenario: dict[str, Any],
+    *,
+    issue_pair_pattern: str,
+    fixed_strength: int,
+    role_mode: str,
+    fallback_offset: int,
+) -> dict[str, str]:
+    issues = scenario["domain"]["issues"]
+    issue_names = [issue["name"] for issue in issues]
+    ppa_a_issue, ppa_b_issue = _high_complexity_issue_pair(
+        issue_names,
+        issue_pair_pattern,
+        fallback_offset=fallback_offset,
+    )
+
+    scenario["privacy_labels"]["external_constraint_hint_allowed"] = True
+    scenario["privacy_labels"]["constraint_hint_accumulation_risk"] = "high"
+
+    for agent in scenario["agents"]:
+        agent["capability"]["constraint_hint"] = True
+        agent["capability"]["constraint_hint_schema_version"] = "constraint_hint.v1"
+        agent["private_profile"]["hard_constraints"] = []
+        agent["allowed_constraint_hint"]["issue_constraints"] = {}
+
+    _add_fixed_constraint(scenario["agents"][0], issues, ppa_a_issue, fixed_strength)
+    _add_fixed_constraint(scenario["agents"][1], issues, ppa_b_issue, fixed_strength)
+    _emphasize_high_complexity_weights(
+        scenario["agents"][0],
+        scenario["agents"][1],
+        ppa_a_issue=ppa_a_issue,
+        ppa_b_issue=ppa_b_issue,
+        role_mode=role_mode,
+    )
+    return {"ppa_a": ppa_a_issue, "ppa_b": ppa_b_issue}
+
+
+def _high_complexity_issue_pair(
+    issue_names: list[str],
+    issue_pair_pattern: str,
+    *,
+    fallback_offset: int,
+) -> tuple[str, str]:
+    if issue_pair_pattern == "time_location":
+        ppa_a_issue = _find_axis_or_fallback(issue_names, TIME_HINTS, fallback_offset)
+        ppa_b_issue = _find_axis_or_fallback(
+            issue_names,
+            LOCATION_HINTS,
+            fallback_offset + 1,
+            exclude=(ppa_a_issue,),
+        )
+    elif issue_pair_pattern == "time_budget":
+        ppa_a_issue = _find_axis_or_fallback(issue_names, TIME_HINTS, fallback_offset)
+        ppa_b_issue = _find_axis_or_fallback(
+            issue_names,
+            BUDGET_HINTS,
+            fallback_offset + 1,
+            exclude=(ppa_a_issue,),
+        )
+    elif issue_pair_pattern == "budget_quality":
+        ppa_a_issue = _find_axis_or_fallback(issue_names, BUDGET_HINTS, fallback_offset)
+        ppa_b_issue = _find_axis_or_fallback(
+            issue_names,
+            QUALITY_HINTS,
+            fallback_offset + 1,
+            exclude=(ppa_a_issue,),
+        )
+    elif issue_pair_pattern == "location_quality":
+        ppa_a_issue = _find_axis_or_fallback(issue_names, LOCATION_HINTS, fallback_offset)
+        ppa_b_issue = _find_axis_or_fallback(
+            issue_names,
+            QUALITY_HINTS,
+            fallback_offset + 1,
+            exclude=(ppa_a_issue,),
+        )
+    elif issue_pair_pattern == "time_quality":
+        ppa_a_issue = _find_axis_or_fallback(issue_names, TIME_HINTS, fallback_offset)
+        ppa_b_issue = _find_axis_or_fallback(
+            issue_names,
+            QUALITY_HINTS,
+            fallback_offset + 1,
+            exclude=(ppa_a_issue,),
+        )
+    else:
+        raise ValueError(f"Unsupported high-complexity issue pair pattern: {issue_pair_pattern}")
+    return ppa_a_issue, ppa_b_issue
+
+
+def _find_axis_or_fallback(
+    issue_names: list[str],
+    candidates: tuple[str, ...],
+    fallback_offset: int,
+    *,
+    exclude: tuple[str, ...] = (),
+) -> str:
+    excluded = set(exclude)
+    for candidate in candidates:
+        if candidate in issue_names and candidate not in excluded:
+            return candidate
+    for index in range(len(issue_names)):
+        candidate = issue_names[(fallback_offset + index) % len(issue_names)]
+        if candidate not in excluded:
+            return candidate
+    raise ValueError("No issue is available for high-complexity fixed constraint pairing")
+
+
+def _emphasize_high_complexity_weights(
+    ppa_a: dict[str, Any],
+    ppa_b: dict[str, Any],
+    *,
+    ppa_a_issue: str,
+    ppa_b_issue: str,
+    role_mode: str,
+) -> None:
+    if role_mode == "ppa_a_dominant":
+        _set_issue_weight(ppa_a["private_profile"], ppa_a_issue, target_weight=0.48)
+        _set_issue_weight(ppa_b["private_profile"], ppa_b_issue, target_weight=0.34)
+    elif role_mode == "ppa_b_dominant":
+        _set_issue_weight(ppa_a["private_profile"], ppa_a_issue, target_weight=0.34)
+        _set_issue_weight(ppa_b["private_profile"], ppa_b_issue, target_weight=0.48)
+    else:
+        raise ValueError(f"Unsupported high-complexity role mode: {role_mode}")
+
+
+def _set_issue_weight(profile: dict[str, Any], issue_name: str, *, target_weight: float) -> None:
+    weights = profile["utility_weights"]
+    if issue_name not in weights:
+        raise KeyError(issue_name)
+    other_issues = [name for name in weights if name != issue_name]
+    if not other_issues:
+        weights[issue_name] = 1.0
+        return
+
+    other_total = sum(weights[name] for name in other_issues)
+    remaining_weight = round(1.0 - target_weight, 4)
+    weights[issue_name] = round(target_weight, 4)
+    if other_total <= 0:
+        equal_weight = round(remaining_weight / len(other_issues), 4)
+        for name in other_issues[:-1]:
+            weights[name] = equal_weight
+    else:
+        for name in other_issues[:-1]:
+            weights[name] = round(weights[name] / other_total * remaining_weight, 4)
+
+    last = other_issues[-1]
+    weights[last] = round(1.0 - sum(weights[name] for name in weights if name != last), 4)
 
 
 def _add_fixed_constraint(

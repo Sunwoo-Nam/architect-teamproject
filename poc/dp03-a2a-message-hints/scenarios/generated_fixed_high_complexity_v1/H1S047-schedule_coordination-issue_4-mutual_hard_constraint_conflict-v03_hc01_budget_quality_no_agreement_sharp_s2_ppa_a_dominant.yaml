@@ -1,0 +1,169 @@
+schema_version: scenario.v1
+scenario_id: H1S047
+task_family: schedule_coordination
+complexity_level: issue_4
+tension_pattern: mutual_hard_constraint_conflict
+variant_id: v03_hc01_budget_quality_no_agreement_sharp_s2_ppa_a_dominant
+domain:
+  issues:
+  - name: slot
+    type: enum
+    values:
+    - weekday_evening
+    - saturday_lunch
+    - sunday_evening
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+  - name: duration_band
+    type: bucket
+    values:
+    - short
+    - standard
+    - extended
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - short
+    - standard
+    - extended
+  - name: notice_period
+    type: bucket
+    values:
+    - same_day
+    - one_day
+    - three_days
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - same_day
+    - one_day
+    - three_days
+  - name: location_band
+    type: enum
+    values:
+    - near_home
+    - midpoint
+    - near_office
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+agents:
+- id: ppa_a
+  role: initiator
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      slot: 0.1733
+      duration_band: 0.1733
+      notice_period: 0.48
+      location_band: 0.1734
+    value_scores:
+      slot:
+        weekday_evening: 0.1
+        saturday_lunch: 0.45
+        sunday_evening: 1.0
+      duration_band:
+        short: 1.0
+        standard: 0.45
+        extended: 0.1
+      notice_period:
+        same_day: 0.45
+        one_day: 1.0
+        three_days: 0.45
+      location_band:
+        near_home: 0.1
+        midpoint: 0.45
+        near_office: 1.0
+    hard_constraints:
+    - issue: notice_period
+      allowed_values:
+      - one_day
+      - same_day
+    reservation_value: 0.779
+    concession_policy:
+      type: linear
+      start_threshold: 0.99
+      end_threshold: 0.779
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      notice_period: fixed
+- id: ppa_b
+  role: responder
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      slot: 0.1466
+      duration_band: 0.34
+      notice_period: 0.1466
+      location_band: 0.3668
+    value_scores:
+      slot:
+        weekday_evening: 0.95
+        saturday_lunch: 0.4275
+        sunday_evening: 0.095
+      duration_band:
+        short: 0.4275
+        standard: 0.95
+        extended: 0.4275
+      notice_period:
+        same_day: 0.4275
+        one_day: 0.95
+        three_days: 0.4275
+      location_band:
+        near_home: 0.95
+        midpoint: 0.4275
+        near_office: 0.095
+    hard_constraints:
+    - issue: duration_band
+      allowed_values:
+      - standard
+      - short
+    reservation_value: 0.779
+    concession_policy:
+      type: linear
+      start_threshold: 0.99
+      end_threshold: 0.779
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      duration_band: fixed
+privacy_labels:
+  pii_raw: false
+  sensitive_reason_present: false
+  exact_value_present: false
+  constraint_hint_accumulation_risk: high
+  external_constraint_hint_allowed: true
+expected_checks:
+  has_agreement_region: false
+  expected_fallback: false
+  expected_timeout_possible: true
+  min_valid_outcomes: 3
+  min_pareto_candidates: 1
+  llm_schema_required: true
+generation_meta:
+  generator_version: gen.fixed_high_complexity.v1
+  seed: 600047
+  source: synthetic_fixed_high_complexity_matrix
+  created_from_legacy_poc: false
+  fixed_pattern: both_agents_different_issue
+  difficulty_stratum: no_agreement
+  utility_shape: sharp
+  fixed_strength: 2
+  issue_pair_pattern: budget_quality
+  role_mode: ppa_a_dominant
+  constraint_issues:
+    ppa_a: notice_period
+    ppa_b: duration_band
+  complexity_focus: high

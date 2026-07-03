@@ -1,6 +1,10 @@
 from dp03_a2a_hints.scenario_generator import (
     COMPLEXITY_LEVELS,
     DIFFICULTY_STRATA,
+    FIXED_HIGH_COMPLEXITY_DIFFICULTY_STRATA,
+    FIXED_HIGH_COMPLEXITY_LEVELS,
+    FIXED_HIGH_COMPLEXITY_PAIR_PATTERNS,
+    FIXED_HIGH_COMPLEXITY_ROLE_MODES,
     FIXED_ONLY_DIFFICULTY_STRATA,
     FIXED_ONLY_PATTERNS,
     HINT_POLICY_STRATA,
@@ -8,6 +12,7 @@ from dp03_a2a_hints.scenario_generator import (
     TENSION_PATTERNS,
     UTILITY_SCORE_SHAPES,
     generate_augmented_scenarios,
+    generate_fixed_high_complexity_scenarios,
     generate_fixed_only_scenarios,
     generate_orthogonal_augmented_scenarios,
     generate_scenarios,
@@ -157,6 +162,60 @@ def test_fixed_only_scenario_matrix_is_balanced_and_uses_only_fixed_hints():
 
     assert no_agreement_count == 120
     assert fixed_hint_count > 0
+
+
+def test_fixed_high_complexity_scenario_matrix_focuses_on_different_issue_constraints():
+    scenarios = generate_fixed_high_complexity_scenarios()
+
+    assert len(scenarios) == 640
+    assert {scenario["generation_meta"]["generator_version"] for scenario in scenarios} == {
+        "gen.fixed_high_complexity.v1"
+    }
+    assert _meta_counts(scenarios, "complexity_focus") == {"high": 640}
+    assert _meta_counts(scenarios, "fixed_pattern") == {"both_agents_different_issue": 640}
+    assert _meta_counts(scenarios, "difficulty_stratum") == {
+        difficulty: 160 for difficulty in FIXED_HIGH_COMPLEXITY_DIFFICULTY_STRATA
+    }
+    assert _meta_counts(scenarios, "issue_pair_pattern") == {
+        pattern: 128 for pattern in FIXED_HIGH_COMPLEXITY_PAIR_PATTERNS
+    }
+    assert _meta_counts(scenarios, "role_mode") == {
+        role_mode: 320 for role_mode in FIXED_HIGH_COMPLEXITY_ROLE_MODES
+    }
+    assert _meta_counts(scenarios, "fixed_strength") == {1: 320, 2: 320}
+    assert {scenario["complexity_level"] for scenario in scenarios} == set(FIXED_HIGH_COMPLEXITY_LEVELS)
+
+    no_agreement_count = 0
+    for raw in scenarios:
+        scenario = scenario_from_dict(raw)
+        validate_scenario(scenario)
+        assert len(raw["domain"]["issues"]) in {4, 5}
+        assert raw["privacy_labels"]["external_constraint_hint_allowed"]
+        assert raw["privacy_labels"]["constraint_hint_accumulation_risk"] == "high"
+        assert len(valid_outcomes(scenario)) >= scenario.expected_checks.min_valid_outcomes
+        if scenario.expected_checks.has_agreement_region:
+            assert agreement_region(scenario)
+        else:
+            no_agreement_count += 1
+            assert not agreement_region(scenario)
+
+        hard_issues_by_agent = []
+        for agent in raw["agents"]:
+            hard_constraints = agent["private_profile"]["hard_constraints"]
+            hints = agent["allowed_constraint_hint"]["issue_constraints"]
+            weights = agent["private_profile"]["utility_weights"]
+            assert len(hard_constraints) == 1
+            assert hints == {hard_constraints[0]["issue"]: "fixed"}
+            assert abs(sum(weights.values()) - 1.0) < 0.0002
+            hard_issues_by_agent.append(hard_constraints[0]["issue"])
+
+        assert hard_issues_by_agent[0] != hard_issues_by_agent[1]
+        assert raw["generation_meta"]["constraint_issues"] == {
+            "ppa_a": hard_issues_by_agent[0],
+            "ppa_b": hard_issues_by_agent[1],
+        }
+
+    assert no_agreement_count == 160
 
 
 def _meta_counts(scenarios: list[dict], key: str) -> dict[str, int]:

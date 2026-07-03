@@ -1,0 +1,167 @@
+schema_version: scenario.v1
+scenario_id: H1S521
+task_family: service_visit
+complexity_level: issue_4
+tension_pattern: mutual_hard_constraint_conflict
+variant_id: v03_hc01_budget_quality_borderline_flat_s1_ppa_a_dominant
+domain:
+  issues:
+  - name: visit_window
+    type: enum
+    values:
+    - morning
+    - afternoon
+    - evening
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+  - name: service_scope
+    type: ordinal
+    values:
+    - basic
+    - standard
+    - extended
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - basic
+    - standard
+    - extended
+  - name: access_method
+    type: enum
+    values:
+    - remote
+    - supervised
+    - unattended
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+  - name: notice_period
+    type: bucket
+    values:
+    - same_day
+    - one_day
+    - three_days
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - same_day
+    - one_day
+    - three_days
+agents:
+- id: ppa_a
+  role: initiator
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      visit_window: 0.1733
+      service_scope: 0.1733
+      access_method: 0.48
+      notice_period: 0.1734
+    value_scores:
+      visit_window:
+        morning: 0.8
+        afternoon: 0.9
+        evening: 1.0
+      service_scope:
+        basic: 1.0
+        standard: 0.9
+        extended: 0.8
+      access_method:
+        remote: 0.9
+        supervised: 1.0
+        unattended: 0.9
+      notice_period:
+        same_day: 0.8
+        one_day: 0.9
+        three_days: 1.0
+    hard_constraints:
+    - issue: access_method
+      allowed_values:
+      - supervised
+    reservation_value: 0.943
+    concession_policy:
+      type: linear
+      start_threshold: 0.99
+      end_threshold: 0.943
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      access_method: fixed
+- id: ppa_b
+  role: responder
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      visit_window: 0.1466
+      service_scope: 0.34
+      access_method: 0.1466
+      notice_period: 0.3668
+    value_scores:
+      visit_window:
+        morning: 1.0
+        afternoon: 0.9
+        evening: 0.8
+      service_scope:
+        basic: 0.9
+        standard: 1.0
+        extended: 0.9
+      access_method:
+        remote: 0.9
+        supervised: 1.0
+        unattended: 0.9
+      notice_period:
+        same_day: 1.0
+        one_day: 0.9
+        three_days: 0.8
+    hard_constraints:
+    - issue: service_scope
+      allowed_values:
+      - standard
+    reservation_value: 0.943
+    concession_policy:
+      type: linear
+      start_threshold: 0.99
+      end_threshold: 0.943
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      service_scope: fixed
+privacy_labels:
+  pii_raw: false
+  sensitive_reason_present: false
+  exact_value_present: false
+  constraint_hint_accumulation_risk: high
+  external_constraint_hint_allowed: true
+expected_checks:
+  has_agreement_region: true
+  expected_fallback: false
+  expected_timeout_possible: true
+  min_valid_outcomes: 3
+  min_pareto_candidates: 1
+  llm_schema_required: true
+generation_meta:
+  generator_version: gen.fixed_high_complexity.v1
+  seed: 600521
+  source: synthetic_fixed_high_complexity_matrix
+  created_from_legacy_poc: false
+  fixed_pattern: both_agents_different_issue
+  difficulty_stratum: borderline
+  utility_shape: flat
+  fixed_strength: 1
+  issue_pair_pattern: budget_quality
+  role_mode: ppa_a_dominant
+  constraint_issues:
+    ppa_a: access_method
+    ppa_b: service_scope
+  complexity_focus: high
