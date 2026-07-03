@@ -34,3 +34,14 @@ PYTHONPATH=src .venv/bin/python scripts/run_track_a_samples.py
 ```
 
 샘플 실행은 `scenarios/samples`의 두 시나리오를 사용해 A1/A2/A3를 한 번씩 실행하고 요약 지표를 출력한다.
+
+## 시나리오 생성
+
+기본 세트는 `01-시나리오-스키마.md`의 매트릭스에 따라 120개를 생성한다. 확장 세트는 variant를 하나 더 늘려 180개를 생성한다.
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/generate_scenarios.py --count 120
+PYTHONPATH=src .venv/bin/python scripts/generate_scenarios.py --count 180
+```
+
+생성 파일은 기본적으로 `scenarios/generated` 하위에 저장된다.
