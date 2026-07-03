@@ -1,18 +1,15 @@
 import json
 from pathlib import Path
-from shutil import copyfile
 
 from dp03_a2a_hints.batch_runner import run_scenario_matrix, write_batch_outputs
 from dp03_a2a_hints.bias_audit import audit_scenario_bias, write_bias_audit
+from dp03_a2a_hints.scenario_generator import generate_scenarios, write_scenarios
 
 
 def test_bias_audit_reports_distribution_and_warnings(tmp_path):
-    source_dir = Path("scenarios/generated")
     scenario_dir = tmp_path / "scenarios"
     result_dir = tmp_path / "results"
-    scenario_dir.mkdir()
-    for path in sorted(source_dir.glob("*.yaml"))[:4]:
-        copyfile(path, scenario_dir / path.name)
+    write_scenarios(generate_scenarios(variant_count=2)[:4], scenario_dir)
 
     records, comparisons = run_scenario_matrix(scenario_dir)
     output = write_batch_outputs(records, comparisons, result_dir)

@@ -1,17 +1,14 @@
 import json
 from pathlib import Path
-from shutil import copyfile
 
 from dp03_a2a_hints.batch_runner import run_scenario_matrix, write_batch_outputs
+from dp03_a2a_hints.scenario_generator import generate_scenarios, write_scenarios
 
 
 def test_batch_runner_writes_track_a_outputs(tmp_path):
-    source_dir = Path("scenarios/generated")
     scenario_dir = tmp_path / "scenarios"
     output_dir = tmp_path / "results"
-    scenario_dir.mkdir()
-    for path in sorted(source_dir.glob("*.yaml"))[:2]:
-        copyfile(path, scenario_dir / path.name)
+    write_scenarios(generate_scenarios(variant_count=2)[:2], scenario_dir)
 
     records, comparisons = run_scenario_matrix(scenario_dir)
     output = write_batch_outputs(records, comparisons, output_dir)
