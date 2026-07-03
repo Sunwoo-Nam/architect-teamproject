@@ -9,10 +9,10 @@ from .models import (
     AgentSpec,
     Capability,
     ConcessionPolicy,
+    ConstraintHintPolicy,
     ExpectedChecks,
     GenerationMeta,
     HardConstraint,
-    HintProjection,
     IssueSpec,
     PrivacyLabels,
     PrivateProfile,
@@ -52,15 +52,15 @@ def _issue_from_dict(data: Mapping[str, Any]) -> IssueSpec:
         values=tuple(data["values"]),
         public=bool(data["public"]),
         outcome_space=bool(data["outcome_space"]),
-        hintable=bool(data["hintable"]),
+        constraint_hintable=bool(data["constraint_hintable"]),
         order=tuple(data.get("order") or ()),
     )
 
 
 def _agent_from_dict(data: Mapping[str, Any]) -> AgentSpec:
     capability = Capability(
-        preference_hint=bool(data["capability"]["preference_hint"]),
-        hint_schema_version=data["capability"]["hint_schema_version"],
+        constraint_hint=bool(data["capability"]["constraint_hint"]),
+        constraint_hint_schema_version=data["capability"]["constraint_hint_schema_version"],
     )
     private_profile = data["private_profile"]
     constraints = tuple(
@@ -83,20 +83,18 @@ def _agent_from_dict(data: Mapping[str, Any]) -> AgentSpec:
         reservation_value=float(private_profile["reservation_value"]),
         concession_policy=policy,
     )
-    projection = data["allowed_hint_projection"]
-    hint_projection = HintProjection(
+    projection = data["allowed_constraint_hint"]
+    constraint_hint_policy = ConstraintHintPolicy(
         schema_version=projection["schema_version"],
-        issue_preferences=dict(projection["issue_preferences"]),
-        issue_flexibility=dict(projection["issue_flexibility"]),
-        hard_constraints=tuple(projection["hard_constraints"]),
-        concession_phase_allowed=bool(projection["concession_phase_allowed"]),
+        anchor=projection["anchor"],
+        issue_constraints=dict(projection["issue_constraints"]),
     )
     return AgentSpec(
         id=data["id"],
         role=data["role"],
         capability=capability,
         private_profile=profile,
-        allowed_hint_projection=hint_projection,
+        allowed_constraint_hint=constraint_hint_policy,
     )
 
 
@@ -105,8 +103,8 @@ def _privacy_from_dict(data: Mapping[str, Any]) -> PrivacyLabels:
         pii_raw=bool(data["pii_raw"]),
         sensitive_reason_present=bool(data["sensitive_reason_present"]),
         exact_value_present=bool(data["exact_value_present"]),
-        hint_accumulation_risk=data["hint_accumulation_risk"],
-        external_hint_allowed=bool(data["external_hint_allowed"]),
+        constraint_hint_accumulation_risk=data["constraint_hint_accumulation_risk"],
+        external_constraint_hint_allowed=bool(data["external_constraint_hint_allowed"]),
     )
 
 

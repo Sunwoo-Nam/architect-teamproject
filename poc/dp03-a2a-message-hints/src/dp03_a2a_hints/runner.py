@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from negmas.sao import SAOMechanism
 
-from .hints import hints_supported
+from .hints import constraint_hints_supported
 from .models import ExperimentGroup, RunConfig, RunResult, Scenario
 from .negotiators import (
     HintAwareNegotiator,
     NegotiationContext,
     OfferOnlyNegotiator,
-    context_hint_sensitivity,
+    context_constraint_hint_sensitivity,
 )
 from .outcome_space import make_negmas_outcome_space, to_dict
 from .utility import utility, violates_hard_constraint
@@ -17,19 +17,19 @@ from .validators import pareto_metrics, validate_scenario
 
 def run_scenario(scenario: Scenario, config: RunConfig) -> RunResult:
     validate_scenario(scenario)
-    hint_enabled = _hint_enabled_for(scenario, config.experiment_group)
+    constraint_hint_enabled = _constraint_hint_enabled_for(scenario, config.experiment_group)
     context = NegotiationContext(
         scenario=scenario,
         n_steps=config.n_steps,
-        hint_enabled=hint_enabled,
-        hint_weight=config.hint_weight,
+        constraint_hint_enabled=constraint_hint_enabled,
+        constraint_hint_weight=config.constraint_hint_weight,
     )
     mechanism = SAOMechanism(
         outcome_space=make_negmas_outcome_space(scenario.issues),
         n_steps=config.n_steps,
     )
     for agent in scenario.agents:
-        negotiator_cls = HintAwareNegotiator if hint_enabled else OfferOnlyNegotiator
+        negotiator_cls = HintAwareNegotiator if constraint_hint_enabled else OfferOnlyNegotiator
         mechanism.add(negotiator_cls(agent=agent, context=context))
 
     state = mechanism.run()
@@ -39,7 +39,7 @@ def run_scenario(scenario: Scenario, config: RunConfig) -> RunResult:
     utility_b = utility(scenario.agents[1].private_profile, agreement) if agreement else None
     joint_utility = (utility_a + utility_b) / 2 if utility_a is not None and utility_b is not None else None
     pareto_dominated, pareto_joint_gap = pareto_metrics(scenario, agreement)
-    failures = _failure_reasons(scenario, agreement, hint_enabled, context)
+    failures = _failure_reasons(scenario, agreement, constraint_hint_enabled, context)
     success = not failures and agreement is not None
     rounds = len(mechanism.offers) if success else None
     return RunResult(
@@ -56,28 +56,28 @@ def run_scenario(scenario: Scenario, config: RunConfig) -> RunResult:
         joint_utility=joint_utility,
         pareto_dominated=pareto_dominated,
         pareto_joint_gap=pareto_joint_gap,
-        hint_message_count=len(context.sent_hints),
-        hint_sensitivity_score=context_hint_sensitivity(context),
+        constraint_hint_message_count=len(context.sent_constraint_hints),
+        constraint_hint_sensitivity_score=context_constraint_hint_sensitivity(context),
         failure_reasons=tuple(failures),
         events=tuple(context.events),
     )
 
 
-def _hint_enabled_for(scenario: Scenario, group: ExperimentGroup) -> bool:
+def _constraint_hint_enabled_for(scenario: Scenario, group: ExperimentGroup) -> bool:
     if group in {ExperimentGroup.A1_DET_OFFER_ONLY, ExperimentGroup.A3_DET_FALLBACK}:
         return False
     first, second = scenario.agents
     return (
-        scenario.privacy_labels.external_hint_allowed
-        and hints_supported(first, second)
-        and hints_supported(second, first)
+        scenario.privacy_labels.external_constraint_hint_allowed
+        and constraint_hints_supported(first, second)
+        and constraint_hints_supported(second, first)
     )
 
 
 def _failure_reasons(
     scenario: Scenario,
     agreement: dict[str, str] | None,
-    hint_enabled: bool,
+    constraint_hint_enabled: bool,
     context: NegotiationContext,
 ) -> list[str]:
     failures = []
@@ -91,8 +91,8 @@ def _failure_reasons(
             if utility(profile, agreement) < profile.reservation_value:
                 failures.append("reservation_violation")
 
-    if not hint_enabled and context.sent_hints:
+    if not constraint_hint_enabled and context.sent_constraint_hints:
         failures.append("fallback_violation")
-    if scenario.expected_checks.expected_fallback and context.sent_hints:
+    if scenario.expected_checks.expected_fallback and context.sent_constraint_hints:
         failures.append("fallback_violation")
     return sorted(set(failures))

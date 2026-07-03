@@ -22,8 +22,10 @@ def summarize(results: Iterable[RunResult]) -> dict[str, dict[str, float | int |
             "agreement_rate": len(successful) / len(items) if items else None,
             "median_rounds": median(rounds) if rounds else None,
             "mean_joint_utility": mean(joint) if joint else None,
-            "hint_message_count": sum(item.hint_message_count for item in items),
-            "mean_hint_sensitivity_score": mean(item.hint_sensitivity_score for item in items) if items else None,
+            "constraint_hint_message_count": sum(item.constraint_hint_message_count for item in items),
+            "mean_constraint_hint_sensitivity_score": (
+                mean(item.constraint_hint_sensitivity_score for item in items) if items else None
+            ),
             "failure_count": sum(1 for item in items if item.failure_reasons),
         }
     return summary

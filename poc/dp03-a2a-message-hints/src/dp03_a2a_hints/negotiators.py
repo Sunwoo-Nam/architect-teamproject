@@ -2,24 +2,31 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from negmas.outcomes.common import ExtendedOutcome
 from negmas.sao import ResponseType, SAONegotiator, SAOState
 
-from .hints import build_hint, hint_sensitivity_score, hints_supported, opponent_hint_fit
-from .models import AgentSpec, EventLog, HintMessage, OutcomeDict, OutcomeTuple, Scenario
+from .hints import (
+    build_constraint_hint,
+    constraint_hint_from_data,
+    constraint_hint_sensitivity_score,
+    constraint_hints_supported,
+    opponent_constraint_hint_fit,
+)
+from .models import AgentSpec, ConstraintHintMessage, EventLog, OutcomeDict, OutcomeTuple, Scenario
 from .outcome_space import enumerate_outcomes, to_dict
 from .utility import is_acceptable, threshold, utility, violates_hard_constraint
-from .validators import validate_hint, validate_outcome_tuple
+from .validators import validate_constraint_hint, validate_outcome_tuple
 
 
 @dataclass
 class NegotiationContext:
     scenario: Scenario
     n_steps: int
-    hint_enabled: bool
-    hint_weight: float = 0.15
-    hints_by_actor: dict[str, HintMessage] = field(default_factory=dict)
+    constraint_hint_enabled: bool
+    constraint_hint_weight: float = 0.15
+    constraint_hints_by_actor: dict[str, ConstraintHintMessage] = field(default_factory=dict)
     last_offer_by_actor: dict[str, OutcomeDict] = field(default_factory=dict)
-    sent_hints: list[HintMessage] = field(default_factory=list)
+    sent_constraint_hints: list[ConstraintHintMessage] = field(default_factory=list)
     events: list[EventLog] = field(default_factory=list)
 
     def opponent_of(self, actor_id: str) -> AgentSpec:
@@ -36,7 +43,7 @@ class NegotiationContext:
         event_type: str,
         outcome: OutcomeDict | None,
         response_type: str | None,
-        preference_hint: HintMessage | None,
+        constraint_hint: ConstraintHintMessage | None,
         validator: dict,
     ) -> None:
         self.events.append(
@@ -46,7 +53,7 @@ class NegotiationContext:
                 event_type=event_type,
                 outcome=outcome,
                 response_type=response_type,
-                preference_hint=preference_hint.as_dict() if preference_hint else None,
+                constraint_hint=constraint_hint.as_dict() if constraint_hint else None,
                 validator=validator,
             )
         )
@@ -59,10 +66,10 @@ class OfferOnlyNegotiator(SAONegotiator):
         self.context = context
         self._offered: set[OutcomeTuple] = set()
 
-    def propose(self, state: SAOState, dest: str | None = None) -> OutcomeTuple | None:
+    def propose(self, state: SAOState, dest: str | None = None) -> OutcomeTuple | ExtendedOutcome | None:
         offer = self._select_offer(state)
-        hint = self._maybe_publish_hint(state)
         outcome_dict = to_dict(offer, self.context.scenario.issues) if offer else None
+        constraint_hint = self._maybe_publish_constraint_hint(outcome_dict)
         if offer:
             self._offered.add(offer)
             self.context.last_offer_by_actor[self.agent.id] = outcome_dict or {}
@@ -72,17 +79,27 @@ class OfferOnlyNegotiator(SAONegotiator):
             event_type="offer" if offer else "no_offer",
             outcome=outcome_dict,
             response_type=None,
-            preference_hint=hint,
+            constraint_hint=constraint_hint,
             validator={
                 "outcome_valid": bool(offer and validate_outcome_tuple(offer, self.context.scenario)),
-                "hint_valid": True if hint is None else validate_hint(hint, self.context.scenario),
+                "constraint_hint_valid": (
+                    True
+                    if constraint_hint is None
+                    else validate_constraint_hint(constraint_hint, self.context.scenario)
+                ),
                 "prohibited_content": False,
             },
         )
+        if offer and constraint_hint:
+            return ExtendedOutcome(
+                outcome=offer,
+                data={"constraint_hint": constraint_hint.as_dict()},
+            )
         return offer
 
     def respond(self, state: SAOState, source: str | None = None) -> ResponseType:
         current_offer = state.current_offer
+        inbound_constraint_hint = constraint_hint_from_data(state.current_data)
         response = self._response_for_offer(current_offer, state.step)
         outcome = (
             to_dict(current_offer, self.context.scenario.issues)
@@ -92,18 +109,26 @@ class OfferOnlyNegotiator(SAONegotiator):
         opponent = self.context.opponent_of(self.agent.id)
         if outcome:
             self.context.last_offer_by_actor[opponent.id] = outcome
+        constraint_hint_valid = (
+            True
+            if inbound_constraint_hint is None
+            else validate_constraint_hint(inbound_constraint_hint, self.context.scenario)
+        )
+        if inbound_constraint_hint and constraint_hint_valid:
+            self.context.constraint_hints_by_actor[opponent.id] = inbound_constraint_hint
         self.context.record_event(
             step=state.step,
             actor=self.agent.id,
             event_type="response",
             outcome=outcome,
             response_type=response.name,
-            preference_hint=None,
+            constraint_hint=inbound_constraint_hint,
             validator={
                 "outcome_valid": outcome is not None,
                 "hard_constraint_violation": bool(
                     outcome and violates_hard_constraint(self.agent.private_profile, outcome)
                 ),
+                "constraint_hint_valid": constraint_hint_valid,
                 "prohibited_content": False,
             },
         )
@@ -154,42 +179,34 @@ class OfferOnlyNegotiator(SAONegotiator):
             return ResponseType.ACCEPT_OFFER
         return ResponseType.REJECT_OFFER
 
-    def _maybe_publish_hint(self, state: SAOState) -> HintMessage | None:
+    def _maybe_publish_constraint_hint(self, outcome: OutcomeDict | None) -> ConstraintHintMessage | None:
         return None
 
 
 class HintAwareNegotiator(OfferOnlyNegotiator):
     def _proposal_score(self, outcome_tuple: OutcomeTuple, outcome: OutcomeDict, own_utility: float) -> float:
         score = super()._proposal_score(outcome_tuple, outcome, own_utility)
-        if not self.context.hint_enabled:
+        if not self.context.constraint_hint_enabled:
             return score
         opponent = self.context.opponent_of(self.agent.id)
-        opponent_hint = self.context.hints_by_actor.get(opponent.id)
+        opponent_hint = self.context.constraint_hints_by_actor.get(opponent.id)
         opponent_last_offer = self.context.last_offer_by_actor.get(opponent.id)
-        fit = opponent_hint_fit(outcome, opponent_last_offer, opponent_hint)
-        return score + self.context.hint_weight * fit
+        fit = opponent_constraint_hint_fit(outcome, opponent_last_offer, opponent_hint)
+        return score + self.context.constraint_hint_weight * fit
 
-    def _maybe_publish_hint(self, state: SAOState) -> HintMessage | None:
+    def _maybe_publish_constraint_hint(self, outcome: OutcomeDict | None) -> ConstraintHintMessage | None:
         opponent = self.context.opponent_of(self.agent.id)
-        if not self.context.hint_enabled or not hints_supported(self.agent, opponent):
+        if not self.context.constraint_hint_enabled or not constraint_hints_supported(self.agent, opponent):
             return None
-        hint = build_hint(self.agent, concession_phase=_phase_for_step(state.step, self.context.n_steps))
-        self.context.hints_by_actor[self.agent.id] = hint
-        self.context.sent_hints.append(hint)
+        hint = build_constraint_hint(self.agent, outcome)
+        if hint is None:
+            return None
+        self.context.sent_constraint_hints.append(hint)
         return hint
 
 
-def _phase_for_step(step: int, n_steps: int) -> str:
-    progress = step / max(n_steps - 1, 1)
-    if progress < 0.34:
-        return "early"
-    if progress < 0.67:
-        return "normal"
-    return "final"
-
-
-def context_hint_sensitivity(context: NegotiationContext) -> float:
-    return hint_sensitivity_score(
-        tuple(context.sent_hints),
-        context.scenario.privacy_labels.hint_accumulation_risk,
+def context_constraint_hint_sensitivity(context: NegotiationContext) -> float:
+    return constraint_hint_sensitivity_score(
+        tuple(context.sent_constraint_hints),
+        context.scenario.privacy_labels.constraint_hint_accumulation_risk,
     )

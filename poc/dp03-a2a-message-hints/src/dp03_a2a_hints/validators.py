@@ -3,7 +3,7 @@ from __future__ import annotations
 from itertools import combinations
 from math import isclose
 
-from .models import HintMessage, OutcomeDict, OutcomeTuple, Scenario
+from .models import ConstraintHintMessage, OutcomeDict, OutcomeTuple, Scenario
 from .outcome_space import enumerate_outcomes, to_dict
 from .utility import utility, violates_hard_constraint
 
@@ -22,6 +22,7 @@ def validate_scenario(scenario: Scenario) -> None:
         raise ValueError("legacy PoC data must not be used")
 
     issue_names = set(scenario.issue_names)
+    issues_by_name = {issue.name: issue for issue in scenario.issues}
     for agent in scenario.agents:
         weights = agent.private_profile.utility_weights
         if set(weights) != issue_names:
@@ -40,6 +41,21 @@ def validate_scenario(scenario: Scenario) -> None:
             values = next(issue.values for issue in scenario.issues if issue.name == constraint.issue)
             if not set(constraint.allowed_values).issubset(values):
                 raise ValueError(f"{agent.id}: invalid hard constraint values")
+        hard_constraint_issues = {constraint.issue for constraint in agent.private_profile.hard_constraints}
+        policy = agent.allowed_constraint_hint
+        if policy.schema_version != "constraint_hint.v1":
+            raise ValueError(f"{agent.id}: unsupported constraint hint schema")
+        if policy.anchor != "offered_outcome":
+            raise ValueError(f"{agent.id}: unsupported constraint hint anchor")
+        for issue, constraint in policy.issue_constraints.items():
+            if issue not in issue_names:
+                raise ValueError(f"{agent.id}: unknown constraint hint issue")
+            if not issues_by_name[issue].constraint_hintable:
+                raise ValueError(f"{agent.id}: non-hintable constraint hint issue")
+            if constraint not in {"fixed", "relaxable"}:
+                raise ValueError(f"{agent.id}: invalid constraint hint value")
+            if constraint == "fixed" and issue not in hard_constraint_issues:
+                raise ValueError(f"{agent.id}: fixed constraint hint without hard constraint")
 
     valid = valid_outcomes(scenario)
     if len(valid) < scenario.expected_checks.min_valid_outcomes:
@@ -72,10 +88,10 @@ def validate_outcome_tuple(outcome: OutcomeTuple, scenario: Scenario) -> bool:
     return outcome in enumerate_outcomes(scenario.issues)
 
 
-def validate_hint(hint: HintMessage, scenario: Scenario) -> bool:
-    from .hints import hint_valid
+def validate_constraint_hint(hint: ConstraintHintMessage, scenario: Scenario) -> bool:
+    from .hints import constraint_hint_valid
 
-    return hint_valid(hint, scenario)
+    return constraint_hint_valid(hint, scenario)
 
 
 def pareto_frontier(scenario: Scenario) -> tuple[OutcomeDict, ...]:

@@ -1,12 +1,12 @@
-# DP03 A2A Message Hints PoC
+# DP03 A2A Constraint Hints PoC
 
 본 폴더는 `DP03-A2A 협상 메시지 구조`의 결정론 Track A PoC를 담는다.
 
 비교 대상:
 
 - `A1_DET_OFFER_ONLY`: 순수 NegMAS 메시지
-- `A2_DET_HINT_AWARE`: A2A Envelope metadata로 `preference_hint` 사용
-- `A3_DET_FALLBACK`: hint 미지원/버전 불일치 시 순수 NegMAS로 fallback
+- `A2_DET_HINT_AWARE`: NegMAS `ExtendedOutcome.data` metadata로 `constraint_hint` 사용
+- `A3_DET_FALLBACK`: constraint hint 미지원/버전 불일치 시 순수 NegMAS로 fallback
 
 기존 `poc/dp03-privacy`의 코드, 데이터, 리포트는 사용하지 않는다.
 

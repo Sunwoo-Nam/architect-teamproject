@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 OutcomeTuple = Tuple[str, ...]
 OutcomeDict = Dict[str, str]
@@ -21,14 +21,14 @@ class IssueSpec:
     values: Tuple[str, ...]
     public: bool = True
     outcome_space: bool = True
-    hintable: bool = True
+    constraint_hintable: bool = True
     order: Tuple[str, ...] = field(default_factory=tuple)
 
 
 @dataclass(frozen=True)
 class Capability:
-    preference_hint: bool
-    hint_schema_version: Optional[str]
+    constraint_hint: bool
+    constraint_hint_schema_version: Optional[str]
 
 
 @dataclass(frozen=True)
@@ -55,12 +55,10 @@ class PrivateProfile:
 
 
 @dataclass(frozen=True)
-class HintProjection:
+class ConstraintHintPolicy:
     schema_version: str
-    issue_preferences: Dict[str, str]
-    issue_flexibility: Dict[str, str]
-    hard_constraints: Tuple[str, ...]
-    concession_phase_allowed: bool
+    anchor: str
+    issue_constraints: Dict[str, str]
 
 
 @dataclass(frozen=True)
@@ -69,7 +67,7 @@ class AgentSpec:
     role: str
     capability: Capability
     private_profile: PrivateProfile
-    allowed_hint_projection: HintProjection
+    allowed_constraint_hint: ConstraintHintPolicy
 
 
 @dataclass(frozen=True)
@@ -77,8 +75,8 @@ class PrivacyLabels:
     pii_raw: bool
     sensitive_reason_present: bool
     exact_value_present: bool
-    hint_accumulation_risk: str
-    external_hint_allowed: bool
+    constraint_hint_accumulation_risk: str
+    external_constraint_hint_allowed: bool
 
 
 @dataclass(frozen=True)
@@ -123,7 +121,7 @@ class RunConfig:
     experiment_group: ExperimentGroup
     n_steps: int = 30
     repeat_id: str = "r01"
-    hint_weight: float = 0.15
+    constraint_hint_weight: float = 0.15
 
 
 @dataclass(frozen=True)
@@ -133,23 +131,17 @@ class AgentRuntime:
 
 
 @dataclass(frozen=True)
-class HintMessage:
+class ConstraintHintMessage:
     schema_version: str
-    issue_preferences: Dict[str, str]
-    issue_flexibility: Dict[str, str]
-    hard_constraints: Tuple[str, ...]
-    concession_phase: Optional[str] = None
+    anchor: str
+    issue_constraints: Dict[str, str]
 
     def as_dict(self) -> Dict[str, Any]:
-        data: Dict[str, Any] = {
+        return {
             "schema_version": self.schema_version,
-            "issue_preferences": dict(self.issue_preferences),
-            "issue_flexibility": dict(self.issue_flexibility),
-            "hard_constraints": list(self.hard_constraints),
+            "anchor": self.anchor,
+            "issue_constraints": dict(self.issue_constraints),
         }
-        if self.concession_phase is not None:
-            data["concession_phase"] = self.concession_phase
-        return data
 
 
 @dataclass(frozen=True)
@@ -159,7 +151,7 @@ class EventLog:
     event_type: str
     outcome: Optional[OutcomeDict]
     response_type: Optional[str]
-    preference_hint: Optional[Dict[str, Any]]
+    constraint_hint: Optional[Dict[str, Any]]
     validator: Dict[str, Any]
 
 
@@ -178,7 +170,7 @@ class RunResult:
     joint_utility: Optional[float]
     pareto_dominated: Optional[bool]
     pareto_joint_gap: Optional[float]
-    hint_message_count: int
-    hint_sensitivity_score: float
+    constraint_hint_message_count: int
+    constraint_hint_sensitivity_score: float
     failure_reasons: Tuple[str, ...]
     events: Tuple[EventLog, ...]
