@@ -8,6 +8,8 @@
 - `A2_DET_HINT_AWARE`: NegMAS `ExtendedOutcome.data` metadata로 `constraint_hint` 사용
 - `A3_DET_FALLBACK`: constraint hint 미지원/버전 불일치 시 순수 NegMAS로 fallback
 
+내부 hard constraint는 NegMAS `UFunConstraint` adapter로 negotiator의 후보 선택과 수락 판단에 반영한다. 공개되는 `constraint_hint`는 이 내부 constraint 객체가 아니라, offer에 붙는 제한된 metadata다.
+
 기존 `poc/dp03-privacy`의 코드, 데이터, 리포트는 사용하지 않는다.
 
 ## 환경

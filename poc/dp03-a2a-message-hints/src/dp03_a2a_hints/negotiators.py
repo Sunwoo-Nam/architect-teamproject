@@ -13,8 +13,9 @@ from .hints import (
     opponent_constraint_hint_fit,
 )
 from .models import AgentSpec, ConstraintHintMessage, EventLog, OutcomeDict, OutcomeTuple, Scenario
+from .negmas_preferences import make_negmas_constrained_ufun
 from .outcome_space import enumerate_outcomes, to_dict
-from .utility import is_acceptable, threshold, utility, violates_hard_constraint
+from .utility import threshold, violates_hard_constraint
 from .validators import validate_constraint_hint, validate_outcome_tuple
 
 
@@ -65,6 +66,7 @@ class OfferOnlyNegotiator(SAONegotiator):
         self.agent = agent
         self.context = context
         self._offered: set[OutcomeTuple] = set()
+        self._negmas_ufun = make_negmas_constrained_ufun(agent.private_profile, context.scenario.issues)
 
     def propose(self, state: SAOState, dest: str | None = None) -> OutcomeTuple | ExtendedOutcome | None:
         offer = self._select_offer(state)
@@ -147,9 +149,9 @@ class OfferOnlyNegotiator(SAONegotiator):
         fallback_outcomes = []
         for outcome_tuple in enumerate_outcomes(self.context.scenario.issues):
             outcome = to_dict(outcome_tuple, self.context.scenario.issues)
-            if violates_hard_constraint(profile, outcome):
+            score = float(self._negmas_ufun(outcome_tuple))
+            if score == float("-inf"):
                 continue
-            score = utility(profile, outcome)
             scored = (self._proposal_score(outcome_tuple, outcome, score), outcome_tuple)
             if score >= threshold_value:
                 outcomes.append(scored)
@@ -166,16 +168,14 @@ class OfferOnlyNegotiator(SAONegotiator):
     def _response_for_offer(self, offer: OutcomeTuple | None, step: int) -> ResponseType:
         if offer is None or not validate_outcome_tuple(offer, self.context.scenario):
             return ResponseType.REJECT_OFFER
-        outcome = to_dict(offer, self.context.scenario.issues)
         threshold_value = threshold(self.agent.private_profile, step, self.context.n_steps)
-        if is_acceptable(self.agent.private_profile, outcome, threshold_value):
+        score = float(self._negmas_ufun(offer))
+        if score == float("-inf"):
+            return ResponseType.REJECT_OFFER
+        if score >= threshold_value:
             return ResponseType.ACCEPT_OFFER
         last_step = step >= self.context.n_steps - 2
-        if last_step and is_acceptable(
-            self.agent.private_profile,
-            outcome,
-            self.agent.private_profile.reservation_value,
-        ):
+        if last_step and score >= self.agent.private_profile.reservation_value:
             return ResponseType.ACCEPT_OFFER
         return ResponseType.REJECT_OFFER
 
