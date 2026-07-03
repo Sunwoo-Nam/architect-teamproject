@@ -18,9 +18,11 @@ from .validators import pareto_metrics, validate_scenario
 def run_scenario(scenario: Scenario, config: RunConfig) -> RunResult:
     validate_scenario(scenario)
     constraint_hint_enabled = _constraint_hint_enabled_for(scenario, config.experiment_group)
+    concession_steps = config.concession_steps or config.n_steps
     context = NegotiationContext(
         scenario=scenario,
         n_steps=config.n_steps,
+        concession_steps=concession_steps,
         constraint_hint_enabled=constraint_hint_enabled,
         constraint_hint_weight=config.constraint_hint_weight,
     )

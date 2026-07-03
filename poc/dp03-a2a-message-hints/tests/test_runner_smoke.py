@@ -40,3 +40,31 @@ def test_summary_groups_results():
 
     assert summary["A1_DET_OFFER_ONLY"]["agreement_rate"] == 1
     assert summary["A2_DET_HINT_AWARE"]["constraint_hint_message_count"] > 0
+
+
+def test_runner_can_extend_deadline_without_slowing_concession():
+    scenario = load_scenario(
+        "scenarios/generated_fixed_only_v1/"
+        "F1S070-schedule_coordination-issue_4-mutual_hard_constraint_conflict-"
+        "v02_f02_both_agents_different_issue_hard_sharp_s1.yaml"
+    )
+
+    baseline = run_scenario(
+        scenario,
+        RunConfig(
+            ExperimentGroup.A1_DET_OFFER_ONLY,
+            n_steps=30,
+            concession_steps=30,
+        ),
+    )
+    extended = run_scenario(
+        scenario,
+        RunConfig(
+            ExperimentGroup.A1_DET_OFFER_ONLY,
+            n_steps=100,
+            concession_steps=30,
+        ),
+    )
+
+    assert not baseline.agreement_success
+    assert extended.agreement_success

@@ -120,6 +120,7 @@ class Scenario:
 class RunConfig:
     experiment_group: ExperimentGroup
     n_steps: int = 30
+    concession_steps: Optional[int] = None
     repeat_id: str = "r01"
     constraint_hint_weight: float = 0.15
 

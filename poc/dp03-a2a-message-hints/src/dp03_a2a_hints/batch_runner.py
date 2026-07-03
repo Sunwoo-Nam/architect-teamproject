@@ -20,6 +20,7 @@ def run_scenario_matrix(
     scenario_dir: Path,
     groups: tuple[ExperimentGroup, ...] = TRACK_A_GROUPS,
     n_steps: int = 30,
+    concession_steps: int | None = None,
     constraint_hint_weight: float = 0.15,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     records: list[dict[str, Any]] = []
@@ -33,6 +34,7 @@ def run_scenario_matrix(
                 RunConfig(
                     experiment_group=group,
                     n_steps=n_steps,
+                    concession_steps=concession_steps,
                     constraint_hint_weight=constraint_hint_weight,
                 ),
             )

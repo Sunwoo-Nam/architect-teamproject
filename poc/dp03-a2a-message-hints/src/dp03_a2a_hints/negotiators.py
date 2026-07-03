@@ -23,6 +23,7 @@ from .validators import validate_constraint_hint, validate_outcome_tuple
 class NegotiationContext:
     scenario: Scenario
     n_steps: int
+    concession_steps: int
     constraint_hint_enabled: bool
     constraint_hint_weight: float = 0.15
     constraint_hints_by_actor: dict[str, ConstraintHintMessage] = field(default_factory=dict)
@@ -144,7 +145,7 @@ class OfferOnlyNegotiator(SAONegotiator):
 
     def _candidate_outcomes(self, step: int) -> list[tuple[float, OutcomeTuple]]:
         profile = self.agent.private_profile
-        threshold_value = threshold(profile, step, self.context.n_steps)
+        threshold_value = threshold(profile, step, self.context.concession_steps)
         outcomes = []
         fallback_outcomes = []
         for outcome_tuple in enumerate_outcomes(self.context.scenario.issues):
@@ -168,7 +169,7 @@ class OfferOnlyNegotiator(SAONegotiator):
     def _response_for_offer(self, offer: OutcomeTuple | None, step: int) -> ResponseType:
         if offer is None or not validate_outcome_tuple(offer, self.context.scenario):
             return ResponseType.REJECT_OFFER
-        threshold_value = threshold(self.agent.private_profile, step, self.context.n_steps)
+        threshold_value = threshold(self.agent.private_profile, step, self.context.concession_steps)
         score = float(self._negmas_ufun(offer))
         if score == float("-inf"):
             return ResponseType.REJECT_OFFER
