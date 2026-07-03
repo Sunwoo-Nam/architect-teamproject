@@ -11,33 +11,33 @@ domain:
       values: [weekday_evening, saturday_lunch, sunday_evening]
       public: true
       outcome_space: true
-      hintable: true
+      constraint_hintable: true
     - name: area
       type: enum
       values: [near_home, midpoint, near_office]
       public: true
       outcome_space: true
-      hintable: true
+      constraint_hintable: true
     - name: budget_band
       type: bucket
       values: [low, medium, high]
       order: [low, medium, high]
       public: true
       outcome_space: true
-      hintable: true
+      constraint_hintable: true
     - name: notice_period
       type: bucket
       values: [same_day, one_day, three_days]
       order: [same_day, one_day, three_days]
       public: true
       outcome_space: true
-      hintable: true
+      constraint_hintable: true
 agents:
   - id: ppa_a
     role: initiator
     capability:
-      preference_hint: true
-      hint_schema_version: hint.v1
+      constraint_hint: true
+      constraint_hint_schema_version: constraint_hint.v1
     private_profile:
       utility_model: linear_additive
       utility_weights:
@@ -70,25 +70,17 @@ agents:
         type: linear
         start_threshold: 0.92
         end_threshold: 0.62
-    allowed_hint_projection:
-      schema_version: hint.v1
-      issue_preferences:
-        slot: high
-        area: medium
-        budget_band: medium
-        notice_period: low
-      issue_flexibility:
-        slot: low
-        area: medium
-        budget_band: medium
-        notice_period: high
-      hard_constraints: [slot]
-      concession_phase_allowed: true
+    allowed_constraint_hint:
+      schema_version: constraint_hint.v1
+      anchor: offered_outcome
+      issue_constraints:
+        slot: fixed
+        notice_period: relaxable
   - id: ppa_b
     role: responder
     capability:
-      preference_hint: true
-      hint_schema_version: hint.v1
+      constraint_hint: true
+      constraint_hint_schema_version: constraint_hint.v1
     private_profile:
       utility_model: linear_additive
       utility_weights:
@@ -119,26 +111,18 @@ agents:
         type: linear
         start_threshold: 0.90
         end_threshold: 0.58
-    allowed_hint_projection:
-      schema_version: hint.v1
-      issue_preferences:
-        slot: medium
-        area: high
-        budget_band: medium
-        notice_period: medium
-      issue_flexibility:
-        slot: medium
-        area: medium
-        budget_band: high
-        notice_period: high
-      hard_constraints: []
-      concession_phase_allowed: true
+    allowed_constraint_hint:
+      schema_version: constraint_hint.v1
+      anchor: offered_outcome
+      issue_constraints:
+        budget_band: relaxable
+        notice_period: relaxable
 privacy_labels:
   pii_raw: false
   sensitive_reason_present: false
   exact_value_present: false
-  hint_accumulation_risk: medium
-  external_hint_allowed: true
+  constraint_hint_accumulation_risk: medium
+  external_constraint_hint_allowed: true
 expected_checks:
   has_agreement_region: true
   expected_fallback: false

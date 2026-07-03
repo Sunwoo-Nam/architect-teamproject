@@ -11,26 +11,26 @@ domain:
       values: [weekday_evening, saturday_lunch, sunday_evening]
       public: true
       outcome_space: true
-      hintable: true
+      constraint_hintable: true
     - name: area
       type: enum
       values: [near_home, midpoint, near_office]
       public: true
       outcome_space: true
-      hintable: true
+      constraint_hintable: true
     - name: budget_band
       type: bucket
       values: [low, medium, high]
       order: [low, medium, high]
       public: true
       outcome_space: true
-      hintable: true
+      constraint_hintable: true
 agents:
   - id: ppa_a
     role: initiator
     capability:
-      preference_hint: true
-      hint_schema_version: hint.v1
+      constraint_hint: true
+      constraint_hint_schema_version: constraint_hint.v1
     private_profile:
       utility_model: linear_additive
       utility_weights:
@@ -56,23 +56,18 @@ agents:
         type: linear
         start_threshold: 0.88
         end_threshold: 0.55
-    allowed_hint_projection:
-      schema_version: hint.v1
-      issue_preferences:
-        slot: medium
-        area: medium
-        budget_band: medium
-      issue_flexibility:
-        slot: high
-        area: high
-        budget_band: high
-      hard_constraints: []
-      concession_phase_allowed: true
+    allowed_constraint_hint:
+      schema_version: constraint_hint.v1
+      anchor: offered_outcome
+      issue_constraints:
+        slot: relaxable
+        area: relaxable
+        budget_band: relaxable
   - id: ppa_b
     role: responder
     capability:
-      preference_hint: false
-      hint_schema_version: null
+      constraint_hint: false
+      constraint_hint_schema_version: null
     private_profile:
       utility_model: linear_additive
       utility_weights:
@@ -98,24 +93,16 @@ agents:
         type: linear
         start_threshold: 0.88
         end_threshold: 0.55
-    allowed_hint_projection:
-      schema_version: hint.v1
-      issue_preferences:
-        slot: medium
-        area: high
-        budget_band: medium
-      issue_flexibility:
-        slot: high
-        area: high
-        budget_band: high
-      hard_constraints: []
-      concession_phase_allowed: false
+    allowed_constraint_hint:
+      schema_version: constraint_hint.v1
+      anchor: offered_outcome
+      issue_constraints: {}
 privacy_labels:
   pii_raw: false
   sensitive_reason_present: false
   exact_value_present: false
-  hint_accumulation_risk: low
-  external_hint_allowed: false
+  constraint_hint_accumulation_risk: low
+  external_constraint_hint_allowed: false
 expected_checks:
   has_agreement_region: true
   expected_fallback: true
