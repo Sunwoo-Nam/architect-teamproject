@@ -1,0 +1,138 @@
+schema_version: scenario.v1
+scenario_id: V3S200
+task_family: group_purchase
+complexity_level: issue_3
+tension_pattern: budget_quality_tradeoff
+variant_id: v01_agent_swap_flat_hard_relaxable_only
+domain:
+  issues:
+  - name: price_band
+    type: bucket
+    values:
+    - low
+    - medium
+    - high
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - low
+    - medium
+    - high
+  - name: quality_tier
+    type: ordinal
+    values:
+    - basic
+    - standard
+    - premium
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - basic
+    - standard
+    - premium
+  - name: delivery_window
+    type: bucket
+    values:
+    - express
+    - standard
+    - flexible
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - express
+    - standard
+    - flexible
+agents:
+- id: ppa_a
+  role: initiator
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      price_band: 0.2222
+      quality_tier: 0.5556
+      delivery_window: 0.2222
+    value_scores:
+      price_band:
+        low: 0.8
+        medium: 0.9
+        high: 1.0
+      quality_tier:
+        basic: 0.8
+        standard: 0.9
+        premium: 1.0
+      delivery_window:
+        express: 1.0
+        standard: 0.9
+        flexible: 0.8
+    hard_constraints: []
+    reservation_value: 0.893
+    concession_policy:
+      type: linear
+      start_threshold: 0.99
+      end_threshold: 0.893
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      delivery_window: relaxable
+      price_band: relaxable
+- id: ppa_b
+  role: responder
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      price_band: 0.5556
+      quality_tier: 0.2222
+      delivery_window: 0.2222
+    value_scores:
+      price_band:
+        low: 1.0
+        medium: 0.9
+        high: 0.8
+      quality_tier:
+        basic: 1.0
+        standard: 0.9
+        premium: 0.8
+      delivery_window:
+        express: 0.8
+        standard: 0.9
+        flexible: 1.0
+    hard_constraints: []
+    reservation_value: 0.893
+    concession_policy:
+      type: linear
+      start_threshold: 0.99
+      end_threshold: 0.893
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      quality_tier: relaxable
+      delivery_window: relaxable
+privacy_labels:
+  pii_raw: false
+  sensitive_reason_present: false
+  exact_value_present: false
+  constraint_hint_accumulation_risk: medium
+  external_constraint_hint_allowed: true
+expected_checks:
+  has_agreement_region: true
+  expected_fallback: false
+  expected_timeout_possible: false
+  min_valid_outcomes: 3
+  min_pareto_candidates: 1
+  llm_schema_required: true
+generation_meta:
+  generator_version: gen.v3
+  seed: 300200
+  source: synthetic_augmented_matrix
+  created_from_legacy_poc: false

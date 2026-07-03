@@ -1,0 +1,159 @@
+schema_version: scenario.v1
+scenario_id: V4S063
+task_family: schedule_coordination
+complexity_level: issue_4
+tension_pattern: one_hard_constraint
+variant_id: v01_value_reverse_plateau_medium_sparse
+domain:
+  issues:
+  - name: slot
+    type: enum
+    values:
+    - sunday_evening
+    - saturday_lunch
+    - weekday_evening
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+  - name: duration_band
+    type: bucket
+    values:
+    - extended
+    - standard
+    - short
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - extended
+    - standard
+    - short
+  - name: notice_period
+    type: bucket
+    values:
+    - three_days
+    - one_day
+    - same_day
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - three_days
+    - one_day
+    - same_day
+  - name: location_band
+    type: enum
+    values:
+    - near_office
+    - midpoint
+    - near_home
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+agents:
+- id: ppa_a
+  role: initiator
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      slot: 0.4545
+      duration_band: 0.1818
+      notice_period: 0.1818
+      location_band: 0.1819
+    value_scores:
+      slot:
+        weekday_evening: 1.0
+        saturday_lunch: 0.95
+        sunday_evening: 0.45
+      duration_band:
+        short: 0.95
+        standard: 1.0
+        extended: 0.95
+      notice_period:
+        same_day: 0.45
+        one_day: 0.95
+        three_days: 1.0
+      location_band:
+        near_home: 1.0
+        midpoint: 0.95
+        near_office: 0.45
+    hard_constraints:
+    - issue: slot
+      allowed_values:
+      - weekday_evening
+      - saturday_lunch
+    reservation_value: 0.839
+    concession_policy:
+      type: linear
+      start_threshold: 0.99
+      end_threshold: 0.839
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      duration_band: relaxable
+- id: ppa_b
+  role: responder
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      slot: 0.25
+      duration_band: 0.25
+      notice_period: 0.25
+      location_band: 0.25
+    value_scores:
+      slot:
+        weekday_evening: 0.45
+        saturday_lunch: 0.95
+        sunday_evening: 1.0
+      duration_band:
+        short: 0.45
+        standard: 0.95
+        extended: 1.0
+      notice_period:
+        same_day: 1.0
+        one_day: 0.95
+        three_days: 0.45
+      location_band:
+        near_home: 0.95
+        midpoint: 1.0
+        near_office: 0.95
+    hard_constraints: []
+    reservation_value: 0.839
+    concession_policy:
+      type: linear
+      start_threshold: 0.99
+      end_threshold: 0.839
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      location_band: relaxable
+privacy_labels:
+  pii_raw: false
+  sensitive_reason_present: false
+  exact_value_present: false
+  constraint_hint_accumulation_risk: high
+  external_constraint_hint_allowed: true
+expected_checks:
+  has_agreement_region: true
+  expected_fallback: false
+  expected_timeout_possible: false
+  min_valid_outcomes: 3
+  min_pareto_candidates: 1
+  llm_schema_required: true
+generation_meta:
+  generator_version: gen.v4
+  seed: 400063
+  source: synthetic_orthogonal_augmented_matrix
+  created_from_legacy_poc: false
+  augmentation_kind: value_reverse
+  utility_shape: plateau
+  difficulty_stratum: medium
+  hint_policy: sparse

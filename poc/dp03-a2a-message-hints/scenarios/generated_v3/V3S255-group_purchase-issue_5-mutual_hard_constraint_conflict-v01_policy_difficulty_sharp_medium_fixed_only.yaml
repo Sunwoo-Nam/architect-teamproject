@@ -1,0 +1,190 @@
+schema_version: scenario.v1
+scenario_id: V3S255
+task_family: group_purchase
+complexity_level: issue_5
+tension_pattern: mutual_hard_constraint_conflict
+variant_id: v01_policy_difficulty_sharp_medium_fixed_only
+domain:
+  issues:
+  - name: price_band
+    type: bucket
+    values:
+    - high
+    - medium
+    - low
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - high
+    - medium
+    - low
+  - name: quality_tier
+    type: ordinal
+    values:
+    - premium
+    - standard
+    - basic
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - premium
+    - standard
+    - basic
+  - name: delivery_window
+    type: bucket
+    values:
+    - flexible
+    - standard
+    - express
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - flexible
+    - standard
+    - express
+  - name: warranty_level
+    type: ordinal
+    values:
+    - extended
+    - basic
+    - none
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - extended
+    - basic
+    - none
+  - name: privacy_option
+    type: ordinal
+    values:
+    - enhanced
+    - standard
+    - minimal
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - enhanced
+    - standard
+    - minimal
+agents:
+- id: ppa_a
+  role: initiator
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      price_band: 0.3846
+      quality_tier: 0.1538
+      delivery_window: 0.1538
+      warranty_level: 0.1538
+      privacy_option: 0.154
+    value_scores:
+      price_band:
+        low: 1.0
+        medium: 0.45
+        high: 0.1
+      quality_tier:
+        basic: 1.0
+        standard: 0.45
+        premium: 0.1
+      delivery_window:
+        express: 0.1
+        standard: 0.45
+        flexible: 1.0
+      warranty_level:
+        none: 1.0
+        basic: 0.45
+        extended: 0.1
+      privacy_option:
+        minimal: 0.45
+        standard: 1.0
+        enhanced: 0.45
+    hard_constraints:
+    - issue: price_band
+      allowed_values:
+      - low
+      - medium
+    reservation_value: 0.572
+    concession_policy:
+      type: linear
+      start_threshold: 0.892
+      end_threshold: 0.572
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      price_band: fixed
+- id: ppa_b
+  role: responder
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      price_band: 0.1538
+      quality_tier: 0.3846
+      delivery_window: 0.1538
+      warranty_level: 0.1538
+      privacy_option: 0.154
+    value_scores:
+      price_band:
+        low: 0.1
+        medium: 0.45
+        high: 1.0
+      quality_tier:
+        basic: 0.1
+        standard: 0.45
+        premium: 1.0
+      delivery_window:
+        express: 1.0
+        standard: 0.45
+        flexible: 0.1
+      warranty_level:
+        none: 0.45
+        basic: 1.0
+        extended: 0.45
+      privacy_option:
+        minimal: 0.1
+        standard: 0.45
+        enhanced: 1.0
+    hard_constraints:
+    - issue: quality_tier
+      allowed_values:
+      - premium
+      - standard
+    reservation_value: 0.572
+    concession_policy:
+      type: linear
+      start_threshold: 0.892
+      end_threshold: 0.572
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      quality_tier: fixed
+privacy_labels:
+  pii_raw: false
+  sensitive_reason_present: false
+  exact_value_present: false
+  constraint_hint_accumulation_risk: high
+  external_constraint_hint_allowed: true
+expected_checks:
+  has_agreement_region: true
+  expected_fallback: false
+  expected_timeout_possible: false
+  min_valid_outcomes: 3
+  min_pareto_candidates: 1
+  llm_schema_required: true
+generation_meta:
+  generator_version: gen.v3
+  seed: 300255
+  source: synthetic_augmented_matrix
+  created_from_legacy_poc: false

@@ -1,0 +1,181 @@
+schema_version: scenario.v1
+scenario_id: V3S072
+task_family: schedule_coordination
+complexity_level: issue_5
+tension_pattern: one_hard_constraint
+variant_id: v02_policy_difficulty_linear_easy_full
+domain:
+  issues:
+  - name: slot
+    type: enum
+    values:
+    - sunday_evening
+    - saturday_lunch
+    - weekday_evening
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+  - name: duration_band
+    type: bucket
+    values:
+    - extended
+    - standard
+    - short
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - extended
+    - standard
+    - short
+  - name: notice_period
+    type: bucket
+    values:
+    - three_days
+    - one_day
+    - same_day
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - three_days
+    - one_day
+    - same_day
+  - name: location_band
+    type: enum
+    values:
+    - near_office
+    - midpoint
+    - near_home
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+  - name: budget_band
+    type: bucket
+    values:
+    - high
+    - medium
+    - low
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - high
+    - medium
+    - low
+agents:
+- id: ppa_a
+  role: initiator
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      slot: 0.2
+      duration_band: 0.2
+      notice_period: 0.2
+      location_band: 0.2
+      budget_band: 0.2
+    value_scores:
+      slot:
+        weekday_evening: 0.3
+        saturday_lunch: 0.65
+        sunday_evening: 1.0
+      duration_band:
+        short: 1.0
+        standard: 0.65
+        extended: 0.3
+      notice_period:
+        same_day: 0.65
+        one_day: 1.0
+        three_days: 0.65
+      location_band:
+        near_home: 0.3
+        midpoint: 0.65
+        near_office: 1.0
+      budget_band:
+        low: 1.0
+        medium: 0.65
+        high: 0.3
+    hard_constraints: []
+    reservation_value: 0.535
+    concession_policy:
+      type: linear
+      start_threshold: 0.855
+      end_threshold: 0.535
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      budget_band: relaxable
+      duration_band: relaxable
+- id: ppa_b
+  role: responder
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      slot: 0.1538
+      duration_band: 0.3846
+      notice_period: 0.1538
+      location_band: 0.1538
+      budget_band: 0.154
+    value_scores:
+      slot:
+        weekday_evening: 0.65
+        saturday_lunch: 1.0
+        sunday_evening: 0.65
+      duration_band:
+        short: 0.3
+        standard: 0.65
+        extended: 1.0
+      notice_period:
+        same_day: 1.0
+        one_day: 0.65
+        three_days: 0.3
+      location_band:
+        near_home: 0.65
+        midpoint: 1.0
+        near_office: 0.65
+      budget_band:
+        low: 0.3
+        medium: 0.65
+        high: 1.0
+    hard_constraints:
+    - issue: duration_band
+      allowed_values:
+      - extended
+      - standard
+    reservation_value: 0.535
+    concession_policy:
+      type: linear
+      start_threshold: 0.855
+      end_threshold: 0.535
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      duration_band: fixed
+      notice_period: relaxable
+      location_band: relaxable
+privacy_labels:
+  pii_raw: false
+  sensitive_reason_present: false
+  exact_value_present: false
+  constraint_hint_accumulation_risk: high
+  external_constraint_hint_allowed: true
+expected_checks:
+  has_agreement_region: true
+  expected_fallback: false
+  expected_timeout_possible: false
+  min_valid_outcomes: 3
+  min_pareto_candidates: 1
+  llm_schema_required: true
+generation_meta:
+  generator_version: gen.v3
+  seed: 300072
+  source: synthetic_augmented_matrix
+  created_from_legacy_poc: false

@@ -1,0 +1,180 @@
+schema_version: scenario.v1
+scenario_id: F1S451
+task_family: service_visit
+complexity_level: issue_5
+tension_pattern: one_hard_constraint
+variant_id: v01_f01_ppa_b_only_medium_flat_s1
+domain:
+  issues:
+  - name: visit_window
+    type: enum
+    values:
+    - morning
+    - afternoon
+    - evening
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+  - name: service_scope
+    type: ordinal
+    values:
+    - basic
+    - standard
+    - extended
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - basic
+    - standard
+    - extended
+  - name: access_method
+    type: enum
+    values:
+    - remote
+    - supervised
+    - unattended
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+  - name: notice_period
+    type: bucket
+    values:
+    - same_day
+    - one_day
+    - three_days
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - same_day
+    - one_day
+    - three_days
+  - name: cost_band
+    type: bucket
+    values:
+    - low
+    - medium
+    - high
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - low
+    - medium
+    - high
+agents:
+- id: ppa_a
+  role: initiator
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      visit_window: 0.3846
+      service_scope: 0.1538
+      access_method: 0.1538
+      notice_period: 0.1538
+      cost_band: 0.154
+    value_scores:
+      visit_window:
+        morning: 1.0
+        afternoon: 0.9
+        evening: 0.8
+      service_scope:
+        basic: 0.9
+        standard: 1.0
+        extended: 0.9
+      access_method:
+        remote: 0.8
+        supervised: 0.9
+        unattended: 1.0
+      notice_period:
+        same_day: 1.0
+        one_day: 0.9
+        three_days: 0.8
+      cost_band:
+        low: 0.9
+        medium: 1.0
+        high: 0.9
+    hard_constraints: []
+    reservation_value: 0.818
+    concession_policy:
+      type: linear
+      start_threshold: 0.99
+      end_threshold: 0.818
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints: {}
+- id: ppa_b
+  role: responder
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      visit_window: 0.2
+      service_scope: 0.2
+      access_method: 0.2
+      notice_period: 0.2
+      cost_band: 0.2
+    value_scores:
+      visit_window:
+        morning: 0.8
+        afternoon: 0.9
+        evening: 1.0
+      service_scope:
+        basic: 0.8
+        standard: 0.9
+        extended: 1.0
+      access_method:
+        remote: 1.0
+        supervised: 0.9
+        unattended: 0.8
+      notice_period:
+        same_day: 0.9
+        one_day: 1.0
+        three_days: 0.9
+      cost_band:
+        low: 0.8
+        medium: 0.9
+        high: 1.0
+    hard_constraints:
+    - issue: service_scope
+      allowed_values:
+      - extended
+    reservation_value: 0.818
+    concession_policy:
+      type: linear
+      start_threshold: 0.99
+      end_threshold: 0.818
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      service_scope: fixed
+privacy_labels:
+  pii_raw: false
+  sensitive_reason_present: false
+  exact_value_present: false
+  constraint_hint_accumulation_risk: high
+  external_constraint_hint_allowed: true
+expected_checks:
+  has_agreement_region: true
+  expected_fallback: false
+  expected_timeout_possible: false
+  min_valid_outcomes: 3
+  min_pareto_candidates: 1
+  llm_schema_required: true
+generation_meta:
+  generator_version: gen.fixed_only.v1
+  seed: 500451
+  source: synthetic_fixed_only_matrix
+  created_from_legacy_poc: false
+  fixed_pattern: ppa_b_only
+  difficulty_stratum: medium
+  utility_shape: flat
+  fixed_strength: 1

@@ -1,0 +1,188 @@
+schema_version: scenario.v1
+scenario_id: F1S331
+task_family: group_purchase
+complexity_level: issue_5
+tension_pattern: one_hard_constraint
+variant_id: v01_f01_ppa_b_only_medium_flat_s1
+domain:
+  issues:
+  - name: price_band
+    type: bucket
+    values:
+    - low
+    - medium
+    - high
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - low
+    - medium
+    - high
+  - name: quality_tier
+    type: ordinal
+    values:
+    - basic
+    - standard
+    - premium
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - basic
+    - standard
+    - premium
+  - name: delivery_window
+    type: bucket
+    values:
+    - express
+    - standard
+    - flexible
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - express
+    - standard
+    - flexible
+  - name: warranty_level
+    type: ordinal
+    values:
+    - none
+    - basic
+    - extended
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - none
+    - basic
+    - extended
+  - name: privacy_option
+    type: ordinal
+    values:
+    - minimal
+    - standard
+    - enhanced
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - minimal
+    - standard
+    - enhanced
+agents:
+- id: ppa_a
+  role: initiator
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      price_band: 0.3846
+      quality_tier: 0.1538
+      delivery_window: 0.1538
+      warranty_level: 0.1538
+      privacy_option: 0.154
+    value_scores:
+      price_band:
+        low: 1.0
+        medium: 0.9
+        high: 0.8
+      quality_tier:
+        basic: 0.9
+        standard: 1.0
+        premium: 0.9
+      delivery_window:
+        express: 0.8
+        standard: 0.9
+        flexible: 1.0
+      warranty_level:
+        none: 1.0
+        basic: 0.9
+        extended: 0.8
+      privacy_option:
+        minimal: 0.9
+        standard: 1.0
+        enhanced: 0.9
+    hard_constraints: []
+    reservation_value: 0.818
+    concession_policy:
+      type: linear
+      start_threshold: 0.99
+      end_threshold: 0.818
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints: {}
+- id: ppa_b
+  role: responder
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      price_band: 0.2
+      quality_tier: 0.2
+      delivery_window: 0.2
+      warranty_level: 0.2
+      privacy_option: 0.2
+    value_scores:
+      price_band:
+        low: 0.8
+        medium: 0.9
+        high: 1.0
+      quality_tier:
+        basic: 0.8
+        standard: 0.9
+        premium: 1.0
+      delivery_window:
+        express: 1.0
+        standard: 0.9
+        flexible: 0.8
+      warranty_level:
+        none: 0.9
+        basic: 1.0
+        extended: 0.9
+      privacy_option:
+        minimal: 0.8
+        standard: 0.9
+        enhanced: 1.0
+    hard_constraints:
+    - issue: quality_tier
+      allowed_values:
+      - premium
+    reservation_value: 0.818
+    concession_policy:
+      type: linear
+      start_threshold: 0.99
+      end_threshold: 0.818
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      quality_tier: fixed
+privacy_labels:
+  pii_raw: false
+  sensitive_reason_present: false
+  exact_value_present: false
+  constraint_hint_accumulation_risk: high
+  external_constraint_hint_allowed: true
+expected_checks:
+  has_agreement_region: true
+  expected_fallback: false
+  expected_timeout_possible: false
+  min_valid_outcomes: 3
+  min_pareto_candidates: 1
+  llm_schema_required: true
+generation_meta:
+  generator_version: gen.fixed_only.v1
+  seed: 500331
+  source: synthetic_fixed_only_matrix
+  created_from_legacy_poc: false
+  fixed_pattern: ppa_b_only
+  difficulty_stratum: medium
+  utility_shape: flat
+  fixed_strength: 1

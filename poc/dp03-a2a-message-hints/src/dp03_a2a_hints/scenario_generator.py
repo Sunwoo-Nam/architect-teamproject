@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from itertools import product
 from pathlib import Path
 from typing import Any
@@ -16,6 +17,33 @@ TENSION_PATTERNS = (
     "time_location_tradeoff",
 )
 VARIANTS = ("v01", "v02", "v03")
+AUGMENTATION_KINDS = ("baseline", "agent_swap", "policy_difficulty")
+ORTHOGONAL_AUGMENTATION_KINDS = (
+    "baseline",
+    "agent_swap",
+    "value_reverse",
+    "agent_swap_value_reverse",
+    "issue_rotate",
+)
+UTILITY_SCORE_SHAPES = ("linear", "sharp", "flat", "near_tie", "plateau")
+DIFFICULTY_STRATA = ("easy", "medium", "hard", "borderline", "no_agreement")
+HINT_POLICY_STRATA = ("full", "fixed_only", "relaxable_only", "sparse", "disabled")
+FIXED_ONLY_PATTERNS = (
+    "ppa_a_only",
+    "ppa_b_only",
+    "both_agents_same_issue",
+    "both_agents_different_issue",
+    "none_control",
+)
+FIXED_ONLY_DIFFICULTY_STRATA = ("easy", "medium", "hard", "no_agreement")
+FIXED_ONLY_VARIANTS = ("f01", "f02")
+FIXED_ONLY_TENSION_BY_PATTERN = {
+    "ppa_a_only": "one_hard_constraint",
+    "ppa_b_only": "one_hard_constraint",
+    "both_agents_same_issue": "mutual_hard_constraint_conflict",
+    "both_agents_different_issue": "mutual_hard_constraint_conflict",
+    "none_control": "aligned_preferences",
+}
 
 ISSUE_CATALOG: dict[str, tuple[dict[str, Any], ...]] = {
     "schedule_coordination": (
@@ -80,6 +108,136 @@ def generate_scenarios(variant_count: int = 2) -> list[dict[str, Any]]:
             tension_pattern=tension_pattern,
             variant_id=variant_id,
             seed=200000 + sequence,
+        )
+        scenarios.append(scenario)
+        sequence += 1
+    return scenarios
+
+
+def generate_augmented_scenarios() -> list[dict[str, Any]]:
+    base_scenarios = generate_scenarios(variant_count=2)
+    augmented = []
+    sequence = 1
+    for index, base in enumerate(base_scenarios):
+        for kind_index, kind in enumerate(AUGMENTATION_KINDS):
+            scenario = deepcopy(base)
+            shape = UTILITY_SCORE_SHAPES[(index + kind_index) % len(UTILITY_SCORE_SHAPES)]
+            difficulty = DIFFICULTY_STRATA[(index + kind_index) % len(DIFFICULTY_STRATA)]
+            hint_policy = HINT_POLICY_STRATA[(index + kind_index) % len(HINT_POLICY_STRATA)]
+
+            if kind == "agent_swap" or (kind == "policy_difficulty" and index % 2 == 1):
+                _swap_agent_profiles(scenario)
+            if kind == "policy_difficulty":
+                _reverse_issue_value_order(scenario)
+
+            _apply_utility_score_shape(scenario, shape)
+            _apply_hint_policy(scenario, hint_policy)
+            _apply_difficulty_stratum(scenario, difficulty)
+            _refresh_generation_meta(
+                scenario,
+                scenario_id=f"V3S{sequence:03d}",
+                seed=300000 + sequence,
+                variant_suffix=f"{kind}_{shape}_{difficulty}_{hint_policy}",
+            )
+            augmented.append(scenario)
+            sequence += 1
+    return augmented
+
+
+def generate_orthogonal_augmented_scenarios() -> list[dict[str, Any]]:
+    base_scenarios = generate_scenarios(variant_count=2)
+    augmented = []
+    sequence = 1
+    for index, base in enumerate(base_scenarios):
+        base_mod = index % len(HINT_POLICY_STRATA)
+        for repeat, kind in enumerate(ORTHOGONAL_AUGMENTATION_KINDS):
+            scenario = deepcopy(base)
+            shape = UTILITY_SCORE_SHAPES[(base_mod + repeat) % len(UTILITY_SCORE_SHAPES)]
+            difficulty = DIFFICULTY_STRATA[(base_mod + 2 * repeat) % len(DIFFICULTY_STRATA)]
+            hint_policy = HINT_POLICY_STRATA[(base_mod + 3 * repeat) % len(HINT_POLICY_STRATA)]
+
+            if kind in {"agent_swap", "agent_swap_value_reverse"}:
+                _swap_agent_profiles(scenario)
+            if kind in {"value_reverse", "agent_swap_value_reverse"}:
+                _reverse_issue_value_order(scenario)
+            if kind == "issue_rotate":
+                if scenario["tension_pattern"] == "one_hard_constraint" and index % 2 == 0:
+                    _swap_agent_profiles(scenario)
+                _rotate_issue_order(scenario, amount=(index % max(len(scenario["domain"]["issues"]), 1)) + 1)
+
+            _apply_utility_score_shape(scenario, shape)
+            _apply_hint_policy(scenario, hint_policy)
+            _apply_difficulty_stratum(scenario, difficulty)
+            _refresh_generation_meta(
+                scenario,
+                scenario_id=f"V4S{sequence:03d}",
+                seed=400000 + sequence,
+                variant_suffix=f"{kind}_{shape}_{difficulty}_{hint_policy}",
+                generator_version="gen.v4",
+                source="synthetic_orthogonal_augmented_matrix",
+            )
+            scenario["generation_meta"].update(
+                {
+                    "augmentation_kind": kind,
+                    "utility_shape": shape,
+                    "difficulty_stratum": difficulty,
+                    "hint_policy": hint_policy,
+                }
+            )
+            augmented.append(scenario)
+            sequence += 1
+    return augmented
+
+
+def generate_fixed_only_scenarios() -> list[dict[str, Any]]:
+    scenarios = []
+    sequence = 1
+    for task_family, complexity_level, fixed_pattern, difficulty, fixed_variant in product(
+        TASK_FAMILIES,
+        COMPLEXITY_LEVELS,
+        FIXED_ONLY_PATTERNS,
+        FIXED_ONLY_DIFFICULTY_STRATA,
+        FIXED_ONLY_VARIANTS,
+    ):
+        pattern_index = FIXED_ONLY_PATTERNS.index(fixed_pattern)
+        difficulty_index = FIXED_ONLY_DIFFICULTY_STRATA.index(difficulty)
+        variant_index = FIXED_ONLY_VARIANTS.index(fixed_variant)
+        utility_shape = UTILITY_SCORE_SHAPES[
+            (pattern_index + difficulty_index + variant_index) % len(UTILITY_SCORE_SHAPES)
+        ]
+        fixed_strength = ((pattern_index + difficulty_index + variant_index) % 2) + 1
+
+        scenario = build_scenario(
+            scenario_id=f"F1S{sequence:03d}",
+            task_family=task_family,
+            complexity_level=complexity_level,
+            tension_pattern=FIXED_ONLY_TENSION_BY_PATTERN[fixed_pattern],
+            variant_id=VARIANTS[variant_index],
+            seed=500000 + sequence,
+        )
+        _apply_utility_score_shape(scenario, utility_shape)
+        _apply_fixed_only_pattern(
+            scenario,
+            fixed_pattern=fixed_pattern,
+            variant_index=variant_index,
+            fixed_strength=fixed_strength,
+        )
+        _apply_difficulty_stratum(scenario, difficulty)
+        _refresh_generation_meta(
+            scenario,
+            scenario_id=f"F1S{sequence:03d}",
+            seed=500000 + sequence,
+            variant_suffix=f"{fixed_variant}_{fixed_pattern}_{difficulty}_{utility_shape}_s{fixed_strength}",
+            generator_version="gen.fixed_only.v1",
+            source="synthetic_fixed_only_matrix",
+        )
+        scenario["generation_meta"].update(
+            {
+                "fixed_pattern": fixed_pattern,
+                "difficulty_stratum": difficulty,
+                "utility_shape": utility_shape,
+                "fixed_strength": fixed_strength,
+            }
         )
         scenarios.append(scenario)
         sequence += 1
@@ -384,3 +542,235 @@ def _risk_for(tension_pattern: str) -> str:
     if tension_pattern in {"one_hard_constraint", "mutual_hard_constraint_conflict"}:
         return "high"
     return "medium"
+
+
+def _swap_agent_profiles(scenario: dict[str, Any]) -> None:
+    first, second = scenario["agents"]
+    fields = ("capability", "private_profile", "allowed_constraint_hint")
+    for field in fields:
+        first[field], second[field] = deepcopy(second[field]), deepcopy(first[field])
+
+
+def _reverse_issue_value_order(scenario: dict[str, Any]) -> None:
+    for issue in scenario["domain"]["issues"]:
+        issue["values"] = list(reversed(issue["values"]))
+        if "order" in issue:
+            issue["order"] = list(reversed(issue["order"]))
+
+
+def _rotate_issue_order(scenario: dict[str, Any], amount: int) -> None:
+    issues = scenario["domain"]["issues"]
+    if not issues:
+        return
+    amount = amount % len(issues)
+    scenario["domain"]["issues"] = issues[amount:] + issues[:amount]
+
+
+def _apply_utility_score_shape(scenario: dict[str, Any], shape: str) -> None:
+    for agent in scenario["agents"]:
+        value_scores = agent["private_profile"]["value_scores"]
+        for issue in scenario["domain"]["issues"]:
+            scores = value_scores[issue["name"]]
+            preferred_value = max(scores, key=scores.get)
+            preferred_index = issue["values"].index(preferred_value)
+            scores.update(_score_shape(issue["values"], preferred_index, shape))
+
+
+def _score_shape(values: list[str], preferred_index: int, shape: str) -> dict[str, float]:
+    by_distance = {
+        "linear": (1.0, 0.65, 0.3),
+        "sharp": (1.0, 0.45, 0.1),
+        "flat": (1.0, 0.9, 0.8),
+        "near_tie": (1.0, 0.96, 0.92),
+        "plateau": (1.0, 0.95, 0.45),
+    }[shape]
+    return {
+        value: by_distance[min(abs(index - preferred_index), len(by_distance) - 1)]
+        for index, value in enumerate(values)
+    }
+
+
+def _apply_hint_policy(scenario: dict[str, Any], policy: str) -> None:
+    if policy == "disabled":
+        scenario["privacy_labels"]["external_constraint_hint_allowed"] = False
+        for agent in scenario["agents"]:
+            agent["capability"]["constraint_hint"] = False
+            agent["capability"]["constraint_hint_schema_version"] = None
+            agent["allowed_constraint_hint"]["issue_constraints"] = {}
+        return
+
+    scenario["privacy_labels"]["external_constraint_hint_allowed"] = True
+    for agent in scenario["agents"]:
+        constraints = agent["allowed_constraint_hint"]["issue_constraints"]
+        if policy == "fixed_only":
+            agent["allowed_constraint_hint"]["issue_constraints"] = {
+                issue: value for issue, value in constraints.items() if value == "fixed"
+            }
+        elif policy == "relaxable_only":
+            agent["allowed_constraint_hint"]["issue_constraints"] = {
+                issue: value for issue, value in constraints.items() if value == "relaxable"
+            }
+        elif policy == "sparse":
+            if constraints:
+                issue = sorted(constraints)[0]
+                agent["allowed_constraint_hint"]["issue_constraints"] = {issue: constraints[issue]}
+
+
+def _apply_fixed_only_pattern(
+    scenario: dict[str, Any],
+    *,
+    fixed_pattern: str,
+    variant_index: int,
+    fixed_strength: int,
+) -> None:
+    issues = scenario["domain"]["issues"]
+    issue_names = [issue["name"] for issue in issues]
+    primary_issue = issue_names[variant_index % len(issue_names)]
+    secondary_issue = issue_names[(variant_index + 1) % len(issue_names)]
+    same_issue = primary_issue
+
+    scenario["privacy_labels"]["external_constraint_hint_allowed"] = fixed_pattern != "none_control"
+    scenario["privacy_labels"]["constraint_hint_accumulation_risk"] = (
+        "low" if fixed_pattern == "none_control" else "high"
+    )
+
+    for agent in scenario["agents"]:
+        agent["capability"]["constraint_hint"] = fixed_pattern != "none_control"
+        agent["capability"]["constraint_hint_schema_version"] = (
+            "constraint_hint.v1" if fixed_pattern != "none_control" else None
+        )
+        agent["private_profile"]["hard_constraints"] = []
+        agent["allowed_constraint_hint"]["issue_constraints"] = {}
+
+    if fixed_pattern == "none_control":
+        return
+
+    if fixed_pattern == "ppa_a_only":
+        _add_fixed_constraint(scenario["agents"][0], issues, primary_issue, fixed_strength)
+    elif fixed_pattern == "ppa_b_only":
+        _add_fixed_constraint(scenario["agents"][1], issues, secondary_issue, fixed_strength)
+    elif fixed_pattern == "both_agents_same_issue":
+        common_value = _values_for(issues, same_issue)[(variant_index + 1) % 3]
+        _add_fixed_constraint(
+            scenario["agents"][0],
+            issues,
+            same_issue,
+            fixed_strength,
+            common_value=common_value,
+        )
+        _add_fixed_constraint(
+            scenario["agents"][1],
+            issues,
+            same_issue,
+            fixed_strength,
+            common_value=common_value,
+        )
+    elif fixed_pattern == "both_agents_different_issue":
+        _add_fixed_constraint(scenario["agents"][0], issues, primary_issue, fixed_strength)
+        _add_fixed_constraint(scenario["agents"][1], issues, secondary_issue, fixed_strength)
+    else:
+        raise ValueError(f"Unsupported fixed-only pattern: {fixed_pattern}")
+
+
+def _add_fixed_constraint(
+    agent: dict[str, Any],
+    issues: list[dict[str, Any]],
+    issue_name: str,
+    fixed_strength: int,
+    *,
+    common_value: str | None = None,
+) -> None:
+    values = _values_for(issues, issue_name)
+    scores = agent["private_profile"]["value_scores"][issue_name]
+    preferred_value = max(scores, key=scores.get)
+    allowed_values = _fixed_allowed_values(
+        values,
+        preferred_value,
+        fixed_strength,
+        common_value=common_value,
+    )
+    agent["private_profile"]["hard_constraints"].append(
+        {
+            "issue": issue_name,
+            "allowed_values": allowed_values,
+        }
+    )
+    agent["allowed_constraint_hint"]["issue_constraints"][issue_name] = "fixed"
+
+
+def _fixed_allowed_values(
+    values: list[str],
+    preferred_value: str,
+    fixed_strength: int,
+    *,
+    common_value: str | None = None,
+) -> list[str]:
+    if fixed_strength not in {1, 2}:
+        raise ValueError("fixed_strength must be 1 or 2")
+    anchor_value = common_value or preferred_value
+    ordered = [anchor_value]
+    if preferred_value not in ordered:
+        ordered.append(preferred_value)
+    ordered.extend(value for value in values if value not in ordered)
+    return ordered[:fixed_strength]
+
+
+def _apply_difficulty_stratum(scenario: dict[str, Any], difficulty: str) -> None:
+    issues = scenario["domain"]["issues"]
+    profiles = [agent["private_profile"] for agent in scenario["agents"]]
+    if difficulty == "no_agreement":
+        for scores in profiles[1]["value_scores"].values():
+            for value, score in list(scores.items()):
+                scores[value] = round(score * 0.95, 4)
+    feasible = [
+        outcome
+        for outcome in _enumerate_outcomes(issues)
+        if all(_satisfies_hard_constraints(profile, outcome) for profile in profiles)
+    ]
+    max_min_utility = max(min(_utility(profile, outcome) for profile in profiles) for outcome in feasible)
+    if difficulty == "no_agreement":
+        reservation = round(min(0.99, max_min_utility + 0.03), 3)
+        expected_agreement = False
+    else:
+        offsets = {
+            "easy": -0.25,
+            "medium": -0.12,
+            "hard": -0.04,
+            "borderline": -0.005,
+        }
+        reservation = round(max(0.35, min(0.99, max_min_utility + offsets[difficulty])), 3)
+        expected_agreement = True
+
+    for profile in profiles:
+        profile["reservation_value"] = reservation
+        profile["concession_policy"]["end_threshold"] = reservation
+        profile["concession_policy"]["start_threshold"] = round(min(0.99, reservation + 0.32), 3)
+
+    scenario["expected_checks"]["has_agreement_region"] = expected_agreement
+    scenario["expected_checks"]["expected_timeout_possible"] = not expected_agreement or difficulty in {
+        "borderline",
+        "no_agreement",
+    }
+    scenario["expected_checks"]["min_valid_outcomes"] = min(
+        scenario["expected_checks"]["min_valid_outcomes"],
+        len(feasible),
+    )
+
+
+def _refresh_generation_meta(
+    scenario: dict[str, Any],
+    *,
+    scenario_id: str,
+    seed: int,
+    variant_suffix: str,
+    generator_version: str = "gen.v3",
+    source: str = "synthetic_augmented_matrix",
+) -> None:
+    scenario["scenario_id"] = scenario_id
+    scenario["variant_id"] = f"{scenario['variant_id']}_{variant_suffix}"
+    scenario["generation_meta"] = {
+        "generator_version": generator_version,
+        "seed": seed,
+        "source": source,
+        "created_from_legacy_poc": False,
+    }

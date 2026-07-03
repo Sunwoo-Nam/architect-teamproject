@@ -37,14 +37,17 @@ PYTHONPATH=src .venv/bin/python scripts/run_track_a_samples.py
 
 ## 시나리오 생성
 
-기본 세트는 `01-시나리오-스키마.md`의 매트릭스에 따라 120개를 생성한다. 확장 세트는 variant를 하나 더 늘려 180개를 생성한다.
+기본 세트는 `01-시나리오-스키마.md`의 매트릭스에 따라 120개를 생성한다. 확장 세트는 variant를 하나 더 늘려 180개를 생성한다. 증강 세트는 bias audit 결과를 반영해 360개를 생성한다. fixed-only 전용 세트는 hard constraint 공개 패턴, 난이도, utility shape를 분리해 480개를 생성한다. 축 분리 증강 세트는 hint policy, difficulty, utility shape의 pairwise 균형을 맞춰 600개를 생성한다.
 
 ```bash
 PYTHONPATH=src .venv/bin/python scripts/generate_scenarios.py --count 120
 PYTHONPATH=src .venv/bin/python scripts/generate_scenarios.py --count 180
+PYTHONPATH=src .venv/bin/python scripts/generate_scenarios.py --count 360
+PYTHONPATH=src .venv/bin/python scripts/generate_scenarios.py --count 480
+PYTHONPATH=src .venv/bin/python scripts/generate_scenarios.py --count 600
 ```
 
-생성 파일은 기본적으로 `scenarios/generated` 하위에 저장된다.
+120/180개 세트는 기본적으로 `scenarios/generated`, 360개 증강 세트는 `scenarios/generated_v3`, 480개 fixed-only 전용 세트는 `scenarios/generated_fixed_only_v1`, 600개 축 분리 증강 세트는 `scenarios/generated_v4` 하위에 저장된다.
 
 ## Generated Matrix 실행
 
@@ -52,6 +55,17 @@ PYTHONPATH=src .venv/bin/python scripts/generate_scenarios.py --count 180
 
 ```bash
 PYTHONPATH=src .venv/bin/python scripts/run_track_a_generated.py
+PYTHONPATH=src .venv/bin/python scripts/run_track_a_generated.py --scenario-dir scenarios/generated_fixed_only_v1 --output-dir results/track_a_fixed_only_v1
 ```
 
 산출물은 `run_results.jsonl`, `scenario_comparison.jsonl`, `metric_summary.json`이다. `results` 하위 실행 산출물은 git에 커밋하지 않는다.
+
+## Bias Audit
+
+생성 시나리오와 Track A batch 결과를 기준으로 feature 분포, 난이도 분포, A2 faster/slower 상관을 점검한다.
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/audit_generated_bias.py
+```
+
+산출물은 `results/track_a_generated/bias_audit.json`이다.

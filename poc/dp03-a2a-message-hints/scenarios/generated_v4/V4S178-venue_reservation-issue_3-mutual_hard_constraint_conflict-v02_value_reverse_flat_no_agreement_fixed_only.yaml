@@ -1,0 +1,140 @@
+schema_version: scenario.v1
+scenario_id: V4S178
+task_family: venue_reservation
+complexity_level: issue_3
+tension_pattern: mutual_hard_constraint_conflict
+variant_id: v02_value_reverse_flat_no_agreement_fixed_only
+domain:
+  issues:
+  - name: slot
+    type: enum
+    values:
+    - sunday_evening
+    - saturday_lunch
+    - weekday_evening
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+  - name: area
+    type: enum
+    values:
+    - near_office
+    - midpoint
+    - near_home
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+  - name: budget_band
+    type: bucket
+    values:
+    - high
+    - medium
+    - low
+    public: true
+    outcome_space: true
+    constraint_hintable: true
+    order:
+    - high
+    - medium
+    - low
+agents:
+- id: ppa_a
+  role: initiator
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      slot: 0.2222
+      area: 0.5556
+      budget_band: 0.2222
+    value_scores:
+      slot:
+        weekday_evening: 0.9
+        saturday_lunch: 1.0
+        sunday_evening: 0.9
+      area:
+        near_home: 0.8
+        midpoint: 0.9
+        near_office: 1.0
+      budget_band:
+        low: 0.9
+        medium: 1.0
+        high: 0.9
+    hard_constraints:
+    - issue: area
+      allowed_values:
+      - near_office
+      - midpoint
+    reservation_value: 0.952
+    concession_policy:
+      type: linear
+      start_threshold: 0.99
+      end_threshold: 0.952
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      area: fixed
+- id: ppa_b
+  role: responder
+  capability:
+    constraint_hint: true
+    constraint_hint_schema_version: constraint_hint.v1
+  private_profile:
+    utility_model: linear_additive
+    utility_weights:
+      slot: 0.2222
+      area: 0.2222
+      budget_band: 0.5556
+    value_scores:
+      slot:
+        weekday_evening: 0.76
+        saturday_lunch: 0.855
+        sunday_evening: 0.95
+      area:
+        near_home: 0.95
+        midpoint: 0.855
+        near_office: 0.76
+      budget_band:
+        low: 0.855
+        medium: 0.95
+        high: 0.855
+    hard_constraints:
+    - issue: budget_band
+      allowed_values:
+      - medium
+      - high
+    reservation_value: 0.952
+    concession_policy:
+      type: linear
+      start_threshold: 0.99
+      end_threshold: 0.952
+  allowed_constraint_hint:
+    schema_version: constraint_hint.v1
+    anchor: offered_outcome
+    issue_constraints:
+      budget_band: fixed
+privacy_labels:
+  pii_raw: false
+  sensitive_reason_present: false
+  exact_value_present: false
+  constraint_hint_accumulation_risk: high
+  external_constraint_hint_allowed: true
+expected_checks:
+  has_agreement_region: false
+  expected_fallback: false
+  expected_timeout_possible: true
+  min_valid_outcomes: 3
+  min_pareto_candidates: 1
+  llm_schema_required: true
+generation_meta:
+  generator_version: gen.v4
+  seed: 400178
+  source: synthetic_orthogonal_augmented_matrix
+  created_from_legacy_poc: false
+  augmentation_kind: value_reverse
+  utility_shape: flat
+  difficulty_stratum: no_agreement
+  hint_policy: fixed_only
