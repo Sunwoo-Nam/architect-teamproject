@@ -45,3 +45,13 @@ PYTHONPATH=src .venv/bin/python scripts/generate_scenarios.py --count 180
 ```
 
 생성 파일은 기본적으로 `scenarios/generated` 하위에 저장된다.
+
+## Generated Matrix 실행
+
+생성된 120개 시나리오 전체에 대해 Track A의 A1/A2를 실행하고, 결과를 `results/track_a_generated` 하위에 저장한다.
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/run_track_a_generated.py
+```
+
+산출물은 `run_results.jsonl`, `scenario_comparison.jsonl`, `metric_summary.json`이다. `results` 하위 실행 산출물은 git에 커밋하지 않는다.
