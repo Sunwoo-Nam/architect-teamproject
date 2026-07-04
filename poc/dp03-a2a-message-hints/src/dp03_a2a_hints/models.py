@@ -95,6 +95,7 @@ class GenerationMeta:
     seed: int
     source: str
     created_from_legacy_poc: bool
+    extra: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -164,9 +165,14 @@ class RunResult:
     repeat_id: str
     agreement_success: bool
     agreement_outcome: Optional[OutcomeDict]
+    wall_clock_ms: float
+    wall_clock_ms_to_agreement: Optional[float]
     steps_to_agreement: Optional[int]
+    offer_count_to_agreement: Optional[int]
     rounds_to_agreement: Optional[int]
     atomic_actions_to_agreement: int
+    candidate_evaluation_count: int
+    hint_fit_evaluation_count: int
     utility_a: Optional[float]
     utility_b: Optional[float]
     joint_utility: Optional[float]
@@ -176,6 +182,7 @@ class RunResult:
     pareto_dominated: Optional[bool]
     pareto_joint_gap: Optional[float]
     constraint_hint_message_count: int
+    hint_attached_offer_count: int
     constraint_hint_sensitivity_score: float
     failure_reasons: Tuple[str, ...]
     events: Tuple[EventLog, ...]

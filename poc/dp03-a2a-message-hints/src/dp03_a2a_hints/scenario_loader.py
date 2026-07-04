@@ -120,9 +120,11 @@ def _expected_from_dict(data: Mapping[str, Any]) -> ExpectedChecks:
 
 
 def _generation_meta_from_dict(data: Mapping[str, Any]) -> GenerationMeta:
+    known_keys = {"generator_version", "seed", "source", "created_from_legacy_poc"}
     return GenerationMeta(
         generator_version=data["generator_version"],
         seed=int(data["seed"]),
         source=data["source"],
         created_from_legacy_poc=bool(data["created_from_legacy_poc"]),
+        extra={key: value for key, value in data.items() if key not in known_keys},
     )

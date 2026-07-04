@@ -28,6 +28,7 @@ def main() -> None:
         help="Step count used for concession threshold. Defaults to --n-steps.",
     )
     parser.add_argument("--constraint-hint-weight", type=float, default=0.15)
+    parser.add_argument("--repeat-count", type=int, default=1)
     args = parser.parse_args()
 
     records, comparisons = run_scenario_matrix(
@@ -35,6 +36,7 @@ def main() -> None:
         n_steps=args.n_steps,
         concession_steps=args.concession_steps,
         constraint_hint_weight=args.constraint_hint_weight,
+        repeat_count=args.repeat_count,
     )
     output = write_batch_outputs(records, comparisons, args.output_dir)
     print(json.dumps(output, ensure_ascii=False, sort_keys=True))

@@ -30,6 +30,8 @@ class NegotiationContext:
     last_offer_by_actor: dict[str, OutcomeDict] = field(default_factory=dict)
     sent_constraint_hints: list[ConstraintHintMessage] = field(default_factory=list)
     events: list[EventLog] = field(default_factory=list)
+    candidate_evaluation_count: int = 0
+    hint_fit_evaluation_count: int = 0
 
     def agent_by_id(self, actor_id: str | None) -> AgentSpec | None:
         if actor_id is None:
@@ -160,6 +162,7 @@ class OfferOnlyNegotiator(SAONegotiator):
         outcomes = []
         fallback_outcomes = []
         for outcome_tuple in enumerate_outcomes(self.context.scenario.issues):
+            self.context.candidate_evaluation_count += 1
             outcome = to_dict(outcome_tuple, self.context.scenario.issues)
             score = float(self._negmas_ufun(outcome_tuple))
             if score == float("-inf"):
@@ -207,6 +210,7 @@ class HintAwareNegotiator(OfferOnlyNegotiator):
         for opponent in self.context.opponents_of(self.agent.id):
             opponent_hint = self.context.constraint_hints_by_actor.get(opponent.id)
             opponent_last_offer = self.context.last_offer_by_actor.get(opponent.id)
+            self.context.hint_fit_evaluation_count += 1
             fits.append(opponent_constraint_hint_fit(outcome, opponent_last_offer, opponent_hint))
         fit = sum(fits) / len(fits) if fits else 0.0
         return score + self.context.constraint_hint_weight * fit

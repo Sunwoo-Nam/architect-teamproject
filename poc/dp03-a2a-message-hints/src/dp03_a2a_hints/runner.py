@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+
 from negmas.sao import SAOMechanism
 
 from .hints import constraint_hints_supported
@@ -34,7 +36,9 @@ def run_scenario(scenario: Scenario, config: RunConfig) -> RunResult:
         negotiator_cls = HintAwareNegotiator if constraint_hint_enabled else OfferOnlyNegotiator
         mechanism.add(negotiator_cls(agent=agent, context=context))
 
+    start = time.perf_counter()
     state = mechanism.run()
+    wall_clock_ms = (time.perf_counter() - start) * 1000
     agreement_tuple = mechanism.agreement or getattr(state, "agreement", None)
     agreement = to_dict(agreement_tuple, scenario.issues) if agreement_tuple else None
     utilities = (
@@ -54,7 +58,8 @@ def run_scenario(scenario: Scenario, config: RunConfig) -> RunResult:
     failures = _failure_reasons(scenario, agreement, constraint_hint_enabled, context)
     success = not failures and agreement is not None
     steps = int(getattr(state, "step", 0)) if success else None
-    rounds = len(mechanism.offers) if success else None
+    offer_count = len(mechanism.offers) if success else None
+    hint_attached_offer_count = len(context.sent_constraint_hints)
     return RunResult(
         run_id=f"{config.experiment_group.value}__{scenario.scenario_id}__{config.repeat_id}",
         experiment_group=config.experiment_group,
@@ -62,9 +67,14 @@ def run_scenario(scenario: Scenario, config: RunConfig) -> RunResult:
         repeat_id=config.repeat_id,
         agreement_success=success,
         agreement_outcome=agreement,
+        wall_clock_ms=wall_clock_ms,
+        wall_clock_ms_to_agreement=wall_clock_ms if success else None,
         steps_to_agreement=steps,
-        rounds_to_agreement=rounds,
+        offer_count_to_agreement=offer_count,
+        rounds_to_agreement=offer_count,
         atomic_actions_to_agreement=len(context.events),
+        candidate_evaluation_count=context.candidate_evaluation_count,
+        hint_fit_evaluation_count=context.hint_fit_evaluation_count,
         utility_a=utility_a,
         utility_b=utility_b,
         joint_utility=joint_utility,
@@ -74,6 +84,7 @@ def run_scenario(scenario: Scenario, config: RunConfig) -> RunResult:
         pareto_dominated=pareto_dominated,
         pareto_joint_gap=pareto_joint_gap,
         constraint_hint_message_count=len(context.sent_constraint_hints),
+        hint_attached_offer_count=hint_attached_offer_count,
         constraint_hint_sensitivity_score=context_constraint_hint_sensitivity(context),
         failure_reasons=tuple(failures),
         events=tuple(context.events),

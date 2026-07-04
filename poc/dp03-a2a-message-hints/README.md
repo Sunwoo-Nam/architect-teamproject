@@ -37,7 +37,7 @@ PYTHONPATH=src .venv/bin/python scripts/run_track_a_samples.py
 
 ## 시나리오 생성
 
-기본 세트는 `01-시나리오-스키마.md`의 매트릭스에 따라 120개를 생성한다. 확장 세트는 variant를 하나 더 늘려 180개를 생성한다. 증강 세트는 bias audit 결과를 반영해 360개를 생성한다. fixed-only 전용 세트는 hard constraint 공개 패턴, 난이도, utility shape를 분리해 480개를 생성한다. 축 분리 증강 세트는 hint policy, difficulty, utility shape의 pairwise 균형을 맞춰 600개를 생성한다. 고복잡도 fixed-only 스트레스 세트는 issue_4/issue_5에서 양측이 서로 다른 issue에 fixed constraint를 갖는 경우를 640개 생성한다. 3자 협상 스트레스 세트는 issue_4/issue_5에서 세 참여자의 fixed constraint 참여 패턴을 나눠 120개를 생성한다.
+기본 세트는 `01-시나리오-스키마.md`의 매트릭스에 따라 120개를 생성한다. 확장 세트는 variant를 하나 더 늘려 180개를 생성한다. 증강 세트는 bias audit 결과를 반영해 360개를 생성한다. fixed-only 전용 세트는 hard constraint 공개 패턴, 난이도, utility shape를 분리해 480개를 생성한다. 축 분리 증강 세트는 hint policy, difficulty, utility shape의 pairwise 균형을 맞춰 600개를 생성한다. 고복잡도 fixed-only 스트레스 세트는 issue_4/issue_5에서 양측이 서로 다른 issue에 fixed constraint를 갖는 경우를 640개 생성한다. 3자 협상 스트레스 세트는 issue_4/issue_5에서 세 참여자의 fixed constraint 참여 패턴을 나눠 120개를 생성한다. 4자 협상 스트레스 세트는 issue_4/issue_5에서 네 참여자의 constraint topology와 난이도를 분리해 160개를 생성한다.
 
 ```bash
 PYTHONPATH=src .venv/bin/python scripts/generate_scenarios.py --count 120
@@ -47,9 +47,10 @@ PYTHONPATH=src .venv/bin/python scripts/generate_scenarios.py --count 480
 PYTHONPATH=src .venv/bin/python scripts/generate_scenarios.py --count 600
 PYTHONPATH=src .venv/bin/python scripts/generate_scenarios.py --count 640
 PYTHONPATH=src .venv/bin/python scripts/generate_scenarios.py --preset fixed_three_party
+PYTHONPATH=src .venv/bin/python scripts/generate_scenarios.py --preset fixed_four_party
 ```
 
-120/180개 세트는 기본적으로 `scenarios/generated`, 360개 증강 세트는 `scenarios/generated_v3`, 480개 fixed-only 전용 세트는 `scenarios/generated_fixed_only_v1`, 600개 축 분리 증강 세트는 `scenarios/generated_v4`, 640개 고복잡도 fixed-only 스트레스 세트는 `scenarios/generated_fixed_high_complexity_v1`, 120개 3자 협상 스트레스 세트는 `scenarios/generated_fixed_three_party_v1` 하위에 저장된다.
+120/180개 세트는 기본적으로 `scenarios/generated`, 360개 증강 세트는 `scenarios/generated_v3`, 480개 fixed-only 전용 세트는 `scenarios/generated_fixed_only_v1`, 600개 축 분리 증강 세트는 `scenarios/generated_v4`, 640개 고복잡도 fixed-only 스트레스 세트는 `scenarios/generated_fixed_high_complexity_v1`, 120개 3자 협상 스트레스 세트는 `scenarios/generated_fixed_three_party_v1`, 160개 4자 협상 스트레스 세트는 `scenarios/generated_fixed_four_party_v1` 하위에 저장된다.
 
 ## Generated Matrix 실행
 
@@ -59,9 +60,12 @@ PYTHONPATH=src .venv/bin/python scripts/generate_scenarios.py --preset fixed_thr
 PYTHONPATH=src .venv/bin/python scripts/run_track_a_generated.py
 PYTHONPATH=src .venv/bin/python scripts/run_track_a_generated.py --scenario-dir scenarios/generated_fixed_only_v1 --output-dir results/track_a_fixed_only_v1
 PYTHONPATH=src .venv/bin/python scripts/run_track_a_generated.py --scenario-dir scenarios/generated_fixed_three_party_v1 --output-dir results/track_a_fixed_three_party_v1_max100_concession30 --n-steps 100 --concession-steps 30
+PYTHONPATH=src .venv/bin/python scripts/run_track_a_generated.py --scenario-dir scenarios/generated_fixed_four_party_v1 --output-dir results/track_a_fixed_four_party_v1_max100_concession30 --n-steps 100 --concession-steps 30
+PYTHONPATH=src .venv/bin/python scripts/run_track_a_generated.py --scenario-dir scenarios/generated_fixed_four_party_v1 --output-dir results/track_a_fixed_four_party_v1_latency_repeat10 --n-steps 100 --concession-steps 30 --repeat-count 10
 ```
 
 산출물은 `run_results.jsonl`, `scenario_comparison.jsonl`, `metric_summary.json`이다. `results` 하위 실행 산출물은 git에 커밋하지 않는다.
+협상 지연시간 분석은 `wall_clock_ms_to_agreement`를 실측 지표로 보고, `offer_count_to_agreement`, `atomic_actions_to_agreement`, `candidate_evaluation_count`, `hint_fit_evaluation_count`를 처리량/계산량 proxy로 함께 확인한다. 기존 `rounds_to_agreement`는 호환을 위해 유지하지만 실제 의미는 offer count에 가깝다.
 
 ## Bias Audit
 
