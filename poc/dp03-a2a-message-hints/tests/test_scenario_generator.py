@@ -5,6 +5,9 @@ from dp03_a2a_hints.scenario_generator import (
     FIXED_HIGH_COMPLEXITY_LEVELS,
     FIXED_HIGH_COMPLEXITY_PAIR_PATTERNS,
     FIXED_HIGH_COMPLEXITY_ROLE_MODES,
+    FIXED_FOUR_PARTY_DIFFICULTY_STRATA,
+    FIXED_FOUR_PARTY_LEVELS,
+    FIXED_FOUR_PARTY_TOPOLOGIES,
     FIXED_ONLY_DIFFICULTY_STRATA,
     FIXED_ONLY_PATTERNS,
     FIXED_THREE_PARTY_DIFFICULTY_STRATA,
@@ -15,6 +18,7 @@ from dp03_a2a_hints.scenario_generator import (
     TENSION_PATTERNS,
     UTILITY_SCORE_SHAPES,
     generate_augmented_scenarios,
+    generate_fixed_four_party_scenarios,
     generate_fixed_high_complexity_scenarios,
     generate_fixed_only_scenarios,
     generate_fixed_three_party_scenarios,
@@ -268,6 +272,59 @@ def test_fixed_three_party_scenario_matrix_adds_multilateral_constraint_cases():
             assert agent["allowed_constraint_hint"]["issue_constraints"] == {hard_issue: "fixed"}
 
     assert no_agreement_count == 30
+
+
+def test_fixed_four_party_scenario_matrix_adds_topology_cases():
+    scenarios = generate_fixed_four_party_scenarios()
+
+    assert len(scenarios) == 160
+    assert {scenario["generation_meta"]["generator_version"] for scenario in scenarios} == {
+        "gen.fixed_four_party.v1"
+    }
+    assert _meta_counts(scenarios, "party_count") == {4: 160}
+    assert _meta_counts(scenarios, "constraint_topology") == {
+        topology: 32 for topology in FIXED_FOUR_PARTY_TOPOLOGIES
+    }
+    assert _meta_counts(scenarios, "difficulty_stratum") == {
+        difficulty: 40 for difficulty in FIXED_FOUR_PARTY_DIFFICULTY_STRATA
+    }
+    assert {scenario["complexity_level"] for scenario in scenarios} == set(FIXED_FOUR_PARTY_LEVELS)
+
+    no_agreement_count = 0
+    for raw in scenarios:
+        scenario = scenario_from_dict(raw)
+        validate_scenario(scenario)
+        assert len(scenario.agents) == 4
+        assert raw["privacy_labels"]["external_constraint_hint_allowed"]
+        assert raw["privacy_labels"]["constraint_hint_accumulation_risk"] == "high"
+        if scenario.expected_checks.has_agreement_region:
+            assert agreement_region(scenario)
+        else:
+            no_agreement_count += 1
+            assert not agreement_region(scenario)
+
+        topology = raw["generation_meta"]["constraint_topology"]
+        fixed_agents = [
+            agent
+            for agent in raw["agents"]
+            if agent["private_profile"]["hard_constraints"]
+        ]
+        if topology == "single_bottleneck":
+            assert [agent["id"] for agent in fixed_agents] == ["ppa_d"]
+        elif topology == "three_fixed_one_flexible":
+            assert {agent["id"] for agent in fixed_agents} == {"ppa_a", "ppa_b", "ppa_c"}
+        elif topology in {"two_pairs_fixed", "all_agents_fixed", "same_issue_collision"}:
+            assert len(fixed_agents) == 4
+
+        fixed_agent_ids = {agent["id"] for agent in fixed_agents}
+        assert set(raw["generation_meta"]["constraint_issues"]) == fixed_agent_ids
+        for agent in fixed_agents:
+            hard_issue = agent["private_profile"]["hard_constraints"][0]["issue"]
+            assert agent["allowed_constraint_hint"]["issue_constraints"] == {hard_issue: "fixed"}
+        if topology == "same_issue_collision":
+            assert len({agent["private_profile"]["hard_constraints"][0]["issue"] for agent in fixed_agents}) == 1
+
+    assert no_agreement_count == 40
 
 
 def _meta_counts(scenarios: list[dict], key: str) -> dict[str, int]:

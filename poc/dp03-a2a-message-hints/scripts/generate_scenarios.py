@@ -6,6 +6,7 @@ from pathlib import Path
 
 from dp03_a2a_hints.scenario_generator import (
     generate_augmented_scenarios,
+    generate_fixed_four_party_scenarios,
     generate_fixed_high_complexity_scenarios,
     generate_fixed_only_scenarios,
     generate_fixed_three_party_scenarios,
@@ -20,7 +21,7 @@ def main() -> None:
     parser.add_argument("--count", type=int, choices=(120, 180, 360, 480, 600, 640), default=120)
     parser.add_argument(
         "--preset",
-        choices=("fixed_three_party",),
+        choices=("fixed_three_party", "fixed_four_party"),
         default=None,
         help="Generate a named scenario preset instead of the count-based matrix.",
     )
@@ -36,6 +37,9 @@ def main() -> None:
     if args.preset == "fixed_three_party":
         output_name = "scenarios/generated_fixed_three_party_v1"
         scenarios = generate_fixed_three_party_scenarios()
+    elif args.preset == "fixed_four_party":
+        output_name = "scenarios/generated_fixed_four_party_v1"
+        scenarios = generate_fixed_four_party_scenarios()
     else:
         output_name = {
             120: "scenarios/generated",

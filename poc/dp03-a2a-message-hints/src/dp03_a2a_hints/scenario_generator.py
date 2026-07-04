@@ -61,6 +61,15 @@ FIXED_THREE_PARTY_PARTICIPATION_PATTERNS = (
     "single_bottleneck",
 )
 FIXED_THREE_PARTY_DIFFICULTY_STRATA = ("medium", "hard", "borderline", "no_agreement")
+FIXED_FOUR_PARTY_LEVELS = ("issue_4", "issue_5")
+FIXED_FOUR_PARTY_TOPOLOGIES = (
+    "single_bottleneck",
+    "two_pairs_fixed",
+    "three_fixed_one_flexible",
+    "all_agents_fixed",
+    "same_issue_collision",
+)
+FIXED_FOUR_PARTY_DIFFICULTY_STRATA = ("medium", "hard", "borderline", "no_agreement")
 
 ISSUE_CATALOG: dict[str, tuple[dict[str, Any], ...]] = {
     "schedule_coordination": (
@@ -390,6 +399,74 @@ def generate_fixed_three_party_scenarios() -> list[dict[str, Any]]:
                 "utility_shape": utility_shape,
                 "fixed_strength": fixed_strength,
                 "issue_pair_pattern": issue_pair_pattern,
+                "constraint_issues": constraint_issues,
+                "complexity_focus": "high",
+            }
+        )
+        scenarios.append(scenario)
+        sequence += 1
+    return scenarios
+
+
+def generate_fixed_four_party_scenarios() -> list[dict[str, Any]]:
+    scenarios = []
+    sequence = 1
+    for task_family, complexity_level, constraint_topology, difficulty in product(
+        TASK_FAMILIES,
+        FIXED_FOUR_PARTY_LEVELS,
+        FIXED_FOUR_PARTY_TOPOLOGIES,
+        FIXED_FOUR_PARTY_DIFFICULTY_STRATA,
+    ):
+        task_index = TASK_FAMILIES.index(task_family)
+        complexity_index = FIXED_FOUR_PARTY_LEVELS.index(complexity_level)
+        topology_index = FIXED_FOUR_PARTY_TOPOLOGIES.index(constraint_topology)
+        difficulty_index = FIXED_FOUR_PARTY_DIFFICULTY_STRATA.index(difficulty)
+        utility_shape = UTILITY_SCORE_SHAPES[
+            (task_index + 2 * complexity_index + topology_index + difficulty_index)
+            % len(UTILITY_SCORE_SHAPES)
+        ]
+        fixed_strength = ((task_index + topology_index + difficulty_index) % 2) + 1
+        if constraint_topology == "same_issue_collision":
+            fixed_strength = 2
+        variant_index = (topology_index + difficulty_index) % len(VARIANTS)
+
+        scenario = build_scenario(
+            scenario_id=f"QP1S{sequence:03d}",
+            task_family=task_family,
+            complexity_level=complexity_level,
+            tension_pattern="four_party_fixed_constraint",
+            variant_id=VARIANTS[variant_index],
+            seed=800000 + sequence,
+        )
+        _add_third_party_agent(scenario, variant_index=variant_index)
+        _add_fourth_party_agent(scenario, variant_index=variant_index)
+        _apply_utility_score_shape(scenario, utility_shape)
+        constraint_issues = _apply_fixed_four_party_topology(
+            scenario,
+            constraint_topology=constraint_topology,
+            fixed_strength=fixed_strength,
+            fallback_offset=task_index + complexity_index + topology_index + difficulty_index,
+        )
+        _apply_difficulty_stratum(scenario, difficulty)
+        _refresh_generation_meta(
+            scenario,
+            scenario_id=f"QP1S{sequence:03d}",
+            seed=800000 + sequence,
+            variant_suffix=(
+                f"qp01_{constraint_topology}_{difficulty}_{utility_shape}_s{fixed_strength}"
+            ),
+            generator_version="gen.fixed_four_party.v1",
+            source="synthetic_fixed_four_party_matrix",
+        )
+        scenario["generation_meta"].update(
+            {
+                "party_count": 4,
+                "fixed_pattern": "four_party_fixed",
+                "constraint_topology": constraint_topology,
+                "difficulty_stratum": difficulty,
+                "utility_shape": utility_shape,
+                "fixed_strength": fixed_strength,
+                "fixed_agent_count": len(constraint_issues),
                 "constraint_issues": constraint_issues,
                 "complexity_focus": "high",
             }
@@ -845,6 +922,24 @@ def _add_third_party_agent(scenario: dict[str, Any], *, variant_index: int) -> N
     scenario["agents"] = tuple(list(scenario["agents"]) + [ppa_c])
 
 
+def _add_fourth_party_agent(scenario: dict[str, Any], *, variant_index: int) -> None:
+    issues = scenario["domain"]["issues"]
+    issue_names = [issue["name"] for issue in issues]
+    preferences = {
+        name: (2 * index + variant_index + 1) % 3
+        for index, name in enumerate(issue_names)
+    }
+    emphasis = (issue_names[(variant_index + 3) % len(issue_names)],)
+    profile = _profile(issues, preferences, emphasis, hard_constraints={})
+    ppa_d = _agent(
+        "ppa_d",
+        "participant",
+        profile,
+        _allowed_constraint_hint(issue_names, profile, preferences),
+    )
+    scenario["agents"] = tuple(list(scenario["agents"]) + [ppa_d])
+
+
 def _apply_fixed_three_party_pattern(
     scenario: dict[str, Any],
     *,
@@ -913,6 +1008,99 @@ def _three_party_constraint_issues(
         exclude=(ppa_a_issue, ppa_b_issue),
     )
     return ppa_a_issue, ppa_b_issue, ppa_c_issue
+
+
+def _apply_fixed_four_party_topology(
+    scenario: dict[str, Any],
+    *,
+    constraint_topology: str,
+    fixed_strength: int,
+    fallback_offset: int,
+) -> dict[str, str]:
+    issues = scenario["domain"]["issues"]
+    issue_names = [issue["name"] for issue in issues]
+    agents_by_id = {agent["id"]: agent for agent in scenario["agents"]}
+    ordered_issues = _four_party_constraint_issues(issue_names, fallback_offset=fallback_offset)
+
+    scenario["privacy_labels"]["external_constraint_hint_allowed"] = True
+    scenario["privacy_labels"]["constraint_hint_accumulation_risk"] = "high"
+
+    for agent in scenario["agents"]:
+        agent["capability"]["constraint_hint"] = True
+        agent["capability"]["constraint_hint_schema_version"] = "constraint_hint.v1"
+        agent["private_profile"]["hard_constraints"] = []
+        agent["allowed_constraint_hint"]["issue_constraints"] = {}
+
+    constraint_issues: dict[str, str] = {}
+    if constraint_topology == "single_bottleneck":
+        issue = ordered_issues[3]
+        _add_fixed_constraint(agents_by_id["ppa_d"], issues, issue, fixed_strength)
+        _set_issue_weight(agents_by_id["ppa_d"]["private_profile"], issue, target_weight=0.52)
+        constraint_issues = {"ppa_d": issue}
+    elif constraint_topology == "two_pairs_fixed":
+        first_issue, second_issue = ordered_issues[0], ordered_issues[1]
+        first_common = _values_for(issues, first_issue)[fallback_offset % 3]
+        second_common = _values_for(issues, second_issue)[(fallback_offset + 1) % 3]
+        for agent_id in ("ppa_a", "ppa_b"):
+            _add_fixed_constraint(
+                agents_by_id[agent_id],
+                issues,
+                first_issue,
+                fixed_strength,
+                common_value=first_common,
+            )
+            _set_issue_weight(agents_by_id[agent_id]["private_profile"], first_issue, target_weight=0.34)
+            constraint_issues[agent_id] = first_issue
+        for agent_id in ("ppa_c", "ppa_d"):
+            _add_fixed_constraint(
+                agents_by_id[agent_id],
+                issues,
+                second_issue,
+                fixed_strength,
+                common_value=second_common,
+            )
+            _set_issue_weight(agents_by_id[agent_id]["private_profile"], second_issue, target_weight=0.34)
+            constraint_issues[agent_id] = second_issue
+    elif constraint_topology == "three_fixed_one_flexible":
+        for agent_id, issue in zip(("ppa_a", "ppa_b", "ppa_c"), ordered_issues):
+            _add_fixed_constraint(agents_by_id[agent_id], issues, issue, fixed_strength)
+            _set_issue_weight(agents_by_id[agent_id]["private_profile"], issue, target_weight=0.36)
+            constraint_issues[agent_id] = issue
+    elif constraint_topology == "all_agents_fixed":
+        for agent_id, issue in zip(("ppa_a", "ppa_b", "ppa_c", "ppa_d"), ordered_issues):
+            _add_fixed_constraint(agents_by_id[agent_id], issues, issue, fixed_strength)
+            _set_issue_weight(agents_by_id[agent_id]["private_profile"], issue, target_weight=0.32)
+            constraint_issues[agent_id] = issue
+    elif constraint_topology == "same_issue_collision":
+        issue = ordered_issues[0]
+        common_value = _values_for(issues, issue)[fallback_offset % 3]
+        for agent_id in ("ppa_a", "ppa_b", "ppa_c", "ppa_d"):
+            _add_fixed_constraint(
+                agents_by_id[agent_id],
+                issues,
+                issue,
+                fixed_strength,
+                common_value=common_value,
+            )
+            _set_issue_weight(agents_by_id[agent_id]["private_profile"], issue, target_weight=0.36)
+            constraint_issues[agent_id] = issue
+    else:
+        raise ValueError(f"Unsupported four-party constraint topology: {constraint_topology}")
+    return constraint_issues
+
+
+def _four_party_constraint_issues(issue_names: list[str], *, fallback_offset: int) -> tuple[str, str, str, str]:
+    ordered = []
+    for axis in (TIME_HINTS, LOCATION_HINTS, BUDGET_HINTS, QUALITY_HINTS):
+        ordered.append(
+            _find_axis_or_fallback(
+                issue_names,
+                axis,
+                fallback_offset + len(ordered),
+                exclude=tuple(ordered),
+            )
+        )
+    return tuple(ordered)
 
 
 def _apply_fixed_high_complexity_pattern(
