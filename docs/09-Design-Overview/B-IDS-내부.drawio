@@ -1,0 +1,60 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="idsB" name="B-IDS-내부(C4 Lv3)">
+    <mxGraphModel dx="1000" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="bnd" value="IDS — Intent Driven Secretary  [온디바이스]" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;strokeColor=#6c8ebf;fillColor=none;verticalAlign=top;fontSize=13;fontStyle=1;align=left;spacingLeft=8;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="220" y="120" width="600" height="500" as="geometry" />
+        </mxCell>
+
+        <mxCell id="in1" value="입력&#10;사용자 발화 / 디바이스 컨텍스트&#10;(화면·메시징·GPS·일정·행동패턴)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="20" y="200" width="170" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ext" value="Explicit Intent Extractor&#10;명시적 의도 추출 (FR-IDS-01)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="260" y="180" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="col" value="Context Collector&#10;컨텍스트 주기 수집 (FR-IDS-02)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="260" y="290" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="inf" value="Implicit Intent Inferer&#10;비명시적 의도 추론 (FR-IDS-02)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="260" y="400" width="200" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ses" value="Context / Session Manager&#10;맥락 연속성·세션 타임아웃 (FR-IDS-04)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="560" y="170" width="220" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="rou" value="Intent Router / Task Mapper&#10;처리 주체 식별: IDS자체 ↔ MAF (FR-IDS-03)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="310" width="220" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="loc" value="Local Execution Engine&#10;디바이스 제어·프라이버시 민감 처리 (FR-IDS-05)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="560" y="460" width="220" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="orch" value="MAF · Orchestrator&#10;(복합 Task 위임 대상)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="900" y="310" width="180" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="usr" value="사용자&#10;(결과·알림)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="900" y="460" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="odllm" value="온디바이스 LLM" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="360" y="680" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f1" value="명시 지시" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="in1" target="ext"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f2" value="컨텍스트" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="in1" target="col"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f3" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="col" target="inf"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f4" value="명시 의도" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="ext" target="rou"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f5" value="추론 의도" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="inf" target="rou"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f6" value="맥락 대조" style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=block;endArrow=block;" edge="1" parent="1" source="ses" target="rou"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f7" value="자체 처리" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="rou" target="loc"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f8" value="복합 Task 전달" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontStyle=1;strokeColor=#82b366;strokeWidth=2;" edge="1" parent="1" source="rou" target="orch"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f9" value="결과 반환" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="loc" target="usr"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f10" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;dashed=1;strokeColor=#d79b00;" edge="1" parent="1" source="inf" target="odllm"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f11" value="추론" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;dashed=1;strokeColor=#d79b00;" edge="1" parent="1" source="loc" target="odllm"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,82 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="overviewA" name="A-전체-Overview(C4 Lv2)">
+    <mxGraphModel dx="1000" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="boundary" value="Ondevice Agentic Platform (Android)" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;strokeColor=#666666;fillColor=none;verticalAlign=top;fontSize=13;fontStyle=1;align=left;spacingLeft=8;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="200" y="120" width="600" height="480" as="geometry" />
+        </mxCell>
+
+        <mxCell id="u1" value="사용자 (User)&#10;묵시적 Intent 표출 / 결과 승인" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="60" y="40" width="170" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a1" value="IDS&#10;(Intent Driven Secretary)&#10;[온디바이스 LLM]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="240" y="200" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="a2" value="MAF · Orchestrator&#10;Planning / 동적 Agent·Tool 생성&#10;[서버 LLM]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="560" y="170" width="200" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="a3" value="MAF · Meta Agent (PPA)&#10;A2A 협상 주체&#10;[온디바이스 LLM]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="320" width="200" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="a4" value="MAF · Sub-Agent(들)&#10;Tool 호출 / 동적 생성&#10;[온디바이스 LLM]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="560" y="470" width="200" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e2" value="DPA (내 가전)&#10;세탁기·TV·냉장고" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="900" y="180" width="170" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="상대방 PPA&#10;(타 사용자 기기)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="900" y="320" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="외부 서비스 API&#10;숙박·교통·식당·캘린더·결제" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="900" y="470" width="170" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e4" value="온디바이스 LLM&#10;(경량 추론)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="240" y="700" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="서버 LLM&#10;(고성능 추론)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="560" y="700" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ed1" value="묵시적 Intent · 명시 지시" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="u1" target="a1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ed2" value="결과·알림 (FR-IDS-05)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;dashed=1;" edge="1" parent="1" source="a1" target="u1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ed3" value="복합 Task (FR-IDS-03)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;fontStyle=1;" edge="1" parent="1" source="a1" target="a2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ed4" value="Agent/Tool 생성·지시" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="a2" target="a3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ed5" value="A2A 협상 (NPN 핵심)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=block;endArrow=block;strokeColor=#b85450;strokeWidth=2;fontStyle=1;" edge="1" parent="1" source="a3" target="e1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ed6" value="컨텍스트 수집" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=block;endArrow=block;" edge="1" parent="1" source="a3" target="e2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ed7" value="Tool 호출" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="a3" target="a4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ed8" value="합의안 실행 (FR-MAF-09)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="a4" target="e3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ed9" value="추론" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;dashed=1;strokeColor=#d79b00;" edge="1" parent="1" source="a1" target="e4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ed10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;dashed=1;strokeColor=#d79b00;" edge="1" parent="1" source="a3" target="e4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ed11" value="Task Planning" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;dashed=1;strokeColor=#d79b00;" edge="1" parent="1" source="a2" target="e5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
