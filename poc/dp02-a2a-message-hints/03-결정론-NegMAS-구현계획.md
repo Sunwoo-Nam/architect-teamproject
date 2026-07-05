@@ -1,4 +1,4 @@
-# DP03 A2A 협상 메시지 구조 PoC: 03 결정론 NegMAS 구현계획
+# DP02 A2A 협상 메시지 구조 PoC: 03 결정론 NegMAS 구현계획
 
 > 본 문서는 [02-측정-프로토콜](./02-측정-프로토콜.md)의 Track A를 구현하기 위한 계획이다.
 > 범위는 `A1_DET_OFFER_ONLY`, `A2_DET_HINT_AWARE`, `A3_DET_FALLBACK`의 최소 구현이며, LLM 포함 Track B는 다루지 않는다.
@@ -32,7 +32,7 @@
 | OutcomeSpace | scenario의 `domain.issues`에서 생성 |
 | constraint hint 위치 | NegMAS OutcomeSpace가 아니라 `ExtendedOutcome.data["constraint_hint"]` |
 | LLM | 본 단계 제외 |
-| 기존 PoC | `poc/dp03-privacy` 데이터, 코드, 리포트 재사용 금지 |
+| 기존 PoC | `poc/dp02-privacy` 데이터, 코드, 리포트 재사용 금지 |
 
 PoC는 `negmas==0.15.7`을 기준으로 한다. 이 버전의 `SAONegotiator.propose()`는 `Outcome`, `ExtendedOutcome`, `None`을 반환할 수 있고, `SAOState.current_data`와 `new_data`를 통해 직전 메시지의 metadata를 조회할 수 있다. 따라서 constraint hint 전달을 위해 NegMAS 내부 프로토콜을 수정하지 않는다.
 
@@ -73,7 +73,7 @@ PoC는 `negmas==0.15.7`을 기준으로 한다. 이 버전의 `SAONegotiator.pro
 현재 Track A 최소 구현은 다음 구조를 사용한다.
 
 ```text
-poc/dp03-a2a-message-hints/
+poc/dp02-a2a-message-hints/
   src/
     dp03_a2a_hints/
       __init__.py
@@ -508,7 +508,7 @@ Track A 구현은 아래 조건을 만족하면 완료로 본다.
 - fallback scenario에서 constraint hint 전송이 0건이다.
 - invalid outcome과 hard constraint 위반이 validator에서 잡힌다.
 - 같은 seed와 scenario로 실행했을 때 결과가 재현된다.
-- 기존 `poc/dp03-privacy` 코드 또는 데이터에 의존하지 않는다.
+- 기존 `poc/dp02-privacy` 코드 또는 데이터에 의존하지 않는다.
 
 ---
 

@@ -1,6 +1,6 @@
-# DP03 A2A Constraint Hints PoC
+# DP02 A2A Constraint Hints PoC
 
-본 폴더는 `DP03-A2A 협상 메시지 구조`의 결정론 Track A PoC를 담는다.
+본 폴더는 `DP02-A2A 협상 메시지 구조`의 결정론 Track A PoC를 담는다.
 
 비교 대상:
 
@@ -10,7 +10,7 @@
 
 내부 hard constraint는 NegMAS `UFunConstraint` adapter로 negotiator의 후보 선택과 수락 판단에 반영한다. 공개되는 `constraint_hint`는 이 내부 constraint 객체가 아니라, offer에 붙는 제한된 metadata다.
 
-기존 `poc/dp03-privacy`의 코드, 데이터, 리포트는 사용하지 않는다.
+기존 `poc/dp02-privacy`의 코드, 데이터, 리포트는 사용하지 않는다.
 
 ## 환경
 

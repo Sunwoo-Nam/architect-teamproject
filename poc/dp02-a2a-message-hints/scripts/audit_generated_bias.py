@@ -9,7 +9,7 @@ from dp03_a2a_hints.bias_audit import audit_scenario_bias, write_bias_audit
 
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
-    parser = argparse.ArgumentParser(description="Audit bias in generated DP03 scenarios.")
+    parser = argparse.ArgumentParser(description="Audit bias in generated DP02 scenarios.")
     parser.add_argument(
         "--scenario-dir",
         type=Path,

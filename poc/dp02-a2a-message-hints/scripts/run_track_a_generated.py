@@ -9,7 +9,7 @@ from dp03_a2a_hints.batch_runner import run_scenario_matrix, write_batch_outputs
 
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
-    parser = argparse.ArgumentParser(description="Run Track A over generated DP03 scenarios.")
+    parser = argparse.ArgumentParser(description="Run Track A over generated DP02 scenarios.")
     parser.add_argument(
         "--scenario-dir",
         type=Path,

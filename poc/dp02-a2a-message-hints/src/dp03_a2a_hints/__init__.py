@@ -1,4 +1,4 @@
-"""DP03 A2A constraint hint PoC package."""
+"""DP02 A2A constraint hint PoC package."""
 
 from .models import ExperimentGroup, RunConfig
 from .runner import run_scenario

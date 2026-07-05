@@ -17,7 +17,7 @@ from dp03_a2a_hints.scenario_generator import (
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate DP03 synthetic scenario matrix.")
+    parser = argparse.ArgumentParser(description="Generate DP02 synthetic scenario matrix.")
     parser.add_argument("--count", type=int, choices=(120, 180, 360, 480, 600, 640), default=120)
     parser.add_argument(
         "--preset",

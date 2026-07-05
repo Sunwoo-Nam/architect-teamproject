@@ -112,7 +112,7 @@ IDS Intent, Sub-Agent 결과, DPA 상태가 들어오는 즉시 정규화기가 
 
 ## 4. 종합 비교
 
-> 평가축은 `poc/dp03-privacy/AGENTS.md`에서 고정한 6개 품질속성에 맞춘다.
+> 평가축은 `poc/dp02-privacy/AGENTS.md`에서 고정한 6개 품질속성에 맞춘다.
 > 척도: ★ = 1점, ☆ = 0.5점. 별점은 설계 비교용 정성 점수이며, 절대 성능 측정값이 아니다.
 
 | 품질속성 | 후보 A<br/>완전 조기 정규화 | 후보 B<br/>단계형 정규화 + 직전 freeze | 판단 |
@@ -169,8 +169,8 @@ DP03의 실질 비교 후보는 다음 두 가지로 정리한다.
 ## 7. 근거
 
 - [DP03-전제-및-공통설계](./DP03-전제-및-공통설계.md): 구조화 메시지, 사유·PII·원문 배제, Schema Registry, OutcomeSpace 세션 전 freeze 전제.
-- [poc/dp03-privacy/AGENTS.md](../../poc/dp03-privacy/AGENTS.md): DP02·PoC 품질속성 6개 고정.
-- [poc/dp03-privacy/00-결정사항.md](../../poc/dp03-privacy/00-결정사항.md): 자유 텍스트 미전송, 프라이버시 게이트웨이, Orchestrator 구조화 입력 결정.
-- [poc/dp03-privacy/report/01-결과-리포트.md](../../poc/dp03-privacy/report/01-결과-리포트.md): transform-at-ingress는 PoC 측정 칸 전부에서 유출 0, filter-at-egress는 자유 텍스트 빈틈에서 유출 발생.
-- [poc/dp03-privacy/report/02-자원-지연-리포트.md](../../poc/dp03-privacy/report/02-자원-지연-리포트.md): 프라이버시 처리 CPU 비용은 매우 작고, 지연은 주로 LLM 입력 토큰 수와 추론 시간이 지배.
+- [poc/dp02-privacy/AGENTS.md](../../poc/dp02-privacy/AGENTS.md): DP02·PoC 품질속성 6개 고정.
+- [poc/dp02-privacy/00-결정사항.md](../../poc/dp02-privacy/00-결정사항.md): 자유 텍스트 미전송, 프라이버시 게이트웨이, Orchestrator 구조화 입력 결정.
+- [poc/dp02-privacy/report/01-결과-리포트.md](../../poc/dp02-privacy/report/01-결과-리포트.md): transform-at-ingress는 PoC 측정 칸 전부에서 유출 0, filter-at-egress는 자유 텍스트 빈틈에서 유출 발생.
+- [poc/dp02-privacy/report/02-자원-지연-리포트.md](../../poc/dp02-privacy/report/02-자원-지연-리포트.md): 프라이버시 처리 CPU 비용은 매우 작고, 지연은 주로 LLM 입력 토큰 수와 추론 시간이 지배.
 
