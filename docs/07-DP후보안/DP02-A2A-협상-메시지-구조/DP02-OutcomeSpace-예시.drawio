@@ -1,0 +1,40 @@
+<mxfile host="app.diagrams.net" version="24.7.17">
+  <diagram name="OutcomeSpace 예시" id="outcomespace-example">
+    <mxGraphModel dx="900" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="720" pageHeight="500" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="OutcomeSpace Ω — 이슈(issue)들의 Cartesian product" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="16" width="640" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="formula" value="Ω = 일정 × 위치   (각 이슈에서 값을 하나씩 뽑은 튜플들의 집합)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=13;fontStyle=2;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="40" y="48" width="640" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="i1h" value="일정 (issue)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="60" y="84" width="250" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="i1v" value="values = { 오전, 오후, 저녁 }" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="114" width="250" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="times" value="×" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=24;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="318" y="104" width="44" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="i2h" value="위치 (issue)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="370" y="84" width="250" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="i2v" value="values = { 강남, 서초, 송파 }" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="370" y="114" width="250" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="datalabel" value="enumerate_issues(issues) → 실제 data 구조 (9개 outcome 전체):" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="172" width="600" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="code" value="issues = [&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;make_issue(['오전','오후','저녁'], name='일정'),&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;make_issue(['강남','서초','송파'], name='위치'),&lt;br&gt;]&lt;br&gt;os = make_os(issues)&amp;nbsp;&amp;nbsp;# DiscreteCartesianOutcomeSpace&lt;br&gt;&lt;br&gt;outcomes = list(enumerate_issues(issues))&amp;nbsp;&amp;nbsp;# |Ω| = 3 × 3 = 9&lt;br&gt;# outcomes == [&lt;br&gt;&amp;nbsp;&amp;nbsp;('오전','강남'), ('오전','서초'), ('오전','송파'),&lt;br&gt;&amp;nbsp;&amp;nbsp;('오후','강남'), ('오후','서초'), ('오후','송파'),&lt;br&gt;&amp;nbsp;&amp;nbsp;('저녁','강남'), ('저녁','서초'), ('저녁','송파'),&lt;br&gt;# ]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontFamily=Courier New;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="198" width="600" height="212" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="협상 시작 시 이슈와 값 집합이 고정된다. 이산 2이슈 예시면 outcome 9개. 이슈가 늘면 N차원, 값이 연속·정수 범위면 조합이 무한이라 전체 열거가 불가능하다. 외부로 나가는 것은 이 안의 값 조합(offer)뿐이다." style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="420" width="640" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
