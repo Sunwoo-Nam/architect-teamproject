@@ -1,57 +1,63 @@
-# Stakeholder 기반 QA·FR 재도출 분석
+# Stakeholder 기반 QA·FR 도출 분석 — 다자간 협상 범위
 
 > 작성일: 2026-08-04 · 작성 브랜치: `changbae`
-> 본 폴더는 On-Device Agentic Platform 과제의 **Quality Attributes와 Functional Requirements를
-> Stakeholder 관점에서 처음부터 다시 도출**한 산출물이다. 기존 `docs/` 파일은 수정하지 않는다.
+> 본 폴더는 On-Device Agentic Platform 과제의 범위를 **다자간 협상(N-party Negotiation)** 으로 한정하고,
+> 그 범위에서 Quality Attributes와 Functional Requirements를 **Stakeholder 관점에서 도출**한 산출물이다.
+> 기존 `docs/` 파일은 수정하지 않는다.
 
 ---
 
-## 1. 분석 조건 (사용자 지시)
+## 1. 분석 조건 (사용자 지시, 2026-08-04)
 
-1. **독립 도출 원칙** — 기존 요구사항·QA 문서(`docs/04-FR.md`, `docs/05-NFR.md`, `docs/07-QAS.md`)를 **도출 근거로 사용하지 않는다.** 근거는 과제 설명(01·02)·Stakeholder VOC(03·annex 원본표)·상호작용 시나리오 9종(annex)으로 한정한다.
-2. **기술 형식 구분** — FR은 기능이므로 *"~하는 기능을 제공해야 한다"*, QA는 정도이므로 *"~을 최대화/최소화해야 한다 (측정 지표)"* 형태로 기술한다.
-3. **포커스: 다자간 협상(N-party Negotiation)** — 협상 알고리즘은 NegMAS 기반: 각 참여자가 자기 옵션을 효용 함수로 점수화 → 최고점 후보를 상대에게 제안 → 수신자는 자기 효용이 threshold 이상이면 수락, 미만이면 거절 후 역제안. 본 과제는 이 **2자 프로토콜의 다자 확장을 설계**한다. (지시 시점상 06~09 문서와 04 문서 매트릭스 해석에 반영됨)
+1. **범위: 다자간 협상** — 3인 이상의 사용자가 각자의 PPA를 투입해 공동 합의에 도달하는 시나리오(상호작용 시나리오 2)가 중심. 협상 알고리즘은 **NegMAS 기반**: 각 참여자가 자기 옵션(OutcomeSpace)을 효용 함수(Ufun)로 점수화 → 최고점 후보 제안 → 수신자는 자기 효용이 threshold 이상이면 수락, 미만이면 거절 후 역제안. **이 2자 교대 제안 프로토콜의 N-party 확장을 설계**한다. 그룹 합의 후 예약(시나리오 6)은 확장 단계, 그 외(B2C 1:1·가전 중재·원격 케어)는 범위 외. *(범위 한정 지시에 따라 전 문서를 이 기준으로 전면 재작성함)*
+2. **독립 도출 원칙** — 기존 요구사항·QA 문서(`docs/04-FR.md`, `docs/05-NFR.md`, `docs/07-QAS.md`)를 도출 근거로 사용하지 않는다. 근거는 과제 설명(01·02)·Stakeholder VOC(03·annex 원본표)·상호작용 시나리오(annex)로 한정한다.
+3. **기술 형식 구분** — FR은 *"~하는 기능을 제공해야 한다"*, QA는 *"~을 최대화/최소화해야 한다 (측정 지표)"* 형태로 기술한다.
 4. **PL 지정** — Functional Correctness가 최우선 QA이며 그 정의 자체를 함께 수립한다 (05 문서).
 
 ## 2. 산출 문서
 
 | 단계 | 내용 | 산출 문서 |
 |---|---|---|
-| 1 | 과제 이해 및 주요 stakeholder 10개 역할 도출 | [`01-Stakeholder-도출.md`](01-Stakeholder-도출.md) |
+| 1 | 다자 협상 범위의 주요 stakeholder 10개 역할 도출 | [`01-Stakeholder-도출.md`](01-Stakeholder-도출.md) |
 | 2 | Stakeholder별 QA 10개씩 도출 (ISO/IEC 25010:2023, 정량 방향 형식) | [`02-Stakeholder별-QA-도출.md`](02-Stakeholder별-QA-도출.md) |
 | 3 | QA를 9개 품질 특성 카테고리로 취합·빈도 분석 | [`03-QA-카테고리-정리.md`](03-QA-카테고리-정리.md) |
-| 4 | QA 전수(37종) 중요도·난이도 H/M/L 평가 | [`04-QA-중요도-난이도-평가.md`](04-QA-중요도-난이도-평가.md) |
-| 5 | (PL 지시) Functional Correctness 정의 수립 | [`05-Functional-Correctness-정의.md`](05-Functional-Correctness-정의.md) |
+| 4 | QA 전수(37종) 중요도·난이도 H/M/L 평가 → (H,H) 11종 ASR 후보 | [`04-QA-중요도-난이도-평가.md`](04-QA-중요도-난이도-평가.md) |
+| 5 | (PL 지시) 다자 협상에서의 Functional Correctness 4계층 정의 | [`05-Functional-Correctness-정의.md`](05-Functional-Correctness-정의.md) |
 | 6 | Stakeholder별 FR 10개씩 도출 ("기능 제공" 형식) | [`06-Stakeholder별-FR-도출.md`](06-Stakeholder별-FR-도출.md) |
-| 7 | FR을 기능 카테고리(A~J)로 취합·통합 (100건 → CFR 66건) | [`07-FR-카테고리-정리.md`](07-FR-카테고리-정리.md) |
-| 8 | FR(CFR 66건) 중요도·난이도 H/M/L 평가 | [`08-FR-중요도-난이도-평가.md`](08-FR-중요도-난이도-평가.md) |
-| 9 | 빈도 상위(4 이상) 핵심 QA 11종 집중 평가 + 다자 확장 함의 | [`09-핵심-QA-중요도-난이도-평가.md`](09-핵심-QA-중요도-난이도-평가.md) |
+| 7 | FR을 기능 카테고리(A~J)로 취합·통합 (100건 → CFR 64건) | [`07-FR-카테고리-정리.md`](07-FR-카테고리-정리.md) |
+| 8 | FR(CFR 64건) 중요도·난이도 평가 → (H,H) 18건, 다자 신규 설계 5건 식별 | [`08-FR-중요도-난이도-평가.md`](08-FR-중요도-난이도-평가.md) |
+| 9 | 빈도 상위(4 이상) 핵심 QA 12종 집중 평가 + 설계 질문 7가지 도출 | [`09-핵심-QA-중요도-난이도-평가.md`](09-핵심-QA-중요도-난이도-평가.md) |
 
-## 3. 방법론 근거
+## 3. 핵심 결론 (요약)
+
+- **QA**: 빈도 공동 1위는 Functional Correctness · Fault Tolerance · Analysability · **Scalability**(6/10) — 포커스 주제의 품질 축이 도출에서도 1위로 나타남. (H,H) 11종이 ASR 후보 (04 §4.4).
+- **FR**: 다자 협상 코어(B, 14건)와 검증(J, 24건)이 최대 카테고리. (H,H) 18건 중 **B2(라운드)·B4(동기화)·B8(양보)·B9(집계·정족수)·B11(이탈)** 5건이 "2자 → 다자 확장에서 새로 설계해야 할 것"의 목록 (08 §8.4).
+- **다음 단계 입력**: 다자 프로토콜이 답해야 할 설계 질문 7가지 (09 §9.3) — 제안 토폴로지 / 집계 규칙 / 양보 전략 / 이탈 처리 / 정보 공개 / 개입 시점 / 합의 커밋.
+
+## 4. 방법론 근거
 
 텍스트북 인용은 **개념 수준의 참조**이며 원문 문장의 직접 인용이 아니다.
 
 | 기법 | 적용 위치 | 출처 |
 |---|---|---|
-| Stakeholder 식별 — 관점(viewpoint)별 이해관계자 열거와 관심사 수집 | 01 | Sommerville, *Software Engineering* (10th ed.) — Requirements Engineering; Wiegers & Beatty, *Software Requirements* (3rd ed.) — Stakeholder 분석 |
-| Stakeholder 범주 커버리지 — 사용자·획득자·개발자·운영자·평가자 등 범주의 완전성 점검 | 01 | Bass, Clements, Kazman, *Software Architecture in Practice* (4th ed.) |
-| 요구사항의 FR/QA 분리 — 기능(무엇을 하는가)과 품질(얼마나 잘 하는가)의 구분 기술 | 02·06 | Sommerville (10th ed.) — Functional / Non-functional requirements; ISO/IEC 25010:2023 |
-| 품질 속성 분류 체계 (9특성 40하위특성) | 02·03 | ISO/IEC 25010:2023 (SQuaRE Product Quality Model) |
-| (Importance, Difficulty) 쌍 평가 — Utility Tree / ATAM의 우선순위화 기법 | 04·08·09 | Bass, Clements, Kazman (4th ed.) — Quality Attributes·평가(ATAM) |
-| ASR(Architecturally Significant Requirement) 식별 — (H,H) 사분면 선별 | 04·08·09 | 같은 책 |
-| 협상 메커니즘 참조 — 교대 제안·효용 함수·수락 threshold | 07·08·09 | NegMAS (자동 협상 프레임워크) — 사용자 지시로 채택된 알고리즘 기반 |
+| Stakeholder 식별 — 관점별 이해관계자 열거·관심사 수집 | 01 | Sommerville, *Software Engineering* (10th ed.); Wiegers & Beatty, *Software Requirements* (3rd ed.) |
+| Stakeholder 범주 커버리지 점검 | 01 | Bass, Clements, Kazman, *Software Architecture in Practice* (4th ed.) |
+| FR/QA 분리 기술 (기능 vs 정도) | 02·06 | Sommerville (10th ed.); ISO/IEC 25010:2023 |
+| 품질 속성 분류 (9특성 40하위특성) | 02·03 | ISO/IEC 25010:2023 (SQuaRE Product Quality Model) |
+| (Importance, Difficulty) 쌍 평가 — Utility Tree / ATAM | 04·08·09 | Bass, Clements, Kazman (4th ed.) |
+| ASR 식별 — (H,H) 사분면 선별 | 04·08·09 | 같은 책 |
+| 협상 메커니즘 — 교대 제안·효용 함수(Ufun)·OutcomeSpace·threshold·양보 전략 | 전반 | NegMAS (자동 협상 프레임워크) — 사용자 지시로 채택된 알고리즘 기반 |
 
-## 4. 입력 자료 (근거)
+## 5. 입력 자료 (근거)
 
-- [`docs/01-과제-배경-및-목적.md`](../01-과제-배경-및-목적.md) — 시스템 목적·비전·사용자 가치
-- [`docs/02-과제-개요.md`](../02-과제-개요.md) — 시스템 구성·범위·대표 시나리오·3대 검증 가설·제약
+- [`docs/01-과제-배경-및-목적.md`](../01-과제-배경-및-목적.md) · [`docs/02-과제-개요.md`](../02-과제-개요.md) — 목적·구성·범위·제약
 - [`docs/03-Stakeholder.md`](../03-Stakeholder.md) · [`annex/Stakeholder-원본표.md`](../../annex/Stakeholder-원본표.md) — 18개 역할과 VOC
-- [`annex/상호작용-시나리오-9종.md`](../../annex/상호작용-시나리오-9종.md) — 시나리오별 문제·설계 포인트
-- 사용자·PL 구두 지시 (2026-08-04): FC 최우선 및 정의 수립 / 독립 도출 / 다자간 협상 포커스 (NegMAS 기반)
+- [`annex/상호작용-시나리오-9종.md`](../../annex/상호작용-시나리오-9종.md) — 특히 시나리오 1·2·6의 문제·설계 포인트
+- 사용자·PL 구두 지시 (2026-08-04): 다자간 협상 범위 한정 / NegMAS 기반 알고리즘 / FC 최우선·정의 수립 / 독립 도출
 
-> **의도적 제외**: `docs/04-FR.md` · `docs/05-NFR.md` · `docs/07-QAS.md` — 독립 도출 원칙에 따라 본 분석의 근거로 사용하지 않았다.
+> **의도적 제외**: `docs/04-FR.md` · `docs/05-NFR.md` · `docs/07-QAS.md` — 독립 도출 원칙에 따라 근거로 사용하지 않았다.
 
-## 5. 표기 원칙
+## 6. 표기 원칙
 
-- 근거가 원본 자료에 있는 항목은 출처를 표기하고, 원본에 없는 판단(순위·등급·정의 제안·카테고리 체계)은 **"분석자 판단/추론"** 으로 명시한다.
-- ISO/IEC 25010:2023 개정 반영: Usability → **Interaction Capability**, Portability → **Flexibility**, **Safety** 특성 신설, Reliability의 Maturity → **Faultlessness**, Security에 **Resistance** 추가.
+- 원본 자료에 있는 근거는 출처를 표기하고, 원본에 없는 판단(순위·등급·다자 확장 해석·카테고리 체계)은 **"분석자 판단/추론/확장"** 으로 명시한다. 원본 VOC는 1:1 협상 어휘이므로 다자 적용은 대부분 분석자 확장에 해당한다.
+- ISO/IEC 25010:2023 개정 반영: Usability → **Interaction Capability**, Portability → **Flexibility**, **Safety** 신설, Maturity → **Faultlessness**, Security에 **Resistance** 추가.
