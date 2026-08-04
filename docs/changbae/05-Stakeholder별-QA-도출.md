@@ -1,4 +1,4 @@
-# 2. Stakeholder별 Quality Attributes 도출 (10명 × 10개) — 다자간 협상 범위
+# 5. Stakeholder별 Quality Attributes 도출 (10명 × 10개) — 다자간 협상 범위
 
 > 분류 체계: **ISO/IEC 25010:2023** Product Quality Model — 표기는 `특성 — 하위특성(영문)`.
 >
@@ -52,7 +52,7 @@
 ## S3. Project Leader
 
 핵심 프레임: *"다자 협상 가설이 정량으로 검증되고, 데모에서 차별화가 체감되는가."*
-**1위는 PL 명시 지시(2026-08-04)** — 정의는 [`05-Functional-Correctness-정의.md`](05-Functional-Correctness-정의.md).
+**1위는 PL 명시 지시(2026-08-04)** — 정의는 [`09-Functional-Correctness-정의.md`](09-Functional-Correctness-정의.md).
 
 | 순위 | QA (특성 — 하위특성) | 품질 요구 (정량 방향) | 근거 |
 |---|---|---|---|
@@ -177,7 +177,7 @@
 |---|---|---|---|
 | 1 | Maintainability — Testability | Mock 참여자 N명만으로 재현 가능한 E2E 다자 협상 흐름의 비율 **100%**를 유지해야 한다 | VOC *"Mock PPA만으로 E2E 재현"* |
 | 2 | Maintainability — Analysability | 실패 실험의 원인(어느 라운드·어느 참여자·어느 판정) 특정 가능률을 **최대화**해야 한다 | VOC *"실패 케이스 주입"의 후속 분석 (분석자 추론) |
-| 3 | Functional Suitability — Functional Correctness | 정확성 판정(L1~L4, [`05`](05-Functional-Correctness-정의.md))의 자동 측정 가능률을 **최대화**해야 한다 | VOC *"정량으로 측정할 수 있어야"* |
+| 3 | Functional Suitability — Functional Correctness | 정확성 판정(L1~L4, [`09`](09-Functional-Correctness-정의.md))의 자동 측정 가능률을 **최대화**해야 한다 | VOC *"정량으로 측정할 수 있어야"* |
 | 4 | Maintainability — Modifiability | 실험 조건(N·전략·threshold·장애 시나리오) 변경에 필요한 작업량을 **최소화**해야 한다 | VOC *"같은 실험을 반복"* (조건 변경 실험은 분석자 추론) |
 | 5 | Performance Efficiency — Time Behaviour | 합의 도달 시간·라운드 수의 측정 정밀도를 **최대화**해야 한다 (측정 오차 최소화) | VOC *"평균 협상 턴 수·응답시간 측정"* |
 | 6 | Flexibility — Scalability | 검증 가능한 참여자 수 범위(N 스케일 벤치마크)를 **최대화**해야 한다 | 시나리오 2 검증 필요성 (분석자 추론) |
@@ -191,4 +191,4 @@
 ## 집계 예고
 
 10명 × 10개 = **100개 항목**, 고유 하위특성 **37종**.
-빈도 집계: [`03-QA-카테고리-정리.md`](03-QA-카테고리-정리.md) · 전수 평가: [`04`](04-QA-중요도-난이도-평가.md) · 빈도 상위 집중 평가: [`09`](09-핵심-QA-중요도-난이도-평가.md)
+빈도 집계: [`06-QA-카테고리-정리.md`](06-QA-카테고리-정리.md) · 전수 평가: [`07`](07-QA-중요도-난이도-평가.md) · 빈도 상위 집중 평가: [`08`](08-핵심-QA-중요도-난이도-평가.md)
