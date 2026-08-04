@@ -12,6 +12,8 @@
 >
 > **QA 기술 형식**: 모든 항목을 *"~을 최대화/최소화해야 한다 (측정 지표)"* 형태로 기술한다.
 > 구체 임계값은 정하지 않는다 (지표·방향만 정의, 임계값은 실측 기반으로 QAS 단계에서 설정).
+> 단, 결정적으로 검증 가능한 요구의 **0건·100%**는 실측으로 조정할 임계값이 아니라 절대 기준이므로
+> 예외적으로 명시한다 ([`09`](09-Functional-Correctness-정의.md) §9.2 판정 이원화 원칙과 동일한 구분).
 
 ---
 
@@ -58,7 +60,7 @@
 |---|---|---|---|
 | 1 | Functional Suitability — Functional Correctness | 그룹 협상·실행 결과가 참여자들 의도에 비추어 "맞는" 비율을 **최대화**해야 한다 | **PL 명시 지시 (2026-08-04)** |
 | 2 | Functional Suitability — Functional Appropriateness | 다자 시나리오가 실현하는 사용자 가치(그룹 조율에 쓰던 메시지 왕복·시간의 절감)를 **최대화**해야 한다 | VOC "새로운 사용자 가치", 01 §1.2.1 "5~10번 왕복" |
-| 3 | Functional Suitability — Functional Completeness | 다자 시나리오의 E2E(의도 감지→협상→합의→실행) 완결 구현률을 **최대화**해야 한다 | VOC "차별화의 핵심부터" |
+| 3 | Functional Suitability — Functional Completeness | 다자 시나리오의 E2E(의도 감지→협상→합의→실행) 완결 구현율을 **최대화**해야 한다 | VOC "차별화의 핵심부터" |
 | 4 | Flexibility — Scalability | 검증된 참여자 수 범위(N)를 **최대화**하고, N 증가에 따른 성능 저하를 **최소화**해야 한다 | 시나리오 2 (포커스 주제의 검증 목표) |
 | 5 | Maintainability — Testability | 다자 가설 검증 실험의 재현 성공률을 **최대화**해야 한다 | VOC *"비용 대비 검증 가치"* |
 | 6 | Performance Efficiency — Time Behaviour | 데모·실사용에서 그룹 합의까지의 체감 대기 시간을 **최소화**해야 한다 | VOC "UX 차별화" |
@@ -97,23 +99,23 @@
 | 5 | Reliability — Recoverability | 중단된 다자 세션의 저장·복원·**재동기화** 성공률을 **최대화**해야 한다 | 시나리오 1 중단 문제 + 시나리오 2 "데이터 일관성" |
 | 6 | Maintainability — Modularity | 협상 메시지 형식·상태 전이의 표준 위반 **0건**을 유지해야 한다 | VOC *"메시지 형식·lifecycle 표준화"* |
 | 7 | Compatibility — Interoperability | 프로토콜 적합성 검사 통과율 **100%**를 유지해야 한다 | 02 §2.2 A2A 준수 |
-| 8 | Safety — Safe Integration | 동적 생성된 협상 Agent의 sandbox 이탈 행위를 **0건**으로 유지해야 한다 | VOC *"sandbox 격리 실행"* — 범위 축소로 우선순위 하향 (분석자 판단) |
+| 8 | Safety — Safe Integration | 동적 생성된 협상 Agent의 sandbox 이탈 행위를 **0건**으로 유지해야 한다 | VOC *"sandbox 격리 실행"* — 다자 협상 코어 검증에는 보조적 (분석자 판단) |
 | 9 | Maintainability — Modifiability | 라운드 규칙·타임아웃 정책 변경 시 수정 범위를 **최소화**해야 한다 | VOC "코드를 단순하게" (분석자 추론) |
 | 10 | Maintainability — Reusability | 2자·다자 케이스 간 공통 기반 코드 비율을 **최대화**해야 한다 | 포커스: 2자 → 다자 확장 (분석자 추론) |
 
 ## S6. 협상 알고리즘 담당 (Negotiation/ML Engineer)
 
-핵심 프레임: *"Ufun이 선호를 맞게 반영하고, threshold·양보·집계가 수렴하며, 온디바이스에서 돌아가는가."*
+핵심 프레임: *"Ufun이 선호를 맞게 반영하고, 조합 폭발 없이 후보를 다루며, threshold·양보·집계가 수렴하고, 온디바이스에서 돌아가는가."*
 
 | 순위 | QA (특성 — 하위특성) | 품질 요구 (정량 방향) | 근거 |
 |---|---|---|---|
 | 1 | Functional Suitability — Functional Correctness | Intent 분류 정확도와 **Ufun의 선호 반영 정확도**(효용 순위와 사용자 실제 선호 순위의 일치율)를 **최대화**해야 한다 | VOC "Intent 품질이 떨어지면 전부 헛수고" + 포커스 알고리즘의 "자기 기준 점수" (분석자 확장) |
-| 2 | Flexibility — Scalability | 참여자 수 증가에 따른 합의 수렴 라운드 수의 증가를 **최소화**해야 한다 (수렴 실패율 최소화) | 시나리오 2 "합의 지연·무한 루프" |
+| 2 | Flexibility — Scalability | 참여자 수와 **의제 조합(옵션 공간) 크기**의 증가에 따른 합의 수렴 라운드·탐색 비용의 증가를 **최소화**해야 한다 (수렴 실패율 최소화) | 시나리오 2 "합의 지연·무한 루프" + PL 구두 시나리오 (2026-08-04, K×L×M×P 조합 폭발) |
 | 3 | Performance Efficiency — Time Behaviour | 라운드당 옵션 생성·효용 평가·판정의 추론 지연을 **최소화**해야 한다 | VOC "on-device 추론 가능성" |
 | 4 | Flexibility — Replaceability | 협상 전략(양보 곡선·집계 규칙)과 LLM 모델의 교체 소요를 **최소화**해야 한다 | VOC "빠르게 교체. 시장 변화 속도" |
 | 5 | Maintainability — Testability | 협상 시뮬레이션 실험의 재현율을 **최대화**해야 한다 (동일 조건 → 동일 결과 재생) | 품질검증팀 VOC *"같은 실험 반복"* |
 | 6 | Maintainability — Analysability | 결렬·수렴 실패·편향 결과의 원인 분석 가능률을 **최대화**해야 한다 | VOC "confidence 안정" (분석자 추론) |
-| 7 | Performance Efficiency — Resource Utilization | 모델·협상 상태의 메모리·NPU 점유를 **최소화**해야 한다 | VOC "OS 정책 안에 들어가야" |
+| 7 | Performance Efficiency — Resource Utilization | 모델·협상 상태·**옵션 공간 표현**의 메모리·NPU 점유를 **최소화**해야 한다 (전체 조합 열거로 인한 메모리 초과 0건) | VOC "OS 정책 안에 들어가야" + PL 구두 시나리오 (조합 전체 열거는 out of memory) |
 | 8 | Flexibility — Adaptability | 협상 결과·사용자 피드백이 Ufun·전략 개선에 반영되는 주기를 **최소화**해야 한다 (closed-loop) | VOC "self-improving" |
 | 9 | Reliability — Faultlessness | 추론 실패·타임아웃 발생률을 **최소화**해야 한다 | VOC "정확도·confidence 안정" |
 | 10 | Functional Suitability — Functional Appropriateness | 의제 유형(일정·장소·예산)별 옵션 표현·전략의 적합률을 **최대화**해야 한다 | 시나리오 2 (모임·여행 의제) (분석자 추론) |
@@ -162,7 +164,7 @@
 | 2 | Compatibility — Co-existence | 포그라운드 앱 성능 저하와 OS(Doze·OOM)에 의한 강제 종료 빈도를 **최소화**해야 한다 | VOC *"Doze·OOM Killer를 정상 통과. 안 그러면 OS가 우리를 끝장냄"* |
 | 3 | Flexibility — Scalability | 참여자 1인 추가당 자원(메모리·CPU·네트워크) 증가분을 **최소화**해야 한다 (선형 이내) | VOC "메모리 점유 상한" + 시나리오 2 (분석자 확장) |
 | 4 | Performance Efficiency — Time Behaviour | 발열 제약(스로틀링) 하 라운드당 추론 시간을 **최소화**해야 한다 | VOC "발열" + 온디바이스 LLM 전제 (02 §2.3) |
-| 5 | Performance Efficiency — Capacity | 동시 유지 가능한 그룹 세션·피어 연결 수의 상한 준수 위반 **0건**을 유지해야 한다 | VOC *"동시에 떠 있는 Agent 수 상한"* |
+| 5 | Performance Efficiency — Capacity | 동시 유지되는 그룹 세션·피어 연결 수의 상한 초과를 **0건**으로 유지해야 한다 | VOC *"동시에 떠 있는 Agent 수 상한"* |
 | 6 | Safety — Operational Constraint | 발열·전력의 안전 한계 초과를 **0건**으로 유지해야 한다 (초과 전 자체 제한) | VOC "발열·배터리" — Safety 매핑 (분석자 판단) |
 | 7 | Reliability — Recoverability | OS 프로세스 종료 후 그룹 세션 상태 복원 성공률을 **최대화**해야 한다 | VOC "Doze·OOM" |
 | 8 | Reliability — Fault Tolerance | 자원 고갈 시 크래시 대신 단계적 성능 저하로 전환되는 비율을 **최대화**해야 한다 | VOC "메모리 상한" (분석자 추론) |
@@ -185,6 +187,8 @@
 | 8 | Reliability — Recoverability | 복구 시나리오의 검증 커버리지를 **최대화**해야 한다 | VOC "세션 복원" (SRE 원본표) 검증 관점 |
 | 9 | Security — Accountability | 실험 이력·조건·결과의 기록 누락 **0건**을 유지해야 한다 (실험 추적성) | VOC "재현 가능한 실험 환경" |
 | 10 | Reliability — Faultlessness | 검증 중 발견되는 기술 결함 밀도의 측정 정확도를 **최대화**해야 한다 | VOC "정량 평가" (분석자 추론) |
+
+> **분류 주석 (분석자 판단)**: S10의 5·7·8·10위(Time Behaviour·Fault Tolerance·Recoverability·Faultlessness)는 "검증 하니스가 해당 품질을 측정·검증할 수 있어야 한다"는 검증 관점의 요구를 **측정 대상 특성에 귀속**시킨 분류다. 이를 전부 Testability로 귀속시키는 분류도 가능하며, 그 경우 해당 특성들의 빈도가 각 1씩 낮아진다 — 빈도 집계가 이 분류 선택에 민감함은 [`08`](08-핵심-QA-중요도-난이도-평가.md) §8.2에 명시한다.
 
 ---
 
