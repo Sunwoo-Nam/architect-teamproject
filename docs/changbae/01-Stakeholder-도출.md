@@ -40,11 +40,11 @@
 | 제외 역할 | 사유 | 관심사의 대변자 |
 |---|---|---|
 | Service Proxy Agent Owner | B2C 예약(시나리오 5·6·9)은 범위 외. **시나리오 6(그룹 합의 후 예약) 확장 시 재편입 1순위** | — (확장 시 재편입) |
-| UX 디자인 팀 | 그룹 승인·개입 UX 요구는 S1·S2의 Interaction 요구로 수렴 | S1·S2 |
+| UX 디자인 팀 | 그룹 승인·개입 UX 요구는 개시·참여 사용자(S1·S2)의 Interaction 요구로 수렴 | S1·S2 |
 | 가전사 담당자 | 가전 중재(시나리오 3·4)는 범위 외. DPA 컨텍스트는 Ufun 입력 정보원으로 축소되어 S6이 다룸 | S6 |
 | Legal / Compliance | 다자 합의의 책임·부인 방지 요구는 Accountability·Non-repudiation으로 수렴 | S7 |
 | Third-party Sub-Agent Developer | Sub-Agent 생태계는 범위 외 (다자 협상 코어에 비직결) | S5 |
-| MX 상품화 의사결정 담당자 | PoC 이후 단계 — 판단 재료는 S3·S10의 검증 산출물 | S3·S10 |
+| MX 상품화 의사결정 담당자 | PoC 이후 단계 — 판단 재료는 PL·품질 검증팀(S3·S10)의 검증 산출물 | S3·S10 |
 | Cloud 담당자 | 서버 LLM은 Task Planning 한 지점(02 §2.3) — 장애 비전파 요구는 S8로 수렴 | S8 |
 
 ## 1.4 병합·재정의 결정의 근거

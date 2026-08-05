@@ -13,7 +13,7 @@
 > **QA 기술 형식**: 모든 항목을 *"~을 최대화/최소화해야 한다 (측정 지표)"* 형태로 기술한다.
 > 구체 임계값은 정하지 않는다 (지표·방향만 정의, 임계값은 실측 기반으로 QAS 단계에서 설정).
 > 단, 결정적으로 검증 가능한 요구의 **0건·100%**는 실측으로 조정할 임계값이 아니라 절대 기준이므로
-> 예외적으로 명시한다 ([`09`](09-Functional-Correctness-정의.md) §9.2 판정 이원화 원칙과 동일한 구분).
+> 예외적으로 명시한다 ([`09`](09-Functional-Correctness-정의.md) §9.3 판정 이원화 원칙과 동일한 구분).
 
 ---
 
@@ -41,7 +41,7 @@
 | 순위 | QA (특성 — 하위특성) | 품질 요구 (정량 방향) | 근거 |
 |---|---|---|---|
 | 1 | Security — Confidentiality | 다른 참여자들에게 노출되는 내 일정·선호를 **최소화**해야 한다 — 제안·수락 패턴에서 내 선호가 역추론되는 정보량 포함 (역추론은 분석자 확장) | VOC "일정을 통째로 보여주고 싶지 않음" |
-| 2 | Functional Suitability — Functional Correctness | 그룹 합의안에 내 조건·제약이 다른 참여자와 **동등하게** 반영되는 비율을 **최대화**해야 한다 (특정 참여자 일방 유리 편향 최소화) | VOC "협상 과정 신뢰성" — 다자 공정성은 분석자 확장 |
+| 2 | Functional Suitability — Functional Correctness | 그룹 합의안에 내 조건·제약이 반영되는 비율을 **최대화**해야 한다 (내 요구가 체계적으로 무시되는 결과 최소화 — 개인 관점) | VOC "협상 과정 신뢰성" (분석자 확장). 그룹 차원의 분배 공정성은 별도 QA "협상 공정성"으로 분리 ([`09`](09-Functional-Correctness-정의.md) §9.4) |
 | 3 | Interaction Capability — Operability | 내 거절·조건 변경이 그룹 협상에 반영되는 지연을 **최소화**해야 한다 | VOC *"거절·조건 변경 시 즉시 반영"* |
 | 4 | Safety — Operational Constraint | 내 동의 없이 그룹 다수결 등으로 일방 확정되는 합의를 **0건**으로 유지해야 한다 | VOC "일방적으로 밀어붙이는 일은 없어야" |
 | 5 | Security — Authenticity | 그룹 내 위장(스푸핑) 참여자와의 협상 성립을 **0건**으로 유지해야 한다 (전 참여자 신원 검증률 100%) | VOC "협상 과정 신뢰성" |
@@ -82,7 +82,7 @@
 | 5 | Maintainability — Analysability | 협상 결과에 대한 변경·설계 결정의 영향 파악 시간을 **최소화**해야 한다 | VOC "변경 영향 추적" |
 | 6 | Flexibility — Adaptability | 새 도메인(일정→장소→예산 등 의제 유형) 적용 시 구조 변경을 **최소화**해야 한다 | 원본표 "확장성" |
 | 7 | Compatibility — Interoperability | A2A 표준 규격 위반 **0건**을 유지해야 한다 (다자 브로드캐스트 확장 포함) | 02 §2.2 A2A, 01 §1.2.2(3) 표준 선점 |
-| 8 | Flexibility — Replaceability | LLM·협상 전략 구현의 교체 시 수정 범위를 추상화 계층 내부로 **최소화**해야 한다 | S6 VOC "모델 교체" |
+| 8 | Flexibility — Replaceability | LLM·협상 전략 구현의 교체 시 수정 범위를 추상화 계층 내부로 **최소화**해야 한다 | 협상 알고리즘 담당 VOC "모델 교체" |
 | 9 | Maintainability — Reusability | 2자 협상과 다자 협상이 공유하는 공통 코어 코드의 비율을 **최대화**해야 한다 | 포커스: 2자 프로토콜의 다자 확장 (분석자 추론) |
 | 10 | Reliability — Fault Tolerance | 단일 참여자 장애의 전파 범위를 **최소화**해야 한다 (격리 경계의 구조화) | SRE VOC "한 Agent 장애가 전체로 번지면 안 됨" |
 
@@ -109,7 +109,7 @@
 
 | 순위 | QA (특성 — 하위특성) | 품질 요구 (정량 방향) | 근거 |
 |---|---|---|---|
-| 1 | Functional Suitability — Functional Correctness | Intent 분류 정확도와 **Ufun의 선호 반영 정확도**(효용 순위와 사용자 실제 선호 순위의 일치율)를 **최대화**해야 한다 | VOC "Intent 품질이 떨어지면 전부 헛수고" + 포커스 알고리즘의 "자기 기준 점수" (분석자 확장) |
+| 1 | Functional Suitability — Functional Correctness | Intent 분류 정확도와 **선호 입력→Ufun 통합의 정합**(통합 결과가 사용자 실제 선호 순위와 일치하는 비율)을 **최대화**해야 한다 — Ufun 구성 알고리즘 자체는 기제공·품질 확보 가정 (PL 지시, 2026-08-05) | VOC "Intent 품질이 떨어지면 전부 헛수고" + 포커스 알고리즘의 "자기 기준 점수" (분석자 확장) |
 | 2 | Flexibility — Scalability | 참여자 수와 **의제 조합(옵션 공간) 크기**의 증가에 따른 합의 수렴 라운드·탐색 비용의 증가를 **최소화**해야 한다 (수렴 실패율 최소화) | 시나리오 2 "합의 지연·무한 루프" + PL 구두 시나리오 (2026-08-04, K×L×M×P 조합 폭발) |
 | 3 | Performance Efficiency — Time Behaviour | 라운드당 옵션 생성·효용 평가·판정의 추론 지연을 **최소화**해야 한다 | VOC "on-device 추론 가능성" |
 | 4 | Flexibility — Replaceability | 협상 전략(양보 곡선·집계 규칙)과 LLM 모델의 교체 소요를 **최소화**해야 한다 | VOC "빠르게 교체. 시장 변화 속도" |
@@ -179,7 +179,7 @@
 |---|---|---|---|
 | 1 | Maintainability — Testability | Mock 참여자 N명만으로 재현 가능한 E2E 다자 협상 흐름의 비율 **100%**를 유지해야 한다 | VOC *"Mock PPA만으로 E2E 재현"* |
 | 2 | Maintainability — Analysability | 실패 실험의 원인(어느 라운드·어느 참여자·어느 판정) 특정 가능률을 **최대화**해야 한다 | VOC *"실패 케이스 주입"의 후속 분석 (분석자 추론) |
-| 3 | Functional Suitability — Functional Correctness | 정확성 판정(L1~L4, [`09`](09-Functional-Correctness-정의.md))의 자동 측정 가능률을 **최대화**해야 한다 | VOC *"정량으로 측정할 수 있어야"* |
+| 3 | Functional Suitability — Functional Correctness | 정확성 판정(의도·제약·선호·실행의 4계층 — [`09`](09-Functional-Correctness-정의.md))의 자동 측정 가능률을 **최대화**해야 한다 | VOC *"정량으로 측정할 수 있어야"* |
 | 4 | Maintainability — Modifiability | 실험 조건(N·전략·threshold·장애 시나리오) 변경에 필요한 작업량을 **최소화**해야 한다 | VOC *"같은 실험을 반복"* (조건 변경 실험은 분석자 추론) |
 | 5 | Performance Efficiency — Time Behaviour | 합의 도달 시간·라운드 수의 측정 정밀도를 **최대화**해야 한다 (측정 오차 최소화) | VOC *"평균 협상 턴 수·응답시간 측정"* |
 | 6 | Flexibility — Scalability | 검증 가능한 참여자 수 범위(N 스케일 벤치마크)를 **최대화**해야 한다 | 시나리오 2 검증 필요성 (분석자 추론) |
@@ -188,7 +188,7 @@
 | 9 | Security — Accountability | 실험 이력·조건·결과의 기록 누락 **0건**을 유지해야 한다 (실험 추적성) | VOC "재현 가능한 실험 환경" |
 | 10 | Reliability — Faultlessness | 검증 중 발견되는 기술 결함 밀도의 측정 정확도를 **최대화**해야 한다 | VOC "정량 평가" (분석자 추론) |
 
-> **분류 주석 (분석자 판단)**: S10의 5·7·8·10위(Time Behaviour·Fault Tolerance·Recoverability·Faultlessness)는 "검증 하니스가 해당 품질을 측정·검증할 수 있어야 한다"는 검증 관점의 요구를 **측정 대상 특성에 귀속**시킨 분류다. 이를 전부 Testability로 귀속시키는 분류도 가능하며, 그 경우 해당 특성들의 빈도가 각 1씩 낮아진다 — 빈도 집계가 이 분류 선택에 민감함은 [`08`](08-핵심-QA-중요도-난이도-평가.md) §8.2에 명시한다.
+> **분류 주석 (분석자 판단)**: 품질 검증팀의 5·7·8·10위(Time Behaviour·Fault Tolerance·Recoverability·Faultlessness)는 "검증 하니스가 해당 품질을 측정·검증할 수 있어야 한다"는 검증 관점의 요구를 **측정 대상 특성에 귀속**시킨 분류다. 이를 전부 Testability로 귀속시키는 분류도 가능하며, 그 경우 해당 특성들의 빈도가 각 1씩 낮아진다 — 빈도 집계가 이 분류 선택에 민감함은 [`08`](08-핵심-QA-중요도-난이도-평가.md) §8.2에 명시한다.
 
 ---
 
