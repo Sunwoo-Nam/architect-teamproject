@@ -1,0 +1,58 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="31A" name="31-A Coordinator 집계형 (Star)">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="826" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="대안 A — Coordinator 집계형 (Star): 모든 통신이 개시자 단말의 Session Coordinator를 경유" style="text;html=1;fontSize=14;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="900" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="co" value="개시자 단말 — Session Coordinator" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="380" y="70" width="400" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="rc" value="Round Controller&#10;(라운드 시작·마감·시한 관리)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;" vertex="1" parent="co">
+          <mxGeometry x="20" y="40" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pa" value="Proposal Aggregator&#10;(제안·응답 취합)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;" vertex="1" parent="co">
+          <mxGeometry x="210" y="40" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="rd" value="Round Result Distributor&#10;(라운드 결과 일괄 배포)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;" vertex="1" parent="co">
+          <mxGeometry x="20" y="130" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ss" value="Session State Store&#10;(세션 기준 상태 — source of truth)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="co">
+          <mxGeometry x="210" y="130" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" value="참여자 단말 1&#10;Negotiation Agent (NegMAS 제안·평가)&#10;+ Coordinator Link" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="80" y="440" width="260" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="참여자 단말 2&#10;Negotiation Agent (NegMAS 제안·평가)&#10;+ Coordinator Link" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="450" y="480" width="260" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="참여자 단말 3&#10;Negotiation Agent (NegMAS 제안·평가)&#10;+ Coordinator Link" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="820" y="440" width="260" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="제안 제출" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="p1" target="co">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="라운드 결과 배포" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;" edge="1" parent="1" source="co" target="p1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="제안 제출" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="p2" target="co">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="라운드 결과 배포" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;" edge="1" parent="1" source="co" target="p2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="제안 제출" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="p3" target="co">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="라운드 결과 배포" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;" edge="1" parent="1" source="co" target="p3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="참여자끼리는 직접 통신하지 않음 — 단일 실패점: Coordinator 단말" style="text;html=1;fontSize=11;fontColor=#990000;align=left;" vertex="1" parent="1">
+          <mxGeometry x="380" y="600" width="500" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

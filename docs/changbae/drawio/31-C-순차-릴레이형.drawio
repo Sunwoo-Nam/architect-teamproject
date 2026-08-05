@@ -1,0 +1,43 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="31C" name="31-C 순차 릴레이형 (Ring)">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="826" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="대안 C — 순차 릴레이형 (Ring): 협상 문서(Baton) 하나가 고정 순서로 순환, 한 번에 한 단말만 활동" style="text;html=1;fontSize=14;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="980" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="n1" value="개시자 단말 (순번 1)&#10;Relay Handler · Baton Processor&#10;Negotiation Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="450" y="80" width="280" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" value="참여자 단말 1 (순번 2)&#10;Relay Handler · Baton Processor&#10;Negotiation Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="840" y="320" width="280" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" value="참여자 단말 2 (순번 3)&#10;Relay Handler · Baton Processor&#10;Negotiation Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="450" y="560" width="280" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" value="참여자 단말 3 (순번 4)&#10;Relay Handler · Baton Processor&#10;Negotiation Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="60" y="320" width="280" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="협상 문서(Baton) 전달" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeWidth=2;" edge="1" parent="1" source="n1" target="n2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="평가·제안 첨부 후 전달" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeWidth=2;" edge="1" parent="1" source="n2" target="n3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="평가·제안 첨부 후 전달" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeWidth=2;" edge="1" parent="1" source="n3" target="n4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="한 바퀴 완료 = 라운드 1회" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeWidth=2;" edge="1" parent="1" source="n4" target="n1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="reg" value="Ring Order Registry&#10;(고리 순서 정의 — 세션 시작 시 전 단말에 배포)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="60" y="80" width="300" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="무응답 시: 앞 순번이 시한(timeout) 후 건너뛰어 다음 순번에게 직접 전달 — 그 시한만큼 전체 대기" style="text;html=1;fontSize=11;fontColor=#990000;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="700" width="700" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
