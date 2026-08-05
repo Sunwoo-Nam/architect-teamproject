@@ -30,7 +30,7 @@
 | 5 | Reliability — Fault Tolerance | 일부 참여자의 일시 오류·지연에도 그룹 협상이 중단 없이 완료되는 비율을 **최대화**해야 한다 | 시나리오 1·2 "네트워크·LLM 추론 시간 등 가변 요인" (다자 확장은 분석자 확장) |
 | 6 | Reliability — Recoverability | 중단된 그룹 세션의 복구 성공률을 **최대화**하고 유실을 **최소화**해야 한다 | SRE VOC "'갑자기 사라진' 경험은 치명적" |
 | 7 | Interaction Capability — Self-descriptiveness | 합의안에 "왜 이 안이 전원에게 선택됐는지" 설명이 제공되는 비율 **100%**를 유지해야 한다 | VOC "왜 그 안을 골랐는지 한 줄이라도" |
-| 8 | Performance Efficiency — Time Behaviour | 그룹 합의 도달까지의 총 시간과 의도 인지·개입 반영 시간을 **최소화**해야 한다 | 01 §1.4.1 "시간 회수", 시나리오 2 "합의 지연 문제" |
+| 8 | Performance Efficiency — Time Behaviour | 그룹 합의 도달까지의 총 시간과 의도 인지 알림 시간을 **최소화**해야 한다 (개입 반영 지연은 2위 Operability의 지표로 단일 귀속) | 01 §1.4.1 "시간 회수", 시나리오 2 "합의 지연 문제" |
 | 9 | Performance Efficiency — Resource Utilization | 백그라운드 협상의 배터리·발열·메모리 사용을 **최소화**해야 한다 | MX VOC "OS 정책 안에 들어와야 사용자가 비활성화하지 않음" |
 | 10 | Interaction Capability — User Engagement | 그룹 조율 의도에 대한 선제 제안의 수락률을 **최대화**하고 무시·차단 빈도를 **최소화**해야 한다 | UX VOC "너무 자주 뜨면 침습적" |
 
