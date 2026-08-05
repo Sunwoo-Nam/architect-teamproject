@@ -41,7 +41,7 @@
 | 순위 | QA (특성 — 하위특성) | 품질 요구 (정량 방향) | 근거 |
 |---|---|---|---|
 | 1 | Security — Confidentiality | 다른 참여자들에게 노출되는 내 일정·선호를 **최소화**해야 한다 — 제안·수락 패턴에서 내 선호가 역추론되는 정보량 포함 (역추론은 분석자 확장) | VOC "일정을 통째로 보여주고 싶지 않음" |
-| 2 | Functional Suitability — Functional Correctness | 그룹 합의안에 내 조건·제약이 반영되는 비율을 **최대화**해야 한다 (내 요구가 체계적으로 무시되는 결과 최소화 — 개인 관점) | VOC "협상 과정 신뢰성" (분석자 확장). 그룹 차원의 분배 공정성은 별도 QA "협상 공정성"으로 분리 ([`09`](09-Functional-Correctness-정의.md) §9.4) |
+| 2 | Functional Suitability — Functional Correctness | 그룹 합의안에 내 조건·제약이 반영되는 비율을 **최대화**해야 한다 (내 요구가 체계적으로 무시되는 결과 최소화 — 개인 관점) | VOC "협상 과정 신뢰성" (분석자 확장). 그룹 차원의 분배 공정성은 별도 품질 지표 "효용 분배 균형"으로 분리 ([`09`](09-Functional-Correctness-정의.md) §9.4) |
 | 3 | Interaction Capability — Operability | 내 거절·조건 변경이 그룹 협상에 반영되는 지연을 **최소화**해야 한다 | VOC *"거절·조건 변경 시 즉시 반영"* |
 | 4 | Safety — Operational Constraint | 내 동의 없이 그룹 다수결 등으로 일방 확정되는 합의를 **0건**으로 유지해야 한다 | VOC "일방적으로 밀어붙이는 일은 없어야" |
 | 5 | Security — Authenticity | 그룹 내 위장(스푸핑) 참여자와의 협상 성립을 **0건**으로 유지해야 한다 (전 참여자 신원 검증률 100%) | VOC "협상 과정 신뢰성" |
@@ -179,7 +179,7 @@
 |---|---|---|---|
 | 1 | Maintainability — Testability | Mock 참여자 N명만으로 재현 가능한 E2E 다자 협상 흐름의 비율 **100%**를 유지해야 한다 | VOC *"Mock PPA만으로 E2E 재현"* |
 | 2 | Maintainability — Analysability | 실패 실험의 원인(어느 라운드·어느 참여자·어느 판정) 특정 가능률을 **최대화**해야 한다 | VOC *"실패 케이스 주입"의 후속 분석 (분석자 추론) |
-| 3 | Functional Suitability — Functional Correctness | 정확성 판정(의도·제약·선호·실행의 4계층 — [`09`](09-Functional-Correctness-정의.md))의 자동 측정 가능률을 **최대화**해야 한다 | VOC *"정량으로 측정할 수 있어야"* |
+| 3 | Functional Suitability — Functional Correctness | 정확성 판정(의도·제약·선호·종결의 4계층 — [`09`](09-Functional-Correctness-정의.md))의 자동 측정 가능률을 **최대화**해야 한다 | VOC *"정량으로 측정할 수 있어야"* |
 | 4 | Maintainability — Modifiability | 실험 조건(N·전략·threshold·장애 시나리오) 변경에 필요한 작업량을 **최소화**해야 한다 | VOC *"같은 실험을 반복"* (조건 변경 실험은 분석자 추론) |
 | 5 | Performance Efficiency — Time Behaviour | 합의 도달 시간·라운드 수의 측정 정밀도를 **최대화**해야 한다 (측정 오차 최소화) | VOC *"평균 협상 턴 수·응답시간 측정"* |
 | 6 | Flexibility — Scalability | 검증 가능한 참여자 수 범위(N 스케일 벤치마크)를 **최대화**해야 한다 | 시나리오 2 검증 필요성 (분석자 추론) |
