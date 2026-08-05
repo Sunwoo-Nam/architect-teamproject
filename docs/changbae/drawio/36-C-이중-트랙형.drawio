@@ -1,0 +1,52 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="36C" name="36-C. 이중 트랙형 — 협상은 계속 진행, 개입은 그림자 상태에 먼저 반영해 검증 후 본 트랙과 교체">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="826" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="36-C. 이중 트랙형 — 협상은 계속 진행, 개입은 그림자 상태에 먼저 반영해 검증 후 본 트랙과 교체" style="text;html=1;fontSize=14;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="16" width="1050" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lg1" value="공통 component (모든 대안 동일)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="40" y="52" width="200" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2" value="이 대안의 고유 component" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="260" y="52" width="200" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="u" value="사용자 (개입 입력: 중단·조건 변경·거절)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="60" y="140" width="240" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="core" value="협상 세션 진행 (공통)&#10;라운드 실행 · 제안/평가 · 완결 판정" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="780" y="140" width="300" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="sh" value="Shadow State Manager&#10;(개입 반영된 가상 상태 병행 유지)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="360" y="60" width="220" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="dv" value="Diff Validator&#10;(본 트랙과 차이 검증)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="360" y="160" width="220" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="sw" value="Swap Controller&#10;(안전 시점에 상태 교체)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="360" y="260" width="220" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="e0" value="개입을 그림자 상태에 반영" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#0066cc;" edge="1" parent="1" source="u" target="sh">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="진행 상태 복사" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#0066cc;dashed=1;" edge="1" parent="1" source="core" target="sh">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#0066cc;" edge="1" parent="1" source="sh" target="dv">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="검증 통과" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#0066cc;" edge="1" parent="1" source="dv" target="sw">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="안전 시점에 교체" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#0066cc;strokeWidth=2;" edge="1" parent="1" source="sw" target="core">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="차이점: 협상이 한 순간도 멈추지 않음 — 대신 상태가 두 벌이라 자원을 더 쓰고, 교체 전까지는 옛 방향으로 진행됨" style="text;html=1;fontSize=11;fontColor=#990000;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="650" width="1000" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
