@@ -39,7 +39,7 @@ next_batch(limit, constraints, exclusions, context) -> list[Outcome]
 | `exclusions` | 이미 제안하여 제외할 조합 |
 | `context` | 단계 식별자 등 호출 맥락 |
 
-`constraints` 변경 시 초기화가 필요한 이유는 값 목록 자체가 바뀌어 기존 큐의 순위 인덱스가 무효가 되기 때문이다. Stage 2에서 `fixed` 조건을 수신할 때 발생한다.
+`constraints` 변경 시 초기화가 필요한 이유는 값 목록 자체가 바뀌어 기존 큐의 순위 인덱스가 무효가 되기 때문이다. Stage 2에서 `fixed` 조건을 수신할 때 발생한다. 초기화 대신 큐에서 조건 불만족 항목만 제거하는 방식도 가능하며, 어느 쪽을 쓸지는 Stage 2에서 정한다. Stage 1에서는 `constraints`가 변하지 않으므로 영향이 없다.
 
 `UFunConstraint`는 생성 후 방어적 검증에만 사용한다. 제약은 값 목록 단계에서 이미 적용된다.
 
