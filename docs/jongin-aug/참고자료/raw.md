@@ -1,4 +1,6 @@
-* 프로젝트내에 본 문서의 내용과 충돌하는 부분이 있다면, 본 문서의 내용을 따른다. (가장 최근 논의가 반영된 것)
+* 프로젝트내에 본 문서의 내용과 충돌하는 부분이 있다면, 본 문서의 내용을 따른다. 
+  (가장 최근 논의가 반영된 것임. 다른 문서의 내용은 참고일 뿐이며, 해당 내용을 그대로 가져다가 쓰지 않을 것임)
+ 
 
 - 기본적으로는, NegMAS를 기본으로 하는 다자간의 일정/계획 협상 시스템임.
   - IDS(/Users/stpc/workspace/architect-teamproject/docs/02-과제-개요.md의 IDS 참고)에 연동하여, 모바일 device 상에서 동작하는 협상 시스템
@@ -10,7 +12,7 @@
   - 다양한 co-planning 시나리오를 커버할 수 있도록 확장성을 갖추는 것을 고민해보아야 함.
 - 이 때, 너무 outcome space가 커진다면, out-of-memory(OOM) 문제가 발생할 수 있음.
   - 이 OOM 문제는, Offer 시에, constraint hint를 함께 주어서 상대방이 자신의 outcome space를 축소하도록 할 수 있음.
-    (상대방이 constraint라고 알려줬으면 해당 내용은 take-or-leave 상태인 것이므로, 더이상 다른 내용을 count-offer할 필요 없음)
+    - Offer에는 issue별 constraint hint를 함께 전달할 수 있다. 특정 issue가 `fixed`로 표시되면, 수신자는 해당 Offer에 포함된 그 issue의 값을 변경 불가능한 조건으로 해석한다. 이후 counter-offer에서는 해당 값을 유지하고, `relaxable`로 표시된 다른 issue의 값만 변경할 수 있다. 수신자가 fixed 값을 만족할 수 없다면 해당 Offer 또는 계획 분기를 거절한다.
 - 협상 결과를 평가할 "정확도"에는 각자의 각자의 선호도(Utility Function)을 잘 반영해서 최적의 해를 찾았는가가 중요할 것임.
   - 이를 어떻게 잘 정의하고 측정할 것인가?
 - 단순히 "협상이 큰 문제 없이 종료되었는가" 하는 것은 가용성에 가까우며, 이는 핵심 QA라고 보기 어려움
