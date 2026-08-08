@@ -70,6 +70,8 @@ NegMAS Python 객체를 A2A 메시지로 직접 사용하지 않는다. 플랫�
 | 단계 협상 해 | 그 단계의 EffectiveOutcomeSpace | 단계 합의가 그 공간의 최적해에 얼마나 가까운가 |
 | 전체 계획 | 단계들의 결합 공간 | 단계별 최적의 합이 계획 전체로도 최적인가. 단계 최적성 평균과의 격차를 함께 본다 |
 
+**계획 효용 함수의 정의:** `계획 효용 = Σ(단계 가중치 × 단계 효용)`이며, 모든 단계가 각자의 유보값 이상이어야 한다는 필수 조건을 둔다. 단계 가중치는 IDS Intent에서 유도하고, 없으면 균등 가중치를 기본값으로 쓴다. 계획 수준에서도 선형 가법이 유지되므로 단계와 동일한 최적성 계산을 결합 공간에 적용할 수 있다. 단계 간 비선형 관계는 이 형태로 표현되지 않는다.
+
 지표는 NegMAS `calc_outcome_optimality()`의 `pareto_optimality`, `nash_optimality`, `kalai_optimality`, `max_welfare_optimality`를 사용한다(0~1 정규화, 1.0이 최적점). 시나리오 난이도는 `opposition_level`로 통제 변수화하고, 유보값 미만 합의 여부는 `is_rational(ufuns, outcome)`으로 판정한다.
 
 계산 순서: `calc_scenario_stats(ufuns, outcomes)` → `calc_outcome_distances(utils, stats)` → `estimate_max_dist(ufuns)` → `calc_outcome_optimality(dists, stats, max_dist)`
