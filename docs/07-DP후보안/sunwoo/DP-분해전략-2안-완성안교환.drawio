@@ -1,0 +1,306 @@
+<mxfile host="65bd71144e">
+    <diagram id="dp-2an-flow" name="2안-예시흐름">
+        <mxGraphModel dx="1120" dy="760" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1120" pageHeight="760" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" value="2안 — 각자 완성안을 만들어 목록을 교환하고, 그 위에서 한 번에 합의한다" style="text;html=1;fontSize=15;fontStyle=1;align=left;verticalAlign=middle;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="8" width="1060" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="deepen" value="합의 실패 → k 늘려 재생성·재교환 (deepening)" style="endArrow=classic;html=1;dashed=1;strokeColor=#b85450;fontColor=#b85450;fontSize=9;curved=1;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="840" y="52" as="sourcePoint"/>
+                        <mxPoint x="360" y="52" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="lblMe" value="내 단말의&#xa;완성안" style="text;html=1;fontSize=11;fontStyle=1;fontColor=#6c8ebf;align=center;verticalAlign=middle;" parent="1" vertex="1">
+                    <mxGeometry x="25" y="120" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lblOp" value="상대 단말의&#xa;완성안" style="text;html=1;fontSize=11;fontStyle=1;fontColor=#d79b00;align=center;verticalAlign=middle;" parent="1" vertex="1">
+                    <mxGeometry x="25" y="470" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1" value="단계 1 — 각자 완성안 top-k 로컬 생성 (통신 없음)" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=none;strokeColor=#666666;verticalAlign=top;fontStyle=1;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="160" y="64" width="400" height="540" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1m1" value="토요일 · 영등포 · B영화" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="104" width="180" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1m2" value="토요일 · 영등포 · A영화" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="140" width="180" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1m3" value="일요일 · 홍대 · A영화" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="176" width="180" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1mx" value="토요일 · 강남 · B영화(영등포관) ✕" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontColor=#b85450;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="212" width="210" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1cap" value="✕ = 축이 안 맞는 조합(지역≠영화관)은 로컬 생성에서 걸러짐" style="text;html=1;fontSize=9;fontColor=#b85450;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="244" width="360" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1note" value="서로 통신 없음 — 각자 취향·캘린더·데이터 조회로&#xa;상위 k개만 생성 (힙 지연 생성 · 전체 조합 안 만듦)" style="text;html=1;fontSize=9;fontColor=#666666;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="320" width="320" height="32" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1o1" value="일요일 · 강남 · C영화" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="440" width="180" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1o2" value="일요일 · 홍대 · A영화" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="476" width="180" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1o3" value="토요일 · 홍대 · A영화" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="512" width="180" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="gchip" value="목록 교환" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="562" y="272" width="66" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="garrow" style="endArrow=block;html=1;strokeWidth=3;strokeColor=#82b366;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="564" y="313" as="sourcePoint"/>
+                        <mxPoint x="628" y="313" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="gcap" value="내 k개 + 상대 k개" style="text;html=1;fontSize=9;fontColor=#666666;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="545" y="330" width="100" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="c2" value="단계 2 — 합쳐진 목록(작은 공간) 위에서 한 번의 SAO 협상" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=none;strokeColor=#666666;verticalAlign=top;fontStyle=1;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="630" y="64" width="420" height="540" as="geometry"/>
+                </mxCell>
+                <mxCell id="c2m1" value="토 · 영등포 · B영화" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="645" y="104" width="128" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="c2m2" value="토 · 영등포 · A영화" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="779" y="104" width="128" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="c2m3" value="일 · 홍대 · A영화" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="913" y="104" width="128" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="c2o1" value="일 · 강남 · C영화" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="645" y="517" width="128" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="c2o2" value="일 · 홍대 · A영화" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="779" y="517" width="128" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="c2o3" value="토 · 홍대 · A영화" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="913" y="517" width="128" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="c2a1" value="① 토·영등포·B영화?" style="endArrow=classic;html=1;fontSize=9;strokeColor=#6c8ebf;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="700" y="140" as="sourcePoint"/>
+                        <mxPoint x="700" y="510" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="c2a2" value="② 일·강남·C영화?" style="endArrow=classic;html=1;fontSize=9;strokeColor=#d79b00;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="840" y="510" as="sourcePoint"/>
+                        <mxPoint x="840" y="140" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="c2a3" value="③ 일·홍대·A영화?" style="endArrow=classic;html=1;fontSize=9;strokeColor=#6c8ebf;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="980" y="140" as="sourcePoint"/>
+                        <mxPoint x="980" y="510" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="c2ok" value="✓ 합의: 일요일 · 홍대 · A영화" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="740" y="560" width="200" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="final" value="최종 약속 = 일요일 · 홍대 · A영화 — 모든 축이 한 번에 확정" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=13;" parent="1" vertex="1">
+                    <mxGeometry x="360" y="640" width="440" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="f1" style="endArrow=classic;html=1;dashed=1;strokeColor=#82b366;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="840" y="592" as="sourcePoint"/>
+                        <mxPoint x="640" y="640" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="legend" value="파랑 = 내 완성안 · 주황 = 상대 완성안 · 회색 ✕ = 로컬 생성에서 제외 · 초록 = 합의/확정 · 세로 화살표 = offer(완성안 하나 통째로) · 칩 하나 = 모든 축이 채워진 완성안" style="text;html=1;fontSize=9;fontColor=#666666;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="700" width="1060" height="18" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="dp-2an" name="컴포넌트-구조">
+        <mxGraphModel dx="472" dy="639" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="760" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" value="2안 — 완성안 목록 교환 (로컬 생성) (관련 컴포넌트)" style="text;html=1;fontSize=16;fontStyle=1;align=left;verticalAlign=middle;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="8" width="720" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="devL" value="내 단말 — Meta Agent (온디바이스 신뢰경계)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;startSize=28;verticalAlign=top;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="44" width="440" height="480" as="geometry"/>
+                </mxCell>
+                <mxCell id="L_ufun" value="효용함수 ufun (비공개)&#xa;선호·유보값" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffcc99;strokeColor=#d79b00;" parent="devL" vertex="1">
+                    <mxGeometry x="15" y="42" width="190" height="52" as="geometry"/>
+                </mxCell>
+                <mxCell id="L_gen" value="로컬 후보 생성기&#xa;(지연 생성 · 힙 top-k)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="devL" vertex="1">
+                    <mxGeometry x="235" y="42" width="190" height="52" as="geometry"/>
+                </mxCell>
+                <mxCell id="L_dep" value="의존성 처리&#xa;합성 축 / 가지치기 / 2단계 재채점" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="devL" vertex="1">
+                    <mxGeometry x="235" y="122" width="190" height="66" as="geometry"/>
+                </mxCell>
+                <mxCell id="L_slate" value="슬레이트 버퍼&#xa;(완성안 목록 top-k)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#e2f0d9;strokeColor=#82b366;" parent="devL" vertex="1">
+                    <mxGeometry x="15" y="120" width="190" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="L_adapter" value="데이터 소스 어댑터&#xa;(실제 값 조회)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="devL" vertex="1">
+                    <mxGeometry x="235" y="212" width="190" height="52" as="geometry"/>
+                </mxCell>
+                <mxCell id="L_sao" value="협상 엔진 (NegMAS SAO)&#xa;작은 공간 · 완성안 offer 교환" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="devL" vertex="1">
+                    <mxGeometry x="15" y="290" width="190" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="L_deep" value="deepening 컨트롤러&#xa;(합의 실패 → k 확장 재교환)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="devL" vertex="1">
+                    <mxGeometry x="235" y="290" width="190" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="eL_ufun_gen" value="선호 점수" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;" parent="devL" source="L_ufun" target="L_gen" edge="1">
+                    <mxGeometry y="12" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="eL_gen_dep" value="덧셈 top-N" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;strokeColor=#6c8ebf;strokeWidth=2;" parent="devL" source="L_gen" target="L_dep" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="360" y="106"/>
+                            <mxPoint x="360" y="106"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="eL_adapter_dep" value="실제 값 공급" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=10;" parent="devL" source="L_adapter" target="L_dep" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eL_dep_slate" value="재채점 후 top-k" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;strokeColor=#6c8ebf;strokeWidth=2;" parent="devL" source="L_dep" target="L_slate" edge="1">
+                    <mxGeometry x="0.0625" y="-17" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="eL_slate_sao" value="완성안 목록" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;strokeColor=#6c8ebf;strokeWidth=2;" parent="devL" source="L_slate" target="L_sao" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eL_deep_gen" value="k 확장 재생성" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=10;" parent="devL" source="L_deep" target="L_gen" edge="1">
+                    <mxGeometry x="-0.0795" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="450" y="320"/>
+                            <mxPoint x="450" y="68"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="eL_sao_deep" value="합의 실패" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=10;" parent="devL" source="L_sao" target="L_deep" edge="1">
+                    <mxGeometry y="14" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ds" value="데이터 소스 (외부 · 조회 전용)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;startSize=26;verticalAlign=top;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="44" width="200" height="220" as="geometry"/>
+                </mxCell>
+                <mxCell id="ds_poi" value="지도 / POI" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#f5eef8;strokeColor=#9673a6;" parent="ds" vertex="1">
+                    <mxGeometry x="35" y="36" width="130" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="ds_cal" value="캘린더" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#f5eef8;strokeColor=#9673a6;" parent="ds" vertex="1">
+                    <mxGeometry x="35" y="94" width="130" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="ds_cat" value="카탈로그&#xa;(상영/메뉴 등)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#f5eef8;strokeColor=#9673a6;" parent="ds" vertex="1">
+                    <mxGeometry x="35" y="152" width="130" height="52" as="geometry"/>
+                </mxCell>
+                <mxCell id="chan" value="A2A 채널&#xa;&#xa;순수 offer (완성안)&#xa;힌트 없음" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="530" y="330" width="140" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="devR" value="상대 단말 — Meta Agent (동일 구조)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;startSize=28;verticalAlign=top;" parent="1" vertex="1">
+                    <mxGeometry x="730" y="44" width="440" height="480" as="geometry"/>
+                </mxCell>
+                <mxCell id="R_ufun" value="효용함수 ufun (비공개)&#xa;선호·유보값" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffcc99;strokeColor=#d79b00;" parent="devR" vertex="1">
+                    <mxGeometry x="235" y="42" width="190" height="52" as="geometry"/>
+                </mxCell>
+                <mxCell id="R_gen" value="로컬 후보 생성기&#xa;(지연 생성 · 힙 top-k)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="devR" vertex="1">
+                    <mxGeometry x="15" y="42" width="190" height="52" as="geometry"/>
+                </mxCell>
+                <mxCell id="R_dep" value="의존성 처리&#xa;합성 축 / 가지치기 / 2단계 재채점" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="devR" vertex="1">
+                    <mxGeometry x="15" y="122" width="190" height="66" as="geometry"/>
+                </mxCell>
+                <mxCell id="R_slate" value="슬레이트 버퍼&#xa;(완성안 목록 top-k)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#e2f0d9;strokeColor=#82b366;" parent="devR" vertex="1">
+                    <mxGeometry x="235" y="118" width="190" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="R_adapter" value="데이터 소스 어댑터&#xa;(실제 값 조회)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="devR" vertex="1">
+                    <mxGeometry x="15" y="212" width="190" height="52" as="geometry"/>
+                </mxCell>
+                <mxCell id="R_sao" value="협상 엔진 (NegMAS SAO)&#xa;작은 공간 · 완성안 offer 교환" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="devR" vertex="1">
+                    <mxGeometry x="235" y="290" width="190" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="R_deep" value="deepening 컨트롤러&#xa;(합의 실패 → k 확장 재교환)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="devR" vertex="1">
+                    <mxGeometry x="15" y="290" width="190" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="eR_ufun_gen" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;" parent="devR" source="R_ufun" target="R_gen" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eR_gen_dep" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;" parent="devR" source="R_gen" target="R_dep" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eR_adapter_dep" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=10;" parent="devR" source="R_adapter" target="R_dep" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eR_dep_slate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;" parent="devR" source="R_dep" target="R_slate" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eR_slate_sao" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;" parent="devR" source="R_slate" target="R_sao" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eR_deep_gen" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=10;" parent="devR" source="R_deep" target="R_gen" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eR_sao_deep" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=10;" parent="devR" source="R_sao" target="R_deep" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eL_ds" value="조회" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=classic;startArrow=classic;fontSize=10;" parent="1" source="L_adapter" target="ds" edge="1">
+                    <mxGeometry x="0.3526" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="490" y="282"/>
+                            <mxPoint x="490" y="154"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="eR_ds" value="조회" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=classic;startArrow=classic;fontSize=10;" parent="1" source="R_adapter" target="ds" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eLchan" value="완성안" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=classic;endArrow=classic;strokeColor=#d6b656;strokeWidth=2;fontSize=10;" parent="1" source="L_sao" target="chan" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="140" y="430"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="eRchan" value="완성안" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=classic;endArrow=classic;strokeColor=#d6b656;strokeWidth=2;fontSize=10;" parent="1" source="chan" target="R_sao" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="b1" value="1" style="ellipse;html=1;fillColor=#6c8ebf;strokeColor=#ffffff;fontColor=#ffffff;fontStyle=1;fontSize=13;" parent="1" vertex="1">
+                    <mxGeometry x="377" y="139" width="26" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2" value="2" style="ellipse;html=1;fillColor=#6c8ebf;strokeColor=#ffffff;fontColor=#ffffff;fontStyle=1;fontSize=13;" parent="1" vertex="1">
+                    <mxGeometry x="237" y="186" width="26" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="b3" value="3" style="ellipse;html=1;fillColor=#6c8ebf;strokeColor=#ffffff;fontColor=#ffffff;fontStyle=1;fontSize=13;" parent="1" vertex="1">
+                    <mxGeometry x="127" y="270" width="26" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="b4" value="4" style="ellipse;html=1;fillColor=#d6b656;strokeColor=#ffffff;fontColor=#ffffff;fontStyle=1;fontSize=13;" parent="1" vertex="1">
+                    <mxGeometry x="487" y="372" width="26" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="b5" value="↻" style="ellipse;html=1;fillColor=#b85450;strokeColor=#ffffff;fontColor=#ffffff;fontStyle=1;fontSize=13;" parent="1" vertex="1">
+                    <mxGeometry x="467" y="230" width="26" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="chip_s1" value="토요일 · 영등포 · B영화" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="244" width="150" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="chip_s2" value="일요일 · 홍대 · A영화" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="270" width="150" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="chip_offer" value="토·영등포·B영화?" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="525" y="300" width="150" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="chip_counter" value="일·강남·C영화?" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="525" y="446" width="150" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="lg_note" value="번호 원 = 실행 순서: ① 덧셈 top-N 생성 → ② 의존성 재채점 → ③ 슬레이트 확정 → ④ A2A 교환 · ↻ = 합의 실패 시 k 확장 반복(deepening).&#xa;핵심: 각 단말이 데이터 소스로 실제 값을 채우고 의존성을 로컬에서 처리해 완성안 top-k를 만든다. 힌트 없이 완성안(offer)만 교환. 축 경계를 넘는 맞교환 보존.&#xa;제외: 인증/신원, 세션 영속화, IDS, 자원 스케줄러, Orchestrator 등 본 결정과 직접 관련 없는 컴포넌트. (데이터 소스 구성은 계획 단계 전제)" style="text;html=1;fontSize=11;align=left;verticalAlign=middle;fillColor=#f5f5f5;strokeColor=#cccccc;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="540" width="1140" height="70" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
