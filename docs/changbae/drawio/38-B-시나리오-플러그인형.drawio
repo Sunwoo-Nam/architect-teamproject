@@ -1,0 +1,43 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="38B" name="38-B. 시나리오 플러그인형 — 시나리오마다 정해진 interface를 구현한 코드 플러그인을 동적 로드">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="826" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="38-B. 시나리오 플러그인형 — 시나리오마다 정해진 interface를 구현한 코드 플러그인을 동적 로드" style="text;html=1;fontSize=14;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="16" width="1050" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lg1" value="공통 component (모든 대안 동일)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="40" y="52" width="200" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2" value="이 대안의 고유 component" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="260" y="52" width="200" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="core" value="협상 코어 (공통)&#10;라운드 실행 · 완결 판정 · 메시지 프로토콜&#10;(코드 변경 없이 유지되는 부분)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="760" y="140" width="320" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="p" value="Scenario Plugin (코드)&#10;정해진 interface 구현&#10;시나리오 절차를 직접 프로그래밍" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="60" y="140" width="260" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="sdk" value="Scenario Interface (SDK)&#10;(코어가 요구하는 계약)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="380" y="60" width="240" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="l" value="Plugin Loader&#10;(서명 검증 후 동적 로드)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="380" y="180" width="240" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="e0" value="interface 준수" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#0066cc;dashed=1;" edge="1" parent="1" source="p" target="sdk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="새 시나리오 = 플러그인 배포" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#0066cc;" edge="1" parent="1" source="p" target="l">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="코어에 결합해 실행" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#0066cc;strokeWidth=2;" edge="1" parent="1" source="l" target="core">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="차이점: 표현력 최대(코드로 무엇이든) + 실행 빠름 — 대신 새 시나리오마다 코드 작성·배포가 필요해 &#x27;코드 변경 없이&#x27;에서 가장 멀다 (코어는 무변경)" style="text;html=1;fontSize=11;fontColor=#990000;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="650" width="1000" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

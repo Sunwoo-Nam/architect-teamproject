@@ -1,0 +1,43 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="38C" name="38-C. 빌딩 블록 조합형 — 검증된 블록(라운드·승인·완결 유형)을 조합 명세로 엮어 시나리오 구성">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="826" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="38-C. 빌딩 블록 조합형 — 검증된 블록(라운드·승인·완결 유형)을 조합 명세로 엮어 시나리오 구성" style="text;html=1;fontSize=14;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="16" width="1050" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lg1" value="공통 component (모든 대안 동일)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="40" y="52" width="200" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2" value="이 대안의 고유 component" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="260" y="52" width="200" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="core" value="협상 코어 (공통)&#10;라운드 실행 · 완결 판정 · 메시지 프로토콜&#10;(코드 변경 없이 유지되는 부분)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="760" y="140" width="320" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="cat" value="Block Catalog&#10;검증된 블록들:&#10;라운드 유형 · 승인 유형 · 완결 유형" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="60" y="140" width="260" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="spec" value="Composition Spec (데이터)&#10;(어떤 블록을 어떤 순서로)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="380" y="60" width="240" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp" value="Composer&#10;(블록을 엮어 절차 구성)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="380" y="180" width="240" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="e0" value="블록 선택" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#0066cc;" edge="1" parent="1" source="cat" target="cmp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="새 시나리오 = 조합 명세 추가" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#0066cc;" edge="1" parent="1" source="spec" target="cmp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="구성된 절차 실행" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#0066cc;strokeWidth=2;" edge="1" parent="1" source="cmp" target="core">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="차이점: 블록은 미리 검증되어 안전하고 진단이 쉬움 — 대신 카탈로그에 없는 형태의 시나리오는 블록 추가(코드) 전까지 표현 불가" style="text;html=1;fontSize=11;fontColor=#990000;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="650" width="1000" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
