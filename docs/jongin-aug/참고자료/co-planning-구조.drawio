@@ -1,0 +1,153 @@
+<mxfile host="app.diagrams.net" agent="claude-code" version="24.7.17">
+  <diagram id="co-planning-structure" name="co-planning 구현 구조 초안">
+    <mxGraphModel dx="1400" dy="1120" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1120" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="band1" value="L1 &#160;계획 그래프 (Plan Graph) — 우리 구현" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#999999;dashed=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=8;fontSize=15;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="60" y="70" width="1280" height="215" as="geometry" />
+        </mxCell>
+        <mxCell id="band2" value="L2 &#160;세션 컴파일러 (Session Compiler) — 우리 구현" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#999999;dashed=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=8;fontSize=15;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="60" y="310" width="1280" height="195" as="geometry" />
+        </mxCell>
+        <mxCell id="band3" value="L3 &#160;세션 런타임 (Session Runtime) — NegMAS 중심" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#999999;dashed=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=8;fontSize=15;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="60" y="530" width="1280" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="band4" value="L4 &#160;전역 효용 · 확정 (Global Utility &amp; Commitment) — 우리 구현" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#999999;dashed=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=8;fontSize=15;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="60" y="805" width="1280" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="band5" value="범례" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CCCCCC;dashed=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fontSize=13;fontStyle=1;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="60" y="995" width="1280" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ids" value="IDS&lt;br&gt;Intent 감지" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="85" y="155" width="130" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="nodeA" value="협상 노드: 영화&lt;br&gt;&lt;br&gt;의제 = {slot, theater, movie}" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="255" y="145" width="185" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="bind" value="바인딩&lt;br&gt;&lt;br&gt;영화.종료시각 → 식사.slot 하한&lt;br&gt;영화.상영관 → 식사.area 후보" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;dashed=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="475" y="140" width="155" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="nodeB" value="협상 노드: 식사&lt;br&gt;&lt;br&gt;의제 = {slot, area, cuisine, price}" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="665" y="145" width="185" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="gate" value="승인 게이트&lt;br&gt;(사용자 확인)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="890" y="155" width="145" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="tmpl" value="플랜 템플릿 (선언적 데이터)&lt;br&gt;&lt;br&gt;노드 종류 · issue 어휘 · 바인딩 규칙&lt;br&gt;새 co-planning 시나리오 추가 =&lt;br&gt;템플릿 + 어휘 등록 (코드 추가 아님)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;dashed=1;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="140" width="250" height="95" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cin" value="입력&lt;br&gt;&lt;br&gt;· 노드 의제 (issue 목록)&lt;br&gt;· 상위 세션 확정 결과&lt;br&gt;· 로컬 사용자 컨텍스트&lt;br&gt;· issue 어휘 카탈로그" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="85" y="350" width="215" height="135" as="geometry" />
+        </mxCell>
+        <mxCell id="comp" value="세션 컴파일러&lt;br&gt;&lt;br&gt;어휘 축소 · 이산화 수준 결정&lt;br&gt;공간 상한 강제" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=13;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="350" y="370" width="270" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="cout" value="출력 (NegMAS Scenario)&lt;br&gt;&lt;br&gt;· OutcomeSpace (상한 적용)&lt;br&gt;· ufun (비공개, 로컬)&lt;br&gt;· mechanism params&lt;br&gt;&#160;&#160;(n_steps / time_limit)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="670" y="350" width="235" height="135" as="geometry" />
+        </mxCell>
+        <mxCell id="oomnote" value="OOM 통제점&lt;br&gt;&lt;br&gt;outcome space는 &lt;b&gt;생성되기 전&lt;/b&gt;에 상한이 정해진다.&lt;br&gt;NegMAS는 to_discrete / limit_cardinality / sample 등&lt;br&gt;도구는 제공하지만, 상한을 강제하는 지점은 제공하지 않는다.&lt;br&gt;세션을 결합할수록 공간은 곱셈으로 증가한다." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;dashed=1;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="950" y="360" width="370" height="115" as="geometry" />
+        </mxCell>
+
+        <mxCell id="neg" value="협상 Negotiator (자사 PPA)&lt;br&gt;&lt;br&gt;· 후보 생성 (상한 적용 공간 내)&lt;br&gt;· 수신 fixed → 후보 공간 절단&lt;br&gt;· 수락/거절은 ufun이 결정" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="85" y="590" width="265" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="mech" value="SAOMechanism (NegMAS)&lt;br&gt;N자 협상 · 도중 참여/이탈 · n_steps / time_limit" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="545" y="570" width="310" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="msg" value="Offer 메시지&lt;br&gt;&lt;br&gt;ExtendedOutcome(outcome, data={constraint_hint})&lt;br&gt;issue별 fixed / relaxable&lt;br&gt;&lt;i&gt;운반은 NegMAS, 어휘·의미론·검증은 우리 구현&lt;/i&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#6C8EBF;dashed=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="505" y="660" width="390" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="opp" value="상대 PPA Negotiator&lt;br&gt;(자사 동일 구현)&lt;br&gt;&lt;br&gt;fixed 만족 불가 시&lt;br&gt;Offer 또는 계획 분기 거절" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1055" y="590" width="265" height="125" as="geometry" />
+        </mxCell>
+
+        <mxCell id="gu" value="전역 효용 관리&lt;br&gt;&lt;br&gt;계획 전체에 대한 사용자 효용 유지&lt;br&gt;(세션별 지역 효용과 구분)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="85" y="850" width="280" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="commit" value="노드 확정 · 보류 · 철회&lt;br&gt;&lt;br&gt;후행 노드 활성화&lt;br&gt;철회 시 재협상 트리거" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="400" y="850" width="280" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="exec" value="실행 위임&lt;br&gt;&lt;br&gt;캘린더 등록 · 예매 · 예약&lt;br&gt;(Sub-Agent)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="715" y="850" width="280" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="eval" value="오프라인 최적성 평가&lt;br&gt;&lt;br&gt;파레토 · Nash · Kalai 근접도&lt;br&gt;&lt;i&gt;전 참여자 ufun + 전량 열거 필요&lt;br&gt;→ 온디바이스 런타임 계산 불가&lt;/i&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;dashed=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="850" width="290" height="95" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lg1" value="우리 구현" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="85" y="1025" width="200" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2" value="NegMAS 제공" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="305" y="1025" width="200" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="lg3" value="외부 시스템 / 상대 기기" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="525" y="1025" width="200" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="lg4" value="자원 통제점" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="745" y="1025" width="200" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="lg5" value="오프라인 전용 (런타임 불가)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;dashed=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="965" y="1025" width="250" height="32" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="ids" target="nodeA">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#6C8EBF;" edge="1" parent="1" source="nodeA" target="bind">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#6C8EBF;" edge="1" parent="1" source="bind" target="nodeB">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#6C8EBF;" edge="1" parent="1" source="nodeB" target="gate">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="노드 1건씩 컴파일" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.25;entryY=0;strokeColor=#666666;fontSize=11;" edge="1" parent="1" source="nodeA" target="comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="세션 인스턴스화" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#666666;fontSize=11;" edge="1" parent="1" source="cout" target="mech">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.25;entryX=0;entryY=0.5;strokeColor=#666666;startArrow=classic;startFill=1;" edge="1" parent="1" source="neg" target="mech">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.25;strokeColor=#666666;startArrow=classic;startFill=1;" edge="1" parent="1" source="mech" target="opp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" style="edgeStyle=none;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;strokeColor=#999999;dashed=1;endArrow=none;" edge="1" parent="1" source="msg" target="mech">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" value="합의 결과" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.25;exitY=1;entryX=0.5;entryY=0;strokeColor=#666666;fontSize=11;" edge="1" parent="1" source="neg" target="gu">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="gu" target="commit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="commit" target="exec">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" value="다음 노드 활성 / 철회 시 재협상" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#B85450;dashed=1;fontSize=11;" edge="1" parent="1" source="commit" target="band1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="25" y="898" />
+              <mxPoint x="25" y="178" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e14" value="확정 합의 기록" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.75;exitY=0;entryX=0.5;entryY=0;strokeColor=#9673A6;dashed=1;fontSize=11;" edge="1" parent="1" source="commit" target="eval">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="610" y="830" />
+              <mxPoint x="1175" y="830" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

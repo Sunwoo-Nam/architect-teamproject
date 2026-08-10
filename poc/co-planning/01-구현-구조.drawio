@@ -1,0 +1,567 @@
+<mxfile host="app.diagrams.net" agent="claude-code" version="24.7.17">
+  <diagram id="poc-module-structure" name="PoC 모듈 구조">
+    <mxGraphModel dx="1500" dy="1250" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="1250" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="b1" value="입력 — 시나리오" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#AAAAAA;dashed=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fontSize=14;fontStyle=1;fontColor=#444444;" vertex="1" parent="1">
+          <mxGeometry x="50" y="60" width="1400" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="b2" value="계획 계층 — PlanGraph 실행과 상태 관리" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#AAAAAA;dashed=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fontSize=14;fontStyle=1;fontColor=#444444;" vertex="1" parent="1">
+          <mxGeometry x="50" y="210" width="1400" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="b3" value="협상 계층 — 후보 공급과 SAO 세션" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#AAAAAA;dashed=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fontSize=14;fontStyle=1;fontColor=#444444;" vertex="1" parent="1">
+          <mxGeometry x="50" y="480" width="1400" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="b4" value="측정 계층 — 오프라인 전용" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#AAAAAA;dashed=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fontSize=14;fontStyle=1;fontColor=#444444;" vertex="1" parent="1">
+          <mxGeometry x="50" y="780" width="1400" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="b5" value="공통 — dp02에서 이식 (모든 계층이 참조)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#AAAAAA;dashed=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fontSize=14;fontStyle=1;fontColor=#444444;" vertex="1" parent="1">
+          <mxGeometry x="50" y="990" width="1400" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="b6" value="범례" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#DDDDDD;dashed=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fontSize=13;fontStyle=1;fontColor=#777777;" vertex="1" parent="1">
+          <mxGeometry x="50" y="1120" width="1400" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="gen" value="&lt;b&gt;scenario_generator.py&lt;/b&gt;&lt;br&gt;Stage 6 — 단계 수·바인딩 강도·참여자 수 축" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="90" y="105" width="250" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="audit" value="&lt;b&gt;bias_audit.py&lt;/b&gt;&lt;br&gt;Stage 6 — 축 균형 감사" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="370" y="105" width="210" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="scen" value="scenarios/*.yaml" style="shape=note;whiteSpace=wrap;html=1;size=14;fillColor=#F5F5F5;strokeColor=#999999;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="610" y="105" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n1" value="Stage 1~5는 수기 작성 시나리오를 사용한다.&lt;br&gt;생성기는 Stage 6에서 도입한다." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#BBBBBB;dashed=1;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="870" y="105" width="380" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="plan" value="&lt;b&gt;plan.py&lt;/b&gt;&lt;br&gt;Stage 3&lt;br&gt;PlanGraph · StageSpec&lt;br&gt;Binding · StageAgreement" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="90" y="270" width="250" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="orch" value="&lt;b&gt;orchestrator.py&lt;/b&gt;&lt;br&gt;Stage 3 · 4에서 확장&lt;br&gt;단계 순차 실행 · TENTATIVE 저장&lt;br&gt;no-good 기록 · backtracking" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="390" y="270" width="270" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="comp" value="&lt;b&gt;compiler.py&lt;/b&gt;&lt;br&gt;Stage 3&lt;br&gt;(노드 의제 + 상위 합의 + 바인딩 + 로컬 컨텍스트)&lt;br&gt;→ EffectiveOutcomeSpace · ufun" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="710" y="270" width="280" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="pstate" value="&lt;b&gt;plan_state.py&lt;/b&gt;&lt;br&gt;Stage 4&lt;br&gt;TENTATIVE / COMMITTED / INFEASIBLE&lt;br&gt;revision · no-good (&lt;b&gt;로컬 기록 한정&lt;/b&gt;)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="270" width="280" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="hints" value="&lt;b&gt;hints.py&lt;/b&gt;&lt;br&gt;Stage 2&lt;br&gt;fixed / relaxable 어휘·검증&lt;br&gt;session·stage·actor·revision" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="90" y="530" width="230" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="hpred" value="&lt;b&gt;hint_predicate.py&lt;/b&gt;&lt;br&gt;Stage 2&lt;br&gt;fixed → issue == offered value" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="350" y="530" width="250" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="espace" value="&lt;b&gt;effective_space.py&lt;/b&gt;&lt;br&gt;Stage 1 · 2에서 확장&lt;br&gt;로컬 제약 ∩ active fixed predicates&lt;br&gt;값 목록만 보관 · 곱집합 없음" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="630" y="530" width="250" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="cspace" value="&lt;b&gt;candidate_space.py&lt;/b&gt;&lt;br&gt;Stage 1&lt;br&gt;next_batch(limit, constraints,&lt;br&gt;exclusions, context) — K개씩 lazy" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="910" y="530" width="250" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="runner" value="&lt;b&gt;runner.py&lt;/b&gt;&lt;br&gt;Stage 1&lt;br&gt;단일 단계 실행 · 구조화 로그" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="90" y="650" width="250" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="neg" value="&lt;b&gt;negotiators.py&lt;/b&gt;&lt;br&gt;Stage 1 · 2에서 확장&lt;br&gt;SAONegotiator 상속&lt;br&gt;정렬 가중치 경로 없음" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="390" y="650" width="280" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="sao" value="&lt;b&gt;NegMAS SAOMechanism&lt;/b&gt;&lt;br&gt;런타임 협상 프로토콜&lt;br&gt;ExtendedOutcome(outcome, data)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="710" y="650" width="280" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" value="&lt;b&gt;핵심 제약&lt;/b&gt;&lt;br&gt;&lt;br&gt;negotiators는 candidate_space를 통해서만&lt;br&gt;후보에 접근한다. 어디에서도 issue 값의&lt;br&gt;곱집합을 실체화하지 않는다.&lt;br&gt;&lt;br&gt;동시 보관 후보 수 ≤ K" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;dashed=1;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="530" width="230" height="205" as="geometry" />
+        </mxCell>
+
+        <mxCell id="base" value="&lt;b&gt;baselines.py&lt;/b&gt;&lt;br&gt;Stage 5 — 손실 원인 분해 3회 실행&lt;br&gt;SAO@운영 n_steps / SAO@큰 n_steps / TAU" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="90" y="825" width="290" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="tau" value="&lt;b&gt;NegMAS TAUMechanism&lt;/b&gt;&lt;br&gt;프로토콜 완전성 기준선&lt;br&gt;&lt;i&gt;단말 탑재 대상 아님&lt;/i&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;dashed=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="410" y="825" width="230" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="opt" value="&lt;b&gt;optimality.py&lt;/b&gt;&lt;br&gt;Stage 5 — 단계 최적성&lt;br&gt;calc_scenario_stats →&lt;br&gt;calc_outcome_optimality" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="670" y="825" width="240" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="popt" value="&lt;b&gt;plan_optimality.py&lt;/b&gt;&lt;br&gt;Stage 5 — 계획 최적성&lt;br&gt;결합 공간은 &lt;b&gt;채점 기준&lt;/b&gt;일 뿐&lt;br&gt;협상은 단계별로 한다" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="940" y="825" width="260" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="met" value="&lt;b&gt;metrics.py&lt;/b&gt;&lt;br&gt;Stage 5&lt;br&gt;집계·요약" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="825" width="190" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="mod" value="&lt;b&gt;models.py&lt;/b&gt;&lt;br&gt;IssueSpec·PrivateProfile + StageSpec 추가" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="90" y="1025" width="250" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="util" value="&lt;b&gt;utility.py&lt;/b&gt;&lt;br&gt;효용·hard constraint·threshold" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="360" y="1025" width="200" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="npref" value="&lt;b&gt;negmas_preferences.py&lt;/b&gt;&lt;br&gt;LinearAdditive + UFunConstraint" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="580" y="1025" width="250" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="val" value="&lt;b&gt;validators.py&lt;/b&gt;&lt;br&gt;outcome·hint 검증" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="850" y="1025" width="190" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="load" value="&lt;b&gt;scenario_loader.py&lt;/b&gt;&lt;br&gt;YAML 로딩" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1060" y="1025" width="230" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lg1" value="신규 구현" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="90" y="1150" width="230" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2" value="dp02에서 이식" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="350" y="1150" width="230" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="lg3" value="NegMAS 제공" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="610" y="1150" width="230" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="lg4" value="오프라인 전용 (단말 탑재 아님)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;dashed=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="870" y="1150" width="240" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="lg5" value="데이터" style="shape=note;whiteSpace=wrap;html=1;size=10;fillColor=#F5F5F5;strokeColor=#999999;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="1150" width="150" height="32" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="gen" target="audit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="audit" target="scen">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="시나리오 로드" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.25;exitY=1;entryX=0.5;entryY=0;strokeColor=#666666;fontSize=11;" edge="1" parent="1" source="scen" target="plan">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="PlanGraph" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;fontSize=11;" edge="1" parent="1" source="plan" target="orch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="단계 컴파일 요청" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;fontSize=11;" edge="1" parent="1" source="orch" target="comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="상태 조회·기록" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.75;exitY=1;entryX=0.25;entryY=1;strokeColor=#666666;startArrow=classic;startFill=1;fontSize=11;" edge="1" parent="1" source="orch" target="pstate">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="592" y="400" />
+              <mxPoint x="1110" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" value="EffectiveOutcomeSpace · ufun" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#666666;fontSize=11;" edge="1" parent="1" source="comp" target="espace">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" value="단계 실행" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.25;exitY=1;entryX=0.5;entryY=0;strokeColor=#666666;fontSize=11;" edge="1" parent="1" source="orch" target="runner">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="hints" target="hpred">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" value="predicate" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;fontSize=11;" edge="1" parent="1" source="hpred" target="espace">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="espace" target="cspace">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" value="next_batch" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=1;entryY=0.25;strokeColor=#666666;fontSize=11;" edge="1" parent="1" source="cspace" target="neg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="runner" target="neg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" value="offer / accept" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;startArrow=classic;startFill=1;fontSize=11;" edge="1" parent="1" source="neg" target="sao">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" value="발신 hint 생성" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=1;strokeColor=#999999;dashed=1;fontSize=11;" edge="1" parent="1" source="neg" target="hints">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" value="합의 결과" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.25;entryX=0.75;entryY=1;strokeColor=#666666;dashed=1;fontSize=11;" edge="1" parent="1" source="sao" target="orch">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1060" y="671" />
+              <mxPoint x="1060" y="430" />
+              <mxPoint x="592" y="430" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e17" value="확정 합의 기록" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#9673A6;dashed=1;fontSize=11;" edge="1" parent="1" source="pstate" target="popt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" value="동일 시나리오 3회 실행" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.25;exitY=0;entryX=0.25;entryY=1;strokeColor=#9673A6;dashed=1;fontSize=11;" edge="1" parent="1" source="base" target="runner">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#9673A6;dashed=1;" edge="1" parent="1" source="base" target="tau">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="opt" target="popt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="popt" target="met">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="poc-stage-roadmap" name="단계 의존과 검증 명제">
+    <mxGraphModel dx="1450" dy="720" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1450" pageHeight="720" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="v1" value="&lt;b&gt;V1&lt;/b&gt; 전수 열거 없이도&lt;br&gt;같은 합의에 도달한다" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;dashed=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="55" y="80" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="v2" value="&lt;b&gt;V2&lt;/b&gt; predicate 절단으로&lt;br&gt;후보 수·라운드가 준다" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;dashed=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="240" y="80" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="v3" value="&lt;b&gt;V3&lt;/b&gt; 단계 분리가 메모리에 유리하면서, 계획 최적성 손실이 측정 범위 안이다" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;dashed=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="425" y="80" width="545" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="v4" value="&lt;b&gt;V4&lt;/b&gt; 상태를 분리해도&lt;br&gt;일관되게 동작한다&lt;br&gt;&lt;i&gt;(안 1에 정의 없음)&lt;/i&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1165" y="80" width="170" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s1" value="&lt;b&gt;Stage 1&lt;/b&gt;&lt;br&gt;&lt;br&gt;단일 단계 협상 커널&lt;br&gt;CandidateSpace Provider" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="55" y="190" width="170" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="s2" value="&lt;b&gt;Stage 2&lt;/b&gt;&lt;br&gt;&lt;br&gt;constraint hint의&lt;br&gt;공간 절단" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="240" y="190" width="170" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="s3" value="&lt;b&gt;Stage 3&lt;/b&gt;&lt;br&gt;&lt;br&gt;PlanGraph 2단계 실행&lt;br&gt;영화 → 식사" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="425" y="190" width="170" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="s4" value="&lt;b&gt;Stage 4&lt;/b&gt;&lt;br&gt;&lt;br&gt;backtracking과&lt;br&gt;no-good" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="610" y="190" width="170" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="s5" value="&lt;b&gt;Stage 5&lt;/b&gt;&lt;br&gt;&lt;br&gt;정확도 측정 하네스&lt;br&gt;K 값 재산정" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="795" y="190" width="170" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="s6" value="&lt;b&gt;Stage 6&lt;/b&gt;&lt;br&gt;&lt;br&gt;시나리오 생성기&lt;br&gt;N자 확장" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="980" y="190" width="170" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="s7" value="&lt;b&gt;Stage 7&lt;/b&gt;&lt;br&gt;&lt;br&gt;계획 상태 분리&lt;br&gt;&lt;i&gt;산출물은 설계 발견&lt;/i&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1165" y="190" width="170" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="s8" value="&lt;b&gt;Stage 8&lt;/b&gt; — LLM 기반 PlanGraph 생성&lt;br&gt;&lt;br&gt;어휘 크기 위반율 · 민감 어휘 생성 · 바인딩 정합성&lt;br&gt;결정론 템플릿 대비 계획 최적성" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="740" y="450" width="400" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c1" value="진입: 배치 크기 K 초기값" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="55" y="335" width="170" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="c2" value="진입: fixed hint 철회 절차" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="240" y="335" width="170" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="c3" value="진입: fixed hint의 후속 단계 승계 범위" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="425" y="335" width="170" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" value="진입: backtracking 상한값" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="610" y="335" width="170" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" value="진입: N자에서 fixed 충돌 처리" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="980" y="335" width="170" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="note" value="Stage 1~7은 LLM을 쓰지 않는다. 측정 대상이 후보 공간 크기·라운드 수·최적성 거리이므로 모델 변동성이 섞이면 인과를 분리할 수 없다.&lt;br&gt;Stage 1~6은 단일 프로세스에서 계획 상태를 공유하므로, 잠정 합의의 양자 동기화 문제가 구조적으로 드러나지 않는다." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#BBBBBB;dashed=1;fontSize=11;align=left;spacingLeft=12;" vertex="1" parent="1">
+          <mxGeometry x="55" y="610" width="1280" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="s1" target="s2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="s2" target="s3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="s3" target="s4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="s4" target="s5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="s5" target="s6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="s6" target="s7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p7" value="V1~V3 확인 후 착수" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#9673A6;dashed=1;fontSize=11;" edge="1" parent="1" source="s5" target="s8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="poc-conceptual-view" name="개념 구조">
+    <mxGraphModel dx="1440" dy="1040" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1440" pageHeight="1040" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="dev" value="단말 내부 — 자사 PPA (온디바이스)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#666666;verticalAlign=top;align=left;spacingLeft=14;spacingTop=8;fontSize=15;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="60" y="160" width="950" height="590" as="geometry" />
+        </mxCell>
+        <mxCell id="off" value="오프라인 평가 — 런타임 밖" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#AAAAAA;dashed=1;verticalAlign=top;align=left;spacingLeft=14;spacingTop=8;fontSize=15;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="60" y="780" width="1320" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="lgb" value="범례" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#DDDDDD;dashed=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fontSize=13;fontStyle=1;fontColor=#777777;" vertex="1" parent="1">
+          <mxGeometry x="60" y="930" width="1320" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="input" value="계획 의도와 시나리오&lt;br&gt;&lt;i&gt;IDS Intent는 본 PoC의 입력이며 범위 밖&lt;/i&gt;" style="shape=note;whiteSpace=wrap;html=1;size=14;fillColor=#F5F5F5;strokeColor=#999999;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="60" width="400" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cplan" value="&lt;b&gt;계획 관리&lt;/b&gt;&lt;br&gt;계획 그래프와 단계 의존을 보관하고, 단계를 순서대로 실행한다.&lt;br&gt;합의는 전체 완성 전까지 잠정 상태로 두며, 후속 단계가 불가능하면 선행 단계로 되돌아간다." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="95" y="225" width="880" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="ccomp" value="&lt;b&gt;단계 의제 생성&lt;/b&gt;&lt;br&gt;&lt;br&gt;상위 합의 · 의존 바인딩 · 로컬 컨텍스트를 합쳐&lt;br&gt;이번 단계에서 다룰 값의 범위와 효용을 만든다.&lt;br&gt;&lt;b&gt;자원 상한을 강제하는 지점&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="95" y="355" width="420" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="cspace2" value="&lt;b&gt;후보 공간 관리&lt;/b&gt;&lt;br&gt;&lt;br&gt;유효한 값 조합의 범위를 계산하고,&lt;br&gt;요청받은 만큼씩 후보를 꺼내 준다.&lt;br&gt;&lt;b&gt;모든 조합을 한꺼번에 만들지 않는다&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="545" y="355" width="430" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="chint" value="&lt;b&gt;제약 힌트 처리&lt;/b&gt;&lt;br&gt;&lt;br&gt;상대가 고정으로 표시한 항목을 고정 조건으로 바꾸고,&lt;br&gt;내보낼 표시를 만든다.&lt;br&gt;조건을 만족하는 조합이 없으면 해당 분기를 거절한다." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="95" y="485" width="420" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="cstrat" value="&lt;b&gt;협상 전략&lt;/b&gt;&lt;br&gt;&lt;br&gt;받은 후보 중에서 무엇을 제안할지 고르고,&lt;br&gt;상대 제안을 받아들일지 판단한다.&lt;br&gt;&lt;b&gt;수락 판단의 기준은 선호 모델이다&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="545" y="485" width="430" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="cpref" value="&lt;b&gt;선호 모델 — 비공개&lt;/b&gt;&lt;br&gt;효용 함수 · 불가 조건 · 유보값 · 양보 정책. 사용자의 사정이 들어가는 곳이다.&lt;br&gt;외부로 나가지 않으며, 상대는 우리가 무엇을 제안하고 무엇을 제안하지 않는지만 본다." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#B85450;strokeWidth=2;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="95" y="615" width="880" height="85" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cwire" value="&lt;b&gt;외부로 나가는 것&lt;/b&gt;&lt;br&gt;&lt;br&gt;유효 범위 안의 오퍼&lt;br&gt;항목별 고정 / 변경가능 표시&lt;br&gt;&lt;br&gt;&lt;i&gt;효용·유보값·사유·계획 상태는 나가지 않는다&lt;/i&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;dashed=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="225" width="330" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="cproto" value="&lt;b&gt;협상 프로토콜&lt;/b&gt;&lt;br&gt;(NegMAS)&lt;br&gt;&lt;br&gt;교대 제안 · 다자 · 라운드 상한" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="355" width="330" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="cpeer" value="&lt;b&gt;상대 PPA&lt;/b&gt;&lt;br&gt;(자사 동일 구현)&lt;br&gt;&lt;br&gt;고정 조건을 만족할 수 없으면&lt;br&gt;해당 오퍼 또는 계획 분기를 거절한다" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="485" width="330" height="105" as="geometry" />
+        </mxCell>
+
+        <mxCell id="copt" value="&lt;b&gt;최적성 평가&lt;/b&gt;&lt;br&gt;단계 최적성과 계획 전체 최적성" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;dashed=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="100" y="815" width="380" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="cbase" value="&lt;b&gt;기준선 실행&lt;/b&gt;&lt;br&gt;라운드 상한 손실과 전략 손실을 분리한다" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;dashed=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="520" y="815" width="380" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="coffnote" value="전 참여자의 효용 함수와 기준 범위 전량 열거가 필요하다.&lt;br&gt;단말 런타임에서는 계산할 수 없다." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;dashed=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="940" y="815" width="400" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="clg1" value="우리 구현" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="100" y="960" width="220" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="clg2" value="NegMAS 제공" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="345" y="960" width="220" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="clg3" value="외부 (상대 기기)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="590" y="960" width="220" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="clg4" value="비공개 — 단말 밖으로 나가지 않는다" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#B85450;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="835" y="960" width="270" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="clg5" value="오프라인 전용" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;dashed=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="960" width="210" height="32" as="geometry" />
+        </mxCell>
+
+        <mxCell id="q0" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.15;entryY=0;strokeColor=#666666;" edge="1" parent="1" source="input" target="cplan">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="q1" value="① 단계 1건" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.25;exitY=1;entryX=0.5;entryY=0;strokeColor=#333333;fontSize=12;fontStyle=1" edge="1" parent="1" source="cplan" target="ccomp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="q2" value="② 유효 범위 (상한 적용)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#333333;fontSize=12;fontStyle=1" edge="1" parent="1" source="ccomp" target="cspace2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="q3" value="③ 고정 조건 → 추가 축소" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.8;strokeColor=#333333;fontSize=12;fontStyle=1" edge="1" parent="1" source="chint" target="cspace2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="q4" value="④ 후보 배치" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#333333;fontSize=12;fontStyle=1" edge="1" parent="1" source="cspace2" target="cstrat">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="q5" value="⑤ 오퍼 + 표시" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#333333;startArrow=classic;startFill=1;fontSize=12;fontStyle=1" edge="1" parent="1" source="cstrat" target="cproto">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="q6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#666666;startArrow=classic;startFill=1;" edge="1" parent="1" source="cproto" target="cpeer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="q7" value="합의 결과" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.9;entryY=0;strokeColor=#666666;dashed=1;fontSize=12;" edge="1" parent="1" source="cproto" target="cplan">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1215" y="195" />
+              <mxPoint x="887" y="195" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="q8" value="효용 생성" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;strokeColor=#B85450;dashed=1;fontSize=12;" edge="1" parent="1" source="cpref" target="ccomp">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="535" y="472" />
+              <mxPoint x="305" y="472" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="q9" value="수락 판단 기준" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.75;exitY=0;entryX=0.5;entryY=1;strokeColor=#B85450;dashed=1;fontSize=12;" edge="1" parent="1" source="cpref" target="cstrat">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="q10" value="내보낼 표시 생성" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.75;entryX=1;entryY=0.75;strokeColor=#999999;dashed=1;fontSize=12;" edge="1" parent="1" source="cstrat" target="chint">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="q11" value="확정 합의 기록" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#9673A6;dashed=1;fontSize=12;" edge="1" parent="1" source="cplan" target="copt">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="30" y="275" />
+              <mxPoint x="30" y="850" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="q12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#9673A6;dashed=1;startArrow=classic;startFill=1;" edge="1" parent="1" source="copt" target="cbase">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="poc-trust-boundary-view" name="전체구조">
+    <mxGraphModel dx="1100" dy="760" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="760" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="t_ids" value="IDS&#10;(범위 밖)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="30" y="125" width="110" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="t_user" value="사용자" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="30" y="215" width="110" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="t_peer" value="상대 PPA&#10;(외부)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="880" y="450" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="t_dev" value="온디바이스 신뢰경계" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;startSize=23;" vertex="1" parent="1">
+          <mxGeometry x="170" y="50" width="660" height="520" as="geometry" />
+        </mxCell>
+
+        <mxCell id="t_gplan" value="계획 계층" style="swimlane;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="t_dev">
+          <mxGeometry x="25" y="45" width="280" height="335" as="geometry" />
+        </mxCell>
+        <mxCell id="t_graph" value="플랜 그래프&#10;(단계·바인딩)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#e2f0d9;strokeColor=#82b366;" vertex="1" parent="t_gplan">
+          <mxGeometry x="20" y="35" width="240" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="t_exec" value="실행 제어&#10;(순차·되돌리기)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cdeb8b;strokeColor=#36393d;" vertex="1" parent="t_gplan">
+          <mxGeometry x="20" y="110" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="t_comp" value="단계 컴파일러&#10;(공간 상한)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cdeb8b;strokeColor=#36393d;" vertex="1" parent="t_gplan">
+          <mxGeometry x="20" y="190" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="t_state" value="계획 상태&#10;(잠정·확정)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#e2f0d9;strokeColor=#82b366;" vertex="1" parent="t_gplan">
+          <mxGeometry x="20" y="265" width="240" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="t_gneg" value="협상 계층" style="swimlane;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="t_dev">
+          <mxGeometry x="340" y="45" width="280" height="435" as="geometry" />
+        </mxCell>
+        <mxCell id="t_pref" value="선호 모델&#10;(효용·유보값)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffcc99;strokeColor=#36393d;" vertex="1" parent="t_gneg">
+          <mxGeometry x="20" y="35" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="t_hint" value="힌트 변환기&#10;(고정 조건)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="t_gneg">
+          <mxGeometry x="20" y="115" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="t_cand" value="후보 공급기&#10;(배치 공급)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="t_gneg">
+          <mxGeometry x="20" y="195" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="t_strat" value="협상 전략&#10;(제안·수락)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="t_gneg">
+          <mxGeometry x="20" y="275" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="t_engine" value="협상 엔진&#10;(NegMAS SAO)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="t_gneg">
+          <mxGeometry x="20" y="355" width="240" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="t_off" value="오프라인 평가 (런타임 밖)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#9673a6;dashed=1;startSize=23;" vertex="1" parent="1">
+          <mxGeometry x="170" y="600" width="660" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="t_opt" value="최적성 평가&#10;(단계·계획)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="t_off">
+          <mxGeometry x="25" y="40" width="280" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="t_base" value="기준선 실행&#10;(손실 분해)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="t_off">
+          <mxGeometry x="340" y="40" width="280" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="te1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="t_ids" target="t_graph">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="te2" value="승인" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="t_user" target="t_exec">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="te3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="t_gplan" source="t_graph" target="t_exec">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="te4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="t_gplan" source="t_exec" target="t_comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="te5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;startArrow=classic;startFill=1;" edge="1" parent="t_gplan" source="t_exec" target="t_state">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="8" y="137" />
+              <mxPoint x="8" y="290" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="te6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="t_comp" target="t_cand">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="te7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="t_gneg" source="t_hint" target="t_cand">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="te8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="t_gneg" source="t_cand" target="t_strat">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="te9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=classic;startFill=1;" edge="1" parent="t_gneg" source="t_strat" target="t_engine">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="te10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="t_gneg" source="t_pref" target="t_strat">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="272" y="62" />
+              <mxPoint x="272" y="302" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="te11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="t_gneg" source="t_strat" target="t_hint">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="8" y="302" />
+              <mxPoint x="8" y="142" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="te12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="t_pref" target="t_comp">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="485" y="157" />
+              <mxPoint x="485" y="312" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="te13" value="합의" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="t_engine" target="t_exec">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="500" y="477" />
+              <mxPoint x="500" y="232" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="te14" value="오퍼 + 고정/변경가능 표시" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=classic;startFill=1;" edge="1" parent="1" source="t_engine" target="t_peer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="te15" value="확정 합의 기록" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="t_state" target="t_opt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="te16" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;startArrow=classic;startFill=1;" edge="1" parent="t_off" source="t_opt" target="t_base">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

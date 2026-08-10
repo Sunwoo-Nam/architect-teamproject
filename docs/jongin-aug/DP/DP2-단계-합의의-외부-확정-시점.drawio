@@ -1,0 +1,128 @@
+<mxfile host="app.diagrams.net" agent="claude-code" version="24.7.17">
+  <diagram id="dp2-commit-timing" name="단계 합의의 외부 확정 시점">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="ra" value="대안 A — 계획 완성 후 일괄 확정" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8FBFF;strokeColor=#6C8EBF;verticalAlign=top;align=left;spacingLeft=14;spacingTop=8;fontSize=15;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="40" y="50" width="640" height="790" as="geometry" />
+        </mxCell>
+        <mxCell id="rb" value="대안 B — 경합 단계의 조기 확정" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFBF5;strokeColor=#D79B00;verticalAlign=top;align=left;spacingLeft=14;spacingTop=8;fontSize=15;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="720" y="50" width="640" height="790" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a1" value="단계 1 협상 → 잠정 합의" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="110" width="560" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="a2" value="단계 2 협상 → 잠정 합의" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="195" width="560" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="a3" value="협상 중 가용성 조회 (읽기 전용)&lt;br&gt;소진된 값을 후보 목록에서 제거한다. 자원을 점유하지 않는다." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;dashed=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="285" width="560" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a4" value="사용자 승인" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E2F0D9;strokeColor=#82B366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="190" y="390" width="340" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="a5" value="외부 예약 일괄 실행" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="190" y="475" width="340" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="a6" value="일부 예약 실패 시 해당 단계만 재협상&lt;br&gt;(사용자 승인 이후 시점이므로 승인을 다시 받아야 한다)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;dashed=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="565" width="560" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a7" value="확정 실행 전까지 외부 세계에 변화가 없다.&lt;br&gt;협상 중 되돌리기 비용은 발생하지 않는다." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;dashed=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="665" width="560" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="b1" value="단계 1 협상 → 합의" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="760" y="110" width="560" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="b2" value="자원 경합 판단&lt;br&gt;잔여 수량 또는 소진 속도를 임계값과 비교한다" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="760" y="190" width="560" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="b3" value="경합 큼&lt;br&gt;취소 가능한 임시 확보 우선,&lt;br&gt;미지원 시 확정 예약" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="760" y="290" width="260" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="b4" value="경합 낮음&lt;br&gt;잠정 유지" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1060" y="290" width="260" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="b5" value="단계 2 협상&lt;br&gt;확정된 단계의 결과는 고정 조건으로 받는다" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="760" y="400" width="560" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="b6" value="사용자 승인" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E2F0D9;strokeColor=#82B366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="870" y="490" width="340" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="b7" value="나머지 단계 예약 실행" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="870" y="570" width="340" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="b8" value="되돌려야 하는 경우&lt;br&gt;취소 비용 산정 → 자기 사용자 결정 → 상대에게 취소 동의 요청" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B85450;dashed=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="760" y="660" width="560" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="b9" value="사전 위임 범위 필요&lt;br&gt;금액 상한 · 취소 가능한 확보만 허용할지 여부 · 조기 확정 허용 단계 유형" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;dashed=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="760" y="750" width="560" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ea1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#666666;" edge="1" parent="1" source="a1" target="a2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ea2" style="edgeStyle=none;rounded=1;html=1;exitX=0.25;exitY=1;entryX=0.25;entryY=0;strokeColor=#999999;dashed=1;endArrow=none;" edge="1" parent="1" source="a2" target="a3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ea3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.75;exitY=1;entryX=0.75;entryY=0;strokeColor=#666666;" edge="1" parent="1" source="a2" target="a4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="500" y="370" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ea4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#666666;" edge="1" parent="1" source="a4" target="a5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ea5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#B85450;dashed=1;" edge="1" parent="1" source="a5" target="a6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ea6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#B85450;dashed=1;" edge="1" parent="1" source="a6" target="a1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="62" y="595" />
+              <mxPoint x="62" y="135" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="eb1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#666666;" edge="1" parent="1" source="b1" target="b2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eb2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.25;exitY=1;entryX=0.5;entryY=0;strokeColor=#666666;" edge="1" parent="1" source="b2" target="b3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eb3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.75;exitY=1;entryX=0.5;entryY=0;strokeColor=#666666;" edge="1" parent="1" source="b2" target="b4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eb4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;entryX=0.25;entryY=0;strokeColor=#666666;" edge="1" parent="1" source="b3" target="b5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eb5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;entryX=0.75;entryY=0;strokeColor=#666666;" edge="1" parent="1" source="b4" target="b5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eb6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#666666;" edge="1" parent="1" source="b5" target="b6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eb7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#666666;" edge="1" parent="1" source="b6" target="b7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eb8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#B85450;dashed=1;" edge="1" parent="1" source="b3" target="b8">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="742" y="325" />
+              <mxPoint x="742" y="690" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eb9" style="edgeStyle=none;rounded=1;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;strokeColor=#D6B656;dashed=1;endArrow=none;" edge="1" parent="1" source="b9" target="b8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
