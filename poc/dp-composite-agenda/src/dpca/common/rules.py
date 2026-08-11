@@ -68,9 +68,20 @@ def _membership(dep: dict) -> HardRule:
 
 
 def build_participant_hard(scenario: Scenario) -> list[HardRule]:
-    """참여자별 하드 제약 — 전원 만족해야 실행 가능(합의 대상이 되려면 모두의 하드 통과)."""
+    """전 참여자 하드 제약 (oracle용) — 전원 만족해야 실행 가능."""
+    return _build_participant_hard(scenario, participant=None)
+
+
+def build_participant_hard_for(scenario: Scenario, participant: int) -> list[HardRule]:
+    """특정 참여자의 하드 제약만 (에이전트용 — 자기 캘린더·제약은 사유 정보)."""
+    return _build_participant_hard(scenario, participant=participant)
+
+
+def _build_participant_hard(scenario: Scenario, participant: int | None) -> list[HardRule]:
     rules: list[HardRule] = []
     for con in scenario.participants.get("constraints", []):
+        if participant is not None and int(con.get("participant", -1)) != participant:
+            continue
         if "axis" in con and "attr_equals" in con:
             # 속성 기반: 값 이름이 아니라 메타데이터로 판정 — count가 커져도(sat2, sun2 …) 의도 유지
             axis, attrs = con["axis"], dict(con["attr_equals"])
