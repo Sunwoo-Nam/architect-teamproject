@@ -354,7 +354,7 @@ def compare_section(bench_raw: dict, arg: str) -> dict:
         return sec
     sec["source_meta"] = {
         k: _get(other, "meta", k)
-        for k in ("timestamp_utc", "seed", "git_commit", "python", "negmas_version", "provider")
+        for k in ("timestamp", "timestamp_utc", "seed", "git_commit", "python", "negmas_version", "provider")
     }
     for name, getter, fmt in COMPARE_METRICS:
         for plan in PLAN_NAMES:
@@ -423,7 +423,7 @@ def render_markdown(raw: dict) -> str:
 
     A("# 벤치마크 셋 기준 측정 리포트 — 설계 후보 1 (방안 1 전원동의 투표형 vs 방안 2 누적 공통제안형)")
     A("")
-    A(f"- 실행: {m['timestamp_utc']} · run_id `{m['run_id']}` · commit `{m['git_commit']}`")
+    A(f"- 실행: {m.get('timestamp') or m.get('timestamp_utc')} · run_id `{m['run_id']}` · commit `{m['git_commit']}`")
     A(f"- 환경: python {m['python']} · negmas {m['negmas_version']}")
     A(
         f"- **입력: 정적 벤치마크 셋** (무작위 생성 프로파일이 아니다) —"
@@ -451,7 +451,7 @@ def render_markdown(raw: dict) -> str:
         else:
             src = cmp_sec.get("source_meta") or {}
             A(
-                f"대조 대상: `{cmp_sec['run_id']}` ({src.get('timestamp_utc', '?')}"
+                f"대조 대상: `{cmp_sec['run_id']}` ({src.get('timestamp') or src.get('timestamp_utc', '?')}"
                 f" · commit `{src.get('git_commit', '?')}` · seed {src.get('seed', '?')})"
             )
             A(f"대조 대상의 입력: {src.get('provider', '(불명)')}")

@@ -9,7 +9,9 @@ import statistics
 import subprocess
 import sys
 import tracemalloc
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+
+KST = timezone(timedelta(hours=9), "KST")  # 한국시간 — 고정 오프셋 (DST 없음)
 
 from .domain import NO_DEAL
 from .faults import FaultInjector
@@ -50,8 +52,8 @@ def _meta(seed: int) -> dict:
     import negmas
 
     return {
-        "run_id": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "run_id": datetime.now(KST).strftime("%Y%m%dT%H%M%S") + "KST",
+        "timestamp": datetime.now(KST).isoformat(timespec="seconds"),
         "seed": seed,
         "git_commit": _git("rev-parse", "--short", "HEAD"),
         "negmas_version": negmas.__version__,

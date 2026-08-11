@@ -19,7 +19,7 @@ def render_markdown(raw: dict) -> str:
     A = L.append
     A("# 측정 리포트 — 설계 후보 1 (방안 1 전원동의 투표형 vs 방안 2 누적 공통제안형)")
     A("")
-    A(f"- 실행: {m['timestamp_utc']} · run_id `{m['run_id']}` · seed {m['seed']} · commit `{m['git_commit']}`")
+    A(f"- 실행: {m.get('timestamp') or m.get('timestamp_utc')} · run_id `{m['run_id']}` · seed {m['seed']} · commit `{m['git_commit']}`")
     A(f"- 환경: python {m['python']} · negmas {m['negmas_version']} · 프로파일: {m['provider']}")
     A(f"- **주의**: {m['caveat']}")
     A("- 측정 정의: [`docs/changbae/24-QA-측정-핸드북.md`](../../../../docs/changbae/24-QA-측정-핸드북.md)")

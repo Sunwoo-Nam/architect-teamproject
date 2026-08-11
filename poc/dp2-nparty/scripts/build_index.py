@@ -12,6 +12,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _kst_display(ts: str | None) -> str:
+    """저장 형식(UTC/KST 불문)을 KST로 변환해 표시."""
+    if not ts:
+        return "?"
+    from datetime import datetime, timedelta, timezone
+
+    try:
+        dt = datetime.fromisoformat(ts)
+        return dt.astimezone(timezone(timedelta(hours=9))).strftime("%m-%d %H:%M")
+    except ValueError:
+        return ts[:16]
+
+
 def _stars(v) -> str:
     return f"★{v}" if isinstance(v, int) else "-"
 
@@ -53,7 +66,7 @@ def _row(run_dir: Path, raw: dict) -> dict:
 
     return {
         "run": run_dir.name,
-        "date": m.get("timestamp_utc", "?")[:16],
+        "date": _kst_display(m.get("timestamp") or m.get("timestamp_utc")),
         "commit": m.get("git_commit", "?"),
         "kind": kind,
         "fc": plan_pair(fc),
@@ -79,7 +92,7 @@ def main() -> None:
         "실행 1건 = 1행, 최신이 위. 별점은 `방안1:방안2`. 상세는 각 행의 report 링크.",
         "재생성: `.venv/bin/python scripts/build_index.py`",
         "",
-        "| 실행 | 일시(UTC) | commit | 입력 종류 | FC | SC-참여자 | FT&REC | CF(참여자) | 상세 |",
+        "| 실행 | 일시(KST) | commit | 입력 종류 | FC | SC-참여자 | FT&REC | CF(참여자) | 상세 |",
         "|---|---|---|---|---|---|---|---|---|",
     ]
     for r in rows:

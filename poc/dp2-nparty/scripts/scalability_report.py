@@ -214,7 +214,7 @@ def render(raw: dict[str, Any]) -> str:
 
     A("# Scalability-참여자 수 — 메시지 확장 지수 b_msg (25) · 정적 벤치마크 family 기준")
     A("")
-    A(f"- 실행: {m['timestamp_utc']} · run_id `{m['run_id']}`")
+    A(f"- 실행: {m.get('timestamp') or m.get('timestamp_utc')} · run_id `{m['run_id']}`")
     A(f"- 입력: **정적 벤치마크 family** `{m['cases_root']}` — 무작위 생성기가 아니다")
     k_dist = " · ".join(f"{k} {v}" for k, v in m["k_distribution"].items())
     A(
@@ -366,7 +366,8 @@ def render(raw: dict[str, Any]) -> str:
 
 
 def out_dir() -> Path:
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    from dp2_nparty.campaign import KST
+    stamp = datetime.now(KST).strftime("%Y%m%dT%H%M%S") + "KST"
     base = ROOT / "results" / f"scalability-{stamp}"
     path, i = base, 2
     while path.exists():  # 같은 초에 재실행돼도 덮어쓰지 않는다 (run_measurements.py 방식)
@@ -414,7 +415,7 @@ def main() -> int:
     raw: dict[str, Any] = {
         "meta": {
             "run_id": "",  # 저장 직전에 채운다
-            "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "timestamp": datetime.now(KST).isoformat(timespec="seconds"),
             "measure": "Scalability-참여자 수 b_msg (25 §25.3-§25.6)",
             "input_kind": "static_benchmark_family",
             "cases_root": str(root.relative_to(ROOT) if root.is_relative_to(ROOT) else root),
