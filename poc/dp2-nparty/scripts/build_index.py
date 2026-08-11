@@ -47,22 +47,25 @@ def _row(run_dir: Path, raw: dict) -> dict:
     else:
         kind = "?"
 
+    plans = [p for p in ("plan1", "plan2", "plan3a") if p in fc or p in sp]
+
     def plan_pair(section, key="stars"):
-        a, b = section.get("plan1", {}), section.get("plan2", {})
-        if key in a and key in b:
-            return f"{_stars(a[key])}:{_stars(b[key])}"
+        vals = [section.get(p, {}).get(key) for p in plans]
+        if any(v is not None for v in vals):
+            return ":".join(_stars(v) for v in vals)
         return "-"
 
     def ftrec_pair():
         if not ft or not rc:
             return "-"
-        p1 = min(ft["plan1"]["stars"], rc["plan1"]["stars"])
-        p2 = min(ft["plan2"]["stars"], rc["plan2"]["stars"])
-        return f"★{p1}:★{p2}"
+        try:
+            return ":".join(f"★{min(ft[p]['stars'], rc[p]['stars'])}" for p in plans)
+        except (KeyError, TypeError):
+            return "-"
 
     def cf_pair():
         try:
-            return f"★{cf['plan1']['participant']['stars']}:★{cf['plan2']['participant']['stars']}"
+            return ":".join(f"★{cf[p]['participant']['stars']}" for p in plans)
         except (KeyError, TypeError):
             return "-"
 

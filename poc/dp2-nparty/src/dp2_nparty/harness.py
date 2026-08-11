@@ -11,10 +11,10 @@ from dataclasses import dataclass, field
 from .domain import Profile, SessionResult
 from .measures import fc
 from .measures.ru_memory import peak_memory_bytes
-from .protocol import Plan1Vote, Plan2Cumulative
+from .protocol import Plan1Vote, Plan2Cumulative, Plan3Batch
 from .ufun_provider import TableUfun, UfunProvider
 
-PLANS = {"plan1": Plan1Vote, "plan2": Plan2Cumulative}
+PLANS = {"plan1": Plan1Vote, "plan2": Plan2Cumulative, "plan3a": Plan3Batch}
 
 
 @dataclass
@@ -43,7 +43,9 @@ class Experiment:
             profiles: list[Profile] = self.provider.build_profiles(
                 candidates, self.n_participants, rng
             )
-            for name, cls in PLANS.items():  # 동일 프로파일로 두 방안 실행
+            for name, cls in PLANS.items():  # 동일 프로파일로 전 방안 실행
+                for prof in profiles:
+                    prof.clear_caches()  # 순위표 구축 비용을 방안마다 동일 지불 (측정 공정성)
                 session, peak = peak_memory_bytes(lambda c=cls: c(profiles).run())
                 out[name].append(
                     RunRecord(
@@ -105,6 +107,8 @@ def multi_issue_sweep(
             candidates = list(itertools.product(*[range(s) for s in sizes]))
             profiles = provider.build_profiles(candidates, 3, rng)
             for name, cls in PLANS.items():
+                for prof in profiles:
+                    prof.clear_caches()
                 session, peak = peak_memory_bytes(
                     lambda c=cls: c(profiles, collect_log=False).run()
                 )

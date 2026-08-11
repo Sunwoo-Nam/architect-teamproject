@@ -9,7 +9,7 @@ from dp2_nparty.domain import NO_DEAL, Profile
 from dp2_nparty.harness import Experiment
 from dp2_nparty.measures import fc
 from dp2_nparty.measures.scaling import loglog_fit, stars_b_msg
-from dp2_nparty.protocol import Plan1Vote, Plan2Cumulative
+from dp2_nparty.protocol import Plan1Vote, Plan2Cumulative, Plan3Batch
 from dp2_nparty.threshold import SweepThreshold
 from dp2_nparty.ufun_provider import TableUfun
 
@@ -28,7 +28,7 @@ def test_both_plans_agree_on_obvious_case():
     profiles = [
         Profile(f"P{i}", {"A": 0.9, "B": 0.5 + i * 0.01, "C": 0.2}, 0.4) for i in range(3)
     ]
-    for cls in (Plan1Vote, Plan2Cumulative):
+    for cls in (Plan1Vote, Plan2Cumulative, Plan3Batch):
         r = cls(profiles).run()
         assert r.outcome == "A", (cls.__name__, r)
         assert r.messages > 0
@@ -41,7 +41,7 @@ def test_no_deal_when_infeasible():
         Profile("P1", {"A": 0.1, "B": 0.9}, 0.4),
         Profile("P2", {"A": 0.1, "B": 0.1}, 0.4),
     ]
-    for cls in (Plan1Vote, Plan2Cumulative):
+    for cls in (Plan1Vote, Plan2Cumulative, Plan3Batch):
         r = cls(profiles).run()
         assert r.outcome == NO_DEAL
         s = fc.score(r.outcome, ["A", "B"], profiles)
@@ -128,3 +128,20 @@ def test_bytes_counted():
     r1, r2 = Plan1Vote(profiles).run(), Plan2Cumulative(profiles).run()
     assert r1.bytes > 0 and r2.bytes > 0
     assert r1.bytes > r2.bytes  # 방안 1은 공지·투표·결과 페이로드가 추가된다
+
+
+def test_plan3a_batch_properties():
+    from dp2_nparty.measures import fc as fcmod
+
+    rng = random.Random(21)
+    cands = [f"s{j}" for j in range(12)]
+    profiles = TableUfun().build_profiles(cands, 3, rng)
+    r2 = Plan2Cumulative(profiles).run()
+    r3 = Plan3Batch(profiles).run()
+    # 3-A는 라운드 반복이 없어 phase가 방안 2 이하이고, 배치라 전송 건수도 적다
+    assert r3.phases <= r2.phases
+    assert r3.messages <= r2.messages
+    # 교집합 "첫" 후보가 아니라 "최선(순위합 최소)"을 고르므로 달성률이 방안 2 이상이어야 한다
+    f2 = fcmod.score(r2.outcome, cands, profiles)
+    f3 = fcmod.score(r3.outcome, cands, profiles)
+    assert f3.ratio >= f2.ratio - 1e-9

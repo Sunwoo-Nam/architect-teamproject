@@ -4,6 +4,8 @@ raw.json만 있으면 언제든 재생성 가능하다. 별점 척도는 핸드�
 """
 from __future__ import annotations
 
+from .protocol import PLAN_NAMES
+
 
 def _stars(n: int) -> str:
     return "★" * n + "☆" * (5 - n) + f" ({n}점)"
@@ -36,7 +38,7 @@ def render_markdown(raw: dict) -> str:
     A("")
     A("| 방안 | 달성률 평균 | R̄ | s | 별점 | x\\* 도달/합의 | 결렬 정답/오답 | 라운드/phase/메시지/바이트 중앙값 |")
     A("|---|---|---|---|---|---|---|---|")
-    for p in ("plan1", "plan2"):
+    for p in PLAN_NAMES:
         d = fc[p]
         A(
             f"| {p} | {d['mean_ratio']:.3f} | {d['mean_baseline']:.3f} | {d['s']:.3f} | {_stars(d['stars'])}"
@@ -52,7 +54,7 @@ def render_markdown(raw: dict) -> str:
     A("")
     A("| 방안 | 피크 증가분 중앙값 | 평균 증가분 중앙값 |")
     A("|---|---|---|")
-    for p in ("plan1", "plan2"):
+    for p in PLAN_NAMES:
         A(f"| {p} | {_kib(ru[p]['median_peak_bytes'])} | {_kib(ru[p]['median_avg_bytes'])} |")
     A("")
 
@@ -63,7 +65,7 @@ def render_markdown(raw: dict) -> str:
     A("")
     A("| 방안 | 게이트 | b_msg [95% CI] | R² | 별점 | 메시지 중앙값 (N별) | 바이트 중앙값 (N별) |")
     A("|---|---|---|---|---|---|---|")
-    for p in ("plan1", "plan2"):
+    for p in PLAN_NAMES:
         d = sp[p]
         msgs = " ".join(f"N{n}:{v:.0f}" for n, v in d["median_messages_by_n"].items() if v)
         byt = " ".join(f"N{n}:{v/1024:.1f}K" for n, v in d["median_bytes_by_n"].items() if v)
@@ -81,7 +83,7 @@ def render_markdown(raw: dict) -> str:
     A("")
     A("| 방안 | 합의 | c [95% CI] | R² | 별점 | 피크 메모리 (S별, KiB) |")
     A("|---|---|---|---|---|---|")
-    for p in ("plan1", "plan2"):
+    for p in PLAN_NAMES:
         d = si[p]
         mem = " ".join(f"S{s}:{int(v) // 1024}" for s, v in d["median_peak_by_S"].items())
         A(
@@ -102,7 +104,7 @@ def render_markdown(raw: dict) -> str:
         A("")
         A("| 방안 | 합성 시간 중앙값 | 통신(RTT) | 평가 | 전송 | 지배 항 |")
         A("|---|---|---|---|---|---|")
-        for p in ("plan1", "plan2"):
+        for p in PLAN_NAMES:
             d = tb[p]
             A(
                 f"| {p} | **{d['median_total_ms'] / 1000:.2f}s** | {d['median_rtt_ms'] / 1000:.2f}s"
@@ -120,7 +122,7 @@ def render_markdown(raw: dict) -> str:
     A("")
     A("| 방안 | 베이스라인 완결률 | 강도별 완결률 | 임계 배수 | 여유 배수 | 별점 |")
     A("|---|---|---|---|---|---|")
-    for p in ("plan1", "plan2"):
+    for p in PLAN_NAMES:
         d = ft[p]
         rates = " ".join(f"{k}x:{v:.2f}" for k, v in d["agree_rates"].items() if k != "0.0")
         crit = d["critical_multiple"] if d["critical_multiple"] is not None else "없음(최대 강도까지)"
@@ -136,7 +138,7 @@ def render_markdown(raw: dict) -> str:
     A("")
     A("| 방안 | 시도 | FR 실패(재개·일치) | 복구 비율 중앙값 | 재시작 비용 R | 별점 |")
     A("|---|---|---|---|---|---|")
-    for p in ("plan1", "plan2"):
+    for p in PLAN_NAMES:
         d = rc[p]
         A(
             f"| {p} | {d['trials']} | {d['fr_failures']} | {d['median_ratio']}"
@@ -153,7 +155,7 @@ def render_markdown(raw: dict) -> str:
     A("")
     A("| 방안 | 관점 | 정확도 | 이득 | 노출률 | 별점 |")
     A("|---|---|---|---|---|---|")
-    for p in ("plan1", "plan2"):
+    for p in PLAN_NAMES:
         for vp in ("participant", "coordinator"):
             d = cf[p][vp]
             A(
@@ -173,21 +175,24 @@ def render_markdown(raw: dict) -> str:
 
     A("## 종합 — 별점 요약 (판정 기준 관점만)")
     A("")
-    A("| QA | 방안 1 | 방안 2 |")
-    A("|---|---|---|")
-    A(f"| §1 Functional Correctness (핵심 1위) | {_stars(fc['plan1']['stars'])} | {_stars(fc['plan2']['stars'])} |")
-    A("| §2 RU-메모리 (핵심 2위) | 상대 비교 (별점 미확정 — 핸드북 §2) | 〃 |")
-    A(f"| §3 SC-참여자 수 (핵심 3위) | {_stars(sp['plan1']['stars'])} | {_stars(sp['plan2']['stars'])} |")
-    A(f"| §4 SC-의제 수 (핵심 4위) | {_stars(si['plan1']['stars'])} | {_stars(si['plan2']['stars'])} |")
-    ft1, ft2 = ft["plan1"]["stars"], ft["plan2"]["stars"]
-    rc1, rc2 = rc["plan1"]["stars"], rc["plan2"]["stars"]
+    A("| QA | " + " | ".join(PLAN_NAMES) + " |")
+    A("|---" * (len(PLAN_NAMES) + 1) + "|")
+    A("| §1 Functional Correctness (핵심 1위) | " + " | ".join(_stars(fc[p]["stars"]) for p in PLAN_NAMES) + " |")
+    A("| §2 RU-메모리 (핵심 2위) | " + " | ".join("상대 비교" for _ in PLAN_NAMES) + " |")
+    A("| §3 SC-참여자 수 (핵심 3위) | " + " | ".join(_stars(sp[p]["stars"]) for p in PLAN_NAMES) + " |")
+    A("| §4 SC-의제 수 (핵심 4위) | " + " | ".join(_stars(si[p]["stars"]) for p in PLAN_NAMES) + " |")
     A(
-        f"| §5 FT & REC (핵심 5위, min 통합) | {_stars(min(ft1, rc1))} (FT {ft1}·REC {rc1})"
-        f" | {_stars(min(ft2, rc2))} (FT {ft2}·REC {rc2}) |"
+        "| §5 FT & REC (핵심 5위, min 통합) | "
+        + " | ".join(
+            f"{_stars(min(ft[p]['stars'], rc[p]['stars']))} (FT {ft[p]['stars']}·REC {rc[p]['stars']})"
+            for p in PLAN_NAMES
+        )
+        + " |"
     )
     A(
-        f"| §7 Confidentiality (비핵심 — 참여자 관찰자) | {_stars(cf['plan1']['participant']['stars'])}"
-        f" | {_stars(cf['plan2']['participant']['stars'])} |"
+        "| §7 Confidentiality (비핵심 — 참여자 관찰자) | "
+        + " | ".join(_stars(cf[p]["participant"]["stars"]) for p in PLAN_NAMES)
+        + " |"
     )
     A("")
     A(f"> 주의: {m['caveat']}")

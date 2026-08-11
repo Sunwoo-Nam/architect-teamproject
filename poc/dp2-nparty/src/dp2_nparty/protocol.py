@@ -21,6 +21,15 @@ from .tiebreak import RankSumThenStdThenRunoff, RunoffMajority, TieBreaker
 
 MAX_SWEEPS = 5  # PL 결정 (2026-08-11)
 
+# 비교 대상 방안 목록 — 측정·리포트 전체가 이 목록을 순회한다
+def all_plans():
+    return (("plan1", Plan1Vote), ("plan2", Plan2Cumulative), ("plan3a", Plan3Batch))
+
+
+PLAN_NAMES = ("plan1", "plan2", "plan3a")
+PLAN_LABELS = {"plan1": "방안 1 전원동의 투표형", "plan2": "방안 2 누적 공통제안형",
+               "plan3a": "방안 3-A 일괄 순위 제출형"}
+
 
 @dataclass
 class KillAt:
@@ -238,3 +247,88 @@ class Plan2Cumulative(_BasePlan):
         if not common:
             return None
         return self._resolve(bb, sorted(common, key=repr))
+
+
+class Plan3Batch(_BasePlan):
+    """방안 3-A — 일괄 순위 제출·중앙 선별형 (51 §3-A).
+
+    라운드 반복이 없다: 바퀴(sweep)마다 각자 revised threshold 이상의 미전달 후보
+    **전부를 순위와 함께 한 번에** 제출(배치 1건 = 1 phase)하고, 담당자가 누적 교집합에서
+    순위 합 최소 후보를 선별한다. 배치 유실은 다음 바퀴에 자동 재시도(미전달 유지).
+    담당자의 누적 저장소는 bb.proposed_by를 재사용한다 (스냅샷·복구 기계 공유).
+    """
+
+    plan_name = "plan3a"
+
+    def __init__(self, profiles, tie_breaker: TieBreaker | None = None, **kw):
+        super().__init__(profiles, tie_breaker or RankSumThenStdThenRunoff(), **kw)
+
+    def run(self, injector=None, kill_at=None, on_round_end=None) -> SessionResult:
+        bb = Blackboard(n=self.n)
+        events: list[dict] = []
+        rounds = 0  # 방안 3-A의 라운드 = 배치 제출 회수 (바퀴당 1회)
+        self._eval_calls = sum(len(a.ranked) for a in self.agents)  # 순위표 구축 (공통)
+        for sweep in range(1, self.max_sweeps + 1):
+            boundary = self._snapshot(bb)
+            try:
+                outcome = self._one_sweep(bb, sweep, rounds + 1, injector, kill_at, events)
+            except _Kill:
+                self._restore(bb, boundary)
+                bb.resync({"sweep": sweep, "delivered": {k: len(v) for k, v in bb.proposed_by.items()}})
+                kill_at = None
+                try:
+                    outcome = self._one_sweep(bb, sweep, rounds + 1, injector, None, events)
+                except _Kill:  # 방어적 — 발생하지 않음
+                    outcome = None
+            rounds += 1
+            if on_round_end:
+                on_round_end()
+            if outcome is not None:
+                winner, tie_used = outcome
+                bb.final_notice({"outcome": str(winner)})
+                bb.phase()
+                return SessionResult(
+                    self.plan_name, winner, rounds, sweep, bb.counter.total,
+                    phases=bb.phases, tie_break_used=tie_used, log=events,
+                    bytes=bb.counter.total_bytes, eval_calls=self._eval_calls,
+                )
+        bb.final_notice({"outcome": NO_DEAL})
+        bb.phase()
+        return SessionResult(
+            self.plan_name, NO_DEAL, rounds, self.max_sweeps, bb.counter.total,
+            phases=bb.phases, tie_break_used=False, log=events,
+            bytes=bb.counter.total_bytes, eval_calls=self._eval_calls,
+        )
+
+    def _one_sweep(self, bb, sweep, round_no, injector, kill_at, events):
+        batch_log: dict[str, list] = {}
+        for i, a in enumerate(self.agents):
+            th = a.th.at_sweep(sweep)
+            delivered = bb.proposed_by.setdefault(a.p.pid, set())
+            items = [
+                (rank + 1, c)
+                for rank, c in enumerate(a.ranked)
+                if a.p.utility(c) >= th and c not in delivered
+            ]
+            if not items:
+                continue
+            payload = [{"rank": r, "candidate": str(c)} for r, c in items]
+            bb.submit(a.p.pid, i == 0, payload)  # 배치 1건 — 페이로드가 후보 수에 비례
+            if injector and injector.lost():
+                continue  # 배치 유실 — 미전달 유지 → 다음 바퀴 재시도
+            delivered.update(c for _r, c in items)
+            batch_log[a.p.pid] = [(r, str(c)) for r, c in items]
+        bb.phase()  # 배치 제출 = 1 phase
+        if self.collect_log:
+            events.append({"t": "batch", "sweep": sweep, "k": round_no, "submitted": batch_log})
+        if kill_at and kill_at.round_no == round_no and kill_at.point == "mid_round":
+            raise _Kill()
+        if len(bb.proposed_by) < self.n or any(not v for v in bb.proposed_by.values()):
+            return None
+        common = set.intersection(*bb.proposed_by.values())
+        if not common:
+            return None
+        result = self._resolve(bb, sorted(common, key=repr))  # 순위 합 최소 선별 (tie 체인)
+        if kill_at and kill_at.round_no == round_no and kill_at.point == "pre_final":
+            raise _Kill()
+        return result

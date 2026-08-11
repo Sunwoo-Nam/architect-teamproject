@@ -17,10 +17,10 @@ from pathlib import Path
 
 from ..domain import NO_DEAL
 from ..faults import FaultInjector
-from ..protocol import Plan1Vote, Plan2Cumulative
+from ..protocol import Plan1Vote, Plan2Cumulative, Plan3Batch
 from ..ufun_provider import TableUfun
 
-PLANS = {"plan1": Plan1Vote, "plan2": Plan2Cumulative}
+PLANS = {"plan1": Plan1Vote, "plan2": Plan2Cumulative, "plan3a": Plan3Batch}
 
 
 def generate_kit(out_dir: Path, seed: int, n_normal: int = 20, n_fault: int = 20) -> dict:
@@ -35,7 +35,7 @@ def generate_kit(out_dir: Path, seed: int, n_normal: int = 20, n_fault: int = 20
             rng = random.Random((seed, "an", kind, i).__hash__())
             cands = [f"slot{j:02d}" for j in range(12)]
             profiles = provider.build_profiles(cands, 3, rng)
-            plan_name = "plan1" if idx % 2 == 0 else "plan2"
+            plan_name = ("plan1", "plan2", "plan3a")[idx % 3]
             injector = FaultInjector(0.15, seed + idx) if kind == "fault" else None
             session = PLANS[plan_name](profiles).run(injector=injector)
             case_id = f"AN-{idx:03d}"

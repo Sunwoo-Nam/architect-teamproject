@@ -22,9 +22,9 @@ from .measures import rec as recmod
 from .measures import tb as tbmod
 from .measures.confidentiality import exposure_rate, measure_gain, stars_exposure
 from .measures.scaling import ci_spans_grades, completion_gate, loglog_fit, stars_b_msg
-from .protocol import Plan1Vote, Plan2Cumulative
+from .protocol import Plan1Vote, Plan2Cumulative, Plan3Batch
 
-PLANS = (("plan1", Plan1Vote), ("plan2", Plan2Cumulative))
+PLANS = (("plan1", Plan1Vote), ("plan2", Plan2Cumulative), ("plan3a", Plan3Batch))
 
 
 def _functional_cases() -> list[BenchmarkCase]:
@@ -77,6 +77,8 @@ def _ru_section(cases: list[BenchmarkCase]) -> dict:
     for name, cls in PLANS:
         peaks, avgs = [], []
         for case in cases:
+            for prof in case.profiles:
+                prof.clear_caches()
             tracemalloc.start(); tracemalloc.reset_peak()
             base, _ = tracemalloc.get_traced_memory()
             samples: list[int] = []

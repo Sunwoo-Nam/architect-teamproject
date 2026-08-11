@@ -25,15 +25,29 @@ class Profile:
         return self.utilities[c]
 
     def ranked(self) -> list[Candidate]:
-        """utility 내림차순 순위표 — '라운드 k = 순위 k번째 제출' 규칙의 기준.
+        """utility 내림차순 순위표 — 순위 순서 제출 규칙의 기준. (인스턴스에 캐싱 —
+        동률 해소가 후보마다 호출해도 전체 정렬이 반복되지 않는다.)
 
         동점은 후보의 repr 순으로 고정해 결정론을 보장한다.
         """
-        return sorted(self.utilities, key=lambda c: (-self.utilities[c], repr(c)))
+        cached = self.__dict__.get("_ranked")
+        if cached is None:
+            cached = sorted(self.utilities, key=lambda c: (-self.utilities[c], repr(c)))
+            object.__setattr__(self, "_ranked", cached)
+        return cached
+
+    def clear_caches(self) -> None:
+        """측정 공정성용 — 캐시를 비워 각 방안이 순위표 구축 비용을 동일하게 지불하게 한다."""
+        self.__dict__.pop("_ranked", None)
+        self.__dict__.pop("_rank_index", None)
 
     def rank_of(self, c: Candidate) -> int:
-        """1-기반 순위 — 방안 2 동률 해소(순위 합)에 사용."""
-        return self.ranked().index(c) + 1
+        """1-기반 순위 — 동률 해소(순위 합)에 사용. 사전 조회 O(1)."""
+        idx = self.__dict__.get("_rank_index")
+        if idx is None:
+            idx = {cand: i + 1 for i, cand in enumerate(self.ranked())}
+            object.__setattr__(self, "_rank_index", idx)
+        return idx[c]
 
 
 @dataclass

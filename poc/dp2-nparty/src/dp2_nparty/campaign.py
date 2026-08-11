@@ -28,10 +28,10 @@ from .measures.scaling import (
     stars_b_msg,
     stars_c,
 )
-from .protocol import Plan1Vote, Plan2Cumulative
+from .protocol import PLAN_NAMES, Plan1Vote, Plan2Cumulative, Plan3Batch
 from .ufun_provider import TableUfun
 
-PLANS = (("plan1", Plan1Vote), ("plan2", Plan2Cumulative))
+PLANS = (("plan1", Plan1Vote), ("plan2", Plan2Cumulative), ("plan3a", Plan3Batch))
 
 
 def _base_profiles(seed: int, i: int, n: int = 3, m: int = 12):
@@ -99,6 +99,8 @@ def _ru_section(seed: int, runs: int) -> dict:
     for i in range(runs):
         _c, profiles = _base_profiles(seed, i)
         for name, cls in PLANS:
+            for prof in profiles:
+                prof.clear_caches()
             tracemalloc.start()
             tracemalloc.reset_peak()
             base, _ = tracemalloc.get_traced_memory()
@@ -127,7 +129,7 @@ def _sc_participants_section(seed: int, runs: int) -> dict:
     sweep = participants_sweep(seed=seed, runs=runs)
     ns = sorted(sweep)
     sec: dict = {"config": {"levels": ns, "runs": runs, "provider": "ControlledTableUfun(k=3)"}}
-    for plan in ("plan1", "plan2"):
+    for plan in PLAN_NAMES:
         agreed = {n: sum(r.session.agreed for r in sweep[n][plan]) for n in ns}
         med, med_b = {}, {}
         for n in ns:
@@ -164,7 +166,7 @@ def _sc_issues_section(seed: int, runs: int) -> dict:
         }
     }
     ss = [int(math.prod(s)) for s in configs]
-    for plan in ("plan1", "plan2"):
+    for plan in PLAN_NAMES:
         med = {s: statistics.median(peak for _r, peak in sweep[s][plan]) for s in configs}
         agreed = sum(r.agreed for s in configs for r, _p in sweep[s][plan])
         total = sum(len(sweep[s][plan]) for s in configs)

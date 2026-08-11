@@ -36,10 +36,10 @@ def _visible_events(session: SessionResult, observer: str, coordinator: str) -> 
     """관점별 가시 이벤트 필터."""
     if session.plan == "plan1" or observer == coordinator:
         return session.log  # 방안 1은 공지·결과 공개로 전원이 봄 / 담당자는 항상 전부 봄
-    # 방안 2의 일반 참여자: 자기 제출만 보인다
+    # 방안 2·3-A의 일반 참여자: 배포가 없어 자기 제출만 보인다
     out = []
     for ev in session.log:
-        if ev["t"] == "round":
+        if ev["t"] in ("round", "batch"):
             mine = {p: c for p, c in ev["submitted"].items() if p == observer}
             out.append({**ev, "submitted": mine})
     return out
@@ -52,10 +52,13 @@ def estimate_top(victim: str, events: list[dict]) -> object | None:
     2) 제안이 안 보이면 — 피해자가 가장 이른 sweep에 O를 준 후보 중 사전순 첫 번째.
     3) 아무 신호도 없으면 None (무작위 추측 처리).
     """
-    proposals = []  # (sweep, k, candidate)
+    proposals = []  # (sweep, 순번, candidate)
     for ev in events:
         if ev["t"] == "round" and victim in ev["submitted"]:
             proposals.append((ev["sweep"], ev["k"], ev["submitted"][victim]))
+        elif ev["t"] == "batch" and victim in ev["submitted"]:
+            for rank, cand in ev["submitted"][victim]:
+                proposals.append((ev["sweep"], rank, cand))  # 배치의 rank가 곧 순위
     if proposals:
         return min(proposals)[2]
     approvals = []  # (sweep, candidate)
