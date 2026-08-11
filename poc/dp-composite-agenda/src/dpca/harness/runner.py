@@ -56,7 +56,8 @@ def run_one(scenario: Scenario, strategy: str, n_steps: int = 200, with_log: boo
     if strategy == "seq":
         result = run_sequential(scenario, beliefs, log=log, comms=comms)
         agreement, rounds, proposals = result.agreement, result.rounds, result.proposals
-        extra = {"backtracks": result.backtracks, "trace": result.trace}
+        extra = {"backtracks": result.backtracks, "axis_rounds": result.axis_rounds,
+                 "trace": result.trace}
     elif strategy in ("full", "pool"):
         codec = TupleCodec(scenario.axes)
         mechanism = SAOMechanism(outcome_space=make_outcome_space(scenario.axes), n_steps=n_steps)

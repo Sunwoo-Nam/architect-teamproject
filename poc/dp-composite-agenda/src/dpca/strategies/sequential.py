@@ -32,6 +32,7 @@ class SequentialResult:
     proposals: int
     backtracks: int
     comms: Comms | None = None
+    axis_rounds: list[int] = field(default_factory=list)  # 축 세션별 라운드 — REC 커밋 경계
     trace: list[str] = field(default_factory=list)
 
 
@@ -168,6 +169,7 @@ def run_sequential(
     agreed: dict[str, Value] = {}
     forbidden: dict[str, set[str]] = {ax.name: set() for ax in scenario.axes}
     rounds = proposals = backtracks = 0
+    axis_rounds: list[int] = []   # 커밋된 축 세션별 라운드 (REC — 축 닫힘 = 일관된 커밋 경계)
     trace: list[str] = []
     shared_hard = beliefs[0].shared_hard  # 공유 규칙은 전원 동일
 
@@ -198,7 +200,8 @@ def run_sequential(
             for negotiator in negotiators:
                 mechanism.add(negotiator)
             state = mechanism.run()
-            rounds += int(getattr(state, "step", 0))
+            session_rounds = int(getattr(state, "step", 0))
+            rounds += session_rounds
             proposals += sum(n.proposal_count for n in negotiators)
             agreement_name = mechanism.agreement[0] if mechanism.agreement else None
 
@@ -221,6 +224,7 @@ def run_sequential(
             continue
 
         agreed[axis.name] = next(v for v in space_values if v.name == agreement_name)
+        axis_rounds.append(session_rounds)   # 이 축이 커밋됨 — 여기까지는 크래시에도 durable
         trace.append(f"{axis.name} = {agreement_name}")
         orch_log("axis_agreed", axis=axis.name, value=agreement_name)
         i += 1
@@ -237,5 +241,5 @@ def run_sequential(
     orch_log("final_confirmed", agreement={k: v.name for k, v in agreed.items()})
     return SequentialResult(
         {name: value.name for name, value in agreed.items()}, rounds, proposals, backtracks,
-        comms=comms, trace=trace,
+        comms=comms, axis_rounds=axis_rounds, trace=trace,
     )

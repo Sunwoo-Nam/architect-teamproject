@@ -15,7 +15,9 @@ P1(하니스 + 전략 3구현)까지 구현됨:
   낙관적 완성 하한·백트랙·최종 확인) · `pool`(2안 축별 top-k 압축 풀 + 양보선-풀하한 deepening)
 - `scripts/run_smoke.py [--all]` — 스모크 (전략 3종 1회)
 - `scripts/run_benchmark.py [--seeds 30]` — **P2 본 측정**: TC × 시드 × 전략 → `results/fc_benchmark.jsonl`
-- `scripts/analyze_fc.py` — FC 집계 + 짝비교(1안 vs 2안). 결과: `results/P2-FC-결과.md`
+- `scripts/analyze_fc.py` — FC 집계 + 짝비교. 결과: `results/P2-FC-결과.md`
+- `scripts/run_c_sweep.py` — **P3** 의제 수 탄력성 c (values·axes). 결과: `results/P3-c-결과.md`
+- `scripts/run_rec.py` — **P4** 복구 시간 비율 REC. 결과: `results/P4-REC-결과.md`
 - 계측: phase 수(B1 Time 정본 지표 — 라운드 수 비교는 핸드북이 금지)·메시지 횟수(C1)
 - **추적성**: 모든 실행은 이벤트 로그(JSONL)를 남길 수 있다 — 제안·응답마다 offer·자기 효용·
   그 시점 양보선·결정 사유, deepening/백트랙/최종 확인 이벤트까지 (기록 완전성 FR 취지).
