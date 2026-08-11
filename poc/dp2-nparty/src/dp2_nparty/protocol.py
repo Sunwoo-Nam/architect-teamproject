@@ -1,39 +1,57 @@
-"""설계 후보 1의 프로토콜 구현 — 51번 문서 §2-§4의 스펙.
+"""설계 후보 1의 프로토콜 구현 — 51번 문서 §2-§4의 스펙 (핸드북 24 측정 지원).
 
-공통 기반: Blackboard + "라운드 k = 자기 utility 순위 k번째 후보 제출" + 바퀴(sweep) +
-만장일치 완결(PL 결정) + 최대 5바퀴 결렬(PL 결정) + 바퀴 단위 threshold 인하.
+공통 기반: Blackboard + "자기 utility 순위 순서 제출"(포인터 기반 — 유실 시 재시도) +
+바퀴(sweep) + 만장일치 완결 + 최대 5바퀴 결렬 + 바퀴 단위 threshold 인하.
 
-Plan1Vote      — 방안 1 전원동의 투표형: 라운드 후보 전부에 O/X, 전원 O면 성립
-Plan2Cumulative — 방안 2 누적 공통제안형: 누적 제안의 전원 교집합 발생 시 성립
+측정 지원 훅:
+- injector: 장애 주입(핸드북 §5-1 FT) — 유실된 제출은 포인터가 안 움직여 자동 재시도
+- kill_at: 강제 중단·복구(§5-2 REC) — 지정 지점 도달 시 라운드 경계 스냅샷으로 복원하고
+  resync 비용을 지불한 뒤 그 라운드를 재수행 (복구 비용은 phase 총량 차로 측정)
+- on_round_end: 라운드 경계 콜백 (§2 RSS 평균의 ENV-A 대체 표집)
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from .blackboard import Blackboard
 from .domain import NO_DEAL, Candidate, Profile, SessionResult
+from .faults import FaultInjector
 from .threshold import SweepThreshold
 from .tiebreak import RankSumThenStdThenRunoff, RunoffMajority, TieBreaker
 
 MAX_SWEEPS = 5  # PL 결정 (2026-08-11)
 
 
+@dataclass
+class KillAt:
+    """REC 측정용 강제 중단 지점 — 세션당 1회."""
+
+    round_no: int
+    point: str  # "mid_round"(제출 직후) | "post_votes"(방안1 투표 직후) | "pre_final"(성립 후 통지 전)
+
+
+class _Kill(Exception):
+    pass
+
+
 class _Agent:
-    """참여자 1인 — 자기 Profile만 안다. 제출·투표 판단은 전부 로컬."""
+    """참여자 1인 — 자기 Profile만 안다. 순위 포인터는 제출이 도착했을 때만 전진한다."""
 
     def __init__(self, profile: Profile, max_sweeps: int, aspiration_type: str | float):
         self.p = profile
         self.ranked = profile.ranked()
+        self.ptr = 0
         self.th = SweepThreshold(
-            profile.initial_threshold,
-            max_sweeps,
-            aspiration_type,
+            profile.initial_threshold, max_sweeps, aspiration_type,
             max_utility=profile.utility(self.ranked[0]),
         )
 
-    def proposal_at(self, sweep: int, k: int) -> Candidate | None:
-        """바퀴 sweep의 라운드 k(1-기반)에 낼 후보 — 순위 k번째, revised threshold 이상일 때만."""
-        if k > len(self.ranked):
+    def peek(self, sweep: int) -> Candidate | None:
+        """이번에 낼 후보 — 포인터 위치 후보가 revised threshold 이상일 때만.
+        순위표가 내림차순이라 한 번 미만이면 그 바퀴는 소진이다 (prefix 성질)."""
+        if self.ptr >= len(self.ranked):
             return None
-        c = self.ranked[k - 1]
+        c = self.ranked[self.ptr]
         return c if self.p.utility(c) >= self.th.at_sweep(sweep) else None
 
     def vote(self, c: Candidate, sweep: int) -> bool:
@@ -59,98 +77,160 @@ class _BasePlan:
         self.n = len(profiles)
         self.collect_log = collect_log
 
-    def run(self) -> SessionResult:
+    # ---- 라운드 경계 스냅샷 = 복구 지점 ----
+    def _snapshot(self, bb: Blackboard) -> dict:
+        return {
+            "ptrs": [a.ptr for a in self.agents],
+            "proposed_by": {k: set(v) for k, v in bb.proposed_by.items()},
+        }
+
+    def _restore(self, bb: Blackboard, snap: dict) -> None:
+        for a, ptr in zip(self.agents, snap["ptrs"]):
+            a.ptr = ptr
+        bb.proposed_by = {k: set(v) for k, v in snap["proposed_by"].items()}
+
+    def run(
+        self,
+        injector: FaultInjector | None = None,
+        kill_at: KillAt | None = None,
+        on_round_end=None,
+    ) -> SessionResult:
         bb = Blackboard(n=self.n)
-        events: list[dict] = []  # 관찰 이벤트 — Confidentiality 공격자의 입력
+        events: list[dict] = []
         rounds = 0
         max_rank = max(len(a.ranked) for a in self.agents)
+        round_cap = self.max_sweeps * (max_rank + 20) * 3  # 유실 재시도 무한 루프 방지
         for sweep in range(1, self.max_sweeps + 1):
-            for k in range(1, max_rank + 1):
-                # 이번 라운드 제출 (전원 동시, 담당자=0번) — 직렬 단계 1
-                submitted: dict[str, Candidate] = {}
-                for i, a in enumerate(self.agents):
-                    c = a.proposal_at(sweep, k)
-                    if c is not None:
-                        bb.submit(a.p.pid, is_coordinator=(i == 0))
-                        submitted[a.p.pid] = c
-                if not submitted and k > 1:
-                    break  # 전원 소진 — 이 바퀴 종료, threshold 내리고 다음 바퀴
-                bb.phase()
-                rounds += 1
-                if self.collect_log:
-                    events.append(
-                        {"t": "round", "sweep": sweep, "k": k, "submitted": dict(submitted)}
+            for a in self.agents:
+                a.ptr = 0  # 새 바퀴 — 낮아진 threshold로 처음부터 재순회
+            while rounds < round_cap:
+                boundary = self._snapshot(bb)
+                try:
+                    outcome, exhausted = self._one_round(
+                        bb, sweep, rounds + 1, injector, kill_at, events
                     )
-                winner, tie_used = self._round(bb, submitted, sweep, events)
-                if winner is not None:
-                    bb.final_notice()
+                except _Kill:
+                    # 복구: 경계 스냅샷 복원 + 전원 상태 재동기화 → 라운드 재수행
+                    self._restore(bb, boundary)
+                    bb.resync({"sweep": sweep, "ptrs": [a.ptr for a in self.agents]})
+                    kill_at = None  # 세션당 1회
+                    continue
+                if exhausted:
+                    break  # 전원 소진 — 다음 바퀴
+                rounds += 1
+                if on_round_end:
+                    on_round_end()
+                if outcome is not None:
+                    winner, tie_used = outcome
+                    bb.final_notice({"outcome": str(winner)})
                     bb.phase()
                     return SessionResult(
                         self.plan_name, winner, rounds, sweep, bb.counter.total,
-                        bb.phases, tie_used, events,
+                        phases=bb.phases, tie_break_used=tie_used, log=events,
+                        bytes=bb.counter.total_bytes,
                     )
-        bb.final_notice()
+        bb.final_notice({"outcome": NO_DEAL})
         bb.phase()
         return SessionResult(
-            self.plan_name, NO_DEAL, rounds, self.max_sweeps, bb.counter.total, bb.phases, False, events
+            self.plan_name, NO_DEAL, rounds, self.max_sweeps, bb.counter.total,
+            phases=bb.phases, tie_break_used=False, log=events,
+            bytes=bb.counter.total_bytes,
         )
 
-    def _round(
-        self, bb: Blackboard, submitted: dict[str, Candidate], sweep: int, events: list[dict]
-    ) -> tuple[Candidate | None, bool]:
+    def _one_round(self, bb, sweep, round_no, injector, kill_at, events):
+        """한 라운드. 반환 (성립 결과 | None, 전원 소진 여부)."""
+        submitted: dict[str, Candidate] = {}
+        any_pending = False
+        for i, a in enumerate(self.agents):
+            c = a.peek(sweep)
+            if c is None:
+                continue
+            any_pending = True
+            bb.submit(a.p.pid, i == 0, {"candidate": str(c)})  # 전송 발생 (비용 지불)
+            if injector and injector.lost():
+                continue  # 도착 실패 — 포인터 유지 → 다음 라운드 재시도
+            submitted[a.p.pid] = c
+            a.ptr += 1
+        if not any_pending:
+            return None, True  # 전원 소진
+        bb.phase()
+        if self.collect_log:
+            events.append(
+                {"t": "round", "sweep": sweep, "k": round_no, "submitted": dict(submitted)}
+            )
+        if kill_at and kill_at.round_no == round_no and kill_at.point == "mid_round":
+            raise _Kill()
+        if not submitted:
+            return None, False  # 이번 라운드 전원 유실 — 다음 라운드 재시도
+        result = self._judge(bb, submitted, sweep, round_no, injector, kill_at, events)
+        if result is not None and kill_at and kill_at.round_no == round_no and kill_at.point == "pre_final":
+            raise _Kill()
+        return result, False
+
+    def _judge(self, bb, submitted, sweep, round_no, injector, kill_at, events):
         raise NotImplementedError
 
-    def _resolve(self, bb: Blackboard, winners: list[Candidate]) -> tuple[Candidate, bool]:
+    def _resolve(self, bb, winners: list[Candidate]):
         if len(winners) == 1:
             return winners[0], False
-        pick, extra_msgs = self.tie.pick(sorted(winners, key=repr), self.profiles)
-        bb.tie_break_messages(extra_msgs)
+        tied = sorted(winners, key=repr)
+        pick, extra_msgs = self.tie.pick(tied, self.profiles)
+        bb.tie_break_messages(extra_msgs, {"tied": [str(c) for c in tied]})
         return pick, True
 
 
 class Plan1Vote(_BasePlan):
-    """방안 1 — 전원동의 투표형. 동률 기본 규칙: 결선투표 1회 다수결."""
+    """방안 1 — 전원동의 투표형. 라운드 = 제출·공지·투표·결과의 4 phase."""
 
     plan_name = "plan1"
 
     def __init__(self, profiles, tie_breaker: TieBreaker | None = None, **kw):
         super().__init__(profiles, tie_breaker or RunoffMajority(), **kw)
 
-    def _round(self, bb, submitted, sweep, events):
+    def _judge(self, bb, submitted, sweep, round_no, injector, kill_at, events):
         candidates = sorted(set(submitted.values()), key=repr)
-        bb.announce_candidates()  # 투표하려면 그 라운드 후보를 전원에게 배포해야 한다
+        bb.announce_candidates([str(c) for c in candidates])
         bb.phase()
         votes: dict[str, dict[Candidate, bool]] = {}
         for i, a in enumerate(self.agents):
-            bb.vote(a.p.pid, is_coordinator=(i == 0))  # 라운드당 O/X 번들 1건
-            votes[a.p.pid] = {c: a.vote(c, sweep) for c in candidates}
+            bundle = {c: a.vote(c, sweep) for c in candidates}
+            bb.vote(a.p.pid, i == 0, {str(c): v for c, v in bundle.items()})  # 전송 발생
+            if injector and injector.lost():
+                continue  # 번들 유실 — 이번 라운드 부재 처리 (O 아님)
+            votes[a.p.pid] = bundle
         bb.phase()
-        bb.round_result()  # O/X 결과가 전원에게 공개된다
+        unanimous = [
+            c for c in candidates
+            if len(votes) == self.n and all(votes[p.pid][c] for p in self.profiles)
+        ]
+        bb.round_result({"unanimous": [str(c) for c in unanimous]})
         bb.phase()
         if self.collect_log:
-            events.append(
-                {"t": "votes", "sweep": sweep, "votes": {p: dict(v) for p, v in votes.items()}}
-            )
-        unanimous = [c for c in candidates if all(votes[p.pid][c] for p in self.profiles)]
+            events.append({
+                "t": "votes", "sweep": sweep,
+                "votes": {p: dict(bundle) for p, bundle in votes.items()},
+            })
+        if kill_at and kill_at.round_no == round_no and kill_at.point == "post_votes":
+            raise _Kill()
         if not unanimous:
-            return None, False
+            return None
         return self._resolve(bb, unanimous)
 
 
 class Plan2Cumulative(_BasePlan):
-    """방안 2 — 누적 공통제안형. 동률 기본 규칙: 순위 합 → 표준편차 → 결선투표."""
+    """방안 2 — 누적 공통제안형. 라운드 = 제출 1 phase (판정은 담당자 로컬)."""
 
     plan_name = "plan2"
 
     def __init__(self, profiles, tie_breaker: TieBreaker | None = None, **kw):
         super().__init__(profiles, tie_breaker or RankSumThenStdThenRunoff(), **kw)
 
-    def _round(self, bb, submitted, sweep, events):
+    def _judge(self, bb, submitted, sweep, round_no, injector, kill_at, events):
         for pid, c in submitted.items():
             bb.proposed_by.setdefault(pid, set()).add(c)
         if len(bb.proposed_by) < self.n:
-            return None, False  # 아직 제안 이력이 없는 참여자가 있음
-        common = set.intersection(*bb.proposed_by.values())  # 전원이 제안한 적 있는 안 = 만장일치
+            return None
+        common = set.intersection(*bb.proposed_by.values())  # 전원 제안 = 만장일치
         if not common:
-            return None, False
+            return None
         return self._resolve(bb, sorted(common, key=repr))

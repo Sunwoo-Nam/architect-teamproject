@@ -69,15 +69,21 @@ tests/test_smoke.py  end-to-end 스모크 (개발용 임시 Ufun 사용)
 ★ = 다른 팀원이 작업 중인 자리 — 인터페이스만 고정해 두었고, 구현이 오면 갈아끼운다.
 그 전까지 하니스는 `ufun_provider.TableUfun`(개발용 임시)으로 동작한다.
 
-## 측정하는 QA (5종)
+## 측정하는 항목 (핸드북 전 항목)
 
-| QA | 지표 | 정의 문서 |
+| 항목 | 지표 | 핸드북 |
 |---|---|---|
-| Functional Correctness | Total Utility 달성률 → 별점 0-5 | [`24`](../../docs/changbae/24-QA-측정-핸드북.md) |
-| Scalability-참여자 수 | 메시지 확장 지수 b_msg → 별점 0-5 (N ∈ {3,4,5,6,8,10}) | [`25`](../../docs/changbae/24-QA-측정-핸드북.md) |
-| Scalability-의제 수 | 조합-메모리 탄력성 c (의제 조합 스윕) | [`21`](../../docs/changbae/21-핵심-QA-측정-정의.md) §21.3-5 |
-| Resource Utilization-메모리 | 협상 1회 피크 추가 메모리 | [`21`](../../docs/changbae/21-핵심-QA-측정-정의.md) §21.3-8 (PoC에서는 프로세스 메모리로 대체 측정) |
-| Confidentiality | 역추론 이득 (frequency 공격자 — 자체 구현: negmas 클래스는 SAO/GB 결합형이라 동일 원리를 관찰 이벤트 위에 재구현, 규칙은 `measures/confidentiality.py`에 고정·명문화) | [`21`](../../docs/changbae/21-핵심-QA-측정-정의.md) §21.3-9 |
-| Time Behaviour (보조) | ENV-A 대체 지표 = **직렬 통신 단계(phase) 수** — 방안별 라운드 구성이 달라(방안1 4단계/방안2 1단계) 라운드 수만으로는 비교가 왜곡됨. 정본 지표(오버헤드 비율)는 실기기 소관 | [`21`](../../docs/changbae/21-핵심-QA-측정-정의.md) §21.3-6 |
+| Functional Correctness | Total Utility 달성률 → 별점 | §1 |
+| RU-메모리 | 피크·평균 증가분 (ENV-A 대체 — 정본 Peak/Average RSS는 실기기) | §2 |
+| SC-참여자 수 | 메시지 확장 지수 b_msg → 별점 (완결률 게이트) | §3 |
+| SC-의제 수 | 조합-메모리 탄력성 c → 별점 (복합의제 튜플 곱집합) | §4 |
+| FT | 내성 여유 배수 → 별점 (강도 스윕 — p_env 잠정, ENV-B 실측 대체 전) | §5-1 |
+| REC | 복구 시간 비율 → 별점 (phase 비용 대체, kill-resume + FR 동일성 검사) | §5-2 |
+| Time Behaviour | phase 수 (ENV-A 대체 — 정본 오버헤드 비율은 실기기) | §6 |
+| Confidentiality | 정규화 노출률 → 별점 (frequency 공격자, 관점 2개) | §7 |
+| Analysability | 진단 실험 킷 생성 + 채점기 (사람 진단 실험 지원) | §8 |
+| 전송 횟수·크기·phase | 물리 전송 건수 · 페이로드 바이트 · 직렬 단계 | §9 |
+
+측정 정의: [`docs/changbae/24-QA-측정-핸드북.md`](../../docs/changbae/24-QA-측정-핸드북.md)
 
 비교 원칙: 두 방안에 **동일 프로파일·동일 시드**를 주고 방안만 교체한다.

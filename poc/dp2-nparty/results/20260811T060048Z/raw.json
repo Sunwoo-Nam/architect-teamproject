@@ -1,0 +1,308 @@
+{
+ "meta": {
+  "run_id": "20260811T060048Z",
+  "timestamp_utc": "2026-08-11T06:00:48+00:00",
+  "seed": 20260811,
+  "git_commit": "1270bf7",
+  "negmas_version": "0.15.7",
+  "python": "3.14.4",
+  "provider": "TableUfun/ControlledTableUfun/MultiIssueTableUfun (개발용 임시)",
+  "caveat": "무작위 생성 프로파일 — 절대값은 잠정, 방안 간 상대 비교만 유효. 벤치마크 셋 도착 시 재실행."
+ },
+ "fc": {
+  "config": {
+   "n": 3,
+   "candidates": 12,
+   "runs": 100
+  },
+  "plan1": {
+   "mean_ratio": 0.9863,
+   "mean_baseline": 0.8043,
+   "s": 0.93,
+   "stars": 5,
+   "agreed": 93,
+   "optimal_hit": 80,
+   "nodeal_correct": 7,
+   "nodeal_wrong": 0,
+   "tie_break_used": 19,
+   "median_rounds": 9.0,
+   "median_phases": 38.0,
+   "median_messages": 73.5,
+   "median_bytes": 1916.0
+  },
+  "plan2": {
+   "mean_ratio": 0.9788,
+   "mean_baseline": 0.8043,
+   "s": 0.8917,
+   "stars": 5,
+   "agreed": 93,
+   "optimal_hit": 78,
+   "nodeal_correct": 7,
+   "nodeal_wrong": 0,
+   "tie_break_used": 9,
+   "median_rounds": 13.0,
+   "median_phases": 14.0,
+   "median_messages": 24.0,
+   "median_bytes": 548.0
+  }
+ },
+ "ru_memory": {
+  "config": {
+   "n": 3,
+   "candidates": 12,
+   "runs": 100,
+   "note": "관찰 로그 제외 · 평균은 라운드 경계 표집 — Peak/Average RSS의 ENV-A 대체"
+  },
+  "plan1": {
+   "median_peak_bytes": 3200,
+   "median_avg_bytes": 2186
+  },
+  "plan2": {
+   "median_peak_bytes": 5987,
+   "median_avg_bytes": 3734
+  }
+ },
+ "sc_participants": {
+  "config": {
+   "levels": [
+    3,
+    4,
+    5,
+    6,
+    8,
+    10
+   ],
+   "runs": 30,
+   "provider": "ControlledTableUfun(k=3)"
+  },
+  "plan1": {
+   "agreed_by_n": {
+    "3": 30,
+    "4": 30,
+    "5": 30,
+    "6": 30,
+    "8": 30,
+    "10": 30
+   },
+   "median_messages_by_n": {
+    "3": 69.5,
+    "4": 114.5,
+    "5": 167.0,
+    "6": 201.0,
+    "8": 303.0,
+    "10": 421.5
+   },
+   "median_bytes_by_n": {
+    "3": 1803.0,
+    "4": 3355.5,
+    "5": 5663.0,
+    "6": 7191.5,
+    "8": 12600.5,
+    "10": 18409.5
+   },
+   "gate_ok": true,
+   "b_msg": 1.4663,
+   "ci": [
+    1.3289,
+    1.6038
+   ],
+   "r2": 0.9955,
+   "stars": 2,
+   "ci_spans_3_grades": true
+  },
+  "plan2": {
+   "agreed_by_n": {
+    "3": 30,
+    "4": 30,
+    "5": 30,
+    "6": 30,
+    "8": 30,
+    "10": 30
+   },
+   "median_messages_by_n": {
+    "3": 24.0,
+    "4": 39.0,
+    "5": 58.0,
+    "6": 71.5,
+    "8": 103.0,
+    "10": 136.5
+   },
+   "median_bytes_by_n": {
+    "3": 548.0,
+    "4": 891.0,
+    "5": 1326.0,
+    "6": 1634.5,
+    "8": 2355.0,
+    "10": 3121.5
+   },
+   "gate_ok": true,
+   "b_msg": 1.4282,
+   "ci": [
+    1.2535,
+    1.6029
+   ],
+   "r2": 0.9923,
+   "stars": 2,
+   "ci_spans_3_grades": true
+  }
+ },
+ "sc_issues": {
+  "config": {
+   "levels": [
+    "10x10",
+    "7x7x7",
+    "10x10x10",
+    "8x8x8x8",
+    "10x10x10x10",
+    "8x8x8x8x8"
+   ],
+   "runs": 5,
+   "note": "복합의제 튜플 곱집합 · 로그 제외 메모리 · 별점 기준 d=4 (핸드북 §4.3)"
+  },
+  "plan1": {
+   "median_peak_by_S": {
+    "100": 8620,
+    "343": 40198,
+    "1000": 115328,
+    "4096": 713200,
+    "10000": 1806128,
+    "32768": 6030640
+   },
+   "agreed": "30/30",
+   "gate_ok": true,
+   "c": 1.1374,
+   "ci": [
+    1.0758,
+    1.1991
+   ],
+   "r2": 0.9985,
+   "stars": 0
+  },
+  "plan2": {
+   "median_peak_by_S": {
+    "100": 13368,
+    "343": 45176,
+    "1000": 115064,
+    "4096": 713200,
+    "10000": 1806128,
+    "32768": 6030640
+   },
+   "agreed": "30/30",
+   "gate_ok": true,
+   "c": 1.074,
+   "ci": [
+    0.9981,
+    1.15
+   ],
+   "r2": 0.9974,
+   "stars": 0
+  }
+ },
+ "ft": {
+  "config": {
+   "p_env": 0.01,
+   "p_env_note": "잠정 (ENV-B 실측 대체 전)",
+   "multiples": [
+    1,
+    2,
+    5,
+    10,
+    20,
+    50
+   ],
+   "runs_base": 100,
+   "runs_each": 50
+  },
+  "plan1": {
+   "baseline_agree_rate": 0.93,
+   "agree_rates": {
+    "0.0": 0.93,
+    "1": 0.9,
+    "2": 0.9,
+    "5": 0.88,
+    "10": 0.9,
+    "20": 0.88,
+    "50": 0.4
+   },
+   "critical_multiple": 50,
+   "margin": 50,
+   "stars": 5
+  },
+  "plan2": {
+   "baseline_agree_rate": 0.93,
+   "agree_rates": {
+    "0.0": 0.93,
+    "1": 0.9,
+    "2": 0.9,
+    "5": 0.9,
+    "10": 0.9,
+    "20": 0.9,
+    "50": 0.9
+   },
+   "critical_multiple": null,
+   "margin": 100,
+   "stars": 5
+  }
+ },
+ "rec": {
+  "config": {
+   "sessions": 10,
+   "note": "시간 대체 = phase 비용. 중단 유형(프로세스/네트워크)은 ENV-A에서 동일 취급"
+  },
+  "plan1": {
+   "trials": 87,
+   "fr_failures": 0,
+   "invalid_trials": 22,
+   "median_ratio": 1.207,
+   "restart_cost_R": 9.5,
+   "stars": 4
+  },
+  "plan2": {
+   "trials": 60,
+   "fr_failures": 0,
+   "invalid_trials": 23,
+   "median_ratio": 1.846,
+   "restart_cost_R": 12.5,
+   "stars": 4
+  }
+ },
+ "confidentiality": {
+  "config": {
+   "n": 3,
+   "candidates": 12,
+   "runs": 100
+  },
+  "plan1": {
+   "participant": {
+    "accuracy": 1.0,
+    "gain_pp": 91.67,
+    "exposure_rate": 1.0,
+    "stars": 0
+   },
+   "coordinator": {
+    "accuracy": 1.0,
+    "gain_pp": 91.67,
+    "exposure_rate": 1.0,
+    "stars": 0
+   }
+  },
+  "plan2": {
+   "participant": {
+    "accuracy": 0.0833,
+    "gain_pp": 0.0,
+    "exposure_rate": 0.0,
+    "stars": 5
+   },
+   "coordinator": {
+    "accuracy": 1.0,
+    "gain_pp": 91.67,
+    "exposure_rate": 1.0,
+    "stars": 0
+   }
+  }
+ },
+ "an_kit": {
+  "cases": 40,
+  "dir": "/home/changbae/workspace/architect-teamproject/poc/dp2-nparty/results/20260811T060048Z/an-kit"
+ }
+}

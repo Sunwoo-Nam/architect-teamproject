@@ -11,6 +11,7 @@ from dp2_nparty.measures import fc
 from dp2_nparty.measures.scaling import loglog_fit, stars_b_msg
 from dp2_nparty.protocol import Plan1Vote, Plan2Cumulative
 from dp2_nparty.threshold import SweepThreshold
+from dp2_nparty.ufun_provider import TableUfun
 
 
 def test_threshold_sweeps_down_to_initial():
@@ -86,3 +87,44 @@ def test_confidentiality_viewpoints():
     assert g1p.gain_pp > 50
     # phase 지표: 방안 1은 라운드당 4단계라 방안 2보다 직렬 단계가 많다
     assert runs1[0][0].phases > runs2[0][0].phases
+
+
+def test_ft_injection_degrades_and_recovers_grading():
+    from dp2_nparty.faults import FaultInjector
+    from dp2_nparty.measures.ft import evaluate, stars_ft
+    from dp2_nparty.ufun_provider import TableUfun
+
+    # 유실 주입 시 세션이 여전히 종결되고(무한 루프 없음), 재시도로 라운드가 늘어난다
+    rng = random.Random(11)
+    cands = [f"s{j}" for j in range(10)]
+    profiles = TableUfun().build_profiles(cands, 3, rng)
+    clean = Plan2Cumulative(profiles).run()
+    noisy = Plan2Cumulative(profiles).run(injector=FaultInjector(0.3, 42))
+    assert noisy.rounds >= clean.rounds
+    # 별점 경계
+    assert stars_ft(0.5) == 0 and stars_ft(1.0) == 1 and stars_ft(10) == 5 and stars_ft(5.7) == 4
+    r = evaluate(95, 100, {1: (47, 50), 5: (45, 50), 10: (30, 50)}, 0.01)
+    assert r.critical_multiple == 10 and r.margin == 10 and r.stars == 5
+
+
+def test_rec_kill_resume_consistency():
+    from dp2_nparty.measures.rec import stars_rec, trial
+
+    rng = random.Random(12)
+    cands = [f"s{j}" for j in range(10)]
+    profiles = TableUfun().build_profiles(cands, 3, rng)
+    for cls, point in ((Plan1Vote, "post_votes"), (Plan2Cumulative, "mid_round")):
+        t = trial(cls, profiles, point, 2)
+        assert t.fr_ok, (cls.__name__, point)  # 복구 후 결과가 무중단 실행과 동일 (FR)
+        if t.ratio is not None:
+            assert t.ratio > 0
+    assert stars_rec(0.9, 16) == 5 and stars_rec(17, 16) == 0 and stars_rec(3.9, 16) == 3
+
+
+def test_bytes_counted():
+    rng = random.Random(13)
+    cands = [f"s{j}" for j in range(10)]
+    profiles = TableUfun().build_profiles(cands, 3, rng)
+    r1, r2 = Plan1Vote(profiles).run(), Plan2Cumulative(profiles).run()
+    assert r1.bytes > 0 and r2.bytes > 0
+    assert r1.bytes > r2.bytes  # 방안 1은 공지·투표·결과 페이로드가 추가된다

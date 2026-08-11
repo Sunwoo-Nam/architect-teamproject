@@ -33,6 +33,10 @@ def main() -> None:
         n += 1
     raw["meta"]["run_id"] = run_dir.name
     run_dir.mkdir(parents=True)
+    from dp2_nparty.measures.an_kit import generate_kit
+
+    kit_n = max(2, int(20 * args.scale))
+    raw["an_kit"] = generate_kit(run_dir / "an-kit", args.seed, n_normal=kit_n, n_fault=kit_n)
     (run_dir / "raw.json").write_text(json.dumps(raw, ensure_ascii=False, indent=1))
     report = render_markdown(raw)
     (run_dir / "report.md").write_text(report)
