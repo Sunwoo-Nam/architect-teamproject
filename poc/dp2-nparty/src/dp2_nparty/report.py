@@ -28,7 +28,11 @@ def render_markdown(raw: dict) -> str:
     fc = raw["fc"]
     A("## [§1] Functional Correctness — Total Utility 달성률")
     A("")
-    A(f"조건: {fc['config']['n']}인 · 후보 {fc['config']['candidates']} · {fc['config']['runs']}회, 두 방안 동일 프로파일")
+    fcc = fc["config"]
+    if "cases" in fcc:
+        A(f"조건: {fcc['input']} {fcc['cases']}건 · 참여자 {fcc.get('participants')} · 두 방안 동일 케이스")
+    else:
+        A(f"조건: {fcc['n']}인 · 후보 {fcc['candidates']} · {fcc['runs']}회, 두 방안 동일 프로파일")
     A("")
     A("| 방안 | 달성률 평균 | R̄ | s | 별점 | x\\* 도달/합의 | 결렬 정답/오답 | 라운드/phase/메시지/바이트 중앙값 |")
     A("|---|---|---|---|---|---|---|---|")
@@ -143,7 +147,9 @@ def render_markdown(raw: dict) -> str:
     cf = raw["confidentiality"]
     A("## [§7] Confidentiality — 정규화 노출률 (비핵심·보조 관측)")
     A("")
-    A(f"조건: {cf['config']['n']}인 · 후보 {cf['config']['candidates']} · {cf['config']['runs']}회 · frequency 공격자(고정 규칙)")
+    cfc = cf["config"]
+    cf_n = cfc.get("cases") or cfc.get("runs")
+    A(f"조건: 표본 {cf_n}건 · 후보 {cfc['candidates']} · frequency 공격자(고정 규칙) · {cfc.get('input', '개발용 무작위')}")
     A("")
     A("| 방안 | 관점 | 정확도 | 이득 | 노출률 | 별점 |")
     A("|---|---|---|---|---|---|")

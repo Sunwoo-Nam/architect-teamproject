@@ -1,0 +1,230 @@
+"""통합 캠페인 — 확정 벤치마크 셋 기준으로 핸드북 전 항목을 한 실행·한 timestamp로 측정.
+
+입력:
+- §1 FC · §2 RU · §5 FT/REC · §6 TB · §7 CF → 정적 벤치마크 functional 트랙
+- §3 SC-참여자 → 정적 벤치마크 scalability family 트랙
+- §4 SC-의제 → 벤치마크 보류 상태라 개발용 multi-issue 생성으로 대체 (라벨 명시)
+
+출력 raw dict의 키 구조는 campaign과 동일 — report.render_markdown·build_index가 그대로 동작한다.
+"""
+from __future__ import annotations
+
+import statistics
+from datetime import datetime
+
+from .benchmark import BenchmarkCase, JsonBenchmarkLoader
+from .campaign import KST, _meta, _sc_issues_section
+from .domain import NO_DEAL
+from .faults import FaultInjector
+from .measures import fc as fcmod
+from .measures import ft as ftmod
+from .measures import rec as recmod
+from .measures import tb as tbmod
+from .measures.confidentiality import exposure_rate, measure_gain, stars_exposure
+from .measures.scaling import ci_spans_grades, completion_gate, loglog_fit, stars_b_msg
+from .protocol import Plan1Vote, Plan2Cumulative
+
+PLANS = (("plan1", Plan1Vote), ("plan2", Plan2Cumulative))
+
+
+def _functional_cases() -> list[BenchmarkCase]:
+    return sorted(JsonBenchmarkLoader(track="functional").cases(), key=lambda c: c.case_id)
+
+
+def _scalability_cases() -> list[BenchmarkCase]:
+    return sorted(JsonBenchmarkLoader(track="scalability").cases(), key=lambda c: c.case_id)
+
+
+def _fc_section(cases: list[BenchmarkCase]) -> dict:
+    sec: dict = {"config": {"cases": len(cases), "input": "벤치마크 functional",
+                            "participants": sorted({len(c.profiles) for c in cases})}}
+    for name, cls in PLANS:
+        ratios, baselines = [], []
+        agreed = opt = nd_ok = nd_bad = ties = 0
+        rounds, phases, msgs, byts = [], [], [], []
+        for case in cases:
+            s = cls(case.profiles).run()
+            f = fcmod.score(s.outcome, case.candidates, case.profiles)
+            ratios.append(f.ratio)
+            baselines.append(f.baseline)
+            agreed += s.agreed
+            opt += s.outcome == f.optimal
+            nd_ok += s.outcome == NO_DEAL and f.optimal == NO_DEAL
+            nd_bad += s.outcome == NO_DEAL and f.optimal != NO_DEAL
+            ties += s.tie_break_used
+            rounds.append(s.rounds); phases.append(s.phases)
+            msgs.append(s.messages); byts.append(s.bytes)
+        mr, mb = statistics.mean(ratios), statistics.mean(baselines)
+        sv = (mr - mb) / (1 - mb) if mb < 1 else 1.0
+        sec[name] = {
+            "mean_ratio": round(mr, 4), "mean_baseline": round(mb, 4),
+            "s": round(sv, 4), "stars": fcmod.stars_from_s(sv),
+            "agreed": agreed, "optimal_hit": opt,
+            "nodeal_correct": nd_ok, "nodeal_wrong": nd_bad, "tie_break_used": ties,
+            "median_rounds": statistics.median(rounds),
+            "median_phases": statistics.median(phases),
+            "median_messages": statistics.median(msgs),
+            "median_bytes": statistics.median(byts),
+        }
+    return sec
+
+
+def _ru_section(cases: list[BenchmarkCase]) -> dict:
+    import tracemalloc
+
+    sec: dict = {"config": {"cases": len(cases), "input": "벤치마크 functional (3인)",
+                            "note": "관찰 로그 제외 · 평균은 라운드 경계 표집 — Peak/Average RSS의 ENV-A 대체"}}
+    for name, cls in PLANS:
+        peaks, avgs = [], []
+        for case in cases:
+            tracemalloc.start(); tracemalloc.reset_peak()
+            base, _ = tracemalloc.get_traced_memory()
+            samples: list[int] = []
+            cls(case.profiles, collect_log=False).run(
+                on_round_end=lambda: samples.append(tracemalloc.get_traced_memory()[0] - base)
+            )
+            _, peak = tracemalloc.get_traced_memory(); tracemalloc.stop()
+            peaks.append(max(0, peak - base))
+            avgs.append(statistics.mean(samples) if samples else 0.0)
+        sec[name] = {"median_peak_bytes": int(statistics.median(peaks)),
+                     "median_avg_bytes": int(statistics.median(avgs))}
+    return sec
+
+
+def _tb_section(cases: list[BenchmarkCase], constants: dict | None = None) -> dict:
+    c = {**tbmod.DEFAULT_CONSTANTS, **(constants or {})}
+    sec: dict = {"config": {"cases": len(cases), "constants": c, "input": "벤치마크 functional (3인)",
+                            "note": "상수 3종은 잠정(분석자 제안) — ENV-B 실측 대체 예정. 상대 비교·지배 항 파악용"}}
+    for name, cls in PLANS:
+        ts = [tbmod.synth_time(cls(case.profiles, collect_log=False).run(), c) for case in cases]
+        sec[name] = {
+            "median_total_ms": round(statistics.median(t.total_ms for t in ts), 1),
+            "median_rtt_ms": round(statistics.median(t.rtt_ms for t in ts), 1),
+            "median_eval_ms": round(statistics.median(t.eval_ms for t in ts), 1),
+            "median_transfer_ms": round(statistics.median(t.transfer_ms for t in ts), 1),
+            "dominant": statistics.mode(t.dominant for t in ts),
+        }
+    return sec
+
+
+def _ft_section(cases: list[BenchmarkCase], seed: int, p_env: float = 0.01) -> dict:
+    multiples = [1, 2, 5, 10, 20, 50]
+    sec: dict = {"config": {"p_env": p_env, "p_env_note": "잠정 (ENV-B 실측 대체 전)",
+                            "multiples": multiples, "runs_base": len(cases), "runs_each": len(cases),
+                            "input": "벤치마크 functional (3인)"}}
+    for name, cls in PLANS:
+        base_agreed = sum(cls(c.profiles, collect_log=False).run().agreed for c in cases)
+        per: dict[float, tuple[int, int]] = {}
+        for mlt in multiples:
+            agreed = 0
+            for i, case in enumerate(cases):
+                inj = FaultInjector(p_env * mlt, (seed, name, mlt, i).__hash__())
+                agreed += cls(case.profiles, collect_log=False).run(injector=inj).agreed
+            per[mlt] = (agreed, len(cases))
+        r = ftmod.evaluate(base_agreed, len(cases), per, p_env)
+        sec[name] = {
+            "baseline_agree_rate": round(base_agreed / len(cases), 4),
+            "agree_rates": {str(k): round(v, 4) for k, v in r.agree_rates.items()},
+            "critical_multiple": r.critical_multiple, "margin": r.margin, "stars": r.stars,
+        }
+    return sec
+
+
+def _rec_section(cases: list[BenchmarkCase]) -> dict:
+    sec: dict = {"config": {"sessions": len(cases), "input": "벤치마크 functional (3인) 선두 표본",
+                            "note": "시간 대체 = phase 비용. 중단 유형(프로세스/네트워크)은 ENV-A에서 동일 취급"}}
+    for name, cls in PLANS:
+        points = ["mid_round", "pre_final"] + (["post_votes"] if name == "plan1" else [])
+        ratios, fr_fail, invalid, ref_rounds = [], 0, 0, []
+        for case in cases:
+            ref = cls(case.profiles).run()
+            ref_rounds.append(ref.rounds)
+            for point in points:
+                for round_no in {2, max(1, ref.rounds // 2), ref.rounds}:
+                    t = recmod.trial(cls, case.profiles, point, round_no)
+                    if not t.fr_ok:
+                        fr_fail += 1
+                    elif t.ratio is None:
+                        invalid += 1
+                    else:
+                        ratios.append(t.ratio)
+        restart = statistics.median(ref_rounds) if ref_rounds else 1.0
+        med = statistics.median(ratios) if ratios else None
+        sec[name] = {
+            "trials": len(ratios) + fr_fail + invalid, "fr_failures": fr_fail,
+            "invalid_trials": invalid,
+            "median_ratio": round(med, 3) if med is not None else None,
+            "restart_cost_R": restart,
+            "stars": recmod.stars_rec(med, restart) if med is not None else 0,
+        }
+    return sec
+
+
+def _cf_section(cases: list[BenchmarkCase]) -> dict:
+    n_cands = len(cases[0].candidates)
+    sec: dict = {"config": {"cases": len(cases), "candidates": n_cands, "input": "벤치마크 functional (3인)"}}
+    for name, cls in PLANS:
+        runs = [(cls(c.profiles).run(), c.profiles) for c in cases]
+        sec[name] = {}
+        for vp in ("participant", "coordinator"):
+            g = measure_gain(runs, n_cands, viewpoint=vp)
+            rate = exposure_rate(g, n_cands)
+            sec[name][vp] = {"accuracy": round(g.accuracy, 4), "gain_pp": round(g.gain_pp, 2),
+                             "exposure_rate": round(rate, 4), "stars": stars_exposure(rate)}
+    return sec
+
+
+def _sc_participants_section(cases: list[BenchmarkCase]) -> dict:
+    by_n: dict[int, list[BenchmarkCase]] = {}
+    for c in cases:
+        by_n.setdefault(len(c.profiles), []).append(c)
+    ns = sorted(by_n)
+    sec: dict = {"config": {"levels": ns, "runs": len(by_n[ns[0]]),
+                            "provider": "정적 벤치마크 scalability family"}}
+    for name, cls in PLANS:
+        agreed, med, med_b = {}, {}, {}
+        for n in ns:
+            done = [cls(c.profiles, collect_log=False).run() for c in by_n[n]]
+            agreed[n] = sum(s.agreed for s in done)
+            ok = [s for s in done if s.agreed]
+            med[n] = statistics.median(s.messages for s in ok) if ok else None
+            med_b[n] = statistics.median(s.bytes for s in ok) if ok else None
+        gate = completion_gate(agreed[ns[0]], len(by_n[ns[0]]), agreed[ns[-1]], len(by_n[ns[-1]]))
+        xs = [n for n in ns if med[n] is not None]
+        fit = loglog_fit(xs, [med[n] for n in xs])
+        sec[name] = {
+            "agreed_by_n": {str(n): agreed[n] for n in ns},
+            "median_messages_by_n": {str(n): med[n] for n in ns},
+            "median_bytes_by_n": {str(n): med_b[n] for n in ns},
+            "gate_ok": gate, "b_msg": round(fit.b, 4),
+            "ci": [round(fit.ci_low, 4), round(fit.ci_high, 4)],
+            "r2": round(fit.r2, 4),
+            "stars": stars_b_msg(fit.b) if gate else 0,
+            "ci_spans_3_grades": ci_spans_grades(fit),
+        }
+    return sec
+
+
+def run_full(seed: int = 20260811) -> dict:
+    functional = _functional_cases()
+    f3 = [c for c in functional if len(c.profiles) == 3]
+    scal = _scalability_cases()
+    meta = _meta(seed)
+    meta["run_id"] = "full-" + datetime.now(KST).strftime("%Y%m%dT%H%M%S") + "KST"
+    meta["provider"] = "정적 벤치마크 셋 (functional·scalability) — §4 SC-의제만 개발용 대체"
+    meta["caveat"] = (
+        "입력은 확정 벤치마크 셋 (결정론 — 같은 입력이면 같은 결과). "
+        "예외: §4 SC-의제는 벤치마크 보류 상태라 개발용 multi-issue 생성으로 대체 측정 (잠정), "
+        "§5-1의 p_env·§6의 상수는 ENV-B 실측 대체 전의 잠정값."
+    )
+    return {
+        "meta": meta,
+        "fc": _fc_section(functional),
+        "ru_memory": _ru_section(f3),
+        "sc_participants": _sc_participants_section(scal),
+        "sc_issues": _sc_issues_section(seed, 5),  # 벤치마크 보류 — 개발용 대체 (config note 참조)
+        "tb": _tb_section(f3),
+        "ft": _ft_section(f3, seed),
+        "rec": _rec_section(f3[:10]),
+        "confidentiality": _cf_section(f3),
+    }

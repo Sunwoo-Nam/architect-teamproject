@@ -36,7 +36,9 @@ def _row(run_dir: Path, raw: dict) -> dict:
     cf = raw.get("confidentiality", {})
     ft, rc = raw.get("ft", {}), raw.get("rec", {})
 
-    if "sc_participants" in raw:
+    if run_dir.name.startswith("full-"):
+        kind = "**벤치마크 전 항목 (통합)**"
+    elif "sc_participants" in raw:
         kind = "개발용 무작위 (전 항목 캠페인)"
     elif "benchmark" in raw:
         kind = "벤치마크 셋 — FC·CF·RU"
