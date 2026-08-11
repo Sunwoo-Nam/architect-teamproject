@@ -36,13 +36,14 @@ def render_markdown(raw: dict) -> str:
     else:
         A(f"조건: {fcc['n']}인 · 후보 {fcc['candidates']} · {fcc['runs']}회, 두 방안 동일 프로파일")
     A("")
-    A("| 방안 | 달성률 평균 | R̄ | s | 별점 | x\\* 도달/합의 | 결렬 정답/오답 | 라운드/phase/메시지/바이트 중앙값 |")
-    A("|---|---|---|---|---|---|---|---|")
+    fc_total = fcc.get("cases") or fcc.get("runs")
+    A("| 방안 | 달성률 평균 | R̄ | s | 별점 | x\\* 도달 | 합의 | 결렬 정답/오답 | 라운드/phase/메시지/바이트 중앙값 |")
+    A("|---|---|---|---|---|---|---|---|---|")
     for p in PLAN_NAMES:
         d = fc[p]
         A(
             f"| {p} | {d['mean_ratio']:.3f} | {d['mean_baseline']:.3f} | {d['s']:.3f} | {_stars(d['stars'])}"
-            f" | {d['optimal_hit']}/{d['agreed']} | {d['nodeal_correct']}/{d['nodeal_wrong']}"
+            f" | {d['optimal_hit']}/{fc_total} | {d['agreed']}/{fc_total} | {d['nodeal_correct']}/{d['nodeal_wrong']}"
             f" | {d['median_rounds']:.0f} / {d['median_phases']:.0f} / {d['median_messages']:.0f} / {d['median_bytes']:.0f} |"
         )
     A("")

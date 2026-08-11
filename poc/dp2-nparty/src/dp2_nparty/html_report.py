@@ -58,12 +58,13 @@ def render_html(raw: dict) -> str:
     def row(label: str, values: list, stars: list, note: str = "") -> str:
         return f'<tr><td>{label}</td>{cells(values, stars)}<td class="tie">{note}</td></tr>'
 
+    fc_total = fc["config"].get("cases") or fc["config"].get("runs")
     rows = []
     rows.append(row(
         '§1 FC — Total Utility 달성률 <span class="badge core">핵심 1위</span>',
-        [f"달성률 {fc[p]['mean_ratio']:.3f} · s {fc[p]['s']:.3f} · x* {fc[p]['optimal_hit']}/{fc[p]['agreed']}" for p in P],
+        [f"달성률 {fc[p]['mean_ratio']:.3f} · s {fc[p]['s']:.3f} · x* {fc[p]['optimal_hit']}/{fc_total}" for p in P],
         [fc[p]["stars"] for p in P],
-        f"R̄ {fc[P[0]]['mean_baseline']:.3f} · 결렬 오답 " + "/".join(str(fc[p]["nodeal_wrong"]) for p in P)))
+        f"x* 도달은 올바른 결렬 포함 · R̄ {fc[P[0]]['mean_baseline']:.3f} · 결렬 오답 " + "/".join(str(fc[p]["nodeal_wrong"]) for p in P)))
     rows.append(row(
         '§2 RU-메모리 — 피크/평균 증가분 <span class="badge core">핵심 2위</span>',
         [f"{ru[p]['median_peak_bytes']/1024:.1f} / {ru[p]['median_avg_bytes']/1024:.1f} KiB" for p in P],
@@ -131,9 +132,9 @@ def render_html(raw: dict) -> str:
     details.append(sec(
         "§1 FC — 상세", "핵심 1위", "core",
         f"벤치마크 functional {fc['config'].get('cases', fc['config'].get('runs'))}건 · 동일 케이스에 방안만 교체",
-        tbl(["방안", "달성률", "R̄", "s", "별점", "x* 도달/합의", "결렬 정답/오답", "동률 사용", "라운드/phase/메시지/바이트"],
+        tbl(["방안", "달성률", "R̄", "s", "별점", "x* 도달(올바른 결렬 포함)", "합의", "결렬 정답/오답", "동률 사용", "라운드/phase/메시지/바이트"],
             [[PLAN_LABELS.get(p, p), f"{fc[p]['mean_ratio']:.3f}", f"{fc[p]['mean_baseline']:.3f}", f"{fc[p]['s']:.3f}",
-              _stars(fc[p]["stars"]), f"{fc[p]['optimal_hit']}/{fc[p]['agreed']}",
+              _stars(fc[p]["stars"]), f"{fc[p]['optimal_hit']}/{fc_total}", f"{fc[p]['agreed']}/{fc_total}",
               f"{fc[p]['nodeal_correct']}/{fc[p]['nodeal_wrong']}", fc[p]["tie_break_used"],
               f"{fc[p]['median_rounds']:.0f} / {fc[p]['median_phases']:.0f} / {fc[p]['median_messages']:.0f} / {fc[p]['median_bytes']:.0f}"]
              for p in P])))
