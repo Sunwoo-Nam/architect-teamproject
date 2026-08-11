@@ -32,14 +32,17 @@ Benchmark Set이 제공하지 않는 값:
 - `NO_DEAL`은 측정기가 별도로 추가하는 예약 결과이므로 후보나 utility map에 넣지 않는다.
 - 직접 작성한 정적 케이스에는 seed가 필요하지 않다.
 
-권장 저장 구조:
+저장 구조:
 
 ```text
+fixtures/
+  conformance/   프로토콜 불변조건과 경계값 확인 — pass/fail 검증 전용
 cases/
-  conformance/   프로토콜 불변조건과 경계값 확인
   functional/    Total Utility 달성률 비교 표본
   scalability/   참여자 수 증가 비교 family
 ```
+
+`fixtures/`와 `cases/`를 나누는 이유는 용도가 다르기 때문이다. `fixtures/`의 경계 사례는 평가 통계에 넣지 않는다 — 극단적으로 구성된 사례가 달성률 평균이나 확장 지수 회귀를 왜곡하지 않도록 표본에서 분리한다. `cases/`만 통계 표본이다.
 
 ## 케이스와 코드의 대응
 
