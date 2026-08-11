@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from dp2_nparty.domain import NO_DEAL
-from dp2_nparty.harness import Experiment, issues_sweep, participants_sweep
+from dp2_nparty.harness import Experiment, multi_issue_sweep, participants_sweep
 from dp2_nparty.measures.confidentiality import measure_gain
 from dp2_nparty.measures.fc import stars_from_s
 from dp2_nparty.protocol import Plan1Vote, Plan2Cumulative
@@ -96,18 +96,38 @@ def section_scaling():
 
 def section_issues():
     print("=" * 72)
-    print("[3] Scalability-의제 수 대체 스윕 (21 §21.3-5) — 후보 수 {8..128}·3인·10회")
-    print("    (의제 조합 구조는 벤치마크 셋 도착 후 — 여기서는 후보 수 확장의 메모리 탄력성)")
+    print("[3] Scalability-의제 수 (21 §21.3-5) — 복합의제(multi-issue) 스윕, 3인·5회")
+    print("    후보 = 의제 값 튜플의 곱집합 · utility = 의제별 점수 가중합(개발용 임시)")
+    print("    의제 수 d 2→5, 조합 수 S 100→32,768 · 관찰 로그 제외한 순수 협상 메모리")
     print("=" * 72)
-    sweep = issues_sweep(seed=SEED, runs=10)
-    ms = sorted(sweep)
+    sweep = multi_issue_sweep(seed=SEED, runs=5)
+    configs = list(sweep)
+    import math as _math
+
+    ss = [int(_math.prod(sizes)) for sizes in configs]
     for plan in ("plan1", "plan2"):
-        med_mem = {m: statistics.median(r.peak_mem_bytes for r in sweep[m][plan]) for m in ms}
-        fit = loglog_fit(ms, [med_mem[m] for m in ms])
-        print("  " + plan + ": 피크메모리 중앙값(KiB) " + " ".join(f"M{m}:{med_mem[m]/1024:.0f}" for m in ms))
+        med_mem, agreed, med_rounds = {}, 0, {}
+        total = 0
+        for sizes in configs:
+            pairs = sweep[sizes][plan]
+            med_mem[sizes] = statistics.median(peak for _s, peak in pairs)
+            med_rounds[sizes] = statistics.median(s.rounds for s, _p in pairs)
+            agreed += sum(s.agreed for s, _p in pairs)
+            total += len(pairs)
+        fit = loglog_fit(ss, [med_mem[sizes] for sizes in configs])
+        print(
+            "  " + plan + ": 합의 " + f"{agreed}/{total}" + " · 피크메모리 중앙값(KiB) "
+            + " ".join(
+                f"d{len(sz)}/S{int(_math.prod(sz))}:{med_mem[sz]/1024:.0f}" for sz in configs
+            )
+        )
+        print(
+            "        라운드 중앙값 "
+            + " ".join(f"S{int(_math.prod(sz))}:{med_rounds[sz]:.0f}" for sz in configs)
+        )
         print(
             f"        탄력성 c {fmt(fit.b)} [95% CI {fmt(fit.ci_low)}, {fmt(fit.ci_high)}]"
-            f" R²={fmt(fit.r2)} (판정 기준: CI 상한 < 1 — 전체 열거 기각)"
+            f" R²={fmt(fit.r2)} — 현 구조(순위표 전체 생성=전체 열거)의 베이스라인 기대값은 c≈1"
         )
     return sweep
 

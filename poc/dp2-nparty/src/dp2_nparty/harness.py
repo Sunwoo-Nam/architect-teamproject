@@ -72,13 +72,42 @@ def participants_sweep(
     }
 
 
-def issues_sweep(seed: int = 20260811, runs: int = 10) -> dict[int, dict[str, list[RunRecord]]]:
-    """[21 §21.3-5] 의제 수 스윕(후보 조합 수 확장) — 탄력성 c 회귀의 입력.
+# 복합의제 스윕 구성 — (의제별 후보 수 목록). 의제 수 d가 2→5로 늘며 조합 수 S가 로그 등간격 확장
+ISSUE_CONFIGS = [
+    (10, 10),            # d=2, S=100
+    (7, 7, 7),           # d=3, S=343
+    (10, 10, 10),        # d=3, S=1,000
+    (8, 8, 8, 8),        # d=4, S=4,096
+    (10, 10, 10, 10),    # d=4, S=10,000
+    (8, 8, 8, 8, 8),     # d=5, S=32,768
+]
 
-    주의: 현재는 후보 수를 직접 늘리는 골격만 제공한다. 의제 구조(K×L×M×P)의
-    조합 생성은 벤치마크 셋 규격이 확정되면 그 케이스로 대체한다.
+
+def multi_issue_sweep(
+    seed: int = 20260811, runs: int = 5
+) -> dict[tuple, dict[str, list[tuple[SessionResult, int]]]]:
+    """[21 §21.3-5] 복합의제(multi-issue) 스윕 — 조합-메모리 탄력성 c 회귀의 입력.
+
+    후보 = 의제 값 튜플의 곱집합. 관찰 로그를 끄고(collect_log=False) 순수 협상
+    상태의 피크 메모리만 잰다. 반환: {의제 구성: {plan: [(세션, 피크바이트)]}}.
+    현 구현(전 후보 순위표 사전 생성)은 전체 열거 구조라 c ≈ 1이 **베이스라인 기대값**이다.
     """
-    return {
-        m: Experiment(n_participants=3, n_candidates=m, runs=runs, seed=seed).run()
-        for m in (8, 16, 32, 64, 128)
-    }
+    import itertools
+
+    from .ufun_provider import MultiIssueTableUfun
+
+    provider = MultiIssueTableUfun()
+    out: dict[tuple, dict[str, list[tuple[SessionResult, int]]]] = {}
+    for sizes in ISSUE_CONFIGS:
+        per_plan: dict[str, list[tuple[SessionResult, int]]] = {n: [] for n in PLANS}
+        for i in range(runs):
+            rng = random.Random((seed, "mi", sizes, i).__hash__())
+            candidates = list(itertools.product(*[range(s) for s in sizes]))
+            profiles = provider.build_profiles(candidates, 3, rng)
+            for name, cls in PLANS.items():
+                session, peak = peak_memory_bytes(
+                    lambda c=cls: c(profiles, collect_log=False).run()
+                )
+                per_plan[name].append((session, peak))
+        out[sizes] = per_plan
+    return out

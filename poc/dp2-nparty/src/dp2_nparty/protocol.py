@@ -50,12 +50,14 @@ class _BasePlan:
         tie_breaker: TieBreaker,
         max_sweeps: int = MAX_SWEEPS,
         aspiration_type: str | float = "boulware",
+        collect_log: bool = True,
     ):
         self.profiles = profiles
         self.agents = [_Agent(p, max_sweeps, aspiration_type) for p in profiles]
         self.tie = tie_breaker
         self.max_sweeps = max_sweeps
         self.n = len(profiles)
+        self.collect_log = collect_log
 
     def run(self) -> SessionResult:
         bb = Blackboard(n=self.n)
@@ -75,7 +77,10 @@ class _BasePlan:
                     break  # 전원 소진 — 이 바퀴 종료, threshold 내리고 다음 바퀴
                 bb.phase()
                 rounds += 1
-                events.append({"t": "round", "sweep": sweep, "k": k, "submitted": dict(submitted)})
+                if self.collect_log:
+                    events.append(
+                        {"t": "round", "sweep": sweep, "k": k, "submitted": dict(submitted)}
+                    )
                 winner, tie_used = self._round(bb, submitted, sweep, events)
                 if winner is not None:
                     bb.final_notice()
@@ -122,7 +127,10 @@ class Plan1Vote(_BasePlan):
         bb.phase()
         bb.round_result()  # O/X 결과가 전원에게 공개된다
         bb.phase()
-        events.append({"t": "votes", "sweep": sweep, "votes": {p: dict(v) for p, v in votes.items()}})
+        if self.collect_log:
+            events.append(
+                {"t": "votes", "sweep": sweep, "votes": {p: dict(v) for p, v in votes.items()}}
+            )
         unanimous = [c for c in candidates if all(votes[p.pid][c] for p in self.profiles)]
         if not unanimous:
             return None, False

@@ -75,3 +75,33 @@ class ControlledTableUfun(UfunProvider):
             )
             for i in range(n_participants)
         ]
+
+
+class MultiIssueTableUfun(UfunProvider):
+    """개발용 임시 — 복합의제(multi-issue) Ufun. 벤치마크·utility 규격 도착 전 대체.
+
+    후보 = 의제 값의 튜플 (예: (날짜3, 영화1, 영화관2, 시간0)).
+    utility(튜플) = Σ_j 가중치_j × 의제별 점수_j(값) — 선형 가중합.
+    NegMAS의 LinearAdditiveUtilityFunction과 동형이다 (규격이 오면 그 클래스로 대체).
+    """
+
+    def __init__(self, initial_threshold: float = 0.4):
+        self.initial_threshold = initial_threshold
+
+    def build_profiles(
+        self, candidates: list[Candidate], n_participants: int, rng: random.Random
+    ) -> list[Profile]:
+        d = len(candidates[0])  # 의제 수 — 후보 튜플의 길이
+        issue_values = [sorted({c[j] for c in candidates}, key=repr) for j in range(d)]
+        profiles = []
+        for i in range(n_participants):
+            raw_w = [rng.random() + 0.1 for _ in range(d)]
+            w = [x / sum(raw_w) for x in raw_w]  # 의제 가중치 (합 1)
+            score = [{v: rng.random() for v in issue_values[j]} for j in range(d)]
+            utilities = {
+                c: round(sum(w[j] * score[j][c[j]] for j in range(d)), 6) for c in candidates
+            }
+            profiles.append(
+                Profile(pid=f"P{i}", utilities=utilities, initial_threshold=self.initial_threshold)
+            )
+        return profiles
