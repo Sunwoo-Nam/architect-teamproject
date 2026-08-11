@@ -41,7 +41,11 @@
 | 22 | **QAW — 핵심 QA 우선순위 선정** — stakeholder 10개 역할 페르소나(sub-agent)의 중요도·난이도 1-10 채점(실사용·상품 수준 전제) + 2라운드 Delphi 재론 → **FC > CF > SC-참여자 > FT > REC > TB > AN > SC-의제 > RU > AD**, (H,H) = FC·SC-참여자 | [`22-QAW-QA-우선순위-선정.md`](22-QAW-QA-우선순위-선정.md) |
 | 23 | **핵심 QA 최종 확정 (정본)** — 핵심 5개(FC > RU-메모리 > SC-참여자 > SC-의제 > FT&REC 통합) · 비핵심 4개(TB > CF > AN > AD), QAW와의 차이 사유 포함 | [`23-핵심-QA-최종-확정.md`](23-핵심-QA-최종-확정.md) |
 | 24 | **Functional Correctness 정의·측정 (정본)** — Total Utility 달성률 = U(도달 결과)÷U(최적 후보 x\*), initial/revised threshold 구분, 결렬 포함 채점, 별점 0-5점 척도(참조점: 만점 1.0-무작위 베이스라인 R̄ 등분, 목표 4점 이상) | [`24-Functional-Correctness-정의-측정.md`](24-Functional-Correctness-정의-측정.md) |
-| 25 | **Scalability-참여자 수 정의·측정 (정본)** — 핵심 지표 = 메시지 확장 지수 b_msg(물리 전송 건수, 95% CI 하한 ≤ 1), 완결률 게이트·난이도 교락 통제·N={3,4,5,6,8,10}, 시간 지수는 보조로 강등 | [`25-Scalability-참여자수-정의-측정.md`](25-Scalability-참여자수-정의-측정.md) |
+| 25 | **Scalability-참여자 수 정의·측정 (정본)** — 핵심 지표 = 메시지 확장 지수 b_msg(물리 전송 건수), 별점 0-5점(선형 1 - 제곱 2 등분), 완결률 게이트·난이도 교락 통제·N={3,4,5,6,8,10} | [`25-Scalability-참여자수-정의-측정.md`](25-Scalability-참여자수-정의-측정.md) |
+| 26 | **Resource Utilization-메모리 정의·측정** — Peak/Average RSS, 실측 프로세스 한도 L_state와 LLM-only 차감 기준, 기존 "예산 50%" 기준 폐기 선언 (팀 작성) | [`26-Resource-Utilization-정의-측정.md`](26-Resource-Utilization-정의-측정.md) |
+| 27 | **Scalability-의제 수 정의·측정 (정본)** — 복합의제(multi-issue) 튜플 공간의 조합-메모리 탄력성 c, 별점 0-5점(전체 열거 1 - 이론 이상 1/d 등분), PoC 베이스라인 c=1.14(전체 열거 확인) | [`27-Scalability-의제수-정의-측정.md`](27-Scalability-의제수-정의-측정.md) |
+| 28 | **Fault Tolerance & Recoverability 정의·측정 (정본)** — 하위 축 2개: FT 내성 여유 배수(1배-10배 로그 등분 별점) · REC 복구 시간 비율(1-재시작 비용 R 로그 등분 별점), 통합 별점 = min(약한 고리) | [`28-Fault-Tolerance-Recoverability-정의-측정.md`](28-Fault-Tolerance-Recoverability-정의-측정.md) |
+| 29 | **Confidentiality 정의·측정 (정본, 비핵심·보조 관측)** — frequency 공격자(자체 구현·규칙 봉인)의 정규화 노출률, 관점 2개(참여자/담당자), PoC: 방안1 ★0 vs 방안2 ★5 | [`29-Confidentiality-정의-측정.md`](29-Confidentiality-정의-측정.md) |
 | 30 | **설계 문제 총괄** — 채택 8건·미채택 1건(양보 전략), 문제 간 의존 관계, 공통 평가 방법·템플릿 | [`30-설계-문제-총괄.md`](30-설계-문제-총괄.md) |
 | 30-1 | **설계 문제별 QA 매핑** — 각 설계 문서의 주 목적 QA·판별 축·직교 축 + QAW 우선순위 역방향 매핑 (단독 결정 축: 기밀성↔33, 의제 확장성↔34 / 복구 구조는 전담 문제 신설 없이 부수 축·측정 정의로 관리 — PL 결정) | [`30-1-설계문제-QA-매핑.md`](30-1-설계문제-QA-매핑.md) |
 | 31-34 | **설계 문서 (1차 — 의존 없음)**: 제안 토폴로지 / 완결 규칙 실행 / 정보 공개(역추론 방지) / 의제 분해·어젠다 — 각 배타 대안 3개 + QA trade-off | [`31`](31-제안-토폴로지.md) · [`32`](32-완결-규칙-실행-구조.md) · [`33`](33-정보-공개-구조.md) · [`34`](34-의제-분해-어젠다-구조.md) |

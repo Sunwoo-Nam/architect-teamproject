@@ -25,9 +25,9 @@ Android 17 Memory Limiter는 앱 프로세스 상태에 따라 Visible과 Not-vi
 
 | 대상 단말 구성 | 물리 RAM | Visible 권장 범위 | Not-visible 권장 범위 |
 |---|---:|---:|---:|
-| Galaxy S25 FE | 8GiB | 4~5.33GiB | 2~2.67GiB |
-| Galaxy S26 12GB 구성 | 12GiB | 6~8GiB | 3~4GiB |
-| Galaxy S26 16GB 구성 | 16GiB | 8~10.67GiB | 4~5.33GiB |
+| Galaxy S25 FE | 8GiB | 4-5.33GiB | 2-2.67GiB |
+| Galaxy S26 12GB 구성 | 12GiB | 6-8GiB | 3-4GiB |
+| Galaxy S26 16GB 구성 | 16GiB | 8-10.67GiB | 4-5.33GiB |
 
 표의 값은 명목 RAM을 기준으로 계산한 권장 범위다. 실제 측정에는 단말에서 확인한 프로세스 한도 `L_state`를 사용한다.
 
@@ -54,14 +54,14 @@ Not-visible 상태는 화면을 표시하지 않고 협상하는 경우의 주 �
 
 LLM 실행 중 비LLM 기능이 사용할 수 있는 이론적 최대 메모리는 `B_nonLLM = L_state − M_LLM_peak`로 계산한다. `L_state`는 현재 프로세스 상태의 실제 한도, `M_LLM_peak`는 협상 없이 LLM만 실행했을 때의 Peak RSS다.
 
-S25 FE의 Not-visible 한도를 2~2.67GiB로 가정하고 순수 가중치만 차감하면 다음과 같다.
+S25 FE의 Not-visible 한도를 2-2.67GiB로 가정하고 순수 가중치만 차감하면 다음과 같다.
 
 | 모델 | 비LLM 기능의 낙관적 이론 상한 |
 |---|---:|
-| 1.5B 4-bit | 약 1,333~2,016MiB |
-| 1.5B 8-bit | 약 617~1,300MiB |
-| 2B 4-bit | 약 1,094~1,777MiB |
-| 2B 8-bit | 약 141~824MiB |
+| 1.5B 4-bit | 약 1,333-2,016MiB |
+| 1.5B 8-bit | 약 617-1,300MiB |
+| 2B 4-bit | 약 1,094-1,777MiB |
+| 2B 8-bit | 약 141-824MiB |
 
 이 값은 순수 가중치만 차감한 사전 검토값이다. 제품 판단에는 실측한 `M_LLM_peak`를 대입한다.
 
