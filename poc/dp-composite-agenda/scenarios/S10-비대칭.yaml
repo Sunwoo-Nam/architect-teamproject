@@ -15,9 +15,10 @@ dependencies:
 participants:
   count: 2
   profile_seed: 1210
+  initial_threshold: [0.4, 0.4]   # 위임 바닥선 = 결렬 시 각자의 utility (24.2)
   styles: [focused, indifferent]
   constraints:
     - {participant: 0, axis: date, values: [tue, sat]}
     - {participant: 0, axis: region, values: [yeongdeungpo, seongsu]}
 agent_view: {weights: quantized3, score_dropout: 0.3, constraints: pass_hard}
-judge: {floor_quantile: [0.7, 0.5], expected: agreement}
+judge: {expected: agreement}   # FC 채점은 24 정본(달성률 U(r)/U(x*)) — oracle이 x*·R̄ 산출

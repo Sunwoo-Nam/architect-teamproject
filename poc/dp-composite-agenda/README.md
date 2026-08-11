@@ -2,7 +2,8 @@
 
 `docs/07-DP후보안/sunwoo/DP-복합의제-협상방식.md`의 두 설계안
 (1안 의제별 순차 협상 / 2안 개인별 후보군 압축 후 복합 협상)을 동일 TC·동일 하니스로 비교하는 PoC.
-QA 기준: `docs/changbae/23-핵심-QA-최종-확정.md` (핵심 5 · 비핵심 4, 측정 정의는 21 위임).
+QA 기준: `docs/changbae/23-핵심-QA-최종-확정.md` (핵심 5 · 비핵심 4) + **QA별 측정 정본 24~29**
+(FC는 24의 Total Utility 달성률, 의제 수 c는 27, FT/REC는 28, Confidentiality 공격자는 29 — 21의 해당 항목 대체. 26 RU는 정의안 단계).
 참여자는 2인 고정 — Scalability-참여자 수(b)는 `poc/dp2-nparty` 소관.
 
 ## 현재 상태

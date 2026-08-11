@@ -23,6 +23,7 @@ class TruthProfile:
     weights: dict[str, float]              # 축 -> 가중치 (합 1)
     scores: dict[str, dict[str, float]]    # 축 -> {값: 점수 0..1}
     home_region: str
+    initial_threshold: float               # 위임 시점 바닥선 — 결렬 시 얻는 utility (24.2)
 
     def base_utility(self, outcome: Outcome) -> float:
         return sum(self.weights[a] * self.scores[a][v.name] for a, v in outcome.items())
@@ -52,6 +53,9 @@ def build_truth_profiles(scenario: Scenario) -> list[TruthProfile]:
     seed = scenario.profile_seed
     styles = scenario.participants.get("styles", ["default"] * scenario.n_participants)
     rho = float(scenario.meta.get("conflict_rho", 0.0))
+    thresholds = scenario.participants.get("initial_threshold", [0.4] * scenario.n_participants)
+    if isinstance(thresholds, (int, float)):
+        thresholds = [float(thresholds)] * scenario.n_participants
     profiles: list[TruthProfile] = []
     p1_scores: dict[str, list[float]] = {}
 
@@ -78,7 +82,14 @@ def build_truth_profiles(scenario: Scenario) -> list[TruthProfile]:
             scores[ax.name] = {value.name: s for value, s in zip(ax.values, vals)}
 
         home = REGIONS[rng.randrange(len(REGIONS))]
-        profiles.append(TruthProfile(weights=weights, scores=scores, home_region=home))
+        profiles.append(
+            TruthProfile(
+                weights=weights,
+                scores=scores,
+                home_region=home,
+                initial_threshold=float(thresholds[p]),
+            )
+        )
     return profiles
 
 

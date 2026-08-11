@@ -44,11 +44,16 @@ def check(path: Path, seed_override: int | None = None) -> tuple[bool, list[str]
 
         expected = scenario.meta["expected"]
         if expected == "no_agreement":
-            if report.feasible_count != 0:
-                problems.append(f"n={n_axes}: 결렬이 정답인데 실행 가능 후보 {report.feasible_count}개 존재")
+            if not report.xstar_is_breakdown:
+                problems.append(
+                    f"n={n_axes}: 결렬이 정답인데 x*가 합의 후보 (valid={report.valid_count})"
+                )
         else:
-            if report.mutual_count <= 0:
-                problems.append(f"n={n_axes}: 상호 수락 가능 후보 없음 (feasible={report.feasible_count})")
+            if report.xstar_is_breakdown:
+                problems.append(
+                    f"n={n_axes}: 합의가 정답인데 x* = 결렬 "
+                    f"(feasible={report.feasible_count}, valid={report.valid_count})"
+                )
 
         label = scenario.meta.get("conflict_level")
         if (
@@ -77,14 +82,16 @@ def main() -> int:
     do_tune = "--tune" in sys.argv
     paths = sorted((ROOT / "scenarios").glob("S*.yaml"))
     all_ok = True
-    print(f"{'TC':<6}{'조합수':>10}{'실행가능':>9}{'상관':>8}{'상호수락':>9}{'Pareto':>8}  판정")
+    print(f"{'TC':<6}{'조합수':>10}{'실행가능':>9}{'유효':>7}{'상관':>8}{'x*':>6}{'U(x*)':>8}{'R̄':>7}  판정")
     for path in paths:
         ok, problems, reports = check(path)
         for report in reports:
             corr = f"{report.utility_corr:.2f}" if report.utility_corr is not None else "-"
+            xstar = "결렬" if report.xstar_is_breakdown else "합의"
             print(
                 f"{report.scenario_id:<6}{report.space_size:>10}{report.feasible_count:>9}"
-                f"{corr:>8}{report.mutual_count:>9}{report.pareto_count:>8}  {'PASS' if ok else 'FAIL'}"
+                f"{report.valid_count:>7}{corr:>8}{xstar:>6}{report.u_xstar:>8.2f}"
+                f"{report.r_bar:>7.2f}  {'PASS' if ok else 'FAIL'}"
             )
         for problem in problems:
             all_ok = False

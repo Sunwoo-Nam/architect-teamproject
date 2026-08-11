@@ -42,18 +42,24 @@ def test_agent_view_differs_from_truth():
     assert masked > 0  # 일부 점수가 마스킹됨
 
 
-def test_s08_infeasible():
+def test_s08_breakdown_is_answer():
+    """S08 — 하드 교집합 공집합이라 x* = 결렬 (24 정본: 결렬이 정답이면 결렬이 만점)."""
     scenario = load_scenario(ROOT / "scenarios" / "S08-합의불가.yaml")
     report = analyze(scenario)
     assert report.feasible_count == 0
+    assert report.xstar_is_breakdown
+    assert report.u_xstar == report.breakdown_total
 
 
 @pytest.mark.parametrize("path", [p for p in SCENARIOS if "S08" not in p.name and "S11" not in p.name])
-def test_mutually_acceptable_exists(path):
+def test_agreement_scenarios_have_valid_xstar(path):
+    """합의가 정답인 TC — 유효 후보가 존재하고 x*는 결렬이 아니어야 한다 (24.3)."""
     scenario = load_scenario(path)
     report = analyze(scenario)
     assert not report.skipped
-    assert report.mutual_count > 0, f"{scenario.id}: 상호 수락 가능 후보 없음"
+    assert report.valid_count > 0, f"{scenario.id}: 유효 후보 없음"
+    assert not report.xstar_is_breakdown, f"{scenario.id}: x*가 결렬"
+    assert 0.0 < report.r_bar <= 1.0
 
 
 def test_s11_prefix_safety():
@@ -63,7 +69,7 @@ def test_s11_prefix_safety():
         for dep in scenario.active_dependencies():
             pass  # 범위 밖 축 참조가 없어야 active_dependencies가 예외 없이 동작
         report = analyze(scenario)
-        assert report.mutual_count > 0
+        assert report.valid_count > 0 and not report.xstar_is_breakdown
 
 
 def test_s08_infeasible_even_when_scaled():
