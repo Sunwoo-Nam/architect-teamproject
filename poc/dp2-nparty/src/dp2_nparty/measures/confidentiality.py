@@ -34,7 +34,7 @@ class InferenceGain:
 
 def _visible_events(session: SessionResult, observer: str, coordinator: str) -> list[dict]:
     """관점별 가시 이벤트 필터."""
-    FULL_VIEW = {"plan1", "plan4mesh", "plan5ring"}  # 공지/방송/문서 순회 — 전원이 전부 봄
+    FULL_VIEW = {"plan1", "plan4mesh", "plan5ring", "plan7gossip"}  # 공지/방송/순회/가십 — 전파 후 전원이 봄
     if session.plan in FULL_VIEW:
         return session.log
     if session.plan == "plan6tree":
@@ -48,6 +48,16 @@ def _visible_events(session: SessionResult, observer: str, coordinator: str) -> 
         for ev in session.log:
             if ev["t"] in ("round", "batch"):
                 out.append({**ev, "submitted": {p: c for p, c in ev["submitted"].items() if p in allowed}})
+        return out
+    if session.plan == "plan8rotate":
+        # 순환 담당: 자기가 담당했던 바퀴의 배치 + 자기 제출만 보인다 — 전량을 모으는 노드가 없음
+        out = []
+        for ev in session.log:
+            if ev["t"] == "batch":
+                if ev.get("coord") == observer:
+                    out.append(ev)
+                else:
+                    out.append({**ev, "submitted": {p: c for p, c in ev["submitted"].items() if p == observer}})
         return out
     if observer == coordinator:
         return session.log  # BB 담당자는 전부 봄 (방안 2·3-A)

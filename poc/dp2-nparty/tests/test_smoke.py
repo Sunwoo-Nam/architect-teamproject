@@ -10,7 +10,7 @@ from dp2_nparty.harness import Experiment
 from dp2_nparty.measures import fc
 from dp2_nparty.measures.scaling import loglog_fit, stars_b_msg
 from dp2_nparty.protocol import Plan1Vote, Plan2Cumulative, Plan3Batch
-from dp2_nparty.protocol_styles import Plan4Mesh, Plan5Ring, Plan6Tree
+from dp2_nparty.protocol_styles import Plan4Mesh, Plan5Ring, Plan6Tree, Plan7Gossip, Plan8Rotate
 from dp2_nparty.threshold import SweepThreshold
 from dp2_nparty.ufun_provider import TableUfun
 
@@ -29,7 +29,7 @@ def test_both_plans_agree_on_obvious_case():
     profiles = [
         Profile(f"P{i}", {"A": 0.9, "B": 0.5 + i * 0.01, "C": 0.2}, 0.4) for i in range(3)
     ]
-    for cls in (Plan1Vote, Plan2Cumulative, Plan3Batch, Plan4Mesh, Plan5Ring, Plan6Tree):
+    for cls in (Plan1Vote, Plan2Cumulative, Plan3Batch, Plan4Mesh, Plan5Ring, Plan6Tree, Plan7Gossip, Plan8Rotate):
         r = cls(profiles).run()
         assert r.outcome == "A", (cls.__name__, r)
         assert r.messages > 0
@@ -42,7 +42,7 @@ def test_no_deal_when_infeasible():
         Profile("P1", {"A": 0.1, "B": 0.9}, 0.4),
         Profile("P2", {"A": 0.1, "B": 0.1}, 0.4),
     ]
-    for cls in (Plan1Vote, Plan2Cumulative, Plan3Batch, Plan4Mesh, Plan5Ring, Plan6Tree):
+    for cls in (Plan1Vote, Plan2Cumulative, Plan3Batch, Plan4Mesh, Plan5Ring, Plan6Tree, Plan7Gossip, Plan8Rotate):
         r = cls(profiles).run()
         assert r.outcome == NO_DEAL
         s = fc.score(r.outcome, ["A", "B"], profiles)
@@ -169,5 +169,28 @@ def test_style_plans_properties():
         assert r.rounds >= 1
     # kill-resume FR 정합
     for cls in (Plan4Mesh, Plan6Tree):
+        tr = trial(cls, profiles, "mid_round", 1)
+        assert tr.fr_ok, cls.plan_name
+
+
+def test_gossip_and_rotate_properties():
+    from dp2_nparty.faults import FaultInjector
+    from dp2_nparty.measures.rec import trial
+
+    rng = random.Random(41)
+    cands = [f"s{j}" for j in range(12)]
+    profiles = TableUfun().build_profiles(cands, 3, rng)
+    g = Plan7Gossip(profiles).run()
+    m = Plan4Mesh(profiles).run()
+    r8 = Plan8Rotate(profiles).run()
+    r3 = Plan3Batch(profiles).run()
+    assert g.outcome == m.outcome  # 가십도 같은 만장일치 결과에 도달
+    # 가십의 선형 이득은 N이 커야 발현 — N=8에서 총 전송이 mesh보다 적어야 한다
+    big = TableUfun().build_profiles(cands, 8, random.Random(42))
+    assert Plan7Gossip(big).run().messages < Plan4Mesh(big).run().messages
+    assert r8.outcome == r3.outcome  # 순환 담당은 3-A와 동일 판정 (담당자만 교대)
+    for cls in (Plan7Gossip, Plan8Rotate):
+        r = cls(profiles).run(injector=FaultInjector(0.3, 9))
+        assert r.rounds >= 1
         tr = trial(cls, profiles, "mid_round", 1)
         assert tr.fr_ok, cls.plan_name

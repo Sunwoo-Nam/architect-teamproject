@@ -296,3 +296,148 @@ def pair_partner(pids: list[str], pid: str) -> str | None:
     idx = pids.index(pid)
     mate = idx + 1 if idx % 2 == 0 else idx - 1
     return pids[mate] if 0 <= mate < len(pids) else None
+
+
+class Plan7Gossip(_StyleBase):
+    """방안 7 — 가십 전파형 (Epidemic/P2P). 라운드마다 각자 자기 다음 순위 후보를 자기
+    상태에 넣고(로컬), **딱 1명(라운드마다 순환하는 짝)에게 자기가 아는 전체 상태를 전송**
+    (전송 N건/라운드 = 선형, 병렬 1 phase). 어느 노드든 자기 지식에서 전원 교집합을
+    발견하면 확정을 방송한다. 유실된 가십은 다음 라운드의 다른 짝으로 자연 복구."""
+
+    plan_name = "plan7gossip"
+
+    def run(self, injector=None, kill_at=None, on_round_end=None) -> SessionResult:
+        bb = Blackboard(n=self.n)
+        events: list[dict] = []
+        pids = [a.p.pid for a in self.agents]
+        # knowledge[i] = 노드 i가 아는 {참여자: 제안 집합}
+        knowledge = [{pid: set() for pid in pids} for _ in range(self.n)]
+        rounds = 0
+        self._eval_calls = sum(len(a.ranked) for a in self.agents)
+        max_rank = max(len(a.ranked) for a in self.agents)
+        cap = self.max_sweeps * (max_rank + 20) * 3
+        for sweep in range(1, self.max_sweeps + 1):
+            for a in self.agents:
+                a.ptr = 0
+            flush = 0
+            while rounds < cap:
+                boundary = {"ptrs": [a.ptr for a in self.agents],
+                            "know": [{k: set(v) for k, v in kn.items()} for kn in knowledge]}
+                submitted, any_pending = {}, False
+                for i, a in enumerate(self.agents):
+                    c = a.peek(sweep)
+                    if c is None:
+                        continue
+                    any_pending = True
+                    knowledge[i][a.p.pid].add(c)  # 로컬 추가 — 전송 없음
+                    submitted[a.p.pid] = c
+                    a.ptr += 1
+                if not any_pending:
+                    flush += 1
+                    if flush > self.n:  # 소진 후 전파 마무리 라운드까지 끝
+                        break
+                else:
+                    flush = 0
+                # 가십 교환: i → (i + 1 + r mod (N-1)) mod N, 전송 1건씩 (병렬)
+                for i in range(self.n):
+                    j = (i + 1 + (rounds % max(1, self.n - 1))) % self.n
+                    size = sum(len(v) for v in knowledge[i].values())
+                    bb.counter.add("gossip", 1, {"entries": size})
+                    bb.load[pids[i]] = bb.load.get(pids[i], 0) + 1
+                    if injector and injector.lost():
+                        continue
+                    for pid, s in knowledge[i].items():
+                        knowledge[j][pid].update(s)
+                bb.phase()
+                rounds += 1
+                if self.collect_log:
+                    events.append({"t": "round", "sweep": sweep, "k": rounds, "submitted": submitted})
+                if on_round_end:
+                    on_round_end()
+                try:
+                    if kill_at and kill_at.round_no == rounds and kill_at.point == "mid_round":
+                        raise _Kill()
+                    picked = None
+                    for kn in knowledge:  # 어느 노드든 전원 교집합을 알면 확정
+                        if all(kn[pid] for pid in pids):
+                            common = set.intersection(*kn.values())
+                            if common:
+                                tied = sorted(common, key=repr)
+                                pick, extra = self.tie.pick(tied, self.profiles)
+                                bb.tie_break_messages(extra, {"tied": [str(c) for c in tied]})
+                                picked = (pick, len(tied) > 1)
+                                break
+                    if picked and kill_at and kill_at.round_no == rounds and kill_at.point == "pre_final":
+                        raise _Kill()
+                except _Kill:
+                    for a, ptr in zip(self.agents, boundary["ptrs"]):
+                        a.ptr = ptr
+                    for kn, snap in zip(knowledge, boundary["know"]):
+                        kn.clear(); kn.update({k: set(v) for k, v in snap.items()})
+                    bb.resync({"sweep": sweep})  # 이웃에게서 상태 회수
+                    kill_at = None
+                    rounds -= 1
+                    continue
+                if picked:
+                    bb.counter.add("final", self.n - 1, {"outcome": str(picked[0])})
+                    bb.phase()
+                    return self._result(bb, rounds, sweep, picked[0], picked[1], events)
+        return self._result(bb, rounds, self.max_sweeps, NO_DEAL, False, events)
+
+
+class Plan8Rotate(_StyleBase):
+    """방안 8 — 순환 담당자형 (Blackboard 변형). 방안 3-A의 일괄 제출·중앙 선별을
+    유지하되 **바퀴마다 담당자를 교대**한다 (바퀴 s의 담당 = P[(s-1) mod N]).
+    부하·노출이 한 단말에 누적되지 않는다 — 어느 단말도 전 바퀴의 전체 목록을 모으지 못함."""
+
+    plan_name = "plan8rotate"
+
+    def run(self, injector=None, kill_at=None, on_round_end=None) -> SessionResult:
+        bb = Blackboard(n=self.n)
+        events: list[dict] = []
+        delivered: dict[str, set] = {}
+        rounds = 0
+        self._eval_calls = sum(len(a.ranked) for a in self.agents)
+        for sweep in range(1, self.max_sweeps + 1):
+            coord = (sweep - 1) % self.n
+            boundary = self._snapshot(delivered)
+            batch_log = {}
+            for i, a in enumerate(self.agents):
+                th = a.th.at_sweep(sweep)
+                got = delivered.setdefault(a.p.pid, set())
+                items = [(r + 1, c) for r, c in enumerate(a.ranked)
+                         if a.p.utility(c) >= th and c not in got]
+                if not items:
+                    continue
+                payload = [{"rank": r, "candidate": str(c)} for r, c in items]
+                bb.submit(a.p.pid, i == coord, payload)  # 이번 바퀴 담당자에게 배치 제출
+                if injector and injector.lost():
+                    continue
+                got.update(c for _r, c in items)
+                batch_log[a.p.pid] = [(r, str(c)) for r, c in items]
+            bb.phase()
+            rounds += 1
+            if self.collect_log:
+                events.append({"t": "batch", "sweep": sweep, "k": rounds,
+                               "coord": self.agents[coord].p.pid, "submitted": batch_log})
+            if on_round_end:
+                on_round_end()
+            try:
+                if kill_at and kill_at.round_no == rounds and kill_at.point == "mid_round":
+                    raise _Kill()
+                picked = self._pick(bb, delivered)
+                if picked and kill_at and kill_at.round_no == rounds and kill_at.point == "pre_final":
+                    raise _Kill()
+            except _Kill:
+                self._restore(delivered, boundary)
+                bb.resync({"sweep": sweep})
+                kill_at = None
+                rounds -= 1
+                continue
+            if picked:
+                bb.final_notice({"outcome": str(picked[0])})
+                bb.phase()
+                return self._result(bb, rounds, sweep, picked[0], picked[1], events)
+        bb.final_notice({"outcome": NO_DEAL})
+        bb.phase()
+        return self._result(bb, rounds, self.max_sweeps, NO_DEAL, False, events)
