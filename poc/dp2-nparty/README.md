@@ -15,6 +15,8 @@ python3 -m virtualenv .venv          # ensurepip 미제공 환경이라 virtuale
 .venv/bin/python scripts/make_report.py results/<run_id>  # raw.json에서 리포트만 재생성
 ```
 
+**결과를 한눈에**: [`results/INDEX.md`](results/INDEX.md) — 전 실행의 별점 요약표 (GitHub에서 렌더링됨). 행의 report 링크로 상세 진입.
+
 **측정값의 정본 위치는 `results/`다** — 실행 1회 = `results/<run_id>/` 폴더 하나:
 `raw.json`(전 측정 원자료 + 실행 메타: seed·commit·negmas 버전)과 `report.md`(별점 표 정리).
 측정 정의 문서(docs/changbae/24-29)에는 방법만 있고 측정값은 여기에만 기록한다.

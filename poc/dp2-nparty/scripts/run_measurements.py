@@ -43,6 +43,9 @@ def main() -> None:
 
     print(report)
     print(f"저장: {run_dir}/raw.json · {run_dir}/report.md")
+    import subprocess
+
+    subprocess.run([sys.executable, str(ROOT / "scripts" / "build_index.py")], check=False)
 
 
 if __name__ == "__main__":
