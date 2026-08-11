@@ -1,0 +1,48 @@
+{
+  "case_id": "C-007-tie-rank-sum",
+  "candidates": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "profiles": [
+    {
+      "pid": "P0",
+      "utilities": {
+        "A": 0.6,
+        "B": 0.55,
+        "C": 0.9,
+        "D": 0.45
+      },
+      "initial_threshold": 0.4
+    },
+    {
+      "pid": "P1",
+      "utilities": {
+        "A": 0.6,
+        "B": 0.9,
+        "C": 0.55,
+        "D": 0.45
+      },
+      "initial_threshold": 0.4
+    },
+    {
+      "pid": "P2",
+      "utilities": {
+        "A": 0.55,
+        "B": 0.9,
+        "C": 0.6,
+        "D": 0.45
+      },
+      "initial_threshold": 0.4
+    }
+  ],
+  "meta": {
+    "schema_version": "benchmark-case.v1",
+    "track": "conformance",
+    "scenario_type": "tie_rank_sum",
+    "expected_no_deal": false,
+    "description": "3라운드에 A·B·C가 동시에 전원 교집합에 들어가 동률이 되고, 순위 합이 5/6/7로 서로 달라 방안 2의 1단계(순위 합 최소)에서 B로 결판난다. B는 순위 표준편차가 가장 큰 후보라서 1단계가 2단계보다 먼저 적용되는지도 함께 검증한다."
+  }
+}

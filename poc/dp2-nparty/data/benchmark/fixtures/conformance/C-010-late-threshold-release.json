@@ -1,0 +1,78 @@
+{
+  "case_id": "C-010-late-threshold-release",
+  "candidates": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "COMPROMISE"
+  ],
+  "profiles": [
+    {
+      "pid": "P0",
+      "utilities": {
+        "A": 0.95,
+        "B": 0.85,
+        "C": 0.75,
+        "D": 0.62,
+        "E": 0.25,
+        "F": 0.2,
+        "G": 0.1,
+        "COMPROMISE": 0.45
+      },
+      "initial_threshold": 0.4
+    },
+    {
+      "pid": "P1",
+      "utilities": {
+        "A": 0.3,
+        "B": 0.22,
+        "C": 0.15,
+        "D": 0.92,
+        "E": 0.8,
+        "F": 0.7,
+        "G": 0.6,
+        "COMPROMISE": 0.48
+      },
+      "initial_threshold": 0.4
+    },
+    {
+      "pid": "P2",
+      "utilities": {
+        "A": 0.64,
+        "B": 0.33,
+        "C": 0.82,
+        "D": 0.28,
+        "E": 0.72,
+        "F": 0.12,
+        "G": 0.9,
+        "COMPROMISE": 0.46
+      },
+      "initial_threshold": 0.4
+    },
+    {
+      "pid": "P3",
+      "utilities": {
+        "A": 0.68,
+        "B": 0.88,
+        "C": 0.58,
+        "D": 0.26,
+        "E": 0.08,
+        "F": 0.78,
+        "G": 0.34,
+        "COMPROMISE": 0.44
+      },
+      "initial_threshold": 0.4
+    }
+  ],
+  "meta": {
+    "schema_version": "benchmark-case.v1",
+    "track": "conformance",
+    "scenario_type": "late_threshold_release",
+    "expected_no_deal": false,
+    "description": "유일한 실후보 COMPROMISE가 네 참여자 모두에게 8개 중 5순위여서, 초기 바퀴의 revised threshold 아래에 있어 제출조차 되지 않는다. threshold가 initial까지 내려온 마지막 바퀴에 와서야 제출되고 그때 합의가 성립한다."
+  }
+}

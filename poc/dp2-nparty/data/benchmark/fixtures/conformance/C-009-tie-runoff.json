@@ -1,0 +1,48 @@
+{
+  "case_id": "C-009-tie-runoff",
+  "candidates": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "profiles": [
+    {
+      "pid": "P0",
+      "utilities": {
+        "A": 0.9,
+        "B": 0.55,
+        "C": 0.6,
+        "D": 0.45
+      },
+      "initial_threshold": 0.4
+    },
+    {
+      "pid": "P1",
+      "utilities": {
+        "A": 0.6,
+        "B": 0.9,
+        "C": 0.3,
+        "D": 0.55
+      },
+      "initial_threshold": 0.4
+    },
+    {
+      "pid": "P2",
+      "utilities": {
+        "A": 0.55,
+        "B": 0.6,
+        "C": 0.9,
+        "D": 0.45
+      },
+      "initial_threshold": 0.4
+    }
+  ],
+  "meta": {
+    "schema_version": "benchmark-case.v1",
+    "track": "conformance",
+    "scenario_type": "tie_runoff",
+    "expected_no_deal": false,
+    "description": "3라운드에 A와 B가 동시에 전원 교집합에 들어가고 순위 벡터가 (1,2,3)과 (3,1,2)라 순위 합(6)도 표준편차(0.8165)도 같아 1·2단계가 모두 무력화된다. 방안 2의 3단계 결선투표에서 B가 2표를 얻어 결판나며 추가 메시지 4건(=2(N-1))이 발생한다."
+  }
+}

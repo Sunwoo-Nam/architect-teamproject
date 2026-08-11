@@ -1,0 +1,48 @@
+{
+  "case_id": "C-008-tie-rank-stdev",
+  "candidates": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "profiles": [
+    {
+      "pid": "P0",
+      "utilities": {
+        "A": 0.55,
+        "B": 0.9,
+        "C": 0.6,
+        "D": 0.45
+      },
+      "initial_threshold": 0.4
+    },
+    {
+      "pid": "P1",
+      "utilities": {
+        "A": 0.9,
+        "B": 0.6,
+        "C": 0.55,
+        "D": 0.45
+      },
+      "initial_threshold": 0.4
+    },
+    {
+      "pid": "P2",
+      "utilities": {
+        "A": 0.55,
+        "B": 0.45,
+        "C": 0.6,
+        "D": 0.9
+      },
+      "initial_threshold": 0.4
+    }
+  ],
+  "meta": {
+    "schema_version": "benchmark-case.v1",
+    "track": "conformance",
+    "scenario_type": "tie_rank_stdev",
+    "expected_no_deal": false,
+    "description": "3라운드에 A와 C가 동시에 전원 교집합에 들어가고 두 후보의 순위 합이 7로 같아 1단계로는 가릴 수 없다. 순위 표준편차가 A는 0.9428, C는 0.4714로 달라 방안 2의 2단계에서 모두에게 고르게 상위인 C로 결판난다."
+  }
+}
