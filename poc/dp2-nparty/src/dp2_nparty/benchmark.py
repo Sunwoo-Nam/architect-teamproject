@@ -184,7 +184,14 @@ def validate_set(cases: Iterable[BenchmarkCase]) -> list[str]:
         if n > 1:
             e.append(f"case_id 중복: {cid} ({n}건)")
 
-    # Scalability family 불변조건 — 참여자 수 외의 조건이 고정되어야 난이도 교락이 통제된다
+    # Scalability family 불변조건.
+    #
+    # 참여자 수가 늘 때 달라져도 되는 것은 **참여자와 후보의 추가**뿐이다.
+    # 기준 시나리오가 3인·후보 12개이므로 1인당 후보 4개 비율을 유지해 후보도 함께 늘리는데,
+    # 그래도 다음 세 가지는 고정되어야 참여자 수 외의 조건이 통제된 것이다:
+    #   ① 작은 N의 후보 목록이 큰 N의 앞부분과 정확히 일치 (후보는 뒤에만 추가된다)
+    #   ② 기존 참여자의 기존 후보에 대한 utility와 수락 기준값이 그대로
+    #   ③ 전원이 수락 가능한 후보 수(k)가 N에 무관하게 동일
     families: dict[str, list[BenchmarkCase]] = {}
     for c in cases:
         if c.family_id:
@@ -193,14 +200,23 @@ def validate_set(cases: Iterable[BenchmarkCase]) -> list[str]:
         members.sort(key=lambda c: len(c.profiles))
         base = members[0]
         for m in members[1:]:
-            if m.candidates != base.candidates:
-                e.append(f"family {fid}: 후보 목록이 {base.case_id} 와 {m.case_id} 사이에서 다르다")
+            if m.candidates[: len(base.candidates)] != base.candidates:
+                e.append(
+                    f"family {fid}: {m.case_id} 의 후보 목록 앞부분이 {base.case_id} 와 다르다 "
+                    "— 후보는 뒤에만 추가되어야 한다"
+                )
+            if len(m.candidates) < len(base.candidates):
+                e.append(f"family {fid}: {m.case_id} 의 후보가 {base.case_id} 보다 적다")
             if len(m.profiles) <= len(base.profiles):
                 e.append(f"family {fid}: 참여자 수가 서로 달라야 한다 ({base.case_id}, {m.case_id})")
             for a, b in zip(base.profiles, m.profiles):
-                if a != b:
+                if a.pid != b.pid or a.initial_threshold != b.initial_threshold:
+                    e.append(f"family {fid}: 기존 참여자 {a.pid} 가 {m.case_id} 에서 바뀌었다")
+                    break
+                if any(a.utilities[c] != b.utilities[c] for c in base.candidates):
                     e.append(
-                        f"family {fid}: 기존 참여자 {a.pid} 의 프로파일이 {m.case_id} 에서 바뀌었다"
+                        f"family {fid}: 기존 참여자 {a.pid} 의 기존 후보 utility가 "
+                        f"{m.case_id} 에서 바뀌었다"
                     )
                     break
         counts = {m.meta.get("common_feasible_count") for m in members}
