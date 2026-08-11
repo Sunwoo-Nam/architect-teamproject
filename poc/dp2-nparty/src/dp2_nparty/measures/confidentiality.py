@@ -34,10 +34,22 @@ class InferenceGain:
 
 def _visible_events(session: SessionResult, observer: str, coordinator: str) -> list[dict]:
     """관점별 가시 이벤트 필터."""
-    FULL_VIEW = {"plan1", "plan4mesh", "plan5ring", "plan7gossip"}  # 공지/방송/순회/가십 — 전파 후 전원이 봄
+    FULL_VIEW = {"plan1", "plan3mesh", "plan4ring", "plan5gossip"}  # 공지/방송/순회/가십 — 전파 후 전원이 봄
     if session.plan in FULL_VIEW:
         return session.log
-    if session.plan == "plan6tree":
+    if session.plan == "plan6itree":
+        # 계층 교집합(점진): 직속 부모만 자식의 개별 제출을 본다 — 조상·형제에겐 귀속 없는 집계뿐.
+        # 관찰자가 보는 것 = 자기 제출 + 이진 트리 자식들의 제출.
+        from ..protocol_styles import tree_children
+
+        pids = sorted({p for ev in session.log for p in ev.get("submitted", {})})
+        allowed = {observer, *tree_children(pids, observer)} if observer in pids else {observer}
+        out = []
+        for ev in session.log:
+            if ev["t"] == "round":
+                out.append({**ev, "submitted": {p: c for p, c in ev["submitted"].items() if p in allowed}})
+        return out
+    if session.plan == "plan11tree":
         # 계층 병합: 레벨-0 짝의 배치만 보인다 — 상위 계층엔 개인 귀속 없는 집계 (root도 동일)
         from ..protocol_styles import pair_partner
 
@@ -49,7 +61,7 @@ def _visible_events(session: SessionResult, observer: str, coordinator: str) -> 
             if ev["t"] in ("round", "batch"):
                 out.append({**ev, "submitted": {p: c for p, c in ev["submitted"].items() if p in allowed}})
         return out
-    if session.plan == "plan8rotate":
+    if session.plan == "plan12rotate":
         # 순환 담당: 자기가 담당했던 바퀴의 배치 + 자기 제출만 보인다 — 전량을 모으는 노드가 없음
         out = []
         for ev in session.log:

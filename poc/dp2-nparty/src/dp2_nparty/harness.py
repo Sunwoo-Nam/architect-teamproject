@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from .domain import Profile, SessionResult
 from .measures import fc
 from .measures.ru_memory import peak_memory_bytes
-from .protocol import Plan1Vote, Plan2Cumulative, Plan3Batch
+from .protocol import Plan1Vote, Plan2Cumulative, Plan10Batch
 from .ufun_provider import TableUfun, UfunProvider
 
 PLANS = dict(__import__("dp2_nparty.protocol", fromlist=["all_plans"]).all_plans())

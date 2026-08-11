@@ -23,19 +23,24 @@ MAX_SWEEPS = 5  # PL 결정 (2026-08-11)
 
 # 비교 대상 방안 목록 — 측정·리포트 전체가 이 목록을 순회한다
 def all_plans():
-    from .protocol_styles import Plan4Mesh, Plan5Ring, Plan6Tree, Plan7Gossip, Plan8Rotate
+    from .protocol_styles import (
+        Plan3Mesh, Plan4Ring, Plan5Gossip, Plan6ITree, Plan11Tree, Plan12Rotate,
+    )
 
-    return (("plan1", Plan1Vote), ("plan2", Plan2Cumulative), ("plan3a", Plan3Batch),
-            ("plan4mesh", Plan4Mesh), ("plan5ring", Plan5Ring), ("plan6tree", Plan6Tree),
-            ("plan7gossip", Plan7Gossip), ("plan8rotate", Plan8Rotate))
+    return (("plan1", Plan1Vote), ("plan2", Plan2Cumulative), ("plan3mesh", Plan3Mesh),
+            ("plan4ring", Plan4Ring), ("plan5gossip", Plan5Gossip), ("plan6itree", Plan6ITree),
+            ("plan10batch", Plan10Batch), ("plan11tree", Plan11Tree), ("plan12rotate", Plan12Rotate))
 
 
-PLAN_NAMES = ("plan1", "plan2", "plan3a", "plan4mesh", "plan5ring", "plan6tree",
-              "plan7gossip", "plan8rotate")
+# 번호 체계 (PL 지시 2026-08-11): 점진 공개(라운드당 자기 순위 1개) = 방안 1-6,
+# 후보군 전체(일괄) 공개 = 방안 10부터.
+PLAN_NAMES = ("plan1", "plan2", "plan3mesh", "plan4ring", "plan5gossip", "plan6itree",
+              "plan10batch", "plan11tree", "plan12rotate")
 PLAN_LABELS = {"plan1": "방안 1 투표형(BB)", "plan2": "방안 2 누적형(BB)",
-               "plan3a": "방안 3-A 일괄형(BB)", "plan4mesh": "방안 4 브로드캐스트(P2P)",
-               "plan5ring": "방안 5 릴레이(Ring)", "plan6tree": "방안 6 계층 병합(Tree)",
-               "plan7gossip": "방안 7 가십(Epidemic)", "plan8rotate": "방안 8 순환 담당(BB-회전)"}
+               "plan3mesh": "방안 3 브로드캐스트(P2P)", "plan4ring": "방안 4 릴레이(Ring)",
+               "plan5gossip": "방안 5 가십(Epidemic)", "plan6itree": "방안 6 계층 교집합(Tree)",
+               "plan10batch": "방안 10 일괄형(BB)", "plan11tree": "방안 11 계층 병합(Tree·일괄)",
+               "plan12rotate": "방안 12 순환 담당(BB-회전)"}
 
 
 @dataclass
@@ -256,8 +261,8 @@ class Plan2Cumulative(_BasePlan):
         return self._resolve(bb, sorted(common, key=repr))
 
 
-class Plan3Batch(_BasePlan):
-    """방안 3-A — 일괄 순위 제출·중앙 선별형 (51 §3-A).
+class Plan10Batch(_BasePlan):
+    """방안 10 — 일괄 순위 제출·중앙 선별형 (51 §3-A).
 
     라운드 반복이 없다: 바퀴(sweep)마다 각자 revised threshold 이상의 미전달 후보
     **전부를 순위와 함께 한 번에** 제출(배치 1건 = 1 phase)하고, 담당자가 누적 교집합에서
@@ -265,7 +270,7 @@ class Plan3Batch(_BasePlan):
     담당자의 누적 저장소는 bb.proposed_by를 재사용한다 (스냅샷·복구 기계 공유).
     """
 
-    plan_name = "plan3a"
+    plan_name = "plan10batch"
 
     def __init__(self, profiles, tie_breaker: TieBreaker | None = None, **kw):
         super().__init__(profiles, tie_breaker or RankSumThenStdThenRunoff(), **kw)
@@ -273,7 +278,7 @@ class Plan3Batch(_BasePlan):
     def run(self, injector=None, kill_at=None, on_round_end=None) -> SessionResult:
         bb = Blackboard(n=self.n)
         events: list[dict] = []
-        rounds = 0  # 방안 3-A의 라운드 = 배치 제출 회수 (바퀴당 1회)
+        rounds = 0  # 방안 10의 라운드 = 배치 제출 회수 (바퀴당 1회)
         self._eval_calls = sum(len(a.ranked) for a in self.agents)  # 순위표 구축 (공통)
         for sweep in range(1, self.max_sweeps + 1):
             boundary = self._snapshot(bb)

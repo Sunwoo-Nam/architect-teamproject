@@ -28,7 +28,7 @@ from .measures.scaling import (
     stars_b_msg,
     stars_c,
 )
-from .protocol import PLAN_NAMES, Plan1Vote, Plan2Cumulative, Plan3Batch
+from .protocol import PLAN_NAMES, Plan1Vote, Plan2Cumulative, Plan10Batch
 from .ufun_provider import TableUfun
 
 from .protocol import all_plans
