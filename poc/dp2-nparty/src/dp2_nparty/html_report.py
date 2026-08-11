@@ -67,10 +67,11 @@ def render_html(raw: dict) -> str:
         [fc[p]["stars"] for p in P],
         f"x* 도달은 올바른 결렬 포함 · R̄ {fc[P[0]]['mean_baseline']:.3f} · 결렬 오답 " + "/".join(str(fc[p]["nodeal_wrong"]) for p in P)))
     rows.append(row(
-        '§2 RU-메모리 — 피크/평균 증가분 <span class="badge core">핵심 2위</span>',
-        [f"{ru[p]['median_peak_bytes']/1024:.1f} / {ru[p]['median_avg_bytes']/1024:.1f} KiB" for p in P],
+        '§2 RU-메모리 — 1인 최대 / 전원 합계 / 프로세스(참고) <span class="badge core">핵심 2위</span>',
+        [f"{ru[p].get('median_person_peak_bytes', 0)/1024:.1f} / {ru[p].get('median_total_logical_bytes', 0)/1024:.1f}"
+         f" / {ru[p]['median_peak_bytes']/1024:.1f} KiB" for p in P],
         [None] * len(P),
-        "별점 미확정 (핸드북 §2) — ENV-A 대체, 정본은 실기기 RSS"))
+        "논리 상태 귀속 계상 (복제 반영 — mesh는 전원 사본) · 별점 미확정, 정본은 실기기 RSS"))
     rows.append(row(
         '§3 SC-참여자 수 — N=10 관측값 <span class="badge core">핵심 3위</span>',
         [(f"라운드 {sp[p]['median_rounds_by_n'].get('10') or 0:.0f}"
@@ -104,10 +105,15 @@ def render_html(raw: dict) -> str:
         [None] * len(P),
         "상수 잠정 — 절대값 아님, 상대 비교용"))
     rows.append(row(
-        '§7 CF — 노출률 (참여자 관찰자) <span class="badge aux">비핵심</span>',
-        [f"{cf[p]['participant']['exposure_rate']:.2f} (이득 {cf[p]['participant']['gain_pp']:+.1f}%p)" for p in P],
-        [cf[p]["participant"]["stars"] for p in P],
-        "담당자 관점 " + " / ".join(f"{cf[p]['coordinator']['exposure_rate']:.2f}" for p in P)))
+        '§7 CF — 노출률 N=3(정밀)/10/50 · 참여자|담당자 <span class="badge aux">비핵심</span>',
+        [(f"참 {cf[p]['participant']['exposure_rate']:.2f}/"
+          f"{cf[p].get('by_n', {}).get('10', {}).get('participant', {}).get('exposure_rate', 0):.2f}/"
+          f"{cf[p].get('by_n', {}).get('50', {}).get('participant', {}).get('exposure_rate', 0):.2f}"
+          f" · 담 {cf[p]['coordinator']['exposure_rate']:.2f}/"
+          f"{cf[p].get('by_n', {}).get('10', {}).get('coordinator', {}).get('exposure_rate', 0):.2f}/"
+          f"{cf[p].get('by_n', {}).get('50', {}).get('coordinator', {}).get('exposure_rate', 0):.2f}") for p in P],
+        [None] * len(P),
+        "종합 등급으로 압축하지 않음 (PL 방침) — 전 N 상세는 §7 카드"))
     if raw.get("an_kit"):
         rows.append(row(
             '§8 AN — 진단 실험 킷 <span class="badge aux">비핵심</span>',
@@ -142,6 +148,18 @@ def render_html(raw: dict) -> str:
               f"{fc[p]['nodeal_correct']}/{fc[p]['nodeal_wrong']}", fc[p]["tie_break_used"],
               f"{fc[p]['median_rounds']:.0f} / {fc[p]['median_phases']:.0f} / {fc[p]['median_messages']:.0f} / {fc[p]['median_bytes']:.0f}"]
              for p in P])))
+    if "by_participants" in fc[P[0]]:
+        fc_ns = sorted(fc[P[0]]["by_participants"], key=int)
+        fc_cnt = {n: fc[P[0]]["by_participants"][n]["cases"] for n in fc_ns}
+        details.append(sec(
+            "§1 FC — 참여자 수별 분해", "보조", "aux",
+            "판정(별점)은 위 통합 기준 · 표본 " + " · ".join(f"{n}인 {fc_cnt[n]}건" for n in fc_ns),
+            tbl(["방안"] + [f"{n}인 (달성률 · s · x*/합의)" for n in fc_ns],
+                [[PLAN_LABELS.get(p, p)] + [
+                    f"{fc[p]['by_participants'][n]['mean_ratio']:.3f} · {fc[p]['by_participants'][n]['s']:.3f}"
+                    f" · {fc[p]['by_participants'][n]['optimal_hit']}/{fc[p]['by_participants'][n]['agreed']}"
+                    for n in fc_ns]
+                 for p in P])))
     # §3 상세 — 지표별 표 4개. N을 열로 두어 방안 간 같은 N을 나란히 비교한다.
     levels = [str(n) for n in sp["config"]["levels"]]
 
@@ -194,18 +212,32 @@ def render_html(raw: dict) -> str:
               f"{tb[p]['median_eval_ms']/1000:.2f}s", f"{tb[p]['median_transfer_ms']/1000:.3f}s", tb[p]["dominant"]]
              for p in P])))
     details.append(sec(
-        "§7 CF — 상세", "비핵심·보조", "aux",
-        "frequency 공격자 (고정 규칙) · 관점 2개",
+        "§7 CF — 상세 (functional 3인 100건 · 정밀)", "비핵심·보조", "aux",
+        f"frequency 공격자 (고정 규칙) · {cf['config'].get('viewpoints', '관점 2개')}",
         tbl(["방안", "관점", "정확도", "이득", "노출률", "별점"],
             [[PLAN_LABELS.get(p, p), "일반 참여자" if vp == "participant" else "담당자",
               f"{cf[p][vp]['accuracy']*100:.1f}%", f"{cf[p][vp]['gain_pp']:+.1f}%p",
               f"{cf[p][vp]['exposure_rate']:.2f}", _stars(cf[p][vp]["stars"])]
              for p in P for vp in ("participant", "coordinator")])))
+    if "by_n" in cf[P[0]]:
+        cf_ns = sorted(cf[P[0]]["by_n"], key=int)
+        for vp, vlabel in (("participant", "일반 참여자"), ("coordinator", "담당자·루트")):
+            details.append(sec(
+                f"§7 CF — N별 노출률 ({vlabel} 관점)", "전 N", "aux",
+                f"{cf['config'].get('by_n_input', '')} · 각 N {cf['config'].get('by_n_runs')}건 · 별점은 N별 개별 등급 — 종합 압축 없음",
+                tbl(["방안"] + [f"N={n}" for n in cf_ns],
+                    [[PLAN_LABELS.get(p, p)] + [
+                        f"{cf[p]['by_n'][n][vp]['exposure_rate']:.2f} · {_stars(cf[p]['by_n'][n][vp]['stars'])}"
+                        for n in cf_ns]
+                     for p in P])))
     details.append(sec(
         "§2 RU / §4 SC-의제 — 상세 (대체 측정)", "보조", "sub",
         "RU 정본(RSS·L_state 판정)은 실기기 소관 · SC-의제는 벤치마크 보류",
         tbl(["항목"] + [PLAN_LABELS.get(p, p) for p in P],
-            [["RU 피크/평균 (KiB)"] + [f"{ru[p]['median_peak_bytes']/1024:.1f} / {ru[p]['median_avg_bytes']/1024:.1f}" for p in P],
+            [["RU 1인 최대 / 전원 합계 (논리 KiB)"] + [
+                 f"{ru[p].get('median_person_peak_bytes', 0)/1024:.1f} / {ru[p].get('median_total_logical_bytes', 0)/1024:.1f}"
+                 for p in P],
+             ["RU 프로세스 피크/평균 (참고 KiB)"] + [f"{ru[p]['median_peak_bytes']/1024:.1f} / {ru[p]['median_avg_bytes']/1024:.1f}" for p in P],
              ["SC-의제 c [CI] · 별점"] + [f"{si[p]['c']:.2f} [{si[p]['ci'][0]:.2f}, {si[p]['ci'][1]:.2f}] · {_stars(si[p]['stars'])}" for p in P]])))
 
     return f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">

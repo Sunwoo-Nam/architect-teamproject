@@ -47,16 +47,33 @@ def render_markdown(raw: dict) -> str:
             f" | {d['median_rounds']:.0f} / {d['median_phases']:.0f} / {d['median_messages']:.0f} / {d['median_bytes']:.0f} |"
         )
     A("")
+    if "by_participants" in fc[PLAN_NAMES[0]]:
+        ns = sorted(fc[PLAN_NAMES[0]]["by_participants"], key=int)
+        counts = {n: fc[PLAN_NAMES[0]]["by_participants"][n]["cases"] for n in ns}
+        A("**참여자 수별 분해** (판정은 위 통합 기준 · 표본 "
+          + " · ".join(f"{n}인 {counts[n]}건" for n in ns) + "):")
+        A("")
+        A("| 방안 | " + " | ".join(f"{n}인 달성률 / s" for n in ns) + " |")
+        A("|---" * (len(ns) + 1) + "|")
+        for p in PLAN_NAMES:
+            bp = fc[p]["by_participants"]
+            A("| " + p + " | " + " | ".join(
+                f"{bp[n]['mean_ratio']:.3f} / {bp[n]['s']:.3f}" for n in ns) + " |")
+        A("")
 
     ru = raw["ru_memory"]
     A("## [§2] Resource Utilization-메모리 (ENV-A 대체 측정)")
     A("")
     A(f"조건: {ru['config']['note']}. 정본(Peak/Average RSS·L_state 판정)은 실기기 소관 — 여기서는 상대 비교만.")
     A("")
-    A("| 방안 | 피크 증가분 중앙값 | 평균 증가분 중앙값 |")
-    A("|---|---|---|")
+    A("| 방안 | 최대 부하 단말 (논리) | 전원 합계 (논리·복제 반영) | 프로세스 피크 (참고) | 프로세스 평균 (참고) |")
+    A("|---|---|---|---|---|")
     for p in PLAN_NAMES:
-        A(f"| {p} | {_kib(ru[p]['median_peak_bytes'])} | {_kib(ru[p]['median_avg_bytes'])} |")
+        A(f"| {p} | {_kib(ru[p].get('median_person_peak_bytes', 0))}"
+          f" | {_kib(ru[p].get('median_total_logical_bytes', 0))}"
+          f" | {_kib(ru[p]['median_peak_bytes'])} | {_kib(ru[p]['median_avg_bytes'])} |")
+    A("")
+    A(f"귀속 모델: {ru['config'].get('person_note', '')}")
     A("")
 
     sp = raw["sc_participants"]
@@ -178,6 +195,20 @@ def render_markdown(raw: dict) -> str:
                 f" | {d['accuracy'] * 100:.1f}% | {d['gain_pp']:+.1f}%p | {d['exposure_rate']:.2f} | {_stars(d['stars'])} |"
             )
     A("")
+    if "by_n" in cf[PLAN_NAMES[0]]:
+        ns = sorted(cf[PLAN_NAMES[0]]["by_n"], key=int)
+        A(f"**N별 노출률** ({cfc.get('by_n_input', '')} · 각 {cfc.get('by_n_runs')}건 · {cfc.get('viewpoints', '')}):")
+        A("")
+        for vp, label in (("participant", "일반 참여자 관점"), ("coordinator", "담당자·루트 관점")):
+            A(f"_{label}_")
+            A("")
+            A("| 방안 | " + " | ".join(f"N={n}" for n in ns) + " |")
+            A("|---" * (len(ns) + 1) + "|")
+            for p in PLAN_NAMES:
+                bn = cf[p]["by_n"]
+                A("| " + p + " | " + " | ".join(
+                    f"{bn[n][vp]['exposure_rate']:.2f} (★{bn[n][vp]['stars']})" for n in ns) + " |")
+            A("")
 
     if "an_kit" in raw:
         A("## [§8] Analysability — 진단 실험 킷")

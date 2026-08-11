@@ -42,7 +42,8 @@ def _visible_events(session: SessionResult, observer: str, coordinator: str) -> 
         # 관찰자가 보는 것 = 자기 제출 + 이진 트리 자식들의 제출.
         from ..protocol_styles import tree_children
 
-        pids = sorted({p for ev in session.log for p in ev.get("submitted", {})})
+        pids = sorted({p for ev in session.log for p in ev.get("submitted", {})},
+                      key=lambda s: (len(s), s))  # P2 < P10 자연 정렬
         allowed = {observer, *tree_children(pids, observer)} if observer in pids else {observer}
         out = []
         for ev in session.log:
@@ -53,7 +54,8 @@ def _visible_events(session: SessionResult, observer: str, coordinator: str) -> 
         # 계층 병합: 레벨-0 짝의 배치만 보인다 — 상위 계층엔 개인 귀속 없는 집계 (root도 동일)
         from ..protocol_styles import pair_partner
 
-        pids = sorted({p for ev in session.log for p in ev.get("submitted", {})})
+        pids = sorted({p for ev in session.log for p in ev.get("submitted", {})},
+                      key=lambda s: (len(s), s))  # P2 < P10 자연 정렬
         mate = pair_partner(pids, observer) if observer in pids else None
         allowed = {observer, mate} if mate else {observer}
         out = []

@@ -45,6 +45,7 @@ def _fc_section(cases: list[BenchmarkCase]) -> dict:
         ratios, baselines = [], []
         agreed = opt = nd_ok = nd_bad = ties = 0
         rounds, phases, msgs, byts = [], [], [], []
+        grp: dict[int, dict] = {}  # 참여자 수별 분해
         for case in cases:
             s = cls(case.profiles).run()
             f = fcmod.score(s.outcome, case.candidates, case.profiles)
@@ -57,9 +58,23 @@ def _fc_section(cases: list[BenchmarkCase]) -> dict:
             ties += s.tie_break_used
             rounds.append(s.rounds); phases.append(s.phases)
             msgs.append(s.messages); byts.append(s.bytes)
+            g = grp.setdefault(len(case.profiles), {"ratios": [], "baselines": [],
+                                                    "agreed": 0, "opt": 0})
+            g["ratios"].append(f.ratio); g["baselines"].append(f.baseline)
+            g["agreed"] += s.agreed; g["opt"] += s.outcome == f.optimal
         mr, mb = statistics.mean(ratios), statistics.mean(baselines)
         sv = (mr - mb) / (1 - mb) if mb < 1 else 1.0
+        by_p = {}
+        for np_ in sorted(grp):
+            g = grp[np_]
+            gmr, gmb = statistics.mean(g["ratios"]), statistics.mean(g["baselines"])
+            gs = (gmr - gmb) / (1 - gmb) if gmb < 1 else 1.0
+            by_p[str(np_)] = {"cases": len(g["ratios"]), "mean_ratio": round(gmr, 4),
+                              "mean_baseline": round(gmb, 4), "s": round(gs, 4),
+                              "stars": fcmod.stars_from_s(gs),
+                              "agreed": g["agreed"], "optimal_hit": g["opt"]}
         sec[name] = {
+            "by_participants": by_p,
             "mean_ratio": round(mr, 4), "mean_baseline": round(mb, 4),
             "s": round(sv, 4), "stars": fcmod.stars_from_s(sv),
             "agreed": agreed, "optimal_hit": opt,
@@ -75,10 +90,14 @@ def _fc_section(cases: list[BenchmarkCase]) -> dict:
 def _ru_section(cases: list[BenchmarkCase]) -> dict:
     import tracemalloc
 
+    from .measures.ru_person import holder_sizes
+
     sec: dict = {"config": {"cases": len(cases), "input": "벤치마크 functional (3인)",
-                            "note": "관찰 로그 제외 · 평균은 라운드 경계 표집 — Peak/Average RSS의 ENV-A 대체"}}
+                            "note": "관찰 로그 제외 · 평균은 라운드 경계 표집 — Peak/Average RSS의 ENV-A 대체",
+                            "person_note": "1인당·합계는 논리 상태의 귀속 계상(ru_person 모델) — "
+                                           "복제 구조(mesh 등)의 비용을 반영. 프로세스 피크는 참고치"}}
     for name, cls in PLANS:
-        peaks, avgs = [], []
+        peaks, avgs, person_peaks, total_peaks = [], [], [], []
         for case in cases:
             for prof in case.profiles:
                 prof.clear_caches()
@@ -91,8 +110,24 @@ def _ru_section(cases: list[BenchmarkCase]) -> dict:
             _, peak = tracemalloc.get_traced_memory(); tracemalloc.stop()
             peaks.append(max(0, peak - base))
             avgs.append(statistics.mean(samples) if samples else 0.0)
+            # 2차 실행(결정론 동일): 논리 상태의 1인당 귀속 표집 — tracemalloc 오염 방지 분리
+            plan = cls(case.profiles, collect_log=False)
+            pmax = [0] * len(case.profiles)
+            tmax = [0]
+
+            def _cb(plan=plan, pmax=pmax, tmax=tmax):
+                sizes = holder_sizes(plan)
+                tmax[0] = max(tmax[0], sum(sizes))
+                for i, s in enumerate(sizes):
+                    pmax[i] = max(pmax[i], s)
+
+            plan.run(on_round_end=_cb)
+            person_peaks.append(max(pmax) if pmax else 0)
+            total_peaks.append(tmax[0])
         sec[name] = {"median_peak_bytes": int(statistics.median(peaks)),
-                     "median_avg_bytes": int(statistics.median(avgs))}
+                     "median_avg_bytes": int(statistics.median(avgs)),
+                     "median_person_peak_bytes": int(statistics.median(person_peaks)),
+                     "median_total_logical_bytes": int(statistics.median(total_peaks))}
     return sec
 
 
@@ -165,9 +200,22 @@ def _rec_section(cases: list[BenchmarkCase]) -> dict:
     return sec
 
 
-def _cf_section(cases: list[BenchmarkCase]) -> dict:
+def _cf_section(cases: list[BenchmarkCase], scal_cases: list[BenchmarkCase]) -> dict:
+    """CF — functional 3인 100건(정밀) + scalability 전 N(구조 차이 발현 구간).
+
+    관점 정의: participant = P1 (트리 구조에서는 자식을 둔 내부 노드 — 비루트 최악 관찰자의
+    보수적 대표), coordinator = P0 (담당자·루트·문서 시작점).
+    """
     n_cands = len(cases[0].candidates)
-    sec: dict = {"config": {"cases": len(cases), "candidates": n_cands, "input": "벤치마크 functional (3인)"}}
+    by_n_groups: dict[int, list[BenchmarkCase]] = {}
+    for c in scal_cases:
+        by_n_groups.setdefault(len(c.profiles), []).append(c)
+    sec: dict = {"config": {
+        "cases": len(cases), "candidates": n_cands, "input": "벤치마크 functional (3인)",
+        "by_n_levels": sorted(by_n_groups), "by_n_runs": len(next(iter(by_n_groups.values()))),
+        "by_n_input": "벤치마크 scalability family (후보 4N)",
+        "viewpoints": "participant=P1(트리에선 내부 노드 — 비루트 최악 관찰자) · coordinator=P0(담당자·루트)",
+    }}
     for name, cls in PLANS:
         runs = [(cls(c.profiles).run(), c.profiles) for c in cases]
         sec[name] = {}
@@ -176,6 +224,19 @@ def _cf_section(cases: list[BenchmarkCase]) -> dict:
             rate = exposure_rate(g, n_cands)
             sec[name][vp] = {"accuracy": round(g.accuracy, 4), "gain_pp": round(g.gain_pp, 2),
                              "exposure_rate": round(rate, 4), "stars": stars_exposure(rate)}
+        by_n = {}
+        for n in sorted(by_n_groups):
+            grp = by_n_groups[n]
+            nc = len(grp[0].candidates)
+            gruns = [(cls(c.profiles).run(), c.profiles) for c in grp]
+            entry = {}
+            for vp in ("participant", "coordinator"):
+                g = measure_gain(gruns, nc, viewpoint=vp)
+                rate = exposure_rate(g, nc)
+                entry[vp] = {"gain_pp": round(g.gain_pp, 2),
+                             "exposure_rate": round(rate, 4), "stars": stars_exposure(rate)}
+            by_n[str(n)] = entry
+        sec[name]["by_n"] = by_n
     return sec
 
 
@@ -245,5 +306,5 @@ def run_full(seed: int = 20260811) -> dict:
         "tb": _tb_section(f3),
         "ft": _ft_section(f3, seed),
         "rec": _rec_section(f3[:10]),
-        "confidentiality": _cf_section(f3),
+        "confidentiality": _cf_section(f3, scal),
     }

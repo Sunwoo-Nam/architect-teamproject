@@ -76,6 +76,7 @@ class Plan3Mesh(_StyleBase):
         bb = Blackboard(n=self.n)
         events: list[dict] = []
         delivered: dict[str, set] = {}
+        self._delivered_ref = delivered  # RU 1인당 귀속 측정용 참조
         rounds = 0
         self._eval_calls = sum(len(a.ranked) for a in self.agents)
         max_rank = max(len(a.ranked) for a in self.agents)
@@ -143,6 +144,7 @@ class Plan4Ring(_StyleBase):
         bb = Blackboard(n=self.n)
         events: list[dict] = []
         delivered: dict[str, set] = {}
+        self._delivered_ref = delivered  # RU 1인당 귀속 측정용 참조
         rounds = 0  # 라운드 = 고리 한 바퀴(전원 1회 처리)
         self._eval_calls = sum(len(a.ranked) for a in self.agents)
         max_rank = max(len(a.ranked) for a in self.agents)
@@ -213,6 +215,7 @@ class Plan11Tree(_StyleBase):
         bb = Blackboard(n=self.n)
         events: list[dict] = []
         delivered: dict[str, set] = {}
+        self._delivered_ref = delivered  # RU 1인당 귀속 측정용 참조
         rounds = 0  # 라운드 = 바퀴당 트리 병합 1회
         self._eval_calls = sum(len(a.ranked) for a in self.agents)
         for sweep in range(1, self.max_sweeps + 1):
@@ -312,6 +315,7 @@ class Plan5Gossip(_StyleBase):
         pids = [a.p.pid for a in self.agents]
         # knowledge[i] = 노드 i가 아는 {참여자: 제안 집합}
         knowledge = [{pid: set() for pid in pids} for _ in range(self.n)]
+        self._knowledge_ref = knowledge  # RU 1인당 귀속 측정용 참조
         rounds = 0
         self._eval_calls = sum(len(a.ranked) for a in self.agents)
         max_rank = max(len(a.ranked) for a in self.agents)
@@ -415,6 +419,7 @@ class Plan6ITree(_StyleBase):
         bb = Blackboard(n=self.n)
         events: list[dict] = []
         delivered: dict[str, set] = {}
+        self._delivered_ref = delivered  # RU 1인당 귀속 측정용 참조
         rounds = 0
         self._eval_calls = sum(len(a.ranked) for a in self.agents)
         max_rank = max(len(a.ranked) for a in self.agents)
@@ -508,10 +513,12 @@ class Plan12Rotate(_StyleBase):
         bb = Blackboard(n=self.n)
         events: list[dict] = []
         delivered: dict[str, set] = {}
+        self._delivered_ref = delivered  # RU 1인당 귀속 측정용 참조
         rounds = 0
         self._eval_calls = sum(len(a.ranked) for a in self.agents)
         for sweep in range(1, self.max_sweeps + 1):
             coord = (sweep - 1) % self.n
+            self._coord_idx = coord  # RU 귀속: 현 바퀴 담당자
             boundary = self._snapshot(delivered)
             batch_log = {}
             for i, a in enumerate(self.agents):

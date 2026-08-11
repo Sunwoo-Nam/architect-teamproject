@@ -202,3 +202,29 @@ def test_gossip_and_rotate_properties():
         assert r.rounds >= 1
         tr = trial(cls, profiles, "mid_round", 1)
         assert tr.fr_ok, cls.plan_name
+
+
+def test_ru_person_attribution():
+    from dp2_nparty.measures.ru_person import holder_sizes
+    from dp2_nparty.protocol import Plan2Cumulative
+    from dp2_nparty.protocol_styles import Plan3Mesh, Plan6ITree
+
+    rng = random.Random(51)
+    cands = [f"s{j}" for j in range(12)]
+    profiles = TableUfun().build_profiles(cands, 4, rng)
+    seen = {}
+    for cls in (Plan2Cumulative, Plan3Mesh, Plan6ITree):
+        plan = cls(profiles, collect_log=False)
+        peaks = [0] * 4
+        def cb(plan=plan, peaks=peaks):
+            for i, s in enumerate(holder_sizes(plan)):
+                peaks[i] = max(peaks[i], s)
+        plan.run(on_round_end=cb)
+        seen[plan.plan_name] = peaks
+    # BB: 담당자만 부하, mesh: 전원 동일(복제), itree: root ≥ 내부 ≥ 리프
+    assert seen["plan2"][0] > 0 and all(v == 0 for v in seen["plan2"][1:])
+    assert len(set(seen["plan3mesh"])) == 1 and seen["plan3mesh"][0] > 0
+    it = seen["plan6itree"]
+    assert it[0] >= it[1] >= it[3] and it[3] > 0  # root ≥ P1(부모) ≥ P3(리프, 자기 것만)
+    # mesh 전원 합계 = 1부의 N배 성질
+    assert sum(seen["plan3mesh"]) == 4 * seen["plan3mesh"][0]

@@ -117,6 +117,7 @@ class _BasePlan:
         on_round_end=None,
     ) -> SessionResult:
         bb = Blackboard(n=self.n)
+        self._bb_ref = bb  # RU 1인당 귀속 측정용 참조
         events: list[dict] = []
         rounds = 0
         # 효용 평가 호출: 순위표 구축 = 참여자마다 전 후보 1회 평가 (두 방안 공통)
@@ -277,6 +278,7 @@ class Plan10Batch(_BasePlan):
 
     def run(self, injector=None, kill_at=None, on_round_end=None) -> SessionResult:
         bb = Blackboard(n=self.n)
+        self._bb_ref = bb  # RU 1인당 귀속 측정용 참조
         events: list[dict] = []
         rounds = 0  # 방안 10의 라운드 = 배치 제출 회수 (바퀴당 1회)
         self._eval_calls = sum(len(a.ranked) for a in self.agents)  # 순위표 구축 (공통)
