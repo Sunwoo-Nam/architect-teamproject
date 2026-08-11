@@ -20,6 +20,7 @@ from dpca.common.generators import Value
 from dpca.common.rules import Outcome
 from dpca.common.scenario import Axis, Scenario
 from dpca.harness.beliefs import AgentBeliefs
+from dpca.harness.comms import Comms
 from dpca.harness.eventlog import EventLog
 from dpca.harness.negmas_bridge import aspiration
 
@@ -30,6 +31,7 @@ class SequentialResult:
     rounds: int
     proposals: int
     backtracks: int
+    comms: Comms | None = None
     trace: list[str] = field(default_factory=list)
 
 
@@ -45,9 +47,11 @@ class AxisNegotiator(SAONegotiator):
         agreed: dict[str, Value],
         n_steps: int,
         log: EventLog | None = None,
+        comms: Comms | None = None,
     ):
         super().__init__(name=f"seq-{beliefs.idx}-{axis.name}")
         self.eventlog = log
+        self.comms = comms
         self.beliefs = beliefs
         self.scenario = scenario
         self.axis = axis
@@ -92,12 +96,16 @@ class AxisNegotiator(SAONegotiator):
         for v in self.mine:
             if self._score(v) >= thr and v.name not in self._offered:
                 self._offered.add(v.name)
+                if self.comms:
+                    self.comms.proposal_sent()
                 self._log("propose", step=state.step, offer=v.name,
                           my_score=round(self._score(v), 4), threshold=round(thr, 4),
                           reason="양보선 이상 미제안 값 중 최선")
                 return (v.name,)
         if self.mine:
             best = self.mine[0]
+            if self.comms:
+                self.comms.proposal_sent()
             self._log("propose", step=state.step, offer=best.name,
                       my_score=round(self._score(best), 4), threshold=round(thr, 4),
                       reason="새 값 없음 — 최선값 반복 제안")
@@ -122,6 +130,8 @@ class AxisNegotiator(SAONegotiator):
                       reason="낙관적 완성 효용이 바닥선 미달 — 받으면 바닥선 도달 불가")
             return ResponseType.REJECT_OFFER
         if self._score(value) >= thr:
+            if self.comms:
+                self.comms.accept_sent()
             self._log("respond", step=state.step, offer=offer[0], decision="ACCEPT",
                       my_score=round(self._score(value), 4), optimistic=round(optimistic, 4),
                       threshold=round(thr, 4), reason="값 점수 ≥ 양보선, 낙관 하한 통과")
@@ -147,7 +157,10 @@ def run_sequential(
     n_steps_per_axis: int = 60,
     max_backtracks: int = 2,
     log: EventLog | None = None,
+    comms: Comms | None = None,
 ) -> SequentialResult:
+    comms = comms if comms is not None else Comms(n_participants=len(beliefs))
+
     def orch_log(kind: str, **fields) -> None:
         if log is not None:
             log.log(kind, **fields)
@@ -168,7 +181,7 @@ def run_sequential(
             and all(r({**agreed, axis.name: v}) for r in shared_hard if _covers(r, {**agreed, axis.name: v}))
         ]
         negotiators = [
-            AxisNegotiator(b, scenario, axis, space_values, agreed, n_steps_per_axis, log=log)
+            AxisNegotiator(b, scenario, axis, space_values, agreed, n_steps_per_axis, log=log, comms=comms)
             for b in beliefs
         ] if space_values else []
         orch_log("axis_session_start", axis=axis.name,
@@ -195,7 +208,7 @@ def run_sequential(
                 trace.append(f"{axis.name}: 진행 불가, 백트랙 소진 → 결렬")
                 orch_log("sequential_breakdown", axis=axis.name, backtracks=backtracks,
                          reason="진행 불가 상태에서 백트랙 상한 소진")
-                return SequentialResult(None, rounds, proposals, backtracks, trace)
+                return SequentialResult(None, rounds, proposals, backtracks, comms=comms, trace=trace)
             prev = scenario.axes[i - 1]
             forbidden[prev.name].add(agreed[prev.name].name)
             trace.append(f"{axis.name}: 진행 불가 → {prev.name}={agreed[prev.name].name} 금지 후 백트랙")
@@ -220,8 +233,9 @@ def run_sequential(
             orch_log("final_confirm_failed", agent=b.idx,
                      utility=round(b.utility(outcome), 4), floor=b.initial_threshold,
                      reason="조립된 전체 합의가 이 참여자의 바닥선 미달")
-            return SequentialResult(None, rounds, proposals, backtracks, trace)
+            return SequentialResult(None, rounds, proposals, backtracks, comms=comms, trace=trace)
     orch_log("final_confirmed", agreement={k: v.name for k, v in agreed.items()})
     return SequentialResult(
-        {name: value.name for name, value in agreed.items()}, rounds, proposals, backtracks, trace
+        {name: value.name for name, value in agreed.items()}, rounds, proposals, backtracks,
+        comms=comms, trace=trace,
     )

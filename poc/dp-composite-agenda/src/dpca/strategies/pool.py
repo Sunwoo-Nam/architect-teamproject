@@ -12,6 +12,7 @@ from dpca.common.generators import Value
 from dpca.common.rules import build_hard_rules
 from dpca.common.scenario import Scenario
 from dpca.harness.beliefs import AgentBeliefs
+from dpca.harness.comms import Comms
 from dpca.harness.eventlog import EventLog
 from dpca.harness.negmas_bridge import TupleCodec
 
@@ -27,8 +28,9 @@ class PoolNegotiator(CandidateNegotiator):
         n_steps: int,
         k_start: int = 2,
         log: EventLog | None = None,
+        comms: Comms | None = None,
     ):
-        super().__init__(beliefs, codec, n_steps, name=f"pool-{beliefs.idx}", log=log)
+        super().__init__(beliefs, codec, n_steps, name=f"pool-{beliefs.idx}", log=log, comms=comms)
         self.scenario = scenario
         self.k = k_start
         self.k_max = max(len(ax.values) for ax in scenario.axes)

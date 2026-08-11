@@ -13,7 +13,10 @@ P1(하니스 + 전략 3구현)까지 구현됨:
   NegMAS 브리지(SAOMechanism·양보선), Judge(24 정본 달성률·별점), 러너(tracemalloc 피크·라운드·제안 수)
 - `src/dpca/strategies/` — `full`(baseline 전수 나열, c≈1 앵커) · `seq`(1안 축별 순차 SAO 세션 +
   낙관적 완성 하한·백트랙·최종 확인) · `pool`(2안 축별 top-k 압축 풀 + 양보선-풀하한 deepening)
-- `scripts/run_smoke.py [--all]` — TC × 전략 3종 스모크 (달성률·별점·라운드·피크 메모리)
+- `scripts/run_smoke.py [--all]` — 스모크 (전략 3종 1회)
+- `scripts/run_benchmark.py [--seeds 30]` — **P2 본 측정**: TC × 시드 × 전략 → `results/fc_benchmark.jsonl`
+- `scripts/analyze_fc.py` — FC 집계 + 짝비교(1안 vs 2안). 결과: `results/P2-FC-결과.md`
+- 계측: phase 수(B1 Time 정본 지표 — 라운드 수 비교는 핸드북이 금지)·메시지 횟수(C1)
 - **추적성**: 모든 실행은 이벤트 로그(JSONL)를 남길 수 있다 — 제안·응답마다 offer·자기 효용·
   그 시점 양보선·결정 사유, deepening/백트랙/최종 확인 이벤트까지 (기록 완전성 FR 취지).
   `scripts/explain_run.py <log.jsonl>` (또는 `--demo S01 pool`)이 로그만으로 협상 전개를

@@ -10,6 +10,7 @@ from __future__ import annotations
 from negmas.sao import ResponseType, SAONegotiator, SAOState
 
 from dpca.harness.beliefs import AgentBeliefs
+from dpca.harness.comms import Comms
 from dpca.harness.eventlog import EventLog
 from dpca.harness.negmas_bridge import TupleCodec, aspiration
 
@@ -22,12 +23,14 @@ class CandidateNegotiator(SAONegotiator):
         n_steps: int,
         name: str,
         log: EventLog | None = None,
+        comms: Comms | None = None,
     ):
         super().__init__(name=name)
         self.beliefs = beliefs
         self.codec = codec
         self.n_steps = n_steps
         self.eventlog = log
+        self.comms = comms
         self.proposal_count = 0
         self.response_count = 0
         self._offered: set[tuple] = set()
@@ -67,6 +70,8 @@ class CandidateNegotiator(SAONegotiator):
                     break  # 내림차순이라 이후는 전부 양보선 미만
                 if offer not in self._offered:
                     self._offered.add(offer)
+                    if self.comms:
+                        self.comms.proposal_sent()
                     self._log("propose", step=state.step, offer=offer, my_utility=round(utility, 4),
                               threshold=round(thr, 4), reason="양보선 이상 미제안 후보 중 최선")
                     return offer
@@ -80,6 +85,8 @@ class CandidateNegotiator(SAONegotiator):
         candidates = self._ensure()
         if candidates:
             utility, offer = candidates[0]
+            if self.comms:
+                self.comms.proposal_sent()
             self._log("propose", step=state.step, offer=offer, my_utility=round(utility, 4),
                       threshold=round(thr, 4), reason="새 후보 없음 — 최선안 반복 제안")
             return offer
@@ -100,6 +107,8 @@ class CandidateNegotiator(SAONegotiator):
             return ResponseType.REJECT_OFFER
         utility = self.beliefs.utility(outcome)
         if utility >= thr:
+            if self.comms:
+                self.comms.accept_sent()
             self._log("respond", step=state.step, offer=tuple(offer), decision="ACCEPT",
                       my_utility=round(utility, 4), threshold=round(thr, 4),
                       reason="내 효용 ≥ 양보선")
