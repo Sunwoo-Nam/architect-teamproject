@@ -23,12 +23,16 @@ MAX_SWEEPS = 5  # PL 결정 (2026-08-11)
 
 # 비교 대상 방안 목록 — 측정·리포트 전체가 이 목록을 순회한다
 def all_plans():
-    return (("plan1", Plan1Vote), ("plan2", Plan2Cumulative), ("plan3a", Plan3Batch))
+    from .protocol_styles import Plan4Mesh, Plan5Ring, Plan6Tree
+
+    return (("plan1", Plan1Vote), ("plan2", Plan2Cumulative), ("plan3a", Plan3Batch),
+            ("plan4mesh", Plan4Mesh), ("plan5ring", Plan5Ring), ("plan6tree", Plan6Tree))
 
 
-PLAN_NAMES = ("plan1", "plan2", "plan3a")
-PLAN_LABELS = {"plan1": "방안 1 전원동의 투표형", "plan2": "방안 2 누적 공통제안형",
-               "plan3a": "방안 3-A 일괄 순위 제출형"}
+PLAN_NAMES = ("plan1", "plan2", "plan3a", "plan4mesh", "plan5ring", "plan6tree")
+PLAN_LABELS = {"plan1": "방안 1 투표형(BB)", "plan2": "방안 2 누적형(BB)",
+               "plan3a": "방안 3-A 일괄형(BB)", "plan4mesh": "방안 4 브로드캐스트(P2P)",
+               "plan5ring": "방안 5 릴레이(Ring)", "plan6tree": "방안 6 계층 병합(Tree)"}
 
 
 @dataclass

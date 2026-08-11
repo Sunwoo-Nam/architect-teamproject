@@ -31,7 +31,9 @@ from .measures.scaling import (
 from .protocol import PLAN_NAMES, Plan1Vote, Plan2Cumulative, Plan3Batch
 from .ufun_provider import TableUfun
 
-PLANS = (("plan1", Plan1Vote), ("plan2", Plan2Cumulative), ("plan3a", Plan3Batch))
+from .protocol import all_plans
+
+PLANS = all_plans()
 
 
 def _base_profiles(seed: int, i: int, n: int = 3, m: int = 12):

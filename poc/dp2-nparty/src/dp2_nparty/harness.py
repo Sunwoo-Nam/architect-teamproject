@@ -14,7 +14,7 @@ from .measures.ru_memory import peak_memory_bytes
 from .protocol import Plan1Vote, Plan2Cumulative, Plan3Batch
 from .ufun_provider import TableUfun, UfunProvider
 
-PLANS = {"plan1": Plan1Vote, "plan2": Plan2Cumulative, "plan3a": Plan3Batch}
+PLANS = dict(__import__("dp2_nparty.protocol", fromlist=["all_plans"]).all_plans())
 
 
 @dataclass

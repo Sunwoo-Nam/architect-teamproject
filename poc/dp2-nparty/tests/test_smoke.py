@@ -10,6 +10,7 @@ from dp2_nparty.harness import Experiment
 from dp2_nparty.measures import fc
 from dp2_nparty.measures.scaling import loglog_fit, stars_b_msg
 from dp2_nparty.protocol import Plan1Vote, Plan2Cumulative, Plan3Batch
+from dp2_nparty.protocol_styles import Plan4Mesh, Plan5Ring, Plan6Tree
 from dp2_nparty.threshold import SweepThreshold
 from dp2_nparty.ufun_provider import TableUfun
 
@@ -28,7 +29,7 @@ def test_both_plans_agree_on_obvious_case():
     profiles = [
         Profile(f"P{i}", {"A": 0.9, "B": 0.5 + i * 0.01, "C": 0.2}, 0.4) for i in range(3)
     ]
-    for cls in (Plan1Vote, Plan2Cumulative, Plan3Batch):
+    for cls in (Plan1Vote, Plan2Cumulative, Plan3Batch, Plan4Mesh, Plan5Ring, Plan6Tree):
         r = cls(profiles).run()
         assert r.outcome == "A", (cls.__name__, r)
         assert r.messages > 0
@@ -41,7 +42,7 @@ def test_no_deal_when_infeasible():
         Profile("P1", {"A": 0.1, "B": 0.9}, 0.4),
         Profile("P2", {"A": 0.1, "B": 0.1}, 0.4),
     ]
-    for cls in (Plan1Vote, Plan2Cumulative, Plan3Batch):
+    for cls in (Plan1Vote, Plan2Cumulative, Plan3Batch, Plan4Mesh, Plan5Ring, Plan6Tree):
         r = cls(profiles).run()
         assert r.outcome == NO_DEAL
         s = fc.score(r.outcome, ["A", "B"], profiles)
@@ -145,3 +146,28 @@ def test_plan3a_batch_properties():
     f2 = fcmod.score(r2.outcome, cands, profiles)
     f3 = fcmod.score(r3.outcome, cands, profiles)
     assert f3.ratio >= f2.ratio - 1e-9
+
+
+def test_style_plans_properties():
+    from dp2_nparty.faults import FaultInjector
+    from dp2_nparty.measures.rec import trial
+
+    rng = random.Random(31)
+    cands = [f"s{j}" for j in range(12)]
+    profiles = TableUfun().build_profiles(cands, 3, rng)
+    base = {cls.plan_name: cls(profiles).run() for cls in (Plan4Mesh, Plan5Ring, Plan6Tree)}
+    # 결과 정합: 세 스타일 모두 같은 만장일치 규칙이므로 방안 2 계열과 동일 결과에 도달해야 한다
+    r2 = Plan2Cumulative(profiles).run()
+    assert base["plan4mesh"].outcome == r2.outcome  # mesh = 분산판 방안 2
+    # 통신 구조 성질
+    assert base["plan4mesh"].messages > r2.messages  # 방송 N-1배
+    assert base["plan5ring"].phases >= base["plan4mesh"].phases  # 직렬 홉 > 병렬 라운드
+    assert base["plan6tree"].phases <= base["plan5ring"].phases  # 트리 log 병합
+    # 유실 주입에도 종결
+    for cls in (Plan4Mesh, Plan5Ring, Plan6Tree):
+        r = cls(profiles).run(injector=FaultInjector(0.3, 7))
+        assert r.rounds >= 1
+    # kill-resume FR 정합
+    for cls in (Plan4Mesh, Plan6Tree):
+        tr = trial(cls, profiles, "mid_round", 1)
+        assert tr.fr_ok, cls.plan_name

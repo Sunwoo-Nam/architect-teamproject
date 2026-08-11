@@ -1,0 +1,807 @@
+{
+ "meta": {
+  "run_id": "full-20260811T182329KST",
+  "timestamp": "2026-08-11T18:23:29+09:00",
+  "seed": 20260811,
+  "git_commit": "497ea29",
+  "negmas_version": "0.15.7",
+  "python": "3.14.4",
+  "provider": "정적 벤치마크 셋 (functional·scalability) — §4 SC-의제만 개발용 대체",
+  "caveat": "입력은 확정 벤치마크 셋 (결정론 — 같은 입력이면 같은 결과). 예외: §4 SC-의제는 벤치마크 보류 상태라 개발용 multi-issue 생성으로 대체 측정 (잠정), §5-1의 p_env·§6의 상수는 ENV-B 실측 대체 전의 잠정값."
+ },
+ "fc": {
+  "config": {
+   "cases": 160,
+   "input": "벤치마크 functional",
+   "participants": [
+    3,
+    5,
+    7
+   ]
+  },
+  "plan1": {
+   "mean_ratio": 0.9142,
+   "mean_baseline": 0.8759,
+   "s": 0.3086,
+   "stars": 2,
+   "agreed": 128,
+   "optimal_hit": 64,
+   "nodeal_correct": 32,
+   "nodeal_wrong": 0,
+   "tie_break_used": 0,
+   "median_rounds": 11.0,
+   "median_phases": 45.0,
+   "median_messages": 100.0,
+   "median_bytes": 2115.5
+  },
+  "plan2": {
+   "mean_ratio": 0.9679,
+   "mean_baseline": 0.8759,
+   "s": 0.7411,
+   "stars": 4,
+   "agreed": 128,
+   "optimal_hit": 129,
+   "nodeal_correct": 32,
+   "nodeal_wrong": 0,
+   "tie_break_used": 0,
+   "median_rounds": 13.0,
+   "median_phases": 14.0,
+   "median_messages": 30.0,
+   "median_bytes": 596.0
+  },
+  "plan3a": {
+   "mean_ratio": 0.995,
+   "mean_baseline": 0.8759,
+   "s": 0.9595,
+   "stars": 5,
+   "agreed": 128,
+   "optimal_hit": 150,
+   "nodeal_correct": 32,
+   "nodeal_wrong": 0,
+   "tie_break_used": 96,
+   "median_rounds": 5.0,
+   "median_phases": 6.0,
+   "median_messages": 9.0,
+   "median_bytes": 547.5
+  },
+  "plan4mesh": {
+   "mean_ratio": 0.9679,
+   "mean_baseline": 0.8759,
+   "s": 0.7411,
+   "stars": 4,
+   "agreed": 128,
+   "optimal_hit": 129,
+   "nodeal_correct": 32,
+   "nodeal_wrong": 0,
+   "tie_break_used": 0,
+   "median_rounds": 13.0,
+   "median_phases": 13.0,
+   "median_messages": 84.0,
+   "median_bytes": 1680.0
+  },
+  "plan5ring": {
+   "mean_ratio": 0.9679,
+   "mean_baseline": 0.8759,
+   "s": 0.7411,
+   "stars": 4,
+   "agreed": 128,
+   "optimal_hit": 129,
+   "nodeal_correct": 32,
+   "nodeal_wrong": 0,
+   "tie_break_used": 0,
+   "median_rounds": 13.0,
+   "median_phases": 62.5,
+   "median_messages": 62.5,
+   "median_bytes": 1136.0
+  },
+  "plan6tree": {
+   "mean_ratio": 0.995,
+   "mean_baseline": 0.8759,
+   "s": 0.9595,
+   "stars": 5,
+   "agreed": 128,
+   "optimal_hit": 150,
+   "nodeal_correct": 32,
+   "nodeal_wrong": 0,
+   "tie_break_used": 96,
+   "median_rounds": 5.0,
+   "median_phases": 11.0,
+   "median_messages": 12.0,
+   "median_bytes": 221.0
+  }
+ },
+ "ru_memory": {
+  "config": {
+   "cases": 100,
+   "input": "벤치마크 functional (3인)",
+   "note": "관찰 로그 제외 · 평균은 라운드 경계 표집 — Peak/Average RSS의 ENV-A 대체"
+  },
+  "plan1": {
+   "median_peak_bytes": 3184,
+   "median_avg_bytes": 2171
+  },
+  "plan2": {
+   "median_peak_bytes": 4710,
+   "median_avg_bytes": 2994
+  },
+  "plan3a": {
+   "median_peak_bytes": 6240,
+   "median_avg_bytes": 3686
+  },
+  "plan4mesh": {
+   "median_peak_bytes": 6412,
+   "median_avg_bytes": 3544
+  },
+  "plan5ring": {
+   "median_peak_bytes": 6256,
+   "median_avg_bytes": 3667
+  },
+  "plan6tree": {
+   "median_peak_bytes": 6928,
+   "median_avg_bytes": 3795
+  }
+ },
+ "sc_participants": {
+  "config": {
+   "levels": [
+    3,
+    4,
+    5,
+    6,
+    8,
+    10
+   ],
+   "runs": 30,
+   "provider": "정적 벤치마크 scalability family"
+  },
+  "plan1": {
+   "agreed_by_n": {
+    "3": 30,
+    "4": 30,
+    "5": 30,
+    "6": 30,
+    "8": 30,
+    "10": 30
+   },
+   "median_messages_by_n": {
+    "3": 63.5,
+    "4": 107.0,
+    "5": 149.5,
+    "6": 192.0,
+    "8": 283.5,
+    "10": 379.5
+   },
+   "median_bytes_by_n": {
+    "3": 1335.0,
+    "4": 2494.0,
+    "5": 3886.0,
+    "6": 5315.0,
+    "8": 9125.0,
+    "10": 13165.5
+   },
+   "gate_ok": true,
+   "b_msg": 1.4647,
+   "ci": [
+    1.3268,
+    1.6026
+   ],
+   "r2": 0.9954,
+   "stars": 2,
+   "ci_spans_3_grades": true
+  },
+  "plan2": {
+   "agreed_by_n": {
+    "3": 30,
+    "4": 30,
+    "5": 30,
+    "6": 30,
+    "8": 30,
+    "10": 30
+   },
+   "median_messages_by_n": {
+    "3": 20.0,
+    "4": 36.5,
+    "5": 52.5,
+    "6": 65.0,
+    "8": 97.0,
+    "10": 127.0
+   },
+   "median_bytes_by_n": {
+    "3": 396.0,
+    "4": 724.0,
+    "5": 1042.0,
+    "6": 1290.0,
+    "8": 1926.0,
+    "10": 2522.0
+   },
+   "gate_ok": true,
+   "b_msg": 1.5004,
+   "ci": [
+    1.262,
+    1.7388
+   ],
+   "r2": 0.9871,
+   "stars": 2,
+   "ci_spans_3_grades": true
+  },
+  "plan3a": {
+   "agreed_by_n": {
+    "3": 30,
+    "4": 30,
+    "5": 30,
+    "6": 30,
+    "8": 30,
+    "10": 30
+   },
+   "median_messages_by_n": {
+    "3": 7.5,
+    "4": 12.0,
+    "5": 16.0,
+    "6": 21.0,
+    "8": 29.0,
+    "10": 38.0
+   },
+   "median_bytes_by_n": {
+    "3": 382.5,
+    "4": 714.0,
+    "5": 1014.0,
+    "6": 1245.5,
+    "8": 1810.0,
+    "10": 2407.5
+   },
+   "gate_ok": true,
+   "b_msg": 1.3326,
+   "ci": [
+    1.2032,
+    1.462
+   ],
+   "r2": 0.9951,
+   "stars": 3,
+   "ci_spans_3_grades": false
+  },
+  "plan4mesh": {
+   "agreed_by_n": {
+    "3": 30,
+    "4": 30,
+    "5": 30,
+    "6": 30,
+    "8": 30,
+    "10": 30
+   },
+   "median_messages_by_n": {
+    "3": 55.0,
+    "4": 129.0,
+    "5": 238.0,
+    "6": 355.0,
+    "8": 693.0,
+    "10": 1147.5
+   },
+   "median_bytes_by_n": {
+    "3": 1100.0,
+    "4": 2580.0,
+    "5": 4760.0,
+    "6": 7100.0,
+    "8": 13860.0,
+    "10": 22950.0
+   },
+   "gate_ok": true,
+   "b_msg": 2.4947,
+   "ci": [
+    2.2729,
+    2.7165
+   ],
+   "r2": 0.9959,
+   "stars": 0,
+   "ci_spans_3_grades": false
+  },
+  "plan5ring": {
+   "agreed_by_n": {
+    "3": 30,
+    "4": 30,
+    "5": 30,
+    "6": 30,
+    "8": 30,
+    "10": 30
+   },
+   "median_messages_by_n": {
+    "3": 44.5,
+    "4": 71.5,
+    "5": 95.5,
+    "6": 116.5,
+    "8": 165.0,
+    "10": 218.0
+   },
+   "median_bytes_by_n": {
+    "3": 797.5,
+    "4": 1303.0,
+    "5": 1755.0,
+    "6": 2150.5,
+    "8": 3067.0,
+    "10": 4099.0
+   },
+   "gate_ok": true,
+   "b_msg": 1.2891,
+   "ci": [
+    1.1614,
+    1.4169
+   ],
+   "r2": 0.9949,
+   "stars": 3,
+   "ci_spans_3_grades": true
+  },
+  "plan6tree": {
+   "agreed_by_n": {
+    "3": 30,
+    "4": 30,
+    "5": 30,
+    "6": 30,
+    "8": 30,
+    "10": 30
+   },
+   "median_messages_by_n": {
+    "3": 12.0,
+    "4": 18.0,
+    "5": 24.0,
+    "6": 30.0,
+    "8": 42.0,
+    "10": 54.0
+   },
+   "median_bytes_by_n": {
+    "3": 216.0,
+    "4": 324.0,
+    "5": 432.0,
+    "6": 540.0,
+    "8": 757.0,
+    "10": 973.5
+   },
+   "gate_ok": true,
+   "b_msg": 1.2427,
+   "ci": [
+    1.1652,
+    1.3202
+   ],
+   "r2": 0.998,
+   "stars": 3,
+   "ci_spans_3_grades": false
+  }
+ },
+ "sc_issues": {
+  "config": {
+   "levels": [
+    "10x10",
+    "7x7x7",
+    "10x10x10",
+    "8x8x8x8",
+    "10x10x10x10",
+    "8x8x8x8x8"
+   ],
+   "runs": 5,
+   "note": "복합의제 튜플 곱집합 · 로그 제외 메모리 · 별점 기준 d=4 (핸드북 §4.3)"
+  },
+  "plan1": {
+   "median_peak_by_S": {
+    "100": 8500,
+    "343": 40174,
+    "1000": 115272,
+    "4096": 714024,
+    "10000": 1805512,
+    "32768": 6029592
+   },
+   "agreed": "30/30",
+   "gate_ok": true,
+   "c": 1.1393,
+   "ci": [
+    1.0762,
+    1.2023
+   ],
+   "r2": 0.9984,
+   "stars": 0
+  },
+  "plan2": {
+   "median_peak_by_S": {
+    "100": 11700,
+    "343": 40174,
+    "1000": 115272,
+    "4096": 714024,
+    "10000": 1805512,
+    "32768": 6029592
+   },
+   "agreed": "30/30",
+   "gate_ok": true,
+   "c": 1.0992,
+   "ci": [
+    1.0339,
+    1.1645
+   ],
+   "r2": 0.9982,
+   "stars": 0
+  },
+  "plan3a": {
+   "median_peak_by_S": {
+    "100": 46826,
+    "343": 190286,
+    "1000": 712966,
+    "4096": 3430248,
+    "10000": 8432244,
+    "32768": 31502216
+   },
+   "agreed": "30/30",
+   "gate_ok": true,
+   "c": 1.1244,
+   "ci": [
+    1.0846,
+    1.1643
+   ],
+   "r2": 0.9993,
+   "stars": 0
+  },
+  "plan4mesh": {
+   "median_peak_by_S": {
+    "100": 30952,
+    "343": 96112,
+    "1000": 253944,
+    "4096": 1122072,
+    "10000": 2388584,
+    "32768": 8801000
+   },
+   "agreed": "30/30",
+   "gate_ok": true,
+   "c": 0.973,
+   "ci": [
+    0.9306,
+    1.0154
+   ],
+   "r2": 0.999,
+   "stars": 1
+  },
+  "plan5ring": {
+   "median_peak_by_S": {
+    "100": 30952,
+    "343": 95928,
+    "1000": 254008,
+    "4096": 1122104,
+    "10000": 2388616,
+    "32768": 8800968
+   },
+   "agreed": "30/30",
+   "gate_ok": true,
+   "c": 0.9731,
+   "ci": [
+    0.9307,
+    1.0156
+   ],
+   "r2": 0.999,
+   "stars": 1
+  },
+  "plan6tree": {
+   "median_peak_by_S": {
+    "100": 40496,
+    "343": 140808,
+    "1000": 536760,
+    "4096": 2868035,
+    "10000": 6887558,
+    "32768": 25717120
+   },
+   "agreed": "30/30",
+   "gate_ok": true,
+   "c": 1.1274,
+   "ci": [
+    1.0797,
+    1.1751
+   ],
+   "r2": 0.9991,
+   "stars": 0
+  }
+ },
+ "tb": {
+  "config": {
+   "cases": 100,
+   "constants": {
+    "t_rtt_ms": 50.0,
+    "t_eval_ms": 20.0,
+    "bw_bytes_per_s": 125000.0
+   },
+   "input": "벤치마크 functional (3인)",
+   "note": "상수 3종은 잠정(분석자 제안) — ENV-B 실측 대체 예정. 상대 비교·지배 항 파악용"
+  },
+  "plan1": {
+   "median_total_ms": 4072.8,
+   "median_rtt_ms": 2050.0,
+   "median_eval_ms": 2070.0,
+   "median_transfer_ms": 13.3,
+   "dominant": "eval"
+  },
+  "plan2": {
+   "median_total_ms": 1373.8,
+   "median_rtt_ms": 650.0,
+   "median_eval_ms": 720.0,
+   "median_transfer_ms": 3.7,
+   "dominant": "eval"
+  },
+  "plan3a": {
+   "median_total_ms": 1023.5,
+   "median_rtt_ms": 300.0,
+   "median_eval_ms": 720.0,
+   "median_transfer_ms": 3.5,
+   "dominant": "eval"
+  },
+  "plan4mesh": {
+   "median_total_ms": 1330.2,
+   "median_rtt_ms": 600.0,
+   "median_eval_ms": 720.0,
+   "median_transfer_ms": 9.9,
+   "dominant": "eval"
+  },
+  "plan5ring": {
+   "median_total_ms": 3252.4,
+   "median_rtt_ms": 2525.0,
+   "median_eval_ms": 720.0,
+   "median_transfer_ms": 7.4,
+   "dominant": "rtt"
+  },
+  "plan6tree": {
+   "median_total_ms": 1271.7,
+   "median_rtt_ms": 550.0,
+   "median_eval_ms": 720.0,
+   "median_transfer_ms": 1.7,
+   "dominant": "eval"
+  }
+ },
+ "ft": {
+  "config": {
+   "p_env": 0.01,
+   "p_env_note": "잠정 (ENV-B 실측 대체 전)",
+   "multiples": [
+    1,
+    2,
+    5,
+    10,
+    20,
+    50
+   ],
+   "runs_base": 100,
+   "runs_each": 100,
+   "input": "벤치마크 functional (3인)"
+  },
+  "plan1": {
+   "baseline_agree_rate": 0.8,
+   "agree_rates": {
+    "0.0": 0.8,
+    "1": 0.8,
+    "2": 0.8,
+    "5": 0.78,
+    "10": 0.79,
+    "20": 0.74,
+    "50": 0.43
+   },
+   "critical_multiple": 50,
+   "margin": 50,
+   "stars": 5
+  },
+  "plan2": {
+   "baseline_agree_rate": 0.8,
+   "agree_rates": {
+    "0.0": 0.8,
+    "1": 0.8,
+    "2": 0.8,
+    "5": 0.8,
+    "10": 0.8,
+    "20": 0.8,
+    "50": 0.8
+   },
+   "critical_multiple": null,
+   "margin": 100,
+   "stars": 5
+  },
+  "plan3a": {
+   "baseline_agree_rate": 0.8,
+   "agree_rates": {
+    "0.0": 0.8,
+    "1": 0.77,
+    "2": 0.76,
+    "5": 0.77,
+    "10": 0.71,
+    "20": 0.52,
+    "50": 0.21
+   },
+   "critical_multiple": 20,
+   "margin": 20,
+   "stars": 5
+  },
+  "plan4mesh": {
+   "baseline_agree_rate": 0.8,
+   "agree_rates": {
+    "0.0": 0.8,
+    "1": 0.8,
+    "2": 0.8,
+    "5": 0.8,
+    "10": 0.8,
+    "20": 0.8,
+    "50": 0.8
+   },
+   "critical_multiple": null,
+   "margin": 100,
+   "stars": 5
+  },
+  "plan5ring": {
+   "baseline_agree_rate": 0.8,
+   "agree_rates": {
+    "0.0": 0.8,
+    "1": 0.8,
+    "2": 0.8,
+    "5": 0.8,
+    "10": 0.8,
+    "20": 0.8,
+    "50": 0.8
+   },
+   "critical_multiple": null,
+   "margin": 100,
+   "stars": 5
+  },
+  "plan6tree": {
+   "baseline_agree_rate": 0.8,
+   "agree_rates": {
+    "0.0": 0.8,
+    "1": 0.8,
+    "2": 0.8,
+    "5": 0.8,
+    "10": 0.8,
+    "20": 0.8,
+    "50": 0.8
+   },
+   "critical_multiple": null,
+   "margin": 100,
+   "stars": 5
+  }
+ },
+ "rec": {
+  "config": {
+   "sessions": 10,
+   "input": "벤치마크 functional (3인) 선두 표본",
+   "note": "시간 대체 = phase 비용. 중단 유형(프로세스/네트워크)은 ENV-A에서 동일 취급"
+  },
+  "plan1": {
+   "trials": 90,
+   "fr_failures": 0,
+   "invalid_trials": 22,
+   "median_ratio": 1.21,
+   "restart_cost_R": 9.0,
+   "stars": 4
+  },
+  "plan2": {
+   "trials": 60,
+   "fr_failures": 0,
+   "invalid_trials": 22,
+   "median_ratio": 1.833,
+   "restart_cost_R": 11.5,
+   "stars": 4
+  },
+  "plan3a": {
+   "trials": 40,
+   "fr_failures": 0,
+   "invalid_trials": 12,
+   "median_ratio": 1.667,
+   "restart_cost_R": 5.0,
+   "stars": 3
+  },
+  "plan4mesh": {
+   "trials": 60,
+   "fr_failures": 0,
+   "invalid_trials": 22,
+   "median_ratio": 2.0,
+   "restart_cost_R": 11.5,
+   "stars": 3
+  },
+  "plan5ring": {
+   "trials": 60,
+   "fr_failures": 0,
+   "invalid_trials": 22,
+   "median_ratio": 0.878,
+   "restart_cost_R": 11.5,
+   "stars": 5
+  },
+  "plan6tree": {
+   "trials": 40,
+   "fr_failures": 0,
+   "invalid_trials": 12,
+   "median_ratio": 1.364,
+   "restart_cost_R": 5.0,
+   "stars": 4
+  }
+ },
+ "confidentiality": {
+  "config": {
+   "cases": 100,
+   "candidates": 12,
+   "input": "벤치마크 functional (3인)"
+  },
+  "plan1": {
+   "participant": {
+    "accuracy": 1.0,
+    "gain_pp": 91.67,
+    "exposure_rate": 1.0,
+    "stars": 0
+   },
+   "coordinator": {
+    "accuracy": 1.0,
+    "gain_pp": 91.67,
+    "exposure_rate": 1.0,
+    "stars": 0
+   }
+  },
+  "plan2": {
+   "participant": {
+    "accuracy": 0.0833,
+    "gain_pp": 0.0,
+    "exposure_rate": 0.0,
+    "stars": 5
+   },
+   "coordinator": {
+    "accuracy": 1.0,
+    "gain_pp": 91.67,
+    "exposure_rate": 1.0,
+    "stars": 0
+   }
+  },
+  "plan3a": {
+   "participant": {
+    "accuracy": 0.0833,
+    "gain_pp": 0.0,
+    "exposure_rate": 0.0,
+    "stars": 5
+   },
+   "coordinator": {
+    "accuracy": 1.0,
+    "gain_pp": 91.67,
+    "exposure_rate": 1.0,
+    "stars": 0
+   }
+  },
+  "plan4mesh": {
+   "participant": {
+    "accuracy": 1.0,
+    "gain_pp": 91.67,
+    "exposure_rate": 1.0,
+    "stars": 0
+   },
+   "coordinator": {
+    "accuracy": 1.0,
+    "gain_pp": 91.67,
+    "exposure_rate": 1.0,
+    "stars": 0
+   }
+  },
+  "plan5ring": {
+   "participant": {
+    "accuracy": 1.0,
+    "gain_pp": 91.67,
+    "exposure_rate": 1.0,
+    "stars": 0
+   },
+   "coordinator": {
+    "accuracy": 1.0,
+    "gain_pp": 91.67,
+    "exposure_rate": 1.0,
+    "stars": 0
+   }
+  },
+  "plan6tree": {
+   "participant": {
+    "accuracy": 0.5417,
+    "gain_pp": 45.83,
+    "exposure_rate": 0.5,
+    "stars": 3
+   },
+   "coordinator": {
+    "accuracy": 0.5417,
+    "gain_pp": 45.83,
+    "exposure_rate": 0.5,
+    "stars": 3
+   }
+  }
+ },
+ "an_kit": {
+  "cases": 40,
+  "dir": "/home/changbae/workspace/architect-teamproject/poc/dp2-nparty/results/full-20260811T182329KST/an-kit"
+ }
+}

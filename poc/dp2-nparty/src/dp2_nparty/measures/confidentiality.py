@@ -34,8 +34,23 @@ class InferenceGain:
 
 def _visible_events(session: SessionResult, observer: str, coordinator: str) -> list[dict]:
     """관점별 가시 이벤트 필터."""
-    if session.plan == "plan1" or observer == coordinator:
-        return session.log  # 방안 1은 공지·결과 공개로 전원이 봄 / 담당자는 항상 전부 봄
+    FULL_VIEW = {"plan1", "plan4mesh", "plan5ring"}  # 공지/방송/문서 순회 — 전원이 전부 봄
+    if session.plan in FULL_VIEW:
+        return session.log
+    if session.plan == "plan6tree":
+        # 계층 병합: 레벨-0 짝의 배치만 보인다 — 상위 계층엔 개인 귀속 없는 집계 (root도 동일)
+        from ..protocol_styles import pair_partner
+
+        pids = sorted({p for ev in session.log for p in ev.get("submitted", {})})
+        mate = pair_partner(pids, observer) if observer in pids else None
+        allowed = {observer, mate} if mate else {observer}
+        out = []
+        for ev in session.log:
+            if ev["t"] in ("round", "batch"):
+                out.append({**ev, "submitted": {p: c for p, c in ev["submitted"].items() if p in allowed}})
+        return out
+    if observer == coordinator:
+        return session.log  # BB 담당자는 전부 봄 (방안 2·3-A)
     # 방안 2·3-A의 일반 참여자: 배포가 없어 자기 제출만 보인다
     out = []
     for ev in session.log:

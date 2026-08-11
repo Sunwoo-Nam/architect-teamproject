@@ -1,0 +1,298 @@
+"""Blackboard 외 아키텍처 스타일의 방안들 (51 §4-2/4-3/4-4).
+
+공통 유지: 순위 순서 제출·바퀴별 threshold 인하·만장일치(교집합)·순위합 최소 선별·
+최대 5바퀴 NO_DEAL. 다른 것은 **통신·상태의 구조**다:
+
+- Plan4Mesh  (P2P 브로드캐스트): 중앙 없음 — 전원이 전원에게 방송, 각자 로컬 판정
+- Plan5Ring  (Pipeline/token):  협상 문서가 고리를 순회 — 문서가 곧 상태, 홉마다 직렬
+- Plan6Tree  (Hierarchical):   쌍별 수락 집합을 트리로 병합 — 상위엔 개인 귀속 없는 집계만
+
+Blackboard 객체는 여기서 공유 저장소가 아니라 **계측기**(메시지·바이트·phase·부하)로만 쓴다.
+"""
+from __future__ import annotations
+
+from .blackboard import Blackboard
+from .domain import NO_DEAL, SessionResult
+from .protocol import MAX_SWEEPS, _Agent, _Kill, KillAt
+from .tiebreak import RankSumThenStdThenRunoff, TieBreaker
+
+
+class _StyleBase:
+    plan_name = "style"
+
+    def __init__(
+        self,
+        profiles,
+        tie_breaker: TieBreaker | None = None,
+        max_sweeps: int = MAX_SWEEPS,
+        aspiration_type="boulware",
+        collect_log: bool = True,
+    ):
+        self.profiles = profiles
+        self.agents = [_Agent(p, max_sweeps, aspiration_type) for p in profiles]
+        self.tie = tie_breaker or RankSumThenStdThenRunoff()
+        self.max_sweeps = max_sweeps
+        self.n = len(profiles)
+        self.collect_log = collect_log
+
+    # 공통 상태: 참여자별 전달 완료 집합 (각 스타일의 '어디에 있느냐'만 다름)
+    def _snapshot(self, delivered):
+        return {"ptrs": [a.ptr for a in self.agents],
+                "delivered": {k: set(v) for k, v in delivered.items()}}
+
+    def _restore(self, delivered, snap):
+        for a, ptr in zip(self.agents, snap["ptrs"]):
+            a.ptr = ptr
+        delivered.clear()
+        delivered.update({k: set(v) for k, v in snap["delivered"].items()})
+
+    def _pick(self, bb, delivered):
+        if len(delivered) < self.n or any(not v for v in delivered.values()):
+            return None
+        common = set.intersection(*delivered.values())
+        if not common:
+            return None
+        tied = sorted(common, key=repr)
+        pick, extra = self.tie.pick(tied, self.profiles)
+        bb.tie_break_messages(extra, {"tied": [str(c) for c in tied]})
+        return pick, len(tied) > 1
+
+    def _result(self, bb, rounds, sweep, outcome, tie_used, events):
+        return SessionResult(
+            self.plan_name, outcome, rounds, sweep, bb.counter.total,
+            phases=bb.phases, tie_break_used=tie_used, log=events,
+            bytes=bb.counter.total_bytes, eval_calls=self._eval_calls,
+        )
+
+
+class Plan4Mesh(_StyleBase):
+    """방안 4 — 전원 브로드캐스트 분산형 (P2P). 라운드마다 각자 순위 순서 후보 1개를
+    전원에게 방송(전송 N-1건, 병렬 1 phase). 전원이 같은 데이터를 보므로 로컬 판정이
+    결정적으로 일치한다 — 별도 성립 통지가 없다. 유실된 방송은 다음 라운드 재시도."""
+
+    plan_name = "plan4mesh"
+
+    def run(self, injector=None, kill_at=None, on_round_end=None) -> SessionResult:
+        bb = Blackboard(n=self.n)
+        events: list[dict] = []
+        delivered: dict[str, set] = {}
+        rounds = 0
+        self._eval_calls = sum(len(a.ranked) for a in self.agents)
+        max_rank = max(len(a.ranked) for a in self.agents)
+        cap = self.max_sweeps * (max_rank + 20) * 3
+        for sweep in range(1, self.max_sweeps + 1):
+            for a in self.agents:
+                a.ptr = 0
+            while rounds < cap:
+                boundary = self._snapshot(delivered)
+                submitted, any_pending = {}, False
+                for a in self.agents:
+                    c = a.peek(sweep)
+                    if c is None:
+                        continue
+                    any_pending = True
+                    bb.counter.add("bcast", self.n - 1, {"candidate": str(c)})  # 방송 = N-1 전송
+                    bb.load[a.p.pid] = bb.load.get(a.p.pid, 0) + 1
+                    if injector and injector.lost():
+                        continue  # 방송 유실(보수 모델: 전체 재시도) — ptr 유지
+                    delivered.setdefault(a.p.pid, set()).add(c)
+                    submitted[a.p.pid] = c
+                    a.ptr += 1
+                if not any_pending:
+                    break
+                bb.phase()
+                rounds += 1
+                if self.collect_log:
+                    events.append({"t": "round", "sweep": sweep, "k": rounds, "submitted": submitted})
+                if on_round_end:
+                    on_round_end()
+                try:
+                    if kill_at and kill_at.round_no == rounds and kill_at.point == "mid_round":
+                        raise _Kill()
+                    picked = self._pick(bb, delivered)
+                    if picked and kill_at and kill_at.round_no == rounds and kill_at.point == "pre_final":
+                        raise _Kill()
+                except _Kill:
+                    self._restore(delivered, boundary)
+                    bb.resync({"sweep": sweep})  # 복귀 노드가 이웃에게서 상태 회수
+                    kill_at = None
+                    rounds -= 1
+                    continue
+                if picked:
+                    winner, tie_used = picked
+                    return self._result(bb, rounds, sweep, winner, tie_used, events)
+        return self._result(bb, rounds, self.max_sweeps, NO_DEAL, False, events)
+
+
+class Plan5Ring(_StyleBase):
+    """방안 5 — 순차 릴레이형 (Pipeline/token). 협상 문서가 P0→P1→…→P0 고리를 돌며,
+    받은 사람이 자기 다음 순위 후보를 문서에 덧붙이고 넘긴다 — 홉 1회 = 전송 1건 = 1 phase
+    (직렬). 문서 보유자가 교집합을 발견하면 확정 순회(N-1 홉)로 전원에게 알린다.
+    홉 유실은 즉시 재전송(+1 홉 비용)."""
+
+    plan_name = "plan5ring"
+
+    def _hop(self, bb, injector, payload):
+        while True:
+            bb.counter.add("relay", 1, payload)
+            bb.phases += 1
+            if not (injector and injector.lost()):
+                return
+
+    def run(self, injector=None, kill_at=None, on_round_end=None) -> SessionResult:
+        bb = Blackboard(n=self.n)
+        events: list[dict] = []
+        delivered: dict[str, set] = {}
+        rounds = 0  # 라운드 = 고리 한 바퀴(전원 1회 처리)
+        self._eval_calls = sum(len(a.ranked) for a in self.agents)
+        max_rank = max(len(a.ranked) for a in self.agents)
+        cap = self.max_sweeps * (max_rank + 20) * 3
+        for sweep in range(1, self.max_sweeps + 1):
+            for a in self.agents:
+                a.ptr = 0
+            while rounds < cap:
+                boundary = self._snapshot(delivered)
+                cycle_submitted, any_pending = {}, False
+                killed = False
+                for a in self.agents:  # 문서가 고리를 한 바퀴
+                    c = a.peek(sweep)
+                    if c is not None:
+                        any_pending = True
+                        delivered.setdefault(a.p.pid, set()).add(c)
+                        cycle_submitted[a.p.pid] = c
+                        a.ptr += 1
+                        bb.load[a.p.pid] = bb.load.get(a.p.pid, 0) + 1
+                    doc_size = sum(len(v) for v in delivered.values())
+                    self._hop(bb, injector, {"doc_entries": doc_size})  # 다음 순번으로 전달
+                    picked = self._pick(bb, delivered)
+                    if picked:
+                        rounds += 1
+                        if self.collect_log:
+                            events.append({"t": "round", "sweep": sweep, "k": rounds,
+                                           "submitted": cycle_submitted})
+                        if kill_at and kill_at.round_no == rounds and kill_at.point in ("mid_round", "pre_final"):
+                            self._restore(delivered, boundary)
+                            bb.resync({"sweep": sweep})  # 직전 보유자 사본에서 문서 복원
+                            kill_at = None
+                            rounds -= 1
+                            killed = True
+                            break
+                        for _ in range(self.n - 1):  # 확정 순회
+                            self._hop(bb, injector, {"final": str(picked[0])})
+                        if on_round_end:
+                            on_round_end()
+                        return self._result(bb, rounds, sweep, picked[0], picked[1], events)
+                if killed:
+                    continue
+                if not any_pending:
+                    break
+                rounds += 1
+                if self.collect_log:
+                    events.append({"t": "round", "sweep": sweep, "k": rounds, "submitted": cycle_submitted})
+                if on_round_end:
+                    on_round_end()
+                if kill_at and kill_at.round_no == rounds and kill_at.point == "mid_round":
+                    self._restore(delivered, boundary)
+                    bb.resync({"sweep": sweep})
+                    kill_at = None
+                    rounds -= 1
+        return self._result(bb, rounds, self.max_sweeps, NO_DEAL, False, events)
+
+
+class Plan6Tree(_StyleBase):
+    """방안 6 — 계층 병합형 (Hierarchical). 바퀴마다: 각자 threshold 이상 미전달 후보를
+    배치로 준비 → 쌍(pair)의 오른쪽이 왼쪽 리더에게 전송(레벨당 병렬 1 phase) → 리더가
+    교집합·순위합을 병합해 위로 — 트리 꼭대기(root = P0)에서 전역 교집합 판정, 결과를
+    전원에 통지(1 phase, N-1건). 상위 계층에는 개인 귀속 없는 집계만 올라간다."""
+
+    plan_name = "plan6tree"
+
+    def run(self, injector=None, kill_at=None, on_round_end=None) -> SessionResult:
+        import math
+
+        bb = Blackboard(n=self.n)
+        events: list[dict] = []
+        delivered: dict[str, set] = {}
+        rounds = 0  # 라운드 = 바퀴당 트리 병합 1회
+        self._eval_calls = sum(len(a.ranked) for a in self.agents)
+        for sweep in range(1, self.max_sweeps + 1):
+            boundary = self._snapshot(delivered)
+            batch_log = {}
+            for a in self.agents:  # 리프: 이번 바퀴 배치 준비 (로컬)
+                th = a.th.at_sweep(sweep)
+                got = delivered.setdefault(a.p.pid, set())
+                items = [(r + 1, c) for r, c in enumerate(a.ranked)
+                         if a.p.utility(c) >= th and c not in got]
+                if items:
+                    got.update(c for _r, c in items)
+                    batch_log[a.p.pid] = [(r, str(c)) for r, c in items]
+            # 병합: 레벨마다 쌍의 오른쪽 → 왼쪽 리더 전송 (병렬 = 레벨당 1 phase)
+            nodes = list(range(self.n))
+            while len(nodes) > 1:
+                nxt = []
+                for i in range(0, len(nodes), 2):
+                    if i + 1 < len(nodes):
+                        right = self.agents[nodes[i + 1]]
+                        size = len(delivered[right.p.pid])
+                        payload = {"agg_entries": size}  # 집계 전송 — 개인 귀속 없는 요약
+                        while True:
+                            bb.counter.add("merge", 1, payload)
+                            bb.load[right.p.pid] = bb.load.get(right.p.pid, 0) + 1
+                            if not (injector and injector.lost()):
+                                break
+                            bb.phases += 1  # 유실 재전송
+                    nxt.append(nodes[i])
+                bb.phase()
+                nodes = nxt
+            rounds += 1
+            if self.collect_log:
+                events.append({"t": "batch", "sweep": sweep, "k": rounds, "submitted": batch_log})
+            if on_round_end:
+                on_round_end()
+            try:
+                if kill_at and kill_at.round_no == rounds and kill_at.point == "mid_round":
+                    raise _Kill()
+                picked = self._pick(bb, delivered)  # root(P0)의 전역 판정
+                if picked and kill_at and kill_at.round_no == rounds and kill_at.point == "pre_final":
+                    raise _Kill()
+            except _Kill:
+                self._restore(delivered, boundary)
+                bb.resync({"sweep": sweep})
+                kill_at = None
+                rounds -= 1
+                sweep_again = sweep  # 같은 바퀴 재수행
+                # 간단 재수행: 다음 루프 반복이 다음 sweep이므로 여기서 직접 한 번 더
+                # (배치·병합을 동일하게) — 결정론이라 결과 동일
+                for a in self.agents:
+                    th = a.th.at_sweep(sweep_again)
+                    got = delivered.setdefault(a.p.pid, set())
+                    items = [(r + 1, c) for r, c in enumerate(a.ranked)
+                             if a.p.utility(c) >= th and c not in got]
+                    if items:
+                        got.update(c for _r, c in items)
+                nodes = list(range(self.n))
+                while len(nodes) > 1:
+                    nxt = []
+                    for i in range(0, len(nodes), 2):
+                        if i + 1 < len(nodes):
+                            right = self.agents[nodes[i + 1]]
+                            bb.counter.add("merge", 1, {"agg_entries": len(delivered[right.p.pid])})
+                        nxt.append(nodes[i])
+                    bb.phase()
+                    nodes = nxt
+                rounds += 1
+                picked = self._pick(bb, delivered)
+            if picked:
+                bb.final_notice({"outcome": str(picked[0])})  # root → 전원 통지
+                bb.phase()
+                return self._result(bb, rounds, sweep, picked[0], picked[1], events)
+        bb.final_notice({"outcome": NO_DEAL})
+        bb.phase()
+        return self._result(bb, rounds, self.max_sweeps, NO_DEAL, False, events)
+
+
+def pair_partner(pids: list[str], pid: str) -> str | None:
+    """방안 6의 레벨-0 짝 — CF 관점 필터에 사용."""
+    idx = pids.index(pid)
+    mate = idx + 1 if idx % 2 == 0 else idx - 1
+    return pids[mate] if 0 <= mate < len(pids) else None

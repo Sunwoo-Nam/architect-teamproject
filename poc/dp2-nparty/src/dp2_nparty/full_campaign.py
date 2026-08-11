@@ -24,7 +24,9 @@ from .measures.confidentiality import exposure_rate, measure_gain, stars_exposur
 from .measures.scaling import ci_spans_grades, completion_gate, loglog_fit, stars_b_msg
 from .protocol import Plan1Vote, Plan2Cumulative, Plan3Batch
 
-PLANS = (("plan1", Plan1Vote), ("plan2", Plan2Cumulative), ("plan3a", Plan3Batch))
+from .protocol import all_plans
+
+PLANS = all_plans()
 
 
 def _functional_cases() -> list[BenchmarkCase]:
