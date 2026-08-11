@@ -47,7 +47,7 @@ def _row(run_dir: Path, raw: dict) -> dict:
     else:
         kind = "?"
 
-    plans = [p for p in ("plan1", "plan2", "plan10batch") if p in fc or p in sp]
+    plans = [p for p in ("plan1", "plan2", "plan20batch") if p in fc or p in sp]
 
     def plan_pair(section, key="stars"):
         vals = [section.get(p, {}).get(key) for p in plans]

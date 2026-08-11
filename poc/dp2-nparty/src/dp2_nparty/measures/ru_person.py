@@ -6,13 +6,13 @@
 전 방안 동일이므로 제외하고 **프로토콜 상태만** 잰다 — 방안 간 차이가 나는 부분이다.
 
 귀속 모델 (PL 승인 2026-08-11):
-- plan1 / plan2 / plan10batch: 담당자 P0가 누적 제안 집합 전체 보유, 일반 참여자 ≈ 0
-- plan12rotate: 현 바퀴 담당자가 누적 전체 보유로 **보수 계상** (스펙상 요약 인계면 더 작음)
+- plan1 / plan2 / plan20batch: 담당자 P0가 누적 제안 집합 전체 보유, 일반 참여자 ≈ 0
+- plan22rotate: 현 바퀴 담당자가 누적 전체 보유로 **보수 계상** (스펙상 요약 인계면 더 작음)
 - plan3mesh: 전원이 누적 집합 전체를 복제 보유 → 합계 = 1부의 N배
 - plan4ring: 문서 1부 = 현재 보유자 귀속 (백업 사본은 계상하지 않음 — 명시적 제외)
 - plan5gossip: 노드별 knowledge를 실측 그대로
 - plan6itree: 각 노드가 자기 서브트리의 누적 집합(개인 귀속 포함) 보유 — root가 전체
-- plan11tree: 병합 리더가 흡수한 그룹의 합집합(개인 귀속 없는 집계) 보유 — root가 전체
+- plan21tree: 병합 리더가 흡수한 그룹의 합집합(개인 귀속 없는 집계) 보유 — root가 전체
 """
 from __future__ import annotations
 
@@ -56,7 +56,7 @@ def _subtree(i: int, n: int) -> list[int]:
 
 
 def _merge_groups(n: int) -> list[list[int]]:
-    """plan11tree의 최종 병합 그룹 — index별로 자기가 리더로서 흡수한 구성원 목록."""
+    """plan21tree의 최종 병합 그룹 — index별로 자기가 리더로서 흡수한 구성원 목록."""
     members = {i: [i] for i in range(n)}
     nodes = list(range(n))
     while len(nodes) > 1:
@@ -78,9 +78,9 @@ def holder_sizes(plan) -> list[int]:
     d = _delivered_map(plan)
     pid_of = [a.p.pid for a in plan.agents]
     per = [0] * n
-    if name in ("plan1", "plan2", "plan10batch"):
+    if name in ("plan1", "plan2", "plan20batch"):
         per[0] = deep_size(d)
-    elif name == "plan12rotate":
+    elif name == "plan22rotate":
         per[getattr(plan, "_coord_idx", 0)] = deep_size(d)
     elif name == "plan3mesh":
         s = deep_size(d)
@@ -91,12 +91,36 @@ def holder_sizes(plan) -> list[int]:
         for i in range(n):
             sub = _subtree(i, n)
             per[i] = deep_size({pid_of[j]: d.get(pid_of[j], set()) for j in sub})
-    elif name == "plan11tree":
+    elif name == "plan21tree":
         for i, grp in enumerate(_merge_groups(n)):
             agg = set()
             for j in grp:
                 agg |= d.get(pid_of[j], set())
             per[i] = deep_size(agg)
+    elif name == "plan7rotc":
+        per[getattr(plan, "_coord_idx", 0)] = deep_size(getattr(plan, "_counts_ref", {}))
+    elif name == "plan8hcube":
+        counts: dict = {}
+        for s_ in d.values():
+            for c_ in s_:
+                counts[c_] = counts.get(c_, 0) + 1
+        sz = deep_size(counts)
+        per = [sz] * n  # all-reduce — 전원이 집계 사본 보유
+    elif name == "plan9psi":
+        blind = getattr(plan, "BLIND_BYTES", 64)
+        total = sum(len(s) for s in d.values())
+        for i, pid in enumerate(pid_of):
+            own = d.get(pid, set())
+            per[i] = deep_size(own) + blind * (total - len(own))  # 남의 원소는 블라인딩 blob로 보유
+    elif name == "plan10shard":
+        from ..protocol_styles import shard_owner
+
+        shards: list[dict] = [{} for _ in range(n)]
+        for s_ in d.values():
+            for c_ in s_:
+                sh = shards[shard_owner(c_, n)]
+                sh[c_] = sh.get(c_, 0) + 1
+        per = [deep_size(sh) for sh in shards]
     else:  # 미등록 방안 — 보수적으로 담당자 전체 보유 취급
         per[0] = deep_size(d)
     return per

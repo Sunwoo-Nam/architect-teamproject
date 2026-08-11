@@ -23,7 +23,7 @@ from .measures import tb as tbmod
 from .measures.confidentiality import exposure_rate, measure_gain, stars_exposure
 from .measures.ru_memory import peak_memory_bytes
 from .measures.scaling import ci_spans_grades, completion_gate, loglog_fit, stars_b_msg
-from .protocol import Plan1Vote, Plan2Cumulative, Plan10Batch
+from .protocol import Plan1Vote, Plan2Cumulative, Plan20Batch
 
 from .protocol import all_plans
 

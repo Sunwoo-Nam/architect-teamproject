@@ -17,7 +17,7 @@ from pathlib import Path
 
 from ..domain import NO_DEAL
 from ..faults import FaultInjector
-from ..protocol import Plan1Vote, Plan2Cumulative, Plan10Batch
+from ..protocol import Plan1Vote, Plan2Cumulative, Plan20Batch
 from ..ufun_provider import TableUfun
 
 from ..protocol import all_plans

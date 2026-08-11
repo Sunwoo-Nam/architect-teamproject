@@ -5,7 +5,7 @@
 
 - Plan3Mesh  (P2P 브로드캐스트): 중앙 없음 — 전원이 전원에게 방송, 각자 로컬 판정
 - Plan4Ring  (Pipeline/token):  협상 문서가 고리를 순회 — 문서가 곧 상태, 홉마다 직렬
-- Plan11Tree  (Hierarchical):   쌍별 수락 집합을 트리로 병합 — 상위엔 개인 귀속 없는 집계만
+- Plan21Tree  (Hierarchical):   쌍별 수락 집합을 트리로 병합 — 상위엔 개인 귀속 없는 집계만
 
 Blackboard 객체는 여기서 공유 저장소가 아니라 **계측기**(메시지·바이트·phase·부하)로만 쓴다.
 """
@@ -201,13 +201,13 @@ class Plan4Ring(_StyleBase):
         return self._result(bb, rounds, self.max_sweeps, NO_DEAL, False, events)
 
 
-class Plan11Tree(_StyleBase):
-    """방안 11 — 계층 병합형 (Hierarchical). 바퀴마다: 각자 threshold 이상 미전달 후보를
+class Plan21Tree(_StyleBase):
+    """방안 21 — 계층 병합형 (Hierarchical). 바퀴마다: 각자 threshold 이상 미전달 후보를
     배치로 준비 → 쌍(pair)의 오른쪽이 왼쪽 리더에게 전송(레벨당 병렬 1 phase) → 리더가
     교집합·순위합을 병합해 위로 — 트리 꼭대기(root = P0)에서 전역 교집합 판정, 결과를
     전원에 통지(1 phase, N-1건). 상위 계층에는 개인 귀속 없는 집계만 올라간다."""
 
-    plan_name = "plan11tree"
+    plan_name = "plan21tree"
 
     def run(self, injector=None, kill_at=None, on_round_end=None) -> SessionResult:
         import math
@@ -295,7 +295,7 @@ class Plan11Tree(_StyleBase):
 
 
 def pair_partner(pids: list[str], pid: str) -> str | None:
-    """방안 11의 레벨-0 짝 — CF 관점 필터에 사용."""
+    """방안 21의 레벨-0 짝 — CF 관점 필터에 사용."""
     idx = pids.index(pid)
     mate = idx + 1 if idx % 2 == 0 else idx - 1
     return pids[mate] if 0 <= mate < len(pids) else None
@@ -502,12 +502,12 @@ class Plan6ITree(_StyleBase):
         return self._result(bb, rounds, self.max_sweeps, NO_DEAL, False, events)
 
 
-class Plan12Rotate(_StyleBase):
-    """방안 12 — 순환 담당자형 (Blackboard 변형). 방안 10의 일괄 제출·중앙 선별을
+class Plan22Rotate(_StyleBase):
+    """방안 22 — 순환 담당자형 (Blackboard 변형). 방안 20의 일괄 제출·중앙 선별을
     유지하되 **바퀴마다 담당자를 교대**한다 (바퀴 s의 담당 = P[(s-1) mod N]).
     부하·노출이 한 단말에 누적되지 않는다 — 어느 단말도 전 바퀴의 전체 목록을 모으지 못함."""
 
-    plan_name = "plan12rotate"
+    plan_name = "plan22rotate"
 
     def run(self, injector=None, kill_at=None, on_round_end=None) -> SessionResult:
         bb = Blackboard(n=self.n)
@@ -557,6 +557,359 @@ class Plan12Rotate(_StyleBase):
                 bb.final_notice({"outcome": str(picked[0])})
                 bb.phase()
                 return self._result(bb, rounds, sweep, picked[0], picked[1], events)
+        bb.final_notice({"outcome": NO_DEAL})
+        bb.phase()
+        return self._result(bb, rounds, self.max_sweeps, NO_DEAL, False, events)
+
+
+def shard_owner(candidate, n: int) -> int:
+    """방안 10(샤딩)의 후보→담당 노드 매핑 — 결정론 해시. CF 관점 필터와 공유."""
+    import hashlib
+
+    return int(hashlib.md5(repr(candidate).encode()).hexdigest(), 16) % n
+
+
+def hcube_direct_peers(pids: list[str], pid: str) -> list[str]:
+    """방안 8(하이퍼큐브)에서 개별 제출이 귀속으로 보이는 직접 짝 — CF 관점 필터용.
+
+    차원 0 짝(i XOR 1)과 접기(fold) 짝(i±m)만 상대의 개별 상태를 식별 가능하게 받는다.
+    이후 차원의 교환은 이미 혼합된 집계라 귀속이 없다.
+    """
+    n = len(pids)
+    i = pids.index(pid)
+    m = 1
+    while m * 2 <= n:
+        m *= 2
+    r = n - m
+    peers = []
+    if i < m:
+        j = i ^ 1
+        if j < m:
+            peers.append(pids[j])
+        if i < r:
+            peers.append(pids[m + i])  # fold 짝
+    else:
+        peers.append(pids[i - m])
+    return peers
+
+
+class Plan7RotCollect(_StyleBase):
+    """방안 7 — 순환 수집형 (Rotating Collector·점진 공개). 방안 2의 규칙을 유지하되
+    **라운드마다 수집자가 교대**한다 (라운드 k의 수집자 = P[(k-1) mod N]).
+
+    - 각자 이번 순위 후보 1개를 그 라운드의 수집자에게 전송 (N-1건, 병렬 1 phase).
+    - 수집자는 **후보별 계수(counter) 집계**를 유지·판정하고, 다음 수집자에게 계수만
+      인계한다 (1건, 1 phase). 순위 순서 제출이라 각자 같은 후보를 두 번 내지 않으므로
+      계수 = 제안한 사람 수 — 계수가 N이면 만장일치다 (개인 귀속 없는 집계).
+    - 노출: 수집자는 **자기가 담당한 라운드의 개별 제출만** 본다 — 전량 노출 지점이
+      시간 축으로 N등분된다. 방안 6과 달리 트리 깊이 비용이 없다 (라운드당 2 phase).
+    - 유실: 제출 유실은 포인터 유지로 다음 라운드 재시도, 인계 유실은 즉시 재전송."""
+
+    plan_name = "plan7rotc"
+
+    def run(self, injector=None, kill_at=None, on_round_end=None) -> SessionResult:
+        bb = Blackboard(n=self.n)
+        events: list[dict] = []
+        delivered: dict[str, set] = {}
+        self._delivered_ref = delivered
+        self._counts_ref = {}
+        rounds = 0
+        self._eval_calls = sum(len(a.ranked) for a in self.agents)
+        max_rank = max(len(a.ranked) for a in self.agents)
+        cap = self.max_sweeps * (max_rank + 20) * 3
+        for sweep in range(1, self.max_sweeps + 1):
+            for a in self.agents:
+                a.ptr = 0
+            while rounds < cap:
+                boundary = self._snapshot(delivered)
+                coord = rounds % self.n
+                self._coord_idx = coord
+                submitted, any_pending = {}, False
+                for i, a in enumerate(self.agents):
+                    c = a.peek(sweep)
+                    if c is None:
+                        continue
+                    any_pending = True
+                    if i != coord:
+                        bb.counter.add("collect", 1, {"candidate": str(c)})
+                        bb.load[self.agents[coord].p.pid] = bb.load.get(self.agents[coord].p.pid, 0) + 1
+                        if injector and injector.lost():
+                            continue  # 제출 유실 — 포인터 유지, 다음 라운드 재시도
+                    delivered.setdefault(a.p.pid, set()).add(c)
+                    submitted[a.p.pid] = c
+                    a.ptr += 1
+                if not any_pending:
+                    break
+                bb.phase()  # 제출
+                # 인계: 계수 집계를 다음 수집자에게 (유실 시 즉시 재전송)
+                counts: dict = {}
+                for s_ in delivered.values():
+                    for c_ in s_:
+                        counts[c_] = counts.get(c_, 0) + 1
+                self._counts_ref = counts
+                while True:
+                    bb.counter.add("handoff", 1, {"agg_entries": len(self._counts_ref)})
+                    if not (injector and injector.lost()):
+                        break
+                bb.phase()  # 인계
+                rounds += 1
+                if self.collect_log:
+                    events.append({"t": "round", "sweep": sweep, "k": rounds,
+                                   "coord": self.agents[coord].p.pid, "submitted": submitted})
+                if on_round_end:
+                    on_round_end()
+                try:
+                    if kill_at and kill_at.round_no == rounds and kill_at.point == "mid_round":
+                        raise _Kill()
+                    picked = self._pick(bb, delivered)
+                    if picked and kill_at and kill_at.round_no == rounds and kill_at.point == "pre_final":
+                        raise _Kill()
+                except _Kill:
+                    self._restore(delivered, boundary)
+                    bb.resync({"sweep": sweep})  # 직전 수집자의 계수 사본에서 복원
+                    kill_at = None
+                    rounds -= 1
+                    continue
+                if picked:
+                    bb.final_notice({"outcome": str(picked[0])})
+                    bb.phase()
+                    return self._result(bb, rounds, sweep, picked[0], picked[1], events)
+        bb.final_notice({"outcome": NO_DEAL})
+        bb.phase()
+        return self._result(bb, rounds, self.max_sweeps, NO_DEAL, False, events)
+
+
+class Plan8Hypercube(_StyleBase):
+    """방안 8 — 하이퍼큐브 전대칭 병합형 (All-reduce·점진 공개). 루트가 없다 — 라운드마다
+    각자 이번 순위 후보를 자기 상태에 넣고(로컬), **하이퍼큐브 차원 순서의 짝 교환**으로
+    전원이 동일한 집계(후보별 계수)에 도달한다. 전원이 같은 데이터를 보므로 로컬 판정이
+    일치한다 (방안 3의 성질 + 트리의 병합 비용).
+
+    - 비2의 거듭제곱 N: 초과 노드 r = N - 2^⌊log₂N⌋ 은 접기(fold)로 짝에게 합류 후
+      마지막에 펼치기(unfold)로 결과를 받는다.
+    - 라운드당: 전송 = r + m·log₂m + r 건, phase = log₂m + (r>0이면 2).
+    - 노출: 차원 0 짝·fold 짝의 개별 상태만 귀속으로 보인다 — 이후 차원 교환은 혼합
+      집계라 귀속이 없다 (방안 21의 짝 노출과 유사하되 전원 대칭·점진).
+    - 대가: **전원이 집계 사본을 보유** — RU 합계가 mesh처럼 N배.
+    - 유실: 교환 유실은 즉시 재전송(+1 phase) — 라운드 판정 시점은 유지."""
+
+    plan_name = "plan8hcube"
+
+    def run(self, injector=None, kill_at=None, on_round_end=None) -> SessionResult:
+        bb = Blackboard(n=self.n)
+        events: list[dict] = []
+        delivered: dict[str, set] = {}
+        self._delivered_ref = delivered
+        rounds = 0
+        self._eval_calls = sum(len(a.ranked) for a in self.agents)
+        max_rank = max(len(a.ranked) for a in self.agents)
+        cap = self.max_sweeps * (max_rank + 20) * 3
+        m = 1
+        while m * 2 <= self.n:
+            m *= 2
+        r = self.n - m
+        dims = m.bit_length() - 1
+        for sweep in range(1, self.max_sweeps + 1):
+            for a in self.agents:
+                a.ptr = 0
+            while rounds < cap:
+                boundary = self._snapshot(delivered)
+                submitted, any_pending = {}, False
+                for a in self.agents:
+                    c = a.peek(sweep)
+                    if c is None:
+                        continue
+                    any_pending = True
+                    delivered.setdefault(a.p.pid, set()).add(c)  # 로컬 추가 — 전송 없음
+                    submitted[a.p.pid] = c
+                    a.ptr += 1
+                if not any_pending:
+                    break
+                agg = sum(len(v) for v in delivered.values())
+
+                def _xfer(count, tag):
+                    for _ in range(count):
+                        while True:
+                            bb.counter.add(tag, 1, {"agg_entries": agg})
+                            if not (injector and injector.lost()):
+                                break
+                            bb.phases += 1  # 유실 재전송
+                    bb.phase()
+
+                if r:
+                    _xfer(r, "fold")
+                for _d in range(dims):
+                    _xfer(m, "hcube")
+                if r:
+                    _xfer(r, "unfold")
+                rounds += 1
+                if self.collect_log:
+                    events.append({"t": "round", "sweep": sweep, "k": rounds, "submitted": submitted})
+                if on_round_end:
+                    on_round_end()
+                try:
+                    if kill_at and kill_at.round_no == rounds and kill_at.point == "mid_round":
+                        raise _Kill()
+                    picked = self._pick(bb, delivered)
+                    if picked and kill_at and kill_at.round_no == rounds and kill_at.point == "pre_final":
+                        raise _Kill()
+                except _Kill:
+                    self._restore(delivered, boundary)
+                    bb.resync({"sweep": sweep})  # 아무 짝에게서든 집계 회수 (전원 사본)
+                    kill_at = None
+                    rounds -= 1
+                    continue
+                if picked:
+                    return self._result(bb, rounds, sweep, picked[0], picked[1], events)
+        return self._result(bb, rounds, self.max_sweeps, NO_DEAL, False, events)
+
+
+class Plan9Psi(_StyleBase):
+    """방안 9 — 비공개 교집합형 (P2P + PSI, 암호 스텁·점진 공개). 노출의 이론적 최소를
+    노린 극한 steelman — **합의 성립 순간까지 그 누구도 남의 후보를 하나도 보지 못한다.**
+
+    - 라운드마다 각자 이번 순위 후보를 자기 비공개 집합에 넣고, 쌍별 DH-블라인딩
+      원소 교환으로 전원 교집합의 존재만 공동 판정한다 (교집합 원소는 성립 시에만 공개).
+    - 정보 모델만 시뮬레이션한다: 암호 연산은 스텁, 비용은 상수로 계상 —
+      블라인딩 원소 1건 = 64 bytes (잠정), 라운드당 전송 N(N-1)건 · 2 phase(교환+확인).
+    - 후보 공간이 유한·열거 가능하므로 단순 해시는 브루트포스에 뚫린다 — 실제 구현은
+      상호 블라인딩 PSI가 필수라는 전제를 51 문서에 명시한다.
+    - 동률 해소: 성립 시 공개된 동률 후보에 한해 순위를 조회한다 (누설 범위 = 동률 집합).
+    - 유실: 쌍별 재전송(ack 전제 — 추가 전송으로 계상, phase 유지)."""
+
+    plan_name = "plan9psi"
+    BLIND_BYTES = 64  # 잠정 상수 — DH 블라인딩 원소 크기
+
+    def run(self, injector=None, kill_at=None, on_round_end=None) -> SessionResult:
+        bb = Blackboard(n=self.n)
+        events: list[dict] = []
+        delivered: dict[str, set] = {}
+        self._delivered_ref = delivered
+        rounds = 0
+        self._eval_calls = sum(len(a.ranked) for a in self.agents)
+        max_rank = max(len(a.ranked) for a in self.agents)
+        cap = self.max_sweeps * (max_rank + 20) * 3
+        blob = "x" * self.BLIND_BYTES
+        for sweep in range(1, self.max_sweeps + 1):
+            for a in self.agents:
+                a.ptr = 0
+            while rounds < cap:
+                boundary = self._snapshot(delivered)
+                submitted, any_pending = {}, False
+                for a in self.agents:
+                    c = a.peek(sweep)
+                    if c is None:
+                        continue
+                    any_pending = True
+                    delivered.setdefault(a.p.pid, set()).add(c)  # 비공개 로컬 집합
+                    submitted[a.p.pid] = c
+                    a.ptr += 1
+                if not any_pending:
+                    break
+                # 쌍별 블라인딩 델타 교환 (신규 원소 1건씩) — 유실은 즉시 재전송
+                for a in self.agents:
+                    for _peer in range(self.n - 1):
+                        while True:
+                            bb.counter.add("psi", 1, {"blind": blob})
+                            if not (injector and injector.lost()):
+                                break
+                    bb.load[a.p.pid] = bb.load.get(a.p.pid, 0) + self.n - 1
+                bb.phase()  # 교환
+                bb.phase()  # 교집합 존재 확인 (응답)
+                rounds += 1
+                if self.collect_log:
+                    events.append({"t": "round", "sweep": sweep, "k": rounds, "submitted": submitted})
+                if on_round_end:
+                    on_round_end()
+                try:
+                    if kill_at and kill_at.round_no == rounds and kill_at.point == "mid_round":
+                        raise _Kill()
+                    picked = self._pick(bb, delivered)
+                    if picked and kill_at and kill_at.round_no == rounds and kill_at.point == "pre_final":
+                        raise _Kill()
+                except _Kill:
+                    self._restore(delivered, boundary)
+                    bb.resync({"sweep": sweep})  # 자기 비공개 집합은 로컬 저장 — 재교환만
+                    kill_at = None
+                    rounds -= 1
+                    continue
+                if picked:
+                    bb.final_notice({"outcome": str(picked[0])})
+                    bb.phase()
+                    return self._result(bb, rounds, sweep, picked[0], picked[1], events)
+        bb.final_notice({"outcome": NO_DEAL})
+        bb.phase()
+        return self._result(bb, rounds, self.max_sweeps, NO_DEAL, False, events)
+
+
+class Plan10Shard(_StyleBase):
+    """방안 10 — 내용 주소 샤딩형 (DHT/Content-addressed·점진 공개). 후보 자체를 주소로
+    쓴다 — 라운드마다 각자 이번 순위 후보를 **그 후보의 샤드 담당 노드**(결정론 해시)에게
+    보낸다 (1건, 병렬 1 phase). 담당 노드는 후보별 계수를 유지하고, 순위 순서 제출의
+    무중복 성질 덕에 계수 = 제안자 수 — 계수가 N이 되는 순간 만장일치를 방송한다.
+
+    - 노출: 각 노드가 보는 것은 전체 제출 중 **자기 샤드로 해시되는 약 1/N 조각**뿐 —
+      전량 노출 지점이 내용 축으로 N등분된다 (방안 7은 시간 축, 방안 6은 트리 축).
+    - phase가 방안 2와 같은 라운드당 1 — 트리 깊이·인계 비용이 없다.
+    - 대가: 노출 조각에 개인 귀속이 있고, 샤드 담당의 이탈이 그 샤드 후보의 판정을
+      지연시킨다 (FT — 재배치 프로토콜은 범위 밖 명시).
+    - 유실: 제출 유실은 포인터 유지로 다음 라운드 재시도."""
+
+    plan_name = "plan10shard"
+
+    def run(self, injector=None, kill_at=None, on_round_end=None) -> SessionResult:
+        bb = Blackboard(n=self.n)
+        events: list[dict] = []
+        delivered: dict[str, set] = {}
+        self._delivered_ref = delivered
+        rounds = 0
+        self._eval_calls = sum(len(a.ranked) for a in self.agents)
+        max_rank = max(len(a.ranked) for a in self.agents)
+        cap = self.max_sweeps * (max_rank + 20) * 3
+        for sweep in range(1, self.max_sweeps + 1):
+            for a in self.agents:
+                a.ptr = 0
+            while rounds < cap:
+                boundary = self._snapshot(delivered)
+                submitted, any_pending = {}, False
+                for i, a in enumerate(self.agents):
+                    c = a.peek(sweep)
+                    if c is None:
+                        continue
+                    any_pending = True
+                    owner = shard_owner(c, self.n)
+                    if owner != i:
+                        bb.counter.add("shard", 1, {"candidate": str(c)})
+                        bb.load[self.agents[owner].p.pid] = bb.load.get(self.agents[owner].p.pid, 0) + 1
+                        if injector and injector.lost():
+                            continue  # 유실 — 포인터 유지, 다음 라운드 재시도
+                    delivered.setdefault(a.p.pid, set()).add(c)
+                    submitted[a.p.pid] = c
+                    a.ptr += 1
+                if not any_pending:
+                    break
+                bb.phase()
+                rounds += 1
+                if self.collect_log:
+                    events.append({"t": "round", "sweep": sweep, "k": rounds, "submitted": submitted})
+                if on_round_end:
+                    on_round_end()
+                try:
+                    if kill_at and kill_at.round_no == rounds and kill_at.point == "mid_round":
+                        raise _Kill()
+                    picked = self._pick(bb, delivered)
+                    if picked and kill_at and kill_at.round_no == rounds and kill_at.point == "pre_final":
+                        raise _Kill()
+                except _Kill:
+                    self._restore(delivered, boundary)
+                    bb.resync({"sweep": sweep})  # 샤드 계수는 제출자들의 재전송으로 재구성
+                    kill_at = None
+                    rounds -= 1
+                    continue
+                if picked:
+                    bb.final_notice({"outcome": str(picked[0])})
+                    bb.phase()
+                    return self._result(bb, rounds, sweep, picked[0], picked[1], events)
         bb.final_notice({"outcome": NO_DEAL})
         bb.phase()
         return self._result(bb, rounds, self.max_sweeps, NO_DEAL, False, events)

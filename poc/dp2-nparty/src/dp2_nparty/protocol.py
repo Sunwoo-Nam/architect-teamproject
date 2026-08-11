@@ -24,23 +24,29 @@ MAX_SWEEPS = 5  # PL 결정 (2026-08-11)
 # 비교 대상 방안 목록 — 측정·리포트 전체가 이 목록을 순회한다
 def all_plans():
     from .protocol_styles import (
-        Plan3Mesh, Plan4Ring, Plan5Gossip, Plan6ITree, Plan11Tree, Plan12Rotate,
+        Plan3Mesh, Plan4Ring, Plan5Gossip, Plan6ITree, Plan7RotCollect, Plan8Hypercube,
+        Plan9Psi, Plan10Shard, Plan21Tree, Plan22Rotate,
     )
 
     return (("plan1", Plan1Vote), ("plan2", Plan2Cumulative), ("plan3mesh", Plan3Mesh),
             ("plan4ring", Plan4Ring), ("plan5gossip", Plan5Gossip), ("plan6itree", Plan6ITree),
-            ("plan10batch", Plan10Batch), ("plan11tree", Plan11Tree), ("plan12rotate", Plan12Rotate))
+            ("plan7rotc", Plan7RotCollect), ("plan8hcube", Plan8Hypercube),
+            ("plan9psi", Plan9Psi), ("plan10shard", Plan10Shard),
+            ("plan20batch", Plan20Batch), ("plan21tree", Plan21Tree), ("plan22rotate", Plan22Rotate))
 
 
 # 번호 체계 (PL 지시 2026-08-11): 점진 공개(라운드당 자기 순위 1개) = 방안 1-6,
-# 후보군 전체(일괄) 공개 = 방안 10부터.
+# 후보군 전체(일괄) 공개 = 방안 20부터.
 PLAN_NAMES = ("plan1", "plan2", "plan3mesh", "plan4ring", "plan5gossip", "plan6itree",
-              "plan10batch", "plan11tree", "plan12rotate")
+              "plan7rotc", "plan8hcube", "plan9psi", "plan10shard",
+              "plan20batch", "plan21tree", "plan22rotate")
 PLAN_LABELS = {"plan1": "방안 1 투표형(BB)", "plan2": "방안 2 누적형(BB)",
                "plan3mesh": "방안 3 브로드캐스트(P2P)", "plan4ring": "방안 4 릴레이(Ring)",
                "plan5gossip": "방안 5 가십(Epidemic)", "plan6itree": "방안 6 계층 교집합(Tree)",
-               "plan10batch": "방안 10 일괄형(BB)", "plan11tree": "방안 11 계층 병합(Tree·일괄)",
-               "plan12rotate": "방안 12 순환 담당(BB-회전)"}
+               "plan7rotc": "방안 7 순환 수집(RotC)", "plan8hcube": "방안 8 하이퍼큐브(Sym)",
+               "plan9psi": "방안 9 비공개 교집합(PSI)", "plan10shard": "방안 10 샤딩(DHT)",
+               "plan20batch": "방안 20 일괄형(BB)", "plan21tree": "방안 21 계층 병합(Tree·일괄)",
+               "plan22rotate": "방안 22 순환 담당(BB-회전)"}
 
 
 @dataclass
@@ -262,8 +268,8 @@ class Plan2Cumulative(_BasePlan):
         return self._resolve(bb, sorted(common, key=repr))
 
 
-class Plan10Batch(_BasePlan):
-    """방안 10 — 일괄 순위 제출·중앙 선별형 (51 §3-A).
+class Plan20Batch(_BasePlan):
+    """방안 20 — 일괄 순위 제출·중앙 선별형 (51 §3-A).
 
     라운드 반복이 없다: 바퀴(sweep)마다 각자 revised threshold 이상의 미전달 후보
     **전부를 순위와 함께 한 번에** 제출(배치 1건 = 1 phase)하고, 담당자가 누적 교집합에서
@@ -271,7 +277,7 @@ class Plan10Batch(_BasePlan):
     담당자의 누적 저장소는 bb.proposed_by를 재사용한다 (스냅샷·복구 기계 공유).
     """
 
-    plan_name = "plan10batch"
+    plan_name = "plan20batch"
 
     def __init__(self, profiles, tie_breaker: TieBreaker | None = None, **kw):
         super().__init__(profiles, tie_breaker or RankSumThenStdThenRunoff(), **kw)
@@ -280,7 +286,7 @@ class Plan10Batch(_BasePlan):
         bb = Blackboard(n=self.n)
         self._bb_ref = bb  # RU 1인당 귀속 측정용 참조
         events: list[dict] = []
-        rounds = 0  # 방안 10의 라운드 = 배치 제출 회수 (바퀴당 1회)
+        rounds = 0  # 방안 20의 라운드 = 배치 제출 회수 (바퀴당 1회)
         self._eval_calls = sum(len(a.ranked) for a in self.agents)  # 순위표 구축 (공통)
         for sweep in range(1, self.max_sweeps + 1):
             boundary = self._snapshot(bb)

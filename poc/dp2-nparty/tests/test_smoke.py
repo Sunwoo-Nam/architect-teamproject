@@ -9,9 +9,10 @@ from dp2_nparty.domain import NO_DEAL, Profile
 from dp2_nparty.harness import Experiment
 from dp2_nparty.measures import fc
 from dp2_nparty.measures.scaling import loglog_fit, stars_b_msg
-from dp2_nparty.protocol import Plan1Vote, Plan2Cumulative, Plan10Batch
+from dp2_nparty.protocol import Plan1Vote, Plan2Cumulative, Plan20Batch
 from dp2_nparty.protocol_styles import (
-    Plan3Mesh, Plan4Ring, Plan5Gossip, Plan6ITree, Plan11Tree, Plan12Rotate,
+    Plan3Mesh, Plan4Ring, Plan5Gossip, Plan6ITree, Plan7RotCollect, Plan8Hypercube,
+    Plan9Psi, Plan10Shard, Plan21Tree, Plan22Rotate,
 )
 from dp2_nparty.threshold import SweepThreshold
 from dp2_nparty.ufun_provider import TableUfun
@@ -32,7 +33,7 @@ def test_both_plans_agree_on_obvious_case():
         Profile(f"P{i}", {"A": 0.9, "B": 0.5 + i * 0.01, "C": 0.2}, 0.4) for i in range(3)
     ]
     for cls in (Plan1Vote, Plan2Cumulative, Plan3Mesh, Plan4Ring, Plan5Gossip, Plan6ITree,
-                Plan10Batch, Plan11Tree, Plan12Rotate):
+                Plan20Batch, Plan21Tree, Plan22Rotate):
         r = cls(profiles).run()
         assert r.outcome == "A", (cls.__name__, r)
         assert r.messages > 0
@@ -46,7 +47,7 @@ def test_no_deal_when_infeasible():
         Profile("P2", {"A": 0.1, "B": 0.1}, 0.4),
     ]
     for cls in (Plan1Vote, Plan2Cumulative, Plan3Mesh, Plan4Ring, Plan5Gossip, Plan6ITree,
-                Plan10Batch, Plan11Tree, Plan12Rotate):
+                Plan20Batch, Plan21Tree, Plan22Rotate):
         r = cls(profiles).run()
         assert r.outcome == NO_DEAL
         s = fc.score(r.outcome, ["A", "B"], profiles)
@@ -135,14 +136,14 @@ def test_bytes_counted():
     assert r1.bytes > r2.bytes  # 방안 1은 공지·투표·결과 페이로드가 추가된다
 
 
-def test_plan10batch_batch_properties():
+def test_plan20batch_batch_properties():
     from dp2_nparty.measures import fc as fcmod
 
     rng = random.Random(21)
     cands = [f"s{j}" for j in range(12)]
     profiles = TableUfun().build_profiles(cands, 3, rng)
     r2 = Plan2Cumulative(profiles).run()
-    r3 = Plan10Batch(profiles).run()
+    r3 = Plan20Batch(profiles).run()
     # 3-A는 라운드 반복이 없어 phase가 방안 2 이하이고, 배치라 전송 건수도 적다
     assert r3.phases <= r2.phases
     assert r3.messages <= r2.messages
@@ -160,7 +161,7 @@ def test_style_plans_properties():
     cands = [f"s{j}" for j in range(12)]
     profiles = TableUfun().build_profiles(cands, 3, rng)
     base = {cls.plan_name: cls(profiles).run()
-            for cls in (Plan3Mesh, Plan4Ring, Plan6ITree, Plan11Tree)}
+            for cls in (Plan3Mesh, Plan4Ring, Plan6ITree, Plan21Tree)}
     # 결과 정합: 스타일들 모두 같은 만장일치 규칙이므로 방안 2 계열과 동일 결과에 도달해야 한다
     r2 = Plan2Cumulative(profiles).run()
     assert base["plan3mesh"].outcome == r2.outcome  # mesh = 분산판 방안 2
@@ -170,13 +171,13 @@ def test_style_plans_properties():
     assert base["plan3mesh"].messages > r2.messages  # 방송 N-1배
     assert base["plan6itree"].messages <= base["plan3mesh"].messages  # 트리 간선 ≤ 방송
     assert base["plan4ring"].phases >= base["plan3mesh"].phases  # 직렬 홉 > 병렬 라운드
-    assert base["plan11tree"].phases <= base["plan4ring"].phases  # 트리 log 병합
+    assert base["plan21tree"].phases <= base["plan4ring"].phases  # 트리 log 병합
     # 유실 주입에도 종결
-    for cls in (Plan3Mesh, Plan4Ring, Plan6ITree, Plan11Tree):
+    for cls in (Plan3Mesh, Plan4Ring, Plan6ITree, Plan21Tree):
         r = cls(profiles).run(injector=FaultInjector(0.3, 7))
         assert r.rounds >= 1
     # kill-resume FR 정합
-    for cls in (Plan3Mesh, Plan6ITree, Plan11Tree):
+    for cls in (Plan3Mesh, Plan6ITree, Plan21Tree):
         tr = trial(cls, profiles, "mid_round", 1)
         assert tr.fr_ok, cls.plan_name
 
@@ -190,14 +191,14 @@ def test_gossip_and_rotate_properties():
     profiles = TableUfun().build_profiles(cands, 3, rng)
     g = Plan5Gossip(profiles).run()
     m = Plan3Mesh(profiles).run()
-    r8 = Plan12Rotate(profiles).run()
-    r3 = Plan10Batch(profiles).run()
+    r8 = Plan22Rotate(profiles).run()
+    r3 = Plan20Batch(profiles).run()
     assert g.outcome == m.outcome  # 가십도 같은 만장일치 결과에 도달
     # 가십의 선형 이득은 N이 커야 발현 — N=8에서 총 전송이 mesh보다 적어야 한다
     big = TableUfun().build_profiles(cands, 8, random.Random(42))
     assert Plan5Gossip(big).run().messages < Plan3Mesh(big).run().messages
     assert r8.outcome == r3.outcome  # 순환 담당은 3-A와 동일 판정 (담당자만 교대)
-    for cls in (Plan5Gossip, Plan12Rotate):
+    for cls in (Plan5Gossip, Plan22Rotate):
         r = cls(profiles).run(injector=FaultInjector(0.3, 9))
         assert r.rounds >= 1
         tr = trial(cls, profiles, "mid_round", 1)
@@ -228,3 +229,49 @@ def test_ru_person_attribution():
     assert it[0] >= it[1] >= it[3] and it[3] > 0  # root ≥ P1(부모) ≥ P3(리프, 자기 것만)
     # mesh 전원 합계 = 1부의 N배 성질
     assert sum(seen["plan3mesh"]) == 4 * seen["plan3mesh"][0]
+
+
+def test_new_incremental_steelmen_match_plan2():
+    from dp2_nparty.faults import FaultInjector
+    from dp2_nparty.measures.rec import trial
+
+    rng = random.Random(61)
+    cands = [f"s{j}" for j in range(12)]
+    profiles = TableUfun().build_profiles(cands, 5, rng)
+    r2 = Plan2Cumulative(profiles).run()
+    runs = {cls.plan_name: cls(profiles).run()
+            for cls in (Plan7RotCollect, Plan8Hypercube, Plan9Psi, Plan10Shard)}
+    for name, r in runs.items():
+        assert r.outcome == r2.outcome, name   # 같은 합의 규칙 → 결과 동일
+        assert r.rounds == r2.rounds, name     # 판정 시점도 라운드 단위 동일
+    # 구조 성질: 샤딩은 방안 2와 같은 라운드당 1 phase 수준, PSI는 메시지 최다
+    assert runs["plan10shard"].phases <= r2.phases + 2
+    assert runs["plan9psi"].messages > runs["plan8hcube"].messages
+    assert runs["plan9psi"].bytes > r2.bytes  # 블라인딩 blob 비용
+    # 유실·복구 내성
+    for cls in (Plan7RotCollect, Plan8Hypercube, Plan9Psi, Plan10Shard):
+        r = cls(profiles).run(injector=FaultInjector(0.3, 17))
+        assert r.rounds >= 1
+        tr = trial(cls, profiles, "mid_round", 1)
+        assert tr.fr_ok, cls.plan_name
+
+
+def test_new_plans_cf_visibility():
+    from dp2_nparty.measures.confidentiality import measure_gain
+
+    rng = random.Random(71)
+    cands = [f"s{j}" for j in range(20)]
+    profiles = TableUfun().build_profiles(cands, 8, rng)
+    # PSI: 어떤 관점도 아무 신호를 못 봐 이득 0이어야 한다
+    runs = [(Plan9Psi(profiles).run(), profiles)]
+    for vp in ("participant", "coordinator"):
+        assert abs(measure_gain(runs, 20, viewpoint=vp).gain_pp) < 1e-9, vp
+    # 샤딩: 관찰자가 보는 남의 제출은 전체의 일부여야 한다 (전량 노출 아님)
+    from dp2_nparty.measures.confidentiality import _visible_events
+    s = Plan10Shard(profiles).run()
+    pids = [p.pid for p in profiles]
+    seen = _visible_events(s, pids[1], pids[0])
+    seen_others = sum(1 for ev in seen for p in ev["submitted"] if p != pids[1])
+    total_others = sum(1 for ev in s.log if ev["t"] == "round"
+                       for p in ev["submitted"] if p != pids[1])
+    assert 0 <= seen_others < total_others
