@@ -106,7 +106,8 @@ class _BasePlan:
             for a in self.agents:
                 a.ptr = 0  # 새 바퀴 — 낮아진 threshold로 처음부터 재순회
             while rounds < round_cap:
-                boundary = self._snapshot(bb)
+                # 스냅샷은 kill 실험에서만 — 일반 세션의 RU 측정을 오염시키지 않도록
+                boundary = self._snapshot(bb) if kill_at else None
                 try:
                     outcome, exhausted = self._one_round(
                         bb, sweep, rounds + 1, injector, kill_at, events
