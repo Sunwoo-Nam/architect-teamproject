@@ -46,6 +46,7 @@ class SessionResult:
     phases: int = 0  # 직렬 통신 단계 수 (핸드북 §6.3 — TB의 ENV-A 대체 지표)
     tie_break_used: bool = False
     bytes: int = 0  # 총 페이로드 바이트 (핸드북 §9.2)
+    eval_calls: int = 0  # 효용 평가 호출 수 (핸드북 §6 합성 시간의 계산 항)
     log: list[dict[str, Any]] = field(default_factory=list)  # 라운드별 이벤트 (분석용)
 
     @property

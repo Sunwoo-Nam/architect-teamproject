@@ -17,6 +17,7 @@ from .harness import Experiment, multi_issue_sweep, participants_sweep
 from .measures import fc as fcmod
 from .measures import ft as ftmod
 from .measures import rec as recmod
+from .measures import tb as tbmod
 from .measures.confidentiality import exposure_rate, measure_gain, stars_exposure
 from .measures.scaling import (
     ci_spans_grades,
@@ -245,6 +246,28 @@ def _rec_section(seed: int, sessions: int) -> dict:
     return sec
 
 
+def _tb_section(seed: int, runs: int, constants: dict | None = None) -> dict:
+    """[§6] 합성 시간 — T = phase×t_rtt + 평가×t_eval + bytes÷bw. 상수는 잠정(실측 대체 자리)."""
+    c = {**tbmod.DEFAULT_CONSTANTS, **(constants or {})}
+    sec: dict = {"config": {"n": 3, "candidates": 12, "runs": runs, "constants": c,
+                            "note": "상수 3종은 잠정(분석자 제안) — ENV-B 실측으로 대체 예정. 절대값 아님, 상대 비교·지배 항 파악용"}}
+    for name, cls in PLANS:
+        times = []
+        for i in range(runs):
+            _cands, profiles = _base_profiles(seed, i)
+            st = tbmod.synth_time(cls(profiles, collect_log=False).run(), c)
+            times.append(st)
+        med = statistics.median(t.total_ms for t in times)
+        sec[name] = {
+            "median_total_ms": round(med, 1),
+            "median_rtt_ms": round(statistics.median(t.rtt_ms for t in times), 1),
+            "median_eval_ms": round(statistics.median(t.eval_ms for t in times), 1),
+            "median_transfer_ms": round(statistics.median(t.transfer_ms for t in times), 1),
+            "dominant": statistics.mode(t.dominant for t in times),
+        }
+    return sec
+
+
 def _cf_section(seed: int, runs: int, n_candidates: int = 12) -> dict:
     sessions: dict[str, list] = {p: [] for p, _ in PLANS}
     for i in range(runs):
@@ -277,6 +300,7 @@ def run_all(seed: int = 20260811, scale: float = 1.0) -> dict:
         "ru_memory": _ru_section(seed, n(100)),
         "sc_participants": _sc_participants_section(seed, n(30)),
         "sc_issues": _sc_issues_section(seed, max(2, int(5 * scale))),
+        "tb": _tb_section(seed, n(100)),
         "ft": _ft_section(seed, n(100), n(50)),
         "rec": _rec_section(seed, n(10)),
         "confidentiality": _cf_section(seed, n(100)),

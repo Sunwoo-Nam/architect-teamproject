@@ -98,6 +98,8 @@ class _BasePlan:
         bb = Blackboard(n=self.n)
         events: list[dict] = []
         rounds = 0
+        # 효용 평가 호출: 순위표 구축 = 참여자마다 전 후보 1회 평가 (두 방안 공통)
+        self._eval_calls = sum(len(a.ranked) for a in self.agents)
         max_rank = max(len(a.ranked) for a in self.agents)
         round_cap = self.max_sweeps * (max_rank + 20) * 3  # 유실 재시도 무한 루프 방지
         for sweep in range(1, self.max_sweeps + 1):
@@ -127,14 +129,14 @@ class _BasePlan:
                     return SessionResult(
                         self.plan_name, winner, rounds, sweep, bb.counter.total,
                         phases=bb.phases, tie_break_used=tie_used, log=events,
-                        bytes=bb.counter.total_bytes,
+                        bytes=bb.counter.total_bytes, eval_calls=self._eval_calls,
                     )
         bb.final_notice({"outcome": NO_DEAL})
         bb.phase()
         return SessionResult(
             self.plan_name, NO_DEAL, rounds, self.max_sweeps, bb.counter.total,
             phases=bb.phases, tie_break_used=False, log=events,
-            bytes=bb.counter.total_bytes,
+            bytes=bb.counter.total_bytes, eval_calls=self._eval_calls,
         )
 
     def _one_round(self, bb, sweep, round_no, injector, kill_at, events):
@@ -192,6 +194,7 @@ class Plan1Vote(_BasePlan):
         bb.announce_candidates([str(c) for c in candidates])
         bb.phase()
         votes: dict[str, dict[Candidate, bool]] = {}
+        self._eval_calls += len(candidates) * self.n  # 투표 = 전원이 라운드 후보 전부 재평가
         for i, a in enumerate(self.agents):
             bundle = {c: a.vote(c, sweep) for c in candidates}
             bb.vote(a.p.pid, i == 0, {str(c): v for c, v in bundle.items()})  # 전송 발생

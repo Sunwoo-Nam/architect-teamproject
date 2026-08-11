@@ -86,6 +86,26 @@ def render_markdown(raw: dict) -> str:
         )
     A("")
 
+    tb = raw.get("tb")
+    if tb:
+        A("## [§6] Time Behaviour — 합성 시간 (ENV-A, 상수 잠정)")
+        A("")
+        cst = tb["config"]["constants"]
+        A(
+            f"모델: T = phase×{cst['t_rtt_ms']:g}ms + 평가×{cst['t_eval_ms']:g}ms + bytes÷{cst['bw_bytes_per_s']:g}B/s"
+            f" — {tb['config']['note']}"
+        )
+        A("")
+        A("| 방안 | 합성 시간 중앙값 | 통신(RTT) | 평가 | 전송 | 지배 항 |")
+        A("|---|---|---|---|---|---|")
+        for p in ("plan1", "plan2"):
+            d = tb[p]
+            A(
+                f"| {p} | **{d['median_total_ms'] / 1000:.2f}s** | {d['median_rtt_ms'] / 1000:.2f}s"
+                f" | {d['median_eval_ms'] / 1000:.2f}s | {d['median_transfer_ms'] / 1000:.3f}s | {d['dominant']} |"
+            )
+        A("")
+
     ft = raw["ft"]
     A("## [§5-1] Fault Tolerance — 내성 여유 배수")
     A("")
