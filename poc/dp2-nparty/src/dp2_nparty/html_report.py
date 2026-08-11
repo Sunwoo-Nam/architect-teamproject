@@ -15,6 +15,7 @@ h1{font-size:1.4rem;margin:8px 0 4px}
 .card{background:#fff;border:1px solid #e3e5e8;border-radius:10px;padding:18px 20px;margin-bottom:18px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
 .card h2{font-size:1.05rem;margin:0 0 4px}
 .card .sub{color:#5f6368;font-size:.8rem;margin-bottom:12px}
+.card h3{font-size:.85rem;margin:16px 0 6px;color:#0b57d0}
 table{border-collapse:collapse;width:100%;font-size:.87rem}
 th,td{border-bottom:1px solid #eceef1;padding:7px 10px;text-align:left;white-space:nowrap}
 th{color:#5f6368;font-weight:600;font-size:.78rem}
@@ -33,8 +34,7 @@ def _stars(n: int) -> str:
     return f'<span class="stars">{"★" * n}{"☆" * (5 - n)}</span> {n}점'
 
 
-def render_html(raw: dict, raw_ref: str = "raw.json (같은 폴더)") -> str:
-    """대시보드 HTML. raw_ref = 각주에 적을 원자료 위치 (대시보드를 원자료와 다른 폴더에 둘 때 지정)."""
+def render_html(raw: dict) -> str:
     m = raw["meta"]
     fc, ru = raw["fc"], raw["ru_memory"]
     sp, si = raw["sc_participants"], raw["sc_issues"]
@@ -72,10 +72,13 @@ def render_html(raw: dict, raw_ref: str = "raw.json (같은 폴더)") -> str:
         [None] * len(P),
         "별점 미확정 (핸드북 §2) — ENV-A 대체, 정본은 실기기 RSS"))
     rows.append(row(
-        '§3 SC-참여자 수 — b_msg <span class="badge core">핵심 3위</span>',
-        [f"{sp[p]['b_msg']:.3f} [{sp[p]['ci'][0]:.2f}, {sp[p]['ci'][1]:.2f}]" for p in P],
-        [sp[p]["stars"] for p in P],
-        "N=10 메시지 " + " / ".join(f"{sp[p]['median_messages_by_n'].get('10', 0):.0f}건" for p in P)))
+        '§3 SC-참여자 수 — N=10 관측값 <span class="badge core">핵심 3위</span>',
+        [(f"라운드 {sp[p]['median_rounds_by_n'].get('10') or 0:.0f}"
+          f" · 메시지 {sp[p]['median_messages_by_n'].get('10') or 0:.0f}건"
+          f" · 메모리 {(sp[p].get('median_peak_bytes_by_n', {}).get('10') or 0)/1024:.1f} KiB"
+          f" · 지연 {(sp[p].get('median_time_ms_by_n', {}).get('10') or 0)/1000:.2f}s") for p in P],
+        [None] * len(P),
+        "확장 지수(b_msg)는 표에서 제외 — results/01-SC-참여자수-측정-해설.md 참조"))
     rows.append(row(
         '§4 SC-의제 수 — 탄력성 c <span class="badge sub">대체 측정</span>',
         [f"{si[p]['c']:.3f} [{si[p]['ci'][0]:.2f}, {si[p]['ci'][1]:.2f}]" for p in P],
@@ -139,16 +142,35 @@ def render_html(raw: dict, raw_ref: str = "raw.json (같은 폴더)") -> str:
               f"{fc[p]['nodeal_correct']}/{fc[p]['nodeal_wrong']}", fc[p]["tie_break_used"],
               f"{fc[p]['median_rounds']:.0f} / {fc[p]['median_phases']:.0f} / {fc[p]['median_messages']:.0f} / {fc[p]['median_bytes']:.0f}"]
              for p in P])))
+    # §3 상세 — 지표별 표 4개. N을 열로 두어 방안 간 같은 N을 나란히 비교한다.
+    levels = [str(n) for n in sp["config"]["levels"]]
+
+    def by_n_table(key: str, fmt) -> str:
+        return tbl(
+            ["방안"] + [f"N={n}" for n in levels],
+            [[PLAN_LABELS.get(p, p)]
+             + [fmt(sp[p].get(key, {}).get(n)) for n in levels] for p in P])
+
+    def f_int(v):
+        return "-" if v is None else f"{v:.0f}"
+
+    def f_kib(v):
+        return "-" if v is None else f"{v/1024:.1f}"
+
+    def f_sec(v):
+        return "-" if v is None else f"{v/1000:.2f}"
+
     details.append(sec(
         "§3 SC-참여자 수 — 상세", "핵심 3위", "core",
-        f"scalability family · N {sp['config']['levels']}",
-        tbl(["방안", "게이트", "b_msg [95% CI]", "R²", "별점", "메시지 중앙값 (N별)", "바이트 중앙값 (N별)"],
-            [[PLAN_LABELS.get(p, p), "통과" if sp[p]["gate_ok"] else "위반(0점)",
-              f"{sp[p]['b_msg']:.3f} [{sp[p]['ci'][0]:.2f}, {sp[p]['ci'][1]:.2f}]" + (" ⚠CI 3등급" if sp[p]["ci_spans_3_grades"] else ""),
-              f"{sp[p]['r2']:.3f}", _stars(sp[p]["stars"]),
-              " ".join(f"N{n}:{v:.0f}" for n, v in sp[p]["median_messages_by_n"].items() if v),
-              " ".join(f"N{n}:{v/1024:.1f}K" for n, v in sp[p]["median_bytes_by_n"].items() if v)]
-             for p in P])))
+        f"scalability family · N {sp['config']['levels']} · 각 수준 {sp['config']['runs']}건의 중앙값"
+        " · 후보 수는 4N (참여자 1인당 4개)",
+        "<div class='sub'>완결률 게이트: "
+        + " · ".join(f"{PLAN_LABELS.get(p, p)} {'통과' if sp[p]['gate_ok'] else '위반'}" for p in P)
+        + "</div>"
+        + "<h3>라운드 수</h3>" + by_n_table("median_rounds_by_n", f_int)
+        + "<h3>메시지 전송 건수</h3>" + by_n_table("median_messages_by_n", f_int)
+        + "<h3>피크 추가 메모리 (KiB)</h3>" + by_n_table("median_peak_bytes_by_n", f_kib)
+        + "<h3>합성 지연시간 (초) — 상수 잠정</h3>" + by_n_table("median_time_ms_by_n", f_sec)))
     details.append(sec(
         "§5-1 FT — 상세", "핵심 5위", "core",
         f"p_env {ft['config']['p_env']} (잠정) · 강도 {ft['config']['multiples']}배 · 표본 {ft['config']['runs_base']}",
@@ -194,5 +216,5 @@ def render_html(raw: dict, raw_ref: str = "raw.json (같은 폴더)") -> str:
 <div class="caveat">⚠ {m['caveat']}</div>
 <div class="card"><h2>종합 — 전 QA × 실측값 + 별점 <span class="badge core">초록 = 최고 등급 (등급이 갈릴 때만)</span></h2><div class="scroll">{summary}</div></div>
 {''.join(details)}
-<footer>별점 척도·게이트 정의: docs/changbae/24-QA-측정-핸드북.md · 원자료: {raw_ref} · 자동 생성 문서</footer>
+<footer>별점 척도·게이트 정의: docs/changbae/24-QA-측정-핸드북.md · 원자료: raw.json (같은 폴더) · 자동 생성 문서</footer>
 </div></body></html>"""

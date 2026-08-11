@@ -78,9 +78,7 @@ def _row(run_dir: Path, raw: dict) -> dict:
         "sc_n": plan_pair(sp),
         "ftrec": ftrec_pair(),
         "cf": cf_pair(),
-        # 대시보드 위치. 신규 실행은 results/ 바로 아래 report-<yymmdd_hhmmss>.html,
-        # 구 실행은 실행 폴더 안의 report.html
-        "dashboard": m.get("dashboard") or f"{run_dir.name}/report.html",
+        "dashboard": f"{run_dir.name}/report.html",
     }
 
 

@@ -21,6 +21,7 @@ from .measures import ft as ftmod
 from .measures import rec as recmod
 from .measures import tb as tbmod
 from .measures.confidentiality import exposure_rate, measure_gain, stars_exposure
+from .measures.ru_memory import peak_memory_bytes
 from .measures.scaling import ci_spans_grades, completion_gate, loglog_fit, stars_b_msg
 from .protocol import Plan1Vote, Plan2Cumulative, Plan3Batch
 
@@ -187,12 +188,20 @@ def _sc_participants_section(cases: list[BenchmarkCase]) -> dict:
                             "provider": "정적 벤치마크 scalability family"}}
     for name, cls in PLANS:
         agreed, med, med_b = {}, {}, {}
+        med_r, med_mem, med_t = {}, {}, {}  # 라운드 · 피크 메모리 · 합성 지연시간
         for n in ns:
-            done = [cls(c.profiles, collect_log=False).run() for c in by_n[n]]
+            done, peaks = [], []
+            for c in by_n[n]:
+                s, peak = peak_memory_bytes(lambda cc=c: cls(cc.profiles, collect_log=False).run())
+                done.append(s)
+                peaks.append(peak)
             agreed[n] = sum(s.agreed for s in done)
-            ok = [s for s in done if s.agreed]
-            med[n] = statistics.median(s.messages for s in ok) if ok else None
-            med_b[n] = statistics.median(s.bytes for s in ok) if ok else None
+            ok = [(s, pk) for s, pk in zip(done, peaks) if s.agreed]
+            med[n] = statistics.median(s.messages for s, _ in ok) if ok else None
+            med_b[n] = statistics.median(s.bytes for s, _ in ok) if ok else None
+            med_r[n] = statistics.median(s.rounds for s, _ in ok) if ok else None
+            med_mem[n] = statistics.median(pk for _, pk in ok) if ok else None
+            med_t[n] = statistics.median(tbmod.synth_time(s).total_ms for s, _ in ok) if ok else None
         gate = completion_gate(agreed[ns[0]], len(by_n[ns[0]]), agreed[ns[-1]], len(by_n[ns[-1]]))
         xs = [n for n in ns if med[n] is not None]
         fit = loglog_fit(xs, [med[n] for n in xs])
@@ -200,6 +209,12 @@ def _sc_participants_section(cases: list[BenchmarkCase]) -> dict:
             "agreed_by_n": {str(n): agreed[n] for n in ns},
             "median_messages_by_n": {str(n): med[n] for n in ns},
             "median_bytes_by_n": {str(n): med_b[n] for n in ns},
+            "median_rounds_by_n": {str(n): med_r[n] for n in ns},
+            "median_peak_bytes_by_n": {str(n): med_mem[n] for n in ns},
+            "median_time_ms_by_n": {str(n): med_t[n] for n in ns},
+            # b_msg는 리포트 표에서 제외했다 (지수만으로는 해석이 어렵고, 물리 전송 건수
+            # 정의상 별점 5점이 도달 불가능하다 — results/01-SC-참여자수-측정-해설.md).
+            # 원자료에는 남겨 둔다: scalability_report.py 와 해설 문서가 참조한다.
             "gate_ok": gate, "b_msg": round(fit.b, 4),
             "ci": [round(fit.ci_low, 4), round(fit.ci_high, 4)],
             "r2": round(fit.r2, 4),

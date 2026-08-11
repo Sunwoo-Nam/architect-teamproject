@@ -60,22 +60,36 @@ def render_markdown(raw: dict) -> str:
     A("")
 
     sp = raw["sc_participants"]
-    A("## [§3] Scalability-참여자 수 — 메시지 확장 지수 b_msg")
+    A("## [§3] Scalability-참여자 수 — N별 관측값")
     A("")
-    A(f"조건: N ∈ {sp['config']['levels']} · 각 {sp['config']['runs']}회 · {sp['config']['provider']} (교락 통제)")
+    A(f"조건: N ∈ {sp['config']['levels']} · 각 {sp['config']['runs']}건의 중앙값 · {sp['config']['provider']}"
+      " · 후보 수는 4N (참여자 1인당 4개, 기준 시나리오 3인·12개에서 도출)")
     A("")
-    A("| 방안 | 게이트 | b_msg [95% CI] | R² | 별점 | 메시지 중앙값 (N별) | 바이트 중앙값 (N별) |")
-    A("|---|---|---|---|---|---|---|")
-    for p in PLAN_NAMES:
-        d = sp[p]
-        msgs = " ".join(f"N{n}:{v:.0f}" for n, v in d["median_messages_by_n"].items() if v)
-        byt = " ".join(f"N{n}:{v/1024:.1f}K" for n, v in d["median_bytes_by_n"].items() if v)
-        warn = " ⚠CI 3등급" if d["ci_spans_3_grades"] else ""
-        A(
-            f"| {p} | {'통과' if d['gate_ok'] else '위반(0점)'} | {d['b_msg']:.3f} [{d['ci'][0]:.2f}, {d['ci'][1]:.2f}]{warn}"
-            f" | {d['r2']:.3f} | {_stars(d['stars'])} | {msgs} | {byt} |"
-        )
+    A("완결률 게이트: " + " · ".join(f"{p} {'통과' if sp[p]['gate_ok'] else '위반'}" for p in PLAN_NAMES))
     A("")
+    A("> 확장 지수(b_msg)는 표에서 제외했다 — 지수만으로는 해석이 어렵고, 메시지를 물리 전송"
+      " 건수로 세는 정의상 별점 5점이 도달 불가능하다. 근거와 이론 기준선 대조는"
+      " [`01-SC-참여자수-측정-해설.md`](../01-SC-참여자수-측정-해설.md). 원자료(raw.json)에는 남아 있다.")
+    A("")
+    levels = [str(n) for n in sp["config"]["levels"]]
+    for title, key, scale, unit in (
+        ("라운드 수", "median_rounds_by_n", 1, ""),
+        ("메시지 전송 건수", "median_messages_by_n", 1, ""),
+        ("피크 추가 메모리 (KiB)", "median_peak_bytes_by_n", 1024, ""),
+        ("합성 지연시간 (초) — 상수 잠정", "median_time_ms_by_n", 1000, ""),
+    ):
+        A(f"### {title}")
+        A("")
+        A("| 방안 | " + " | ".join(f"N={n}" for n in levels) + " |")
+        A("|---" * (len(levels) + 1) + "|")
+        for p in PLAN_NAMES:
+            vals = sp[p].get(key, {})
+            cells = []
+            for n in levels:
+                v = vals.get(n)
+                cells.append("-" if v is None else (f"{v:.0f}" if scale == 1 else f"{v/scale:.1f}{unit}"))
+            A(f"| {p} | " + " | ".join(cells) + " |")
+        A("")
 
     si = raw["sc_issues"]
     A("## [§4] Scalability-의제 수 — 조합-메모리 탄력성 c")
@@ -180,7 +194,14 @@ def render_markdown(raw: dict) -> str:
     A("|---" * (len(PLAN_NAMES) + 1) + "|")
     A("| §1 Functional Correctness (핵심 1위) | " + " | ".join(_stars(fc[p]["stars"]) for p in PLAN_NAMES) + " |")
     A("| §2 RU-메모리 (핵심 2위) | " + " | ".join("상대 비교" for _ in PLAN_NAMES) + " |")
-    A("| §3 SC-참여자 수 (핵심 3위) | " + " | ".join(_stars(sp[p]["stars"]) for p in PLAN_NAMES) + " |")
+    A("| §3 SC-참여자 수 (핵심 3위) | "
+      + " | ".join(
+          f"N=10 라운드 {sp[p]['median_rounds_by_n'].get('10') or 0:.0f}"
+          f" · 메시지 {sp[p]['median_messages_by_n'].get('10') or 0:.0f}"
+          f" · {(sp[p].get('median_peak_bytes_by_n', {}).get('10') or 0)/1024:.0f}KiB"
+          f" · {(sp[p].get('median_time_ms_by_n', {}).get('10') or 0)/1000:.0f}s"
+          for p in PLAN_NAMES)
+      + " |")
     A("| §4 SC-의제 수 (핵심 4위) | " + " | ".join(_stars(si[p]["stars"]) for p in PLAN_NAMES) + " |")
     A(
         "| §5 FT & REC (핵심 5위, min 통합) | "
