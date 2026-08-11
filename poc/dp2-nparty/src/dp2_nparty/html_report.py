@@ -60,17 +60,75 @@ def render_html(raw: dict) -> str:
         b = "".join("<tr>" + "".join(f"<td>{c}</td>" for c in r) + "</tr>" for r in rows)
         return f"<table><tr>{h}</tr>{b}</table>"
 
-    # 종합 요약
-    summary = f"""<table>
-<tr><th>QA (핸드북 §)</th><th>방안 1 전원동의 투표형</th><th>방안 2 누적 공통제안형</th><th>비고</th></tr>
-<tr><td>§1 Functional Correctness <span class="badge core">핵심 1위</span></td>{_pair_cells(fc['plan1']['stars'], fc['plan2']['stars'])}<td>달성률 {fc['plan1']['mean_ratio']:.3f} vs {fc['plan2']['mean_ratio']:.3f}</td></tr>
-<tr><td>§2 RU-메모리 <span class="badge core">핵심 2위</span></td><td class="tie">상대 비교</td><td class="tie">상대 비교</td><td>피크 {ru['plan1']['median_peak_bytes']/1024:.1f} vs {ru['plan2']['median_peak_bytes']/1024:.1f} KiB (별점 미확정)</td></tr>
-<tr><td>§3 SC-참여자 수 <span class="badge core">핵심 3위</span></td>{_pair_cells(sp['plan1']['stars'], sp['plan2']['stars'])}<td>b_msg {sp['plan1']['b_msg']:.2f} vs {sp['plan2']['b_msg']:.2f}</td></tr>
-<tr><td>§4 SC-의제 수 <span class="badge sub">대체 측정</span></td>{_pair_cells(si['plan1']['stars'], si['plan2']['stars'])}<td>c {si['plan1']['c']:.2f} vs {si['plan2']['c']:.2f} — 벤치마크 보류, 개발용 생성</td></tr>
-<tr><td>§5 FT &amp; REC <span class="badge core">핵심 5위</span></td>{_pair_cells(min(ft1, rc1), min(ft2, rc2))}<td>min(FT {ft1}·REC {rc1}) vs min(FT {ft2}·REC {rc2})</td></tr>
-<tr><td>§6 Time Behaviour <span class="badge aux">비핵심</span></td><td class="tie">{(tb['plan1']['median_total_ms']/1000):.2f}s</td><td class="tie">{(tb['plan2']['median_total_ms']/1000):.2f}s</td><td>합성 시간 (상수 잠정) — 지배 항 {tb['plan1']['dominant']}/{tb['plan2']['dominant']}</td></tr>
-<tr><td>§7 Confidentiality <span class="badge aux">비핵심</span></td>{_pair_cells(cf['plan1']['participant']['stars'], cf['plan2']['participant']['stars'])}<td>참여자 관찰자 노출률 {cf['plan1']['participant']['exposure_rate']:.2f} vs {cf['plan2']['participant']['exposure_rate']:.2f}</td></tr>
-</table>"""
+    # 종합 — 전 QA 종류 × 실측값 + 별점 (압축이 아니라 집결)
+    def cell(value: str, stars: int | None, win: bool) -> str:
+        badge = f' &nbsp;{_stars(stars)}' if stars is not None else ""
+        cls = ' class="win"' if win else ""
+        return f"<td{cls}><span class=\"num\">{value}</span>{badge}</td>"
+
+    def row(label, v1, s1, v2, s2, note=""):
+        w1 = s1 is not None and s2 is not None and s1 > s2
+        w2 = s1 is not None and s2 is not None and s2 > s1
+        return (f"<tr><td>{label}</td>{cell(v1, s1, w1)}{cell(v2, s2, w2)}"
+                f"<td class=\"tie\">{note}</td></tr>")
+
+    rows = []
+    rows.append(row(
+        '§1 Functional Correctness — Total Utility 달성률 <span class="badge core">핵심 1위</span>',
+        f"달성률 {fc['plan1']['mean_ratio']:.3f} · s {fc['plan1']['s']:.3f} · x* {fc['plan1']['optimal_hit']}/{fc['plan1']['agreed']}", fc['plan1']['stars'],
+        f"달성률 {fc['plan2']['mean_ratio']:.3f} · s {fc['plan2']['s']:.3f} · x* {fc['plan2']['optimal_hit']}/{fc['plan2']['agreed']}", fc['plan2']['stars'],
+        f"R̄ {fc['plan1']['mean_baseline']:.3f} · 결렬 오답 {fc['plan1']['nodeal_wrong']}/{fc['plan2']['nodeal_wrong']}"))
+    rows.append(row(
+        '§2 RU-메모리 — 피크/평균 증가분 <span class="badge core">핵심 2위</span>',
+        f"{ru['plan1']['median_peak_bytes']/1024:.1f} / {ru['plan1']['median_avg_bytes']/1024:.1f} KiB", None,
+        f"{ru['plan2']['median_peak_bytes']/1024:.1f} / {ru['plan2']['median_avg_bytes']/1024:.1f} KiB", None,
+        "별점 미확정 (핸드북 §2) — ENV-A 대체, 정본은 실기기 RSS"))
+    rows.append(row(
+        '§3 SC-참여자 수 — b_msg <span class="badge core">핵심 3위</span>',
+        f"{sp['plan1']['b_msg']:.3f} [{sp['plan1']['ci'][0]:.2f}, {sp['plan1']['ci'][1]:.2f}]", sp['plan1']['stars'],
+        f"{sp['plan2']['b_msg']:.3f} [{sp['plan2']['ci'][0]:.2f}, {sp['plan2']['ci'][1]:.2f}]", sp['plan2']['stars'],
+        f"게이트 {'통과' if sp['plan1']['gate_ok'] and sp['plan2']['gate_ok'] else '위반'} · N=10 메시지 {sp['plan1']['median_messages_by_n'].get('10', 0):.0f} vs {sp['plan2']['median_messages_by_n'].get('10', 0):.0f}건"))
+    rows.append(row(
+        '§4 SC-의제 수 — 탄력성 c <span class="badge sub">대체 측정</span>',
+        f"{si['plan1']['c']:.3f} [{si['plan1']['ci'][0]:.2f}, {si['plan1']['ci'][1]:.2f}]", si['plan1']['stars'],
+        f"{si['plan2']['c']:.3f} [{si['plan2']['ci'][0]:.2f}, {si['plan2']['ci'][1]:.2f}]", si['plan2']['stars'],
+        "벤치마크 보류 — 개발용 multi-issue 생성 (전체 열거 베이스라인)"))
+    rows.append(row(
+        '§5-1 Fault Tolerance — 내성 여유 배수 <span class="badge core">핵심 5위</span>',
+        f"{ft['plan1']['margin']:g}배 (임계 {ft['plan1']['critical_multiple'] or '없음'})", ft1,
+        f"{ft['plan2']['margin']:g}배 (임계 {ft['plan2']['critical_multiple'] or '없음'})", ft2,
+        f"베이스라인 완결률 {ft['plan1']['baseline_agree_rate']:.2f} · p_env 잠정"))
+    rows.append(row(
+        '§5-2 Recoverability — 복구 시간 비율 <span class="badge core">핵심 5위</span>',
+        f"{rc['plan1']['median_ratio']} (R {rc['plan1']['restart_cost_R']:g})", rc1,
+        f"{rc['plan2']['median_ratio']} (R {rc['plan2']['restart_cost_R']:g})", rc2,
+        f"FR 실패 {rc['plan1']['fr_failures']}/{rc['plan2']['fr_failures']}건 · phase 비용 대체"))
+    rows.append(row(
+        '§5 FT &amp; REC 통합 (약한 고리 min)',
+        f"min({ft1}, {rc1})", min(ft1, rc1), f"min({ft2}, {rc2})", min(ft2, rc2), ""))
+    rows.append(row(
+        '§6 Time Behaviour — 합성 시간 <span class="badge aux">비핵심</span>',
+        f"{tb['plan1']['median_total_ms']/1000:.2f}s (지배: {tb['plan1']['dominant']})", None,
+        f"{tb['plan2']['median_total_ms']/1000:.2f}s (지배: {tb['plan2']['dominant']})", None,
+        "상수 잠정 — 절대값 아님, 상대 비교용"))
+    rows.append(row(
+        '§7 Confidentiality — 노출률 (참여자 관찰자) <span class="badge aux">비핵심</span>',
+        f"{cf['plan1']['participant']['exposure_rate']:.2f} (이득 {cf['plan1']['participant']['gain_pp']:+.1f}%p)", cf['plan1']['participant']['stars'],
+        f"{cf['plan2']['participant']['exposure_rate']:.2f} (이득 {cf['plan2']['participant']['gain_pp']:+.1f}%p)", cf['plan2']['participant']['stars'],
+        f"담당자 관점 {cf['plan1']['coordinator']['exposure_rate']:.2f} / {cf['plan2']['coordinator']['exposure_rate']:.2f} (집중 노출 감시)"))
+    if raw.get("an_kit"):
+        rows.append(row(
+            '§8 Analysability — 진단 실험 킷 <span class="badge aux">비핵심</span>',
+            f"킷 {raw['an_kit']['cases']}건 생성", None, "동일 킷 공유", None,
+            "사람 진단 실험 대기 — 성공률은 진단 후 grade()로 채점"))
+    rows.append(row(
+        '§9 관측량 — 메시지 횟수 / 크기 / phase (세션 중앙값)',
+        f"{fc['plan1']['median_messages']:.0f}건 / {fc['plan1']['median_bytes']/1024:.1f}KiB / {fc['plan1']['median_phases']:.0f}", None,
+        f"{fc['plan2']['median_messages']:.0f}건 / {fc['plan2']['median_bytes']/1024:.1f}KiB / {fc['plan2']['median_phases']:.0f}", None,
+        "횟수=배터리 · 크기=대역 · phase=체감 시간"))
+
+    summary = ('<table><tr><th>QA · 지표</th><th>방안 1 전원동의 투표형</th>'
+               '<th>방안 2 누적 공통제안형</th><th>참고</th></tr>' + "".join(rows) + "</table>")
 
     details = []
     details.append(sec(
