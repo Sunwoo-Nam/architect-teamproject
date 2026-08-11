@@ -56,10 +56,19 @@ class Experiment:
         return out
 
 
-def participants_sweep(seed: int = 20260811, runs: int = 30) -> dict[int, dict[str, list[RunRecord]]]:
-    """[25] N ∈ {3,4,5,6,8,10} 스윕 — b_msg 회귀의 입력."""
+def participants_sweep(
+    seed: int = 20260811, runs: int = 30, provider: UfunProvider | None = None
+) -> dict[int, dict[str, list[RunRecord]]]:
+    """[25] N ∈ {3,4,5,6,8,10} 스윕 — b_msg 회귀의 입력.
+
+    provider 기본값은 교락 통제 생성기(공통 feasible k=3 고정) — 25 §25.5의 요구.
+    """
+    from .ufun_provider import ControlledTableUfun
+
+    prov = provider or ControlledTableUfun()
     return {
-        n: Experiment(n_participants=n, runs=runs, seed=seed).run() for n in (3, 4, 5, 6, 8, 10)
+        n: Experiment(n_participants=n, runs=runs, seed=seed, provider=prov).run()
+        for n in (3, 4, 5, 6, 8, 10)
     }
 
 

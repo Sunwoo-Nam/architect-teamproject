@@ -14,11 +14,11 @@ from dp2_nparty.threshold import SweepThreshold
 
 
 def test_threshold_sweeps_down_to_initial():
-    th = SweepThreshold(initial_threshold=0.4, max_sweeps=5)
-    values = [th.at_sweep(s) for s in range(1, 7)]
-    assert values[0] == 1.0  # 첫 바퀴는 최고 기대치
+    th = SweepThreshold(initial_threshold=0.4, max_sweeps=5, max_utility=0.9)
+    values = [th.at_sweep(s) for s in range(1, 6)]
+    assert values[0] == 0.9  # 첫 바퀴 = 자기 최고 utility (1순위만 제출 가능)
     assert all(a >= b for a, b in zip(values, values[1:]))  # 단조 하강
-    assert values[-1] >= 0.4  # 하한 = initial threshold
+    assert abs(values[-1] - 0.4) < 1e-9  # 마지막 바퀴 = initial threshold까지 개방
 
 
 def test_both_plans_agree_on_obvious_case():

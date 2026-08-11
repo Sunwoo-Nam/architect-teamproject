@@ -22,7 +22,12 @@ class _Agent:
     def __init__(self, profile: Profile, max_sweeps: int, aspiration_type: str | float):
         self.p = profile
         self.ranked = profile.ranked()
-        self.th = SweepThreshold(profile.initial_threshold, max_sweeps, aspiration_type)
+        self.th = SweepThreshold(
+            profile.initial_threshold,
+            max_sweeps,
+            aspiration_type,
+            max_utility=profile.utility(self.ranked[0]),
+        )
 
     def proposal_at(self, sweep: int, k: int) -> Candidate | None:
         """바퀴 sweep의 라운드 k(1-기반)에 낼 후보 — 순위 k번째, revised threshold 이상일 때만."""

@@ -45,3 +45,33 @@ class TableUfun(UfunProvider):
             )
             for i in range(n_participants)
         ]
+
+
+class ControlledTableUfun(UfunProvider):
+    """개발용 임시 + 교락 통제(25 §25.5) — 공통 feasible 후보 k개를 N과 무관하게 고정.
+
+    k개 후보는 전원에게 utility ∈ [threshold, 1) 로 역방향 생성하고, 나머지는 균등 무작위.
+    참여자 수를 늘려도 '전원 수락 가능 후보 수'가 유지되어, 확장성 측정이
+    문제 난이도가 아니라 프로토콜 구조를 재게 만든다.
+    """
+
+    def __init__(self, initial_threshold: float = 0.4, k_feasible: int = 3):
+        self.initial_threshold = initial_threshold
+        self.k_feasible = k_feasible
+
+    def build_profiles(
+        self, candidates: list[Candidate], n_participants: int, rng: random.Random
+    ) -> list[Profile]:
+        common = set(rng.sample(candidates, min(self.k_feasible, len(candidates))))
+        th = self.initial_threshold
+        return [
+            Profile(
+                pid=f"P{i}",
+                utilities={
+                    c: round(rng.uniform(th, 1.0) if c in common else rng.random(), 4)
+                    for c in candidates
+                },
+                initial_threshold=th,
+            )
+            for i in range(n_participants)
+        ]
