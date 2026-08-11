@@ -13,7 +13,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from dp2_nparty.domain import NO_DEAL
 from dp2_nparty.harness import Experiment, issues_sweep, participants_sweep
+from dp2_nparty.measures.confidentiality import measure_gain
 from dp2_nparty.measures.fc import stars_from_s
+from dp2_nparty.protocol import Plan1Vote, Plan2Cumulative
+from dp2_nparty.ufun_provider import TableUfun
 from dp2_nparty.measures.scaling import (
     ci_spans_grades,
     completion_gate,
@@ -57,6 +60,7 @@ def section_fc():
         )
         print(
             f"        라운드 중앙값 {statistics.median(r.session.rounds for r in recs):.0f}"
+            f" · 직렬단계(phase) 중앙값 {statistics.median(r.session.phases for r in recs):.0f}"
             f" · 메시지 중앙값 {statistics.median(r.session.messages for r in recs):.0f}"
             f" · 피크메모리 중앙값 {statistics.median(r.peak_mem_bytes for r in recs)/1024:.1f} KiB"
         )
@@ -108,11 +112,37 @@ def section_issues():
     return sweep
 
 
+def section_cf(runs: int = 100, n_candidates: int = 12):
+    print("=" * 72)
+    print("[5] Confidentiality (21 §21.3-9) — frequency 공격자, 3인·12후보·100회")
+    print("    지표: 1순위 추정 정확도 − 무작위 기준선(1/12 = 8.3%) = 이득(%p)")
+    print("=" * 72)
+    import random as _random
+
+    provider = TableUfun()
+    sessions = {"plan1": [], "plan2": []}
+    for i in range(runs):
+        rng = _random.Random((SEED, "cf", i).__hash__())
+        cands = [f"slot{j:02d}" for j in range(n_candidates)]
+        profiles = provider.build_profiles(cands, 3, rng)
+        for name, cls in (("plan1", Plan1Vote), ("plan2", Plan2Cumulative)):
+            sessions[name].append((cls(profiles).run(), profiles))
+    for name in ("plan1", "plan2"):
+        for vp in ("participant", "coordinator"):
+            g = measure_gain(sessions[name], n_candidates, viewpoint=vp)
+            print(
+                f"  {name} / 관찰자={vp:<11}: 정확도 {g.accuracy*100:5.1f}%"
+                f"  이득 {g.gain_pp:+6.1f}%p  (21 목표선 참고: ≤ +10%p)"
+            )
+
+
 if __name__ == "__main__":
     print("시험 실행 — 개발용 무작위 Ufun (벤치마크 대체 전). seed =", SEED)
-    print("[4] RU-메모리는 [1]의 피크메모리(프로세스 대체 측정), [5] Confidentiality는 공격자 미구현.\n")
+    print("[4] RU-메모리는 [1]의 피크메모리(프로세스 대체 측정)로 갈음한다.\n")
     section_fc()
     print()
     section_scaling()
     print()
     section_issues()
+    print()
+    section_cf()

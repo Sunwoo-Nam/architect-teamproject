@@ -43,6 +43,7 @@ class SessionResult:
     rounds: int  # 진행된 총 라운드 수
     sweeps: int  # 진행된 바퀴 수
     messages: int  # 물리 전송 총 건수 (README 매핑 v1)
+    phases: int = 0  # 직렬 통신 단계 수 (TB의 ENV-A 대체 지표)
     tie_break_used: bool = False
     log: list[dict[str, Any]] = field(default_factory=list)  # 라운드별 이벤트 (분석용)
 

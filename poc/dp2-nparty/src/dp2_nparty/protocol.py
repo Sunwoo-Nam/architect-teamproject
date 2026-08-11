@@ -59,11 +59,12 @@ class _BasePlan:
 
     def run(self) -> SessionResult:
         bb = Blackboard(n=self.n)
+        events: list[dict] = []  # 관찰 이벤트 — Confidentiality 공격자의 입력
         rounds = 0
         max_rank = max(len(a.ranked) for a in self.agents)
         for sweep in range(1, self.max_sweeps + 1):
             for k in range(1, max_rank + 1):
-                # 이번 라운드 제출 (전원 동시, 담당자=0번)
+                # 이번 라운드 제출 (전원 동시, 담당자=0번) — 직렬 단계 1
                 submitted: dict[str, Candidate] = {}
                 for i, a in enumerate(self.agents):
                     c = a.proposal_at(sweep, k)
@@ -72,18 +73,25 @@ class _BasePlan:
                         submitted[a.p.pid] = c
                 if not submitted and k > 1:
                     break  # 전원 소진 — 이 바퀴 종료, threshold 내리고 다음 바퀴
+                bb.phase()
                 rounds += 1
-                winner, tie_used = self._round(bb, submitted, sweep)
+                events.append({"t": "round", "sweep": sweep, "k": k, "submitted": dict(submitted)})
+                winner, tie_used = self._round(bb, submitted, sweep, events)
                 if winner is not None:
                     bb.final_notice()
+                    bb.phase()
                     return SessionResult(
-                        self.plan_name, winner, rounds, sweep, bb.counter.total, tie_used
+                        self.plan_name, winner, rounds, sweep, bb.counter.total,
+                        bb.phases, tie_used, events,
                     )
         bb.final_notice()
-        return SessionResult(self.plan_name, NO_DEAL, rounds, self.max_sweeps, bb.counter.total)
+        bb.phase()
+        return SessionResult(
+            self.plan_name, NO_DEAL, rounds, self.max_sweeps, bb.counter.total, bb.phases, False, events
+        )
 
     def _round(
-        self, bb: Blackboard, submitted: dict[str, Candidate], sweep: int
+        self, bb: Blackboard, submitted: dict[str, Candidate], sweep: int, events: list[dict]
     ) -> tuple[Candidate | None, bool]:
         raise NotImplementedError
 
@@ -103,17 +111,19 @@ class Plan1Vote(_BasePlan):
     def __init__(self, profiles, tie_breaker: TieBreaker | None = None, **kw):
         super().__init__(profiles, tie_breaker or RunoffMajority(), **kw)
 
-    def _round(self, bb, submitted, sweep):
+    def _round(self, bb, submitted, sweep, events):
         candidates = sorted(set(submitted.values()), key=repr)
         bb.announce_candidates()  # 투표하려면 그 라운드 후보를 전원에게 배포해야 한다
-        approvals: dict[Candidate, int] = {c: 0 for c in candidates}
+        bb.phase()
+        votes: dict[str, dict[Candidate, bool]] = {}
         for i, a in enumerate(self.agents):
             bb.vote(a.p.pid, is_coordinator=(i == 0))  # 라운드당 O/X 번들 1건
-            for c in candidates:
-                if a.vote(c, sweep):
-                    approvals[c] += 1
-        bb.round_result()
-        unanimous = [c for c, n_ok in approvals.items() if n_ok == self.n]  # 만장일치만 (PL 결정)
+            votes[a.p.pid] = {c: a.vote(c, sweep) for c in candidates}
+        bb.phase()
+        bb.round_result()  # O/X 결과가 전원에게 공개된다
+        bb.phase()
+        events.append({"t": "votes", "sweep": sweep, "votes": {p: dict(v) for p, v in votes.items()}})
+        unanimous = [c for c in candidates if all(votes[p.pid][c] for p in self.profiles)]
         if not unanimous:
             return None, False
         return self._resolve(bb, unanimous)
@@ -127,7 +137,7 @@ class Plan2Cumulative(_BasePlan):
     def __init__(self, profiles, tie_breaker: TieBreaker | None = None, **kw):
         super().__init__(profiles, tie_breaker or RankSumThenStdThenRunoff(), **kw)
 
-    def _round(self, bb, submitted, sweep):
+    def _round(self, bb, submitted, sweep, events):
         for pid, c in submitted.items():
             bb.proposed_by.setdefault(pid, set()).add(c)
         if len(bb.proposed_by) < self.n:

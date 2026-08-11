@@ -67,3 +67,22 @@ def test_loglog_fit_and_stars():
     assert abs(fit.b - 1.5) < 1e-6  # 회귀가 그대로 찾아야 한다
     assert stars_b_msg(fit.b) == 2  # 1.4 초과 - 1.6 이하 → 2점
     assert stars_b_msg(0.97) == 5 and stars_b_msg(1.05) == 4 and stars_b_msg(1.9) == 0
+
+
+def test_confidentiality_viewpoints():
+    from dp2_nparty.measures.confidentiality import measure_gain
+    from dp2_nparty.ufun_provider import TableUfun
+
+    rng = random.Random(7)
+    cands = [f"s{j}" for j in range(10)]
+    profiles = TableUfun().build_profiles(cands, 3, rng)
+    runs1 = [(Plan1Vote(profiles).run(), profiles)]
+    runs2 = [(Plan2Cumulative(profiles).run(), profiles)]
+    # 방안 2의 일반 참여자 관찰자는 아무 신호도 못 봐 무작위 수준이어야 한다
+    g2p = measure_gain(runs2, 10, viewpoint="participant")
+    assert abs(g2p.gain_pp) < 1e-9
+    # 방안 1의 일반 참여자는 1라운드 공지로 1순위를 그대로 본다 — 이득이 커야 한다
+    g1p = measure_gain(runs1, 10, viewpoint="participant")
+    assert g1p.gain_pp > 50
+    # phase 지표: 방안 1은 라운드당 4단계라 방안 2보다 직렬 단계가 많다
+    assert runs1[0][0].phases > runs2[0][0].phases

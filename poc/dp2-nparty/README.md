@@ -52,7 +52,7 @@ src/dp2_nparty/
     fc.py            [24] Total Utility 달성률·별점 (x*, 무작위 베이스라인 R̄)
     scaling.py       [25] 확장 지수 회귀(b, 95% CI, R²)·완결률 게이트·별점 — 참여자 수/의제 수 공용
     ru_memory.py     [21 §21.3-8] 피크 메모리 측정 (tracemalloc)
-    confidentiality.py [21 §21.3-9] ★ frequency 공격자 자리 (negmas 모델 연동 예정)
+    confidentiality.py [21 §21.3-9] frequency 공격자 — 관점별(참여자/담당자) 역추론 이득
   harness.py         시드 관리·세션 러너·실험 매트릭스
 data/benchmark/      ★ 벤치마크 셋 데이터 자리 (별도 담당자)
 tests/test_smoke.py  end-to-end 스모크 (개발용 임시 Ufun 사용)
@@ -69,6 +69,7 @@ tests/test_smoke.py  end-to-end 스모크 (개발용 임시 Ufun 사용)
 | Scalability-참여자 수 | 메시지 확장 지수 b_msg → 별점 0-5 (N ∈ {3,4,5,6,8,10}) | [`25`](../../docs/changbae/25-Scalability-참여자수-정의-측정.md) |
 | Scalability-의제 수 | 조합-메모리 탄력성 c (의제 조합 스윕) | [`21`](../../docs/changbae/21-핵심-QA-측정-정의.md) §21.3-5 |
 | Resource Utilization-메모리 | 협상 1회 피크 추가 메모리 | [`21`](../../docs/changbae/21-핵심-QA-측정-정의.md) §21.3-8 (PoC에서는 프로세스 메모리로 대체 측정) |
-| Confidentiality | 역추론 이득 (frequency 공격자) | [`21`](../../docs/changbae/21-핵심-QA-측정-정의.md) §21.3-9 |
+| Confidentiality | 역추론 이득 (frequency 공격자 — 자체 구현: negmas 클래스는 SAO/GB 결합형이라 동일 원리를 관찰 이벤트 위에 재구현, 규칙은 `measures/confidentiality.py`에 고정·명문화) | [`21`](../../docs/changbae/21-핵심-QA-측정-정의.md) §21.3-9 |
+| Time Behaviour (보조) | ENV-A 대체 지표 = **직렬 통신 단계(phase) 수** — 방안별 라운드 구성이 달라(방안1 4단계/방안2 1단계) 라운드 수만으로는 비교가 왜곡됨. 정본 지표(오버헤드 비율)는 실기기 소관 | [`21`](../../docs/changbae/21-핵심-QA-측정-정의.md) §21.3-6 |
 
 비교 원칙: 두 방안에 **동일 프로파일·동일 시드**를 주고 방안만 교체한다.

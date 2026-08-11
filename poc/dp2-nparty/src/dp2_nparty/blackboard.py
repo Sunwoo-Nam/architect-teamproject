@@ -27,6 +27,7 @@ class Blackboard:
     """공유 상태 — 담당자 단말에 있다고 가정한다."""
 
     n: int  # 참여자 수
+    phases: int = 0  # 직렬 통신 단계 수 — Time Behaviour의 ENV-A 대체 지표 (단계 수 × 왕복 지연 ≈ 시간)
     counter: MessageCounter = field(default_factory=MessageCounter)
     # 방안 2용: 참여자별 누적 제안 집합
     proposed_by: dict[str, set[Candidate]] = field(default_factory=dict)
@@ -52,3 +53,8 @@ class Blackboard:
 
     def tie_break_messages(self, count: int) -> None:
         self.counter.add("tiebreak", count)
+        if count > 0:
+            self.phases += 2  # 결선 공지 + 표 회신
+
+    def phase(self) -> None:
+        self.phases += 1
