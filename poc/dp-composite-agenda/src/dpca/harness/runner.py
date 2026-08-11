@@ -13,6 +13,7 @@ from negmas.sao import SAOMechanism
 
 from dpca.common.scenario import Scenario
 from dpca.harness.beliefs import build_beliefs
+from dpca.harness.eventlog import EventLog
 from dpca.harness.negmas_bridge import TupleCodec, make_outcome_space
 from dpca.strategies.baseline_full import FullEnumNegotiator
 from dpca.strategies.pool import PoolNegotiator
@@ -31,16 +32,25 @@ class RunResult:
     peak_kib: float
     wall_ms: float
     extra: dict = field(default_factory=dict)
+    log: EventLog | None = None
 
 
-def run_one(scenario: Scenario, strategy: str, n_steps: int = 200) -> RunResult:
+def run_one(scenario: Scenario, strategy: str, n_steps: int = 200, with_log: bool = False) -> RunResult:
     beliefs = build_beliefs(scenario)
+    log = EventLog(meta={
+        "scenario": scenario.id,
+        "strategy": strategy,
+        "profile_seed": scenario.profile_seed,
+        "n_axes": len(scenario.axes),
+        "space_size": scenario.space_size(),
+        "initial_thresholds": [b.initial_threshold for b in beliefs],
+    }) if with_log else None
     tracemalloc.start()
     tracemalloc.reset_peak()
     start = time.perf_counter()
 
     if strategy == "seq":
-        result = run_sequential(scenario, beliefs)
+        result = run_sequential(scenario, beliefs, log=log)
         agreement, rounds, proposals = result.agreement, result.rounds, result.proposals
         extra = {"backtracks": result.backtracks, "trace": result.trace}
     elif strategy in ("full", "pool"):
@@ -49,9 +59,9 @@ def run_one(scenario: Scenario, strategy: str, n_steps: int = 200) -> RunResult:
         negotiators = []
         for b in beliefs:
             if strategy == "full":
-                negotiators.append(FullEnumNegotiator(scenario, b, codec, n_steps))
+                negotiators.append(FullEnumNegotiator(scenario, b, codec, n_steps, log=log))
             else:
-                negotiators.append(PoolNegotiator(scenario, b, codec, n_steps))
+                negotiators.append(PoolNegotiator(scenario, b, codec, n_steps, log=log))
         for negotiator in negotiators:
             mechanism.add(negotiator)
         state = mechanism.run()
@@ -73,6 +83,8 @@ def run_one(scenario: Scenario, strategy: str, n_steps: int = 200) -> RunResult:
     wall_ms = (time.perf_counter() - start) * 1000
     _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
+    if log is not None:
+        log.log("session_end", agreement=agreement, rounds=rounds, proposals=proposals)
     return RunResult(
         strategy=strategy,
         scenario_id=scenario.id,
@@ -82,4 +94,5 @@ def run_one(scenario: Scenario, strategy: str, n_steps: int = 200) -> RunResult:
         peak_kib=peak / 1024,
         wall_ms=wall_ms,
         extra=extra,
+        log=log,
     )

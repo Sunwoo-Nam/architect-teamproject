@@ -12,6 +12,7 @@ from dpca.common.generators import Value
 from dpca.common.rules import build_hard_rules
 from dpca.common.scenario import Scenario
 from dpca.harness.beliefs import AgentBeliefs
+from dpca.harness.eventlog import EventLog
 from dpca.harness.negmas_bridge import TupleCodec
 
 from .negotiator_base import CandidateNegotiator
@@ -25,8 +26,9 @@ class PoolNegotiator(CandidateNegotiator):
         codec: TupleCodec,
         n_steps: int,
         k_start: int = 2,
+        log: EventLog | None = None,
     ):
-        super().__init__(beliefs, codec, n_steps, name=f"pool-{beliefs.idx}")
+        super().__init__(beliefs, codec, n_steps, name=f"pool-{beliefs.idx}", log=log)
         self.scenario = scenario
         self.k = k_start
         self.k_max = max(len(ax.values) for ax in scenario.axes)
@@ -82,8 +84,10 @@ class PoolNegotiator(CandidateNegotiator):
 
     def _replenish(self) -> bool:
         if self.k >= self.k_max:
+            self._log("deepening_exhausted", k=self.k, reason="k가 축 최대 크기에 도달")
             return False
         self.k += 1
         self.deepening_count += 1
         self._candidates = None  # 재압축
+        self._log("deepening", k=self.k, reason="양보선이 풀 하한 아래로 — k 확장 재압축")
         return True

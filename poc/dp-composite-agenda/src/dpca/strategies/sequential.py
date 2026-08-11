@@ -20,6 +20,7 @@ from dpca.common.generators import Value
 from dpca.common.rules import Outcome
 from dpca.common.scenario import Axis, Scenario
 from dpca.harness.beliefs import AgentBeliefs
+from dpca.harness.eventlog import EventLog
 from dpca.harness.negmas_bridge import aspiration
 
 
@@ -43,8 +44,10 @@ class AxisNegotiator(SAONegotiator):
         values: list[Value],
         agreed: dict[str, Value],
         n_steps: int,
+        log: EventLog | None = None,
     ):
         super().__init__(name=f"seq-{beliefs.idx}-{axis.name}")
+        self.eventlog = log
         self.beliefs = beliefs
         self.scenario = scenario
         self.axis = axis
@@ -79,27 +82,53 @@ class AxisNegotiator(SAONegotiator):
     def _score(self, value: Value) -> float:
         return self.beliefs.scores[self.axis.name][value.name]
 
+    def _log(self, kind: str, **fields) -> None:
+        if self.eventlog is not None:
+            self.eventlog.log(kind, agent=self.beliefs.idx, axis=self.axis.name, **fields)
+
     def propose(self, state: SAOState, dest: str | None = None):
         self.proposal_count += 1
         thr = aspiration(state.step, self.n_steps, 0.0)
         for v in self.mine:
             if self._score(v) >= thr and v.name not in self._offered:
                 self._offered.add(v.name)
+                self._log("propose", step=state.step, offer=v.name,
+                          my_score=round(self._score(v), 4), threshold=round(thr, 4),
+                          reason="양보선 이상 미제안 값 중 최선")
                 return (v.name,)
-        return (self.mine[0].name,) if self.mine else None
+        if self.mine:
+            best = self.mine[0]
+            self._log("propose", step=state.step, offer=best.name,
+                      my_score=round(self._score(best), 4), threshold=round(thr, 4),
+                      reason="새 값 없음 — 최선값 반복 제안")
+            return (best.name,)
+        self._log("propose", step=state.step, offer=None, reason="제안 가능 값 없음")
+        return None
 
     def respond(self, state: SAOState, source: str | None = None) -> ResponseType:
         offer = state.current_offer
         if offer is None:
             return ResponseType.REJECT_OFFER
+        thr = aspiration(state.step, self.n_steps, 0.0)
         value = self._by_name.get(offer[0])
         if value is None or not self._own_ok(value):
+            self._log("respond", step=state.step, offer=offer[0], decision="REJECT",
+                      threshold=round(thr, 4), reason="내 하드 제약 위반")
             return ResponseType.REJECT_OFFER
-        if self._optimistic(value) < self.beliefs.initial_threshold:
-            return ResponseType.REJECT_OFFER  # 이 값을 받으면 바닥선 도달이 불가능해짐
-        thr = aspiration(state.step, self.n_steps, 0.0)
+        optimistic = self._optimistic(value)
+        if optimistic < self.beliefs.initial_threshold:
+            self._log("respond", step=state.step, offer=offer[0], decision="REJECT",
+                      optimistic=round(optimistic, 4), threshold=round(thr, 4),
+                      reason="낙관적 완성 효용이 바닥선 미달 — 받으면 바닥선 도달 불가")
+            return ResponseType.REJECT_OFFER
         if self._score(value) >= thr:
+            self._log("respond", step=state.step, offer=offer[0], decision="ACCEPT",
+                      my_score=round(self._score(value), 4), optimistic=round(optimistic, 4),
+                      threshold=round(thr, 4), reason="값 점수 ≥ 양보선, 낙관 하한 통과")
             return ResponseType.ACCEPT_OFFER
+        self._log("respond", step=state.step, offer=offer[0], decision="REJECT",
+                  my_score=round(self._score(value), 4), threshold=round(thr, 4),
+                  reason="값 점수 < 양보선")
         return ResponseType.REJECT_OFFER
 
 
@@ -117,7 +146,12 @@ def run_sequential(
     beliefs: list[AgentBeliefs],
     n_steps_per_axis: int = 60,
     max_backtracks: int = 2,
+    log: EventLog | None = None,
 ) -> SequentialResult:
+    def orch_log(kind: str, **fields) -> None:
+        if log is not None:
+            log.log(kind, **fields)
+
     agreed: dict[str, Value] = {}
     forbidden: dict[str, set[str]] = {ax.name: set() for ax in scenario.axes}
     rounds = proposals = backtracks = 0
@@ -134,9 +168,12 @@ def run_sequential(
             and all(r({**agreed, axis.name: v}) for r in shared_hard if _covers(r, {**agreed, axis.name: v}))
         ]
         negotiators = [
-            AxisNegotiator(b, scenario, axis, space_values, agreed, n_steps_per_axis)
+            AxisNegotiator(b, scenario, axis, space_values, agreed, n_steps_per_axis, log=log)
             for b in beliefs
         ] if space_values else []
+        orch_log("axis_session_start", axis=axis.name,
+                 space=[v.name for v in space_values],
+                 agreed_prefix={k: v.name for k, v in agreed.items()})
 
         if not space_values or any(not n.mine for n in negotiators):
             agreement_name = None
@@ -156,10 +193,15 @@ def run_sequential(
             # 백트랙 — 직전 축 합의를 금지하고 재협상
             if i == 0 or backtracks >= max_backtracks:
                 trace.append(f"{axis.name}: 진행 불가, 백트랙 소진 → 결렬")
+                orch_log("sequential_breakdown", axis=axis.name, backtracks=backtracks,
+                         reason="진행 불가 상태에서 백트랙 상한 소진")
                 return SequentialResult(None, rounds, proposals, backtracks, trace)
             prev = scenario.axes[i - 1]
             forbidden[prev.name].add(agreed[prev.name].name)
             trace.append(f"{axis.name}: 진행 불가 → {prev.name}={agreed[prev.name].name} 금지 후 백트랙")
+            orch_log("backtrack", stuck_axis=axis.name, forbid_axis=prev.name,
+                     forbid_value=agreed[prev.name].name,
+                     reason="현재 축 세션 진행 불가(후보 없음/결렬)")
             del agreed[prev.name]
             backtracks += 1
             i -= 1
@@ -167,6 +209,7 @@ def run_sequential(
 
         agreed[axis.name] = next(v for v in space_values if v.name == agreement_name)
         trace.append(f"{axis.name} = {agreement_name}")
+        orch_log("axis_agreed", axis=axis.name, value=agreement_name)
         i += 1
 
     # 최종 확인 — 잠정 합의를 각자 전체 효용으로 재검 (바닥선 미달이면 결렬)
@@ -174,7 +217,11 @@ def run_sequential(
     for b in beliefs:
         if not b.feasible(outcome) or b.utility(outcome) < b.initial_threshold:
             trace.append(f"최종 확인 실패 (참여자 {b.idx}) → 결렬")
+            orch_log("final_confirm_failed", agent=b.idx,
+                     utility=round(b.utility(outcome), 4), floor=b.initial_threshold,
+                     reason="조립된 전체 합의가 이 참여자의 바닥선 미달")
             return SequentialResult(None, rounds, proposals, backtracks, trace)
+    orch_log("final_confirmed", agreement={k: v.name for k, v in agreed.items()})
     return SequentialResult(
         {name: value.name for name, value in agreed.items()}, rounds, proposals, backtracks, trace
     )

@@ -9,14 +9,16 @@ import itertools
 
 from dpca.common.scenario import Scenario
 from dpca.harness.beliefs import AgentBeliefs
+from dpca.harness.eventlog import EventLog
 from dpca.harness.negmas_bridge import TupleCodec
 
 from .negotiator_base import CandidateNegotiator
 
 
 class FullEnumNegotiator(CandidateNegotiator):
-    def __init__(self, scenario: Scenario, beliefs: AgentBeliefs, codec: TupleCodec, n_steps: int):
-        super().__init__(beliefs, codec, n_steps, name=f"full-{beliefs.idx}")
+    def __init__(self, scenario: Scenario, beliefs: AgentBeliefs, codec: TupleCodec, n_steps: int,
+                 log: EventLog | None = None):
+        super().__init__(beliefs, codec, n_steps, name=f"full-{beliefs.idx}", log=log)
         self.scenario = scenario
 
     def _build_candidates(self) -> list[tuple[float, tuple]]:

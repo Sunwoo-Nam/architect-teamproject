@@ -50,3 +50,25 @@ def test_pool_memory_below_full_on_s09():
     full = run_one(scenario, "full")
     pool = run_one(scenario, "pool")
     assert pool.peak_kib * 10 < full.peak_kib, f"pool={pool.peak_kib:.0f} full={full.peak_kib:.0f}"
+
+
+def test_eventlog_completeness(s01):
+    """기록 완전성(FR CFR-H2 취지) — 모든 제안·응답에 offer·효용/점수·양보선·사유가 기록된다."""
+    for strategy in STRATEGIES:
+        result = run_one(s01, strategy, with_log=True)
+        events = result.log.events
+        proposes = [e for e in events if e["kind"] == "propose"]
+        responds = [e for e in events if e["kind"] == "respond"]
+        assert proposes and responds, f"{strategy}: 제안/응답 이벤트 없음"
+        for e in proposes + responds:
+            assert "reason" in e and "threshold" in e, f"{strategy}: 사유/양보선 누락 {e}"
+        accepts = [e for e in responds if e.get("decision") == "ACCEPT"]
+        assert accepts, f"{strategy}: 수락 이벤트 없음 (S01은 합의 TC)"
+        assert any(e["kind"] == "session_end" for e in events) or strategy == "seq"
+
+
+def test_eventlog_deterministic_replay(s01):
+    """같은 시드 → 같은 로그 (결정론 재현)."""
+    e1 = run_one(s01, "pool", with_log=True).log.events
+    e2 = run_one(s01, "pool", with_log=True).log.events
+    assert e1 == e2

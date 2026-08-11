@@ -14,6 +14,10 @@ P1(하니스 + 전략 3구현)까지 구현됨:
 - `src/dpca/strategies/` — `full`(baseline 전수 나열, c≈1 앵커) · `seq`(1안 축별 순차 SAO 세션 +
   낙관적 완성 하한·백트랙·최종 확인) · `pool`(2안 축별 top-k 압축 풀 + 양보선-풀하한 deepening)
 - `scripts/run_smoke.py [--all]` — TC × 전략 3종 스모크 (달성률·별점·라운드·피크 메모리)
+- **추적성**: 모든 실행은 이벤트 로그(JSONL)를 남길 수 있다 — 제안·응답마다 offer·자기 효용·
+  그 시점 양보선·결정 사유, deepening/백트랙/최종 확인 이벤트까지 (기록 완전성 FR 취지).
+  `scripts/explain_run.py <log.jsonl>` (또는 `--demo S01 pool`)이 로그만으로 협상 전개를
+  사람 말로 재구성한다. 같은 시드 → 같은 로그(결정론 재현).
 
 TC 계층:
 - `scenarios/S01~S11.yaml` — TC 11종 (스키마: `01-TC-스키마.md`)
