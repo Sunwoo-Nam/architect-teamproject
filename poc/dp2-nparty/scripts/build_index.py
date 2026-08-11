@@ -78,6 +78,9 @@ def _row(run_dir: Path, raw: dict) -> dict:
         "sc_n": plan_pair(sp),
         "ftrec": ftrec_pair(),
         "cf": cf_pair(),
+        # 대시보드 위치. 신규 실행은 results/ 바로 아래 report-<yymmdd_hhmmss>.html,
+        # 구 실행은 실행 폴더 안의 report.html
+        "dashboard": m.get("dashboard") or f"{run_dir.name}/report.html",
     }
 
 
@@ -89,7 +92,8 @@ def main() -> None:
         except Exception as e:  # 형식이 다른 결과가 와도 인덱스는 죽지 않는다
             rows.append({"run": raw_file.parent.name, "date": "?", "commit": "?",
                          "kind": f"파싱 실패 ({type(e).__name__})", "fc": "-", "sc_n": "-",
-                         "ftrec": "-", "cf": "-"})
+                         "ftrec": "-", "cf": "-",
+                         "dashboard": f"{raw_file.parent.name}/report.html"})
 
     L = [
         "# 측정 결과 인덱스 (자동 생성 — 직접 수정 금지)",
@@ -104,7 +108,7 @@ def main() -> None:
         L.append(
             f"| `{r['run']}` | {r['date']} | `{r['commit']}` | {r['kind']}"
             f" | {r['fc']} | {r['sc_n']} | {r['ftrec']} | {r['cf']}"
-            f" | [report]({r['run']}/report.md) |"
+            f" | [대시보드]({r['dashboard']}) · [md]({r['run']}/report.md) |"
         )
     L += [
         "",

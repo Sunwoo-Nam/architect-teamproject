@@ -33,7 +33,8 @@ def _stars(n: int) -> str:
     return f'<span class="stars">{"★" * n}{"☆" * (5 - n)}</span> {n}점'
 
 
-def render_html(raw: dict) -> str:
+def render_html(raw: dict, raw_ref: str = "raw.json (같은 폴더)") -> str:
+    """대시보드 HTML. raw_ref = 각주에 적을 원자료 위치 (대시보드를 원자료와 다른 폴더에 둘 때 지정)."""
     m = raw["meta"]
     fc, ru = raw["fc"], raw["ru_memory"]
     sp, si = raw["sc_participants"], raw["sc_issues"]
@@ -193,5 +194,5 @@ def render_html(raw: dict) -> str:
 <div class="caveat">⚠ {m['caveat']}</div>
 <div class="card"><h2>종합 — 전 QA × 실측값 + 별점 <span class="badge core">초록 = 최고 등급 (등급이 갈릴 때만)</span></h2><div class="scroll">{summary}</div></div>
 {''.join(details)}
-<footer>별점 척도·게이트 정의: docs/changbae/24-QA-측정-핸드북.md · 원자료: raw.json (같은 폴더) · 자동 생성 문서</footer>
+<footer>별점 척도·게이트 정의: docs/changbae/24-QA-측정-핸드북.md · 원자료: {raw_ref} · 자동 생성 문서</footer>
 </div></body></html>"""
