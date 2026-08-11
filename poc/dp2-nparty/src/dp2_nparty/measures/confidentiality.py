@@ -93,3 +93,16 @@ def measure_gain(
             score += (1.0 if guess == truth else 0.0) if guess is not None else baseline
     acc = score / total if total else baseline
     return InferenceGain(acc, baseline, (acc - baseline) * 100.0)
+
+
+def exposure_rate(gain: InferenceGain, n_candidates: int) -> float:
+    """29 §29.2 — 정규화 노출률 = 이득 ÷ 최대 이득(1 − 1/M)."""
+    max_gain = (1.0 - 1.0 / n_candidates) * 100.0
+    return max(0.0, gain.gain_pp / max_gain) if max_gain > 0 else 0.0
+
+
+def stars_exposure(rate: float) -> int:
+    """29 §29.3 — 유계 [0,1]을 6등분: 5점 ≤ 1/6 … 0점 > 5/6."""
+    import math as _m
+
+    return max(0, 5 - _m.floor(min(rate, 0.9999) * 6))

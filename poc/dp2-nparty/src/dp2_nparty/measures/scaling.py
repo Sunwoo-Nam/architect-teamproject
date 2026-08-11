@@ -60,3 +60,14 @@ def completion_gate(agreed_small: int, n_small: int, agreed_large: int, n_large:
         return True
     z = (p1 - p2) / se
     return z < stats.norm.ppf(0.95)  # 저하가 유의하면 z가 커진다
+
+
+def stars_c(c: float, d: int = 4) -> int:
+    """27 §27.3 — 전체 열거(1)와 이론 이상(1/d) 사이 5등분. c > 1이면 0점."""
+    lo = 1.0 / d
+    if c > 1.0:
+        return 0
+    if c <= lo + (1.0 - lo) / 5:
+        return 5
+    width = (1.0 - lo) / 5
+    return max(1, 5 - math.ceil(round((c - lo) / width, 10)) + 1)

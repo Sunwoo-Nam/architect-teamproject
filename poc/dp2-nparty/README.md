@@ -9,7 +9,15 @@
 python3 -m virtualenv .venv          # ensurepip 미제공 환경이라 virtualenv 사용
 .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m pytest tests/    # 스모크 테스트
+
+.venv/bin/python scripts/run_measurements.py              # 전 QA 측정 → results/<run_id>/ 저장
+.venv/bin/python scripts/run_measurements.py --scale 0.1  # 표본 1/10 스모크
+.venv/bin/python scripts/make_report.py results/<run_id>  # raw.json에서 리포트만 재생성
 ```
+
+**측정값의 정본 위치는 `results/`다** — 실행 1회 = `results/<run_id>/` 폴더 하나:
+`raw.json`(전 측정 원자료 + 실행 메타: seed·commit·negmas 버전)과 `report.md`(별점 표 정리).
+측정 정의 문서(docs/changbae/24-29)에는 방법만 있고 측정값은 여기에만 기록한다.
 
 - Python 3.14 / **negmas 0.15.7** (버전 고정 — 재현성)
 - NegMAS 재사용 범위: OutcomeSpace·Ufun(선호 표현·점수화)과 **양보 곡선(`PolyAspiration`)**.
