@@ -3,7 +3,22 @@
 이 폴더는 `poc/dp2-nparty`의 두 프로토콜 방안이 공통으로 사용하는 정적 협상 사례를 보관한다.
 두 방안은 동일한 후보 목록과 동일한 참여자 프로파일로 실행되어야 한다.
 
-현재 단계에서는 정적 파일 계약만 정의한다. 실제 케이스와 `BenchmarkLoader` 구현은 대표 사례를 검토한 뒤 추가한다.
+정적 파일 계약과 로더가 준비되어 있고, 케이스는 [`01-테스트-케이스-확장-계획.md`](01-테스트-케이스-확장-계획.md) §10의 단계에 따라 확장 중이다.
+
+## 읽고 검증하기
+
+```bash
+.venv/bin/python -m pytest tests/test_benchmark_data.py tests/test_benchmark_conformance.py
+```
+
+```python
+from dp2_nparty.benchmark import JsonBenchmarkLoader
+
+for case in JsonBenchmarkLoader(track="conformance").cases():
+    print(case.case_id, case.feasible())
+```
+
+`JsonBenchmarkLoader`는 `fixtures/`와 `cases/` 아래의 모든 `*.json`을 읽어 `BenchmarkCase`로 돌려준다. 순회 순서는 `case_id` 사전순으로 고정된다 — 실행 순서가 결과에 영향을 주지 않아야 재현이 성립하기 때문이다. 계약을 어긴 파일이 있으면 조용히 건너뛰지 않고 `BenchmarkValidationError`로 실패한다.
 
 ## 책임 경계
 
