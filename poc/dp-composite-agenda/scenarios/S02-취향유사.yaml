@@ -1,0 +1,19 @@
+meta:
+  id: S02
+  name: 취향 유사 — 빠른 수렴 케이스
+  conflict_level: low
+  conflict_rho: 0.7
+  expected: agreement
+axes:
+  - {name: date, generator: date_slots, base_count: 7}
+  - {name: time, generator: time_slots, base_count: 6}
+  - {name: region, generator: regions, base_count: 5}
+  - {name: movie, generator: movies, base_count: 8}
+dependencies:
+  - {type: hard, rule: availability, subject: movie, over: region, coverage: 0.75}
+participants:
+  count: 2
+  profile_seed: 1202
+  styles: [default, default]
+agent_view: {weights: quantized3, score_dropout: 0.3, constraints: pass_hard}
+judge: {floor_quantile: [0.7, 0.7], expected: agreement}

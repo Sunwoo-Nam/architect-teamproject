@@ -1,0 +1,21 @@
+meta:
+  id: S06
+  name: 역방향 의존 — 인기작 mv6은 금·토 21시만 상영 (1안 약점 자극)
+  conflict_level: mid
+  conflict_rho: 0.0
+  expected: agreement
+axes:
+  - {name: date, generator: date_slots, base_count: 7}
+  - {name: time, generator: time_slots, base_count: 6}
+  - {name: region, generator: regions, base_count: 5}
+  - {name: movie, generator: movies, base_count: 8}
+dependencies:
+  - {type: hard, rule: availability, subject: movie, over: region, coverage: 0.75}
+  - {type: hard, rule: availability_explicit, subject: movie, subject_value: mv6,
+     allowed: {date: [fri, sat], time: ["21:00"]}}
+participants:
+  count: 2
+  profile_seed: 1206
+  styles: [default, default]
+agent_view: {weights: quantized3, score_dropout: 0.3, constraints: pass_hard}
+judge: {floor_quantile: [0.7, 0.7], expected: agreement}

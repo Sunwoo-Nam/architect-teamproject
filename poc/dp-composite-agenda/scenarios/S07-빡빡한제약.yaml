@@ -1,0 +1,24 @@
+meta:
+  id: S07
+  name: 빡빡한 제약 — 유효 교집합 극소수 (백트랙·deepening 한계)
+  conflict_level: high
+  conflict_rho: -0.7
+  expected: agreement
+axes:
+  - {name: date, generator: date_slots, base_count: 7}
+  - {name: time, generator: time_slots, base_count: 6}
+  - {name: region, generator: regions, base_count: 5}
+  - {name: movie, generator: movies, base_count: 8}
+dependencies:
+  - {type: hard, rule: availability, subject: movie, over: region, coverage: 0.75}
+participants:
+  count: 2
+  profile_seed: 1207
+  styles: [default, default]
+  constraints:
+    - {participant: 0, axis: date, values: [sat]}
+    - {participant: 0, axis: region, values: [gangnam, hongdae]}
+    - {participant: 1, pairs: {axes: [date, time], values: [[sat, "17:00"], [sat, "19:00"], [sat, "21:00"], [sun, "19:00"], [sun, "21:00"]]}}
+    - {participant: 1, axis: region, values: [hongdae, jamsil]}
+agent_view: {weights: quantized3, score_dropout: 0.3, constraints: pass_hard}
+judge: {floor_quantile: [0.5, 0.5], expected: agreement}

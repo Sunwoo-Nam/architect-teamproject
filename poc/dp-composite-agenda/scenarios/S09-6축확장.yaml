@@ -1,0 +1,23 @@
+meta:
+  id: S09
+  name: 6축 확장 — 날짜·시간·지역·영화·식당·메뉴
+  conflict_level: mid
+  conflict_rho: 0.0
+  expected: agreement
+axes:
+  - {name: date, generator: date_slots, base_count: 7}
+  - {name: time, generator: time_slots, base_count: 6}
+  - {name: region, generator: regions, base_count: 5}
+  - {name: movie, generator: movies, base_count: 8}
+  - {name: restaurant, generator: restaurants, base_count: 10}
+  - {name: menu, generator: menus, base_count: 6}
+dependencies:
+  - {type: hard, rule: availability, subject: movie, over: region, coverage: 0.75}
+  - {type: hard, rule: membership, subject: restaurant, region_axis: region}
+  - {type: soft, rule: conditional_home, if_axis: time, if_values: ["21:00"], then_axis: region, penalty: 0.3}
+participants:
+  count: 2
+  profile_seed: 1209
+  styles: [default, default]
+agent_view: {weights: quantized3, score_dropout: 0.3, constraints: pass_hard}
+judge: {floor_quantile: [0.7, 0.7], expected: agreement}
