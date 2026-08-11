@@ -25,8 +25,14 @@ def main() -> None:
     args = ap.parse_args()
 
     raw = run_all(seed=args.seed, scale=args.scale)
-    run_dir = ROOT / "results" / raw["meta"]["run_id"]
-    run_dir.mkdir(parents=True, exist_ok=True)
+    # 실행 1회 = 폴더 1개. 같은 초에 재실행돼도 덮어쓰지 않도록 접미사로 유일성 보장
+    base = ROOT / "results" / raw["meta"]["run_id"]
+    run_dir, n = base, 2
+    while run_dir.exists():
+        run_dir = base.with_name(f"{base.name}-{n}")
+        n += 1
+    raw["meta"]["run_id"] = run_dir.name
+    run_dir.mkdir(parents=True)
     (run_dir / "raw.json").write_text(json.dumps(raw, ensure_ascii=False, indent=1))
     report = render_markdown(raw)
     (run_dir / "report.md").write_text(report)
