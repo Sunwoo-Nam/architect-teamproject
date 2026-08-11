@@ -1,6 +1,6 @@
 """oracle — 기본 크기에서 전수 열거로 TC를 검증하고 FC 채점 기준을 산출한다.
 
-FC 정본(docs/changbae/24-Functional-Correctness-정의-측정.md)을 따른다:
+FC 정본(docs/changbae/24-QA-측정-핸드북.md)을 따른다:
   - 유효 후보 = 하드 제약 통과 ∧ 전원 utility ≥ 각자 initial threshold. 결렬 후보(전원이
     자기 threshold를 얻음)는 항상 유효 후보에 포함된다.
   - x* = 유효 후보 중 total utility 최대 — "도달할 수 있었던 가장 좋은 결과".

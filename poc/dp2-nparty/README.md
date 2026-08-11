@@ -73,8 +73,8 @@ tests/test_smoke.py  end-to-end 스모크 (개발용 임시 Ufun 사용)
 
 | QA | 지표 | 정의 문서 |
 |---|---|---|
-| Functional Correctness | Total Utility 달성률 → 별점 0-5 | [`24`](../../docs/changbae/24-Functional-Correctness-정의-측정.md) |
-| Scalability-참여자 수 | 메시지 확장 지수 b_msg → 별점 0-5 (N ∈ {3,4,5,6,8,10}) | [`25`](../../docs/changbae/25-Scalability-참여자수-정의-측정.md) |
+| Functional Correctness | Total Utility 달성률 → 별점 0-5 | [`24`](../../docs/changbae/24-QA-측정-핸드북.md) |
+| Scalability-참여자 수 | 메시지 확장 지수 b_msg → 별점 0-5 (N ∈ {3,4,5,6,8,10}) | [`25`](../../docs/changbae/24-QA-측정-핸드북.md) |
 | Scalability-의제 수 | 조합-메모리 탄력성 c (의제 조합 스윕) | [`21`](../../docs/changbae/21-핵심-QA-측정-정의.md) §21.3-5 |
 | Resource Utilization-메모리 | 협상 1회 피크 추가 메모리 | [`21`](../../docs/changbae/21-핵심-QA-측정-정의.md) §21.3-8 (PoC에서는 프로세스 메모리로 대체 측정) |
 | Confidentiality | 역추론 이득 (frequency 공격자 — 자체 구현: negmas 클래스는 SAO/GB 결합형이라 동일 원리를 관찰 이벤트 위에 재구현, 규칙은 `measures/confidentiality.py`에 고정·명문화) | [`21`](../../docs/changbae/21-핵심-QA-측정-정의.md) §21.3-9 |

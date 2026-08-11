@@ -9,8 +9,8 @@
 ## 근거 문서
 
 - 프로토콜 의미는 `docs/changbae/51-설계후보1-다자-합의-프로토콜.md`를 따른다.
-- Functional Correctness 사례 구성은 `docs/changbae/24-Functional-Correctness-정의-측정.md`를 따른다.
-- 참여자 수 Scalability 사례 구성은 `docs/changbae/25-Scalability-참여자수-정의-측정.md`를 따른다.
+- Functional Correctness 사례 구성은 `docs/changbae/24-QA-측정-핸드북.md`를 따른다.
+- 참여자 수 Scalability 사례 구성은 `docs/changbae/24-QA-측정-핸드북.md`를 따른다.
 - 근거 문서 사이에 모순이나 미정 사항이 있으면 임의로 확정하지 않고 사용자에게 확인한다.
 - 이름이 `_legacy`로 끝나는 폴더는 별도 지시 없이 읽거나 참조하지 않는다.
 
