@@ -18,6 +18,7 @@ from dpca.harness.eventlog import EventLog
 from dpca.harness.negmas_bridge import TupleCodec, make_outcome_space
 from dpca.strategies.baseline_full import FullEnumNegotiator
 from dpca.strategies.pool import PoolNegotiator
+from dpca.strategies.pool2 import run_pool2
 from dpca.strategies.sequential import run_sequential
 
 STRATEGIES = ("full", "pool", "seq")
@@ -62,6 +63,11 @@ def run_one(scenario: Scenario, strategy: str, n_steps: int = 200, with_log: boo
         agreement, rounds, proposals = result.agreement, result.rounds, result.proposals
         extra = {"backtracks": result.backtracks, "axis_rounds": result.axis_rounds,
                  "trace": result.trace}
+    elif strategy == "pool2":
+        # 2안 개선판: 유효-only 조건부 확장 + k 고정 + 충돌 축 교체 재협상
+        agreement, rounds, proposals, p2extra = run_pool2(scenario, beliefs, n_steps=n_steps,
+                                                          log=log, comms=comms)
+        extra = p2extra
     elif strategy in ("full", "pool"):
         codec = TupleCodec(scenario.axes)
         mechanism = SAOMechanism(outcome_space=make_outcome_space(scenario.axes), n_steps=n_steps)
