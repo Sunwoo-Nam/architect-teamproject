@@ -15,6 +15,14 @@ def _kib(b) -> str:
     return f"{b / 1024:.1f} KiB"
 
 
+def _mem(b) -> str:
+    return f"{b / 1024:.0f} KiB" if b < 1024 * 1024 else f"{b / 1024 / 1024:.1f} MiB"
+
+
+def _dur(s) -> str:
+    return f"{s:.1f}초" if s < 60 else f"{s / 60:.1f}분"
+
+
 def render_markdown(raw: dict) -> str:
     m = raw["meta"]
     P = [p for p in PLAN_NAMES if p in raw["fc"]]  # 부분 실행(--plans) 대응
@@ -295,6 +303,41 @@ def render_markdown(raw: dict) -> str:
           "규모를 섞은 대표값 하나로는 오해를 부르므로 조합 수(S)별로 나눠 싣는다 — "
           "같은 규모 안에서도 케이스 편차가 커서 min/max를 병기한다.")
         A("")
+
+    isn = raw.get("issue_space_n")
+    if isn:
+        A("## [§11] 의제 조합 — 참여자 수(N)별 상세")
+        A("")
+        nc = isn["config"]
+        NP = [p for p in PLAN_NAMES if p in isn]  # config 외의 키가 방안이다
+        ns = [str(n) for n in nc["participants"]]
+        A(f"조건: {nc['track_label']} 트랙 · 조합 수 "
+          + " · ".join(f"{S:,}" for S in nc["combos"])
+          + f" × 참여자 {nc['participants']} · 셀당 {nc['cases_per_cell']}건.")
+        A(nc["note"])
+        knc = nc.get("constants", {})
+        if knc:
+            A(f"합성 시간 상수: 통신 {knc.get('t_rtt_ms', 0):.0f}ms/phase ·"
+              f" 평가 {knc.get('t_eval_ms', 0)*1000:.0f}µs/건 ÷N 병렬 보정 ·"
+              f" 대역 {knc.get('bw_bytes_per_s', 0)/1000:.0f}kB/s. **상수는 잠정 — 방안 간 상대 비교용이다.**")
+        A("")
+        for title, fmt in (
+            ("정확도 (s)", lambda v: f"{v['s']:.3f}"),
+            ("달성률 (x\\* 대비)", lambda v: f"{v['mean_ratio']:.3f}"),
+            ("협상 1건 시간 (중앙값)", lambda v: _dur(v["median_time_s"])),
+            ("라운드 / phase", lambda v: f"{v['median_rounds']:,.0f} / {v['median_phases']:,.0f}"),
+            ("단말 총 점유 메모리 (중앙값)", lambda v: _mem(v["median_device_bytes"])),
+        ):
+            A(f"**{title}**")
+            A("")
+            A("| 방안 · 조합 수 | " + " | ".join(f"N={n}" for n in ns) + " |")
+            A("|---" * (len(ns) + 1) + "|")
+            for p in NP:
+                for S in nc["combos"]:
+                    by_n = isn[p].get(str(S), {})  # 미측정 셀은 키가 없다
+                    A(f"| {p} · S={S:,} | " + " | ".join(
+                        fmt(by_n[n]) if n in by_n else "—" for n in ns) + " |")
+            A("")
 
     if "an_kit" in raw:
         A("## [§8] Analysability — 진단 실험 킷")

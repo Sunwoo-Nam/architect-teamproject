@@ -34,11 +34,19 @@ def _stars(n: int) -> str:
     return f'<span class="stars">{"★" * n}{"☆" * (5 - n)}</span> {n}점'
 
 
+def _mem(b) -> str:
+    return f"{b / 1024:.0f} KiB" if b < 1024 * 1024 else f"{b / 1024 / 1024:.1f} MiB"
+
+
+def _dur(s) -> str:
+    return f"{s:.1f}초" if s < 60 else f"{s / 60:.1f}분"
+
+
 def render_html(raw: dict) -> str:
     m = raw["meta"]
     fc, ru = raw["fc"], raw["ru_memory"]
     sp, si = raw["sc_participants"], raw["sc_issues"]
-    isec = raw.get("issue_space")
+    isec, isn = raw.get("issue_space"), raw.get("issue_space_n")
     tb, ft, rc, cf = raw.get("tb"), raw["ft"], raw["rec"], raw["confidentiality"]
     P = [p for p in PLAN_NAMES if p in fc]
 
@@ -328,6 +336,39 @@ def render_html(raw: dict) -> str:
                 "전송 바이트는 점유량이 아니라 통신 시간 항으로만 계상.",
                 tbl(["조합 수", "방안", "건수", "달성률(s)", "협상 1건 시간 min/평균/중앙/max (s)",
                      "항별 중앙 (s)", "단말 총 점유", "프로토콜 상태", "라운드/phase"], body)))
+
+    if isn:
+        # §11 상세 — 행은 방안 × 조합 수, 열은 참여자 수 N. 지표별로 표를 나눈다.
+        nc = isn["config"]
+        inp = [p for p in PLAN_NAMES if p in isn]  # config 외의 키가 방안이다
+        n_levels = [str(n) for n in nc["participants"]]
+
+        def n_table(fmt) -> str:
+            body = []
+            for p in inp:
+                for S in nc["combos"]:
+                    by_n = isn[p].get(str(S), {})  # 미측정 셀은 키가 없다
+                    body.append([f"{PLAN_LABELS.get(p, p)} · S={S:,}"]
+                                + [fmt(by_n[n]) if n in by_n else "—" for n in n_levels])
+            return tbl(["방안 · 조합 수"] + [f"N={n}" for n in n_levels], body)
+
+        knc = nc.get("constants", {})
+        n_sub = (f"{nc['track_label']} 트랙 · 조합 수 " + " · ".join(f"{S:,}" for S in nc["combos"])
+                 + f" × 참여자 {nc['participants']} · 셀당 {nc['cases_per_cell']}건. {nc['note']}")
+        if knc:
+            n_sub += (f" 합성 시간 상수: 통신 {knc.get('t_rtt_ms', 0):.0f}ms/phase ·"
+                      f" 평가 {knc.get('t_eval_ms', 0)*1000:.0f}µs/건 ÷N · "
+                      f"대역 {knc.get('bw_bytes_per_s', 0)/1000:.0f}kB/s. 상수 잠정 — 방안 간 상대 비교용.")
+        details.append(sec(
+            "§11 의제 조합 — 참여자 수(N)별 상세", "신규", "sub", n_sub,
+            "<h3>정확도 (s)</h3>"
+            + n_table(lambda v: f"{v['s']:.3f}")
+            + "<h3>달성률 (x* 대비)</h3>" + n_table(lambda v: f"{v['mean_ratio']:.3f}")
+            + "<h3>협상 1건 시간 (중앙값)</h3>" + n_table(lambda v: _dur(v["median_time_s"]))
+            + "<h3>라운드 / phase</h3>"
+            + n_table(lambda v: f"{v['median_rounds']:,.0f} / {v['median_phases']:,.0f}")
+            + "<h3>단말 총 점유 메모리 (중앙값)</h3>"
+            + n_table(lambda v: _mem(v["median_device_bytes"]))))
 
     return f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
