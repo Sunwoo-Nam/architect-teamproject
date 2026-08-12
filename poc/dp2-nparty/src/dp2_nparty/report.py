@@ -180,7 +180,7 @@ def render_markdown(raw: dict) -> str:
     A("")
 
     cf = raw["confidentiality"]
-    A("## [§7] Confidentiality — 정규화 노출률 (비핵심·보조 관측)")
+    A("## [§7] Confidentiality — 정규화 노출률 (핵심 5위)")
     A("")
     cfc = cf["config"]
     cf_n = cfc.get("cases") or cfc.get("runs")
@@ -236,7 +236,7 @@ def render_markdown(raw: dict) -> str:
       + " |")
     A("| §4 SC-의제 수 (핵심 4위) | " + " | ".join(_stars(si[p]["stars"]) for p in P) + " |")
     A(
-        "| §5 FT & REC (핵심 5위, min 통합) | "
+        "| §5 FT & REC (비핵심, min 통합) | "
         + " | ".join(
             f"{_stars(min(ft[p]['stars'], rc[p]['stars']))} (FT {ft[p]['stars']}·REC {rc[p]['stars']})"
             for p in P
@@ -244,7 +244,7 @@ def render_markdown(raw: dict) -> str:
         + " |"
     )
     A(
-        "| §7 Confidentiality (비핵심 — 참여자 관찰자) | "
+        "| §7 Confidentiality (핵심 5위 — 참여자 관찰자) | "
         + " | ".join(_stars(cf[p]["participant"]["stars"]) for p in P)
         + " |"
     )

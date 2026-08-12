@@ -86,12 +86,12 @@ def render_html(raw: dict) -> str:
         [si[p]["stars"] for p in P],
         "벤치마크 보류 — 개발용 multi-issue 생성"))
     rows.append(row(
-        '§5-1 FT — 내성 여유 배수 <span class="badge core">핵심 5위</span>',
+        '§5-1 FT — 내성 여유 배수 <span class="badge aux">비핵심</span>',
         [f"{ft[p]['margin']:g}배 (임계 {ft[p]['critical_multiple'] or '없음'})" for p in P],
         [ft[p]["stars"] for p in P],
         "베이스라인 완결률 " + " / ".join(f"{ft[p]['baseline_agree_rate']:.2f}" for p in P) + " · p_env 잠정"))
     rows.append(row(
-        '§5-2 REC — 복구 시간 비율 <span class="badge core">핵심 5위</span>',
+        '§5-2 REC — 복구 시간 비율 <span class="badge aux">비핵심</span>',
         [f"{rc[p]['median_ratio']} (R {rc[p]['restart_cost_R']:g})" for p in P],
         [rc[p]["stars"] for p in P],
         "FR 실패 " + "/".join(str(rc[p]["fr_failures"]) for p in P) + "건 · phase 비용 대체"))
@@ -105,7 +105,7 @@ def render_html(raw: dict) -> str:
         [None] * len(P),
         "상수 잠정 — 절대값 아님, 상대 비교용"))
     rows.append(row(
-        '§7 CF — 노출률 N=3(정밀)/10/50 · 참여자|담당자 <span class="badge aux">비핵심</span>',
+        '§7 CF — 노출률 N=3(정밀)/10/50 · 참여자|담당자 <span class="badge core">핵심 5위</span>',
         [(f"참 {cf[p]['participant']['exposure_rate']:.2f}/"
           f"{cf[p].get('by_n', {}).get('10', {}).get('participant', {}).get('exposure_rate', 0):.2f}/"
           f"{cf[p].get('by_n', {}).get('50', {}).get('participant', {}).get('exposure_rate', 0):.2f}"
@@ -190,7 +190,7 @@ def render_html(raw: dict) -> str:
         + "<h3>피크 추가 메모리 (KiB)</h3>" + by_n_table("median_peak_bytes_by_n", f_kib)
         + "<h3>합성 지연시간 (초) — 상수 잠정</h3>" + by_n_table("median_time_ms_by_n", f_sec)))
     details.append(sec(
-        "§5-1 FT — 상세", "핵심 5위", "core",
+        "§5-1 FT — 상세", "비핵심", "aux",
         f"p_env {ft['config']['p_env']} (잠정) · 강도 {ft['config']['multiples']}배 · 표본 {ft['config']['runs_base']}",
         tbl(["방안", "베이스라인 완결률", "강도별 완결률", "임계", "여유 배수", "별점"],
             [[PLAN_LABELS.get(p, p), f"{ft[p]['baseline_agree_rate']:.2f}",
@@ -198,7 +198,7 @@ def render_html(raw: dict) -> str:
               ft[p]["critical_multiple"] or "없음", f"{ft[p]['margin']:g}", _stars(ft[p]["stars"])]
              for p in P])))
     details.append(sec(
-        "§5-2 REC — 상세", "핵심 5위", "core",
+        "§5-2 REC — 상세", "비핵심", "aux",
         f"기준 세션 {rc['config']['sessions']}개 × 중단 그리드 (phase 비용 대체)",
         tbl(["방안", "시도", "FR 실패", "복구 비율 중앙값", "재시작 비용 R", "별점"],
             [[PLAN_LABELS.get(p, p), rc[p]["trials"], rc[p]["fr_failures"], rc[p]["median_ratio"],
@@ -212,7 +212,7 @@ def render_html(raw: dict) -> str:
               f"{tb[p]['median_eval_ms']/1000:.2f}s", f"{tb[p]['median_transfer_ms']/1000:.3f}s", tb[p]["dominant"]]
              for p in P])))
     details.append(sec(
-        "§7 CF — 상세 (functional 3인 100건 · 정밀)", "비핵심·보조", "aux",
+        "§7 CF — 상세 (functional 3인 100건 · 정밀)", "핵심 5위", "core",
         f"frequency 공격자 (고정 규칙) · {cf['config'].get('viewpoints', '관점 2개')}",
         tbl(["방안", "관점", "정확도", "이득", "노출률", "별점"],
             [[PLAN_LABELS.get(p, p), "일반 참여자" if vp == "participant" else "담당자",
