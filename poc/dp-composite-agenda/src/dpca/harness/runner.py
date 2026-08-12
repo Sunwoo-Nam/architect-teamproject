@@ -53,8 +53,12 @@ def run_one(scenario: Scenario, strategy: str, n_steps: int = 200, with_log: boo
     tracemalloc.reset_peak()
     start = time.perf_counter()
 
-    if strategy == "seq":
-        result = run_sequential(scenario, beliefs, log=log, comms=comms)
+    if strategy in ("seq", "seq2"):
+        # seq2 = 1안 개선판: T1(프리픽스-소프트 반영) + T3(최종확인 백트랙) + 백트랙 상한 상향
+        # (T3 재협상이 축막힘에 걸리지 않도록 백트랙 예산을 축 수만큼 준다)
+        kw = (dict(soft_aware=True, final_confirm_retries=6, max_backtracks=max(2, len(scenario.axes)))
+              if strategy == "seq2" else {})
+        result = run_sequential(scenario, beliefs, log=log, comms=comms, **kw)
         agreement, rounds, proposals = result.agreement, result.rounds, result.proposals
         extra = {"backtracks": result.backtracks, "axis_rounds": result.axis_rounds,
                  "trace": result.trace}

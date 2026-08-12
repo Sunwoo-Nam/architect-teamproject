@@ -49,6 +49,7 @@ class AxisNegotiator(SAONegotiator):
         n_steps: int,
         log: EventLog | None = None,
         comms: Comms | None = None,
+        soft_aware: bool = False,
     ):
         super().__init__(name=f"seq-{beliefs.idx}-{axis.name}")
         self.eventlog = log
@@ -58,10 +59,11 @@ class AxisNegotiator(SAONegotiator):
         self.axis = axis
         self.agreed = agreed
         self.n_steps = n_steps
+        self.soft_aware = soft_aware   # T1: 값 점수에 프리픽스-소프트 감점 반영
         self.proposal_count = 0
         # 자기 기준 실행 가능 값만 (자기 하드 + 공유 규칙은 세션 공간에서 이미 걸러짐)
         self.mine = [v for v in values if self._own_ok(v) and self._optimistic(v) >= beliefs.initial_threshold]
-        self.mine.sort(key=lambda v: -beliefs.scores[axis.name][v.name])
+        self.mine.sort(key=lambda v: -self._score(v))
         self._by_name = {v.name: v for v in values}
         self._offered: set[str] = set()
 
@@ -85,7 +87,18 @@ class AxisNegotiator(SAONegotiator):
         return total  # soft 감점은 낙관 가정상 0으로 둔다 (상한이므로)
 
     def _score(self, value: Value) -> float:
-        return self.beliefs.scores[self.axis.name][value.name]
+        base = self.beliefs.scores[self.axis.name][value.name]
+        if not self.soft_aware:
+            return base
+        # T1: 현재 값이 이미 확정된 프리픽스와 취향상 어울리는가(소프트 감점) 반영
+        partial: Outcome = {**self.agreed, self.axis.name: value}
+        penalty = 0.0
+        for rule in self.beliefs.soft:
+            try:
+                penalty += rule(self.beliefs.idx, partial)
+            except KeyError:
+                continue
+        return base - penalty
 
     def _log(self, kind: str, **fields) -> None:
         if self.eventlog is not None:
@@ -159,6 +172,8 @@ def run_sequential(
     max_backtracks: int = 2,
     log: EventLog | None = None,
     comms: Comms | None = None,
+    soft_aware: bool = False,        # T1: 값 점수에 프리픽스-소프트 감점 반영
+    final_confirm_retries: int = 0,  # T3: 최종확인 실패 시 원인 축 금지 재협상 횟수
 ) -> SequentialResult:
     comms = comms if comms is not None else Comms(n_participants=len(beliefs))
 
@@ -173,73 +188,97 @@ def run_sequential(
     trace: list[str] = []
     shared_hard = beliefs[0].shared_hard  # 공유 규칙은 전원 동일
 
+    final_retries = 0
     i = 0
-    while i < len(scenario.axes):
-        axis = scenario.axes[i]
-        # 세션 공간: 공유 규칙과 prefix에 일관 + 금지 목록 제외 (양측이 같은 공간을 본다)
-        space_values = [
-            v for v in axis.values
-            if v.name not in forbidden[axis.name]
-            and all(r({**agreed, axis.name: v}) for r in shared_hard if _covers(r, {**agreed, axis.name: v}))
-        ]
-        negotiators = [
-            AxisNegotiator(b, scenario, axis, space_values, agreed, n_steps_per_axis, log=log, comms=comms)
-            for b in beliefs
-        ] if space_values else []
-        orch_log("axis_session_start", axis=axis.name,
-                 space=[v.name for v in space_values],
-                 agreed_prefix={k: v.name for k, v in agreed.items()})
+    while True:   # 외부 루프: 최종확인 실패 시 재시도(T3) 허용
+        while i < len(scenario.axes):
+            axis = scenario.axes[i]
+            # 세션 공간: 공유 규칙과 prefix에 일관 + 금지 목록 제외 (양측이 같은 공간을 본다)
+            space_values = [
+                v for v in axis.values
+                if v.name not in forbidden[axis.name]
+                and all(r({**agreed, axis.name: v}) for r in shared_hard if _covers(r, {**agreed, axis.name: v}))
+            ]
+            negotiators = [
+                AxisNegotiator(b, scenario, axis, space_values, agreed, n_steps_per_axis,
+                               log=log, comms=comms, soft_aware=soft_aware)
+                for b in beliefs
+            ] if space_values else []
+            orch_log("axis_session_start", axis=axis.name,
+                     space=[v.name for v in space_values],
+                     agreed_prefix={k: v.name for k, v in agreed.items()})
 
-        if not space_values or any(not n.mine for n in negotiators):
-            agreement_name = None
-        else:
-            mechanism = SAOMechanism(
-                outcome_space=make_os(issues=[make_issue([v.name for v in space_values], name=axis.name)]),
-                n_steps=n_steps_per_axis,
+            if not space_values or any(not n.mine for n in negotiators):
+                agreement_name = None
+            else:
+                mechanism = SAOMechanism(
+                    outcome_space=make_os(issues=[make_issue([v.name for v in space_values], name=axis.name)]),
+                    n_steps=n_steps_per_axis,
+                )
+                for negotiator in negotiators:
+                    mechanism.add(negotiator)
+                state = mechanism.run()
+                session_rounds = int(getattr(state, "step", 0))
+                rounds += session_rounds
+                proposals += sum(n.proposal_count for n in negotiators)
+                agreement_name = mechanism.agreement[0] if mechanism.agreement else None
+
+            if agreement_name is None:
+                # 백트랙 — 직전 축 합의를 금지하고 재협상
+                if i == 0 or backtracks >= max_backtracks:
+                    trace.append(f"{axis.name}: 진행 불가, 백트랙 소진 → 결렬")
+                    orch_log("sequential_breakdown", axis=axis.name, backtracks=backtracks,
+                             reason="진행 불가 상태에서 백트랙 상한 소진")
+                    return SequentialResult(None, rounds, proposals, backtracks, comms=comms, trace=trace)
+                prev = scenario.axes[i - 1]
+                forbidden[prev.name].add(agreed[prev.name].name)
+                trace.append(f"{axis.name}: 진행 불가 → {prev.name}={agreed[prev.name].name} 금지 후 백트랙")
+                orch_log("backtrack", stuck_axis=axis.name, forbid_axis=prev.name,
+                         forbid_value=agreed[prev.name].name,
+                         reason="현재 축 세션 진행 불가(후보 없음/결렬)")
+                del agreed[prev.name]
+                if axis_rounds:
+                    axis_rounds.pop()
+                backtracks += 1
+                i -= 1
+                continue
+
+            agreed[axis.name] = next(v for v in space_values if v.name == agreement_name)
+            axis_rounds.append(session_rounds)   # 이 축이 커밋됨 — 여기까지는 크래시에도 durable
+            trace.append(f"{axis.name} = {agreement_name}")
+            orch_log("axis_agreed", axis=axis.name, value=agreement_name)
+            i += 1
+
+        # 최종 확인 — 잠정 합의를 각자 전체 효용으로 재검
+        outcome: Outcome = dict(agreed)
+        failing = [b for b in beliefs
+                   if not b.feasible(outcome) or b.utility(outcome) < b.initial_threshold]
+        if not failing:
+            orch_log("final_confirmed", agreement={k: v.name for k, v in agreed.items()})
+            return SequentialResult(
+                {name: value.name for name, value in agreed.items()}, rounds, proposals, backtracks,
+                comms=comms, axis_rounds=axis_rounds, trace=trace,
             )
-            for negotiator in negotiators:
-                mechanism.add(negotiator)
-            state = mechanism.run()
-            session_rounds = int(getattr(state, "step", 0))
-            rounds += session_rounds
-            proposals += sum(n.proposal_count for n in negotiators)
-            agreement_name = mechanism.agreement[0] if mechanism.agreement else None
-
-        if agreement_name is None:
-            # 백트랙 — 직전 축 합의를 금지하고 재협상
-            if i == 0 or backtracks >= max_backtracks:
-                trace.append(f"{axis.name}: 진행 불가, 백트랙 소진 → 결렬")
-                orch_log("sequential_breakdown", axis=axis.name, backtracks=backtracks,
-                         reason="진행 불가 상태에서 백트랙 상한 소진")
-                return SequentialResult(None, rounds, proposals, backtracks, comms=comms, trace=trace)
-            prev = scenario.axes[i - 1]
-            forbidden[prev.name].add(agreed[prev.name].name)
-            trace.append(f"{axis.name}: 진행 불가 → {prev.name}={agreed[prev.name].name} 금지 후 백트랙")
-            orch_log("backtrack", stuck_axis=axis.name, forbid_axis=prev.name,
-                     forbid_value=agreed[prev.name].name,
-                     reason="현재 축 세션 진행 불가(후보 없음/결렬)")
-            del agreed[prev.name]
-            backtracks += 1
-            i -= 1
-            continue
-
-        agreed[axis.name] = next(v for v in space_values if v.name == agreement_name)
-        axis_rounds.append(session_rounds)   # 이 축이 커밋됨 — 여기까지는 크래시에도 durable
-        trace.append(f"{axis.name} = {agreement_name}")
-        orch_log("axis_agreed", axis=axis.name, value=agreement_name)
-        i += 1
-
-    # 최종 확인 — 잠정 합의를 각자 전체 효용으로 재검 (바닥선 미달이면 결렬)
-    outcome: Outcome = dict(agreed)
-    for b in beliefs:
-        if not b.feasible(outcome) or b.utility(outcome) < b.initial_threshold:
-            trace.append(f"최종 확인 실패 (참여자 {b.idx}) → 결렬")
-            orch_log("final_confirm_failed", agent=b.idx,
-                     utility=round(b.utility(outcome), 4), floor=b.initial_threshold,
-                     reason="조립된 전체 합의가 이 참여자의 바닥선 미달")
+        fb = failing[0]
+        # T3: 최종확인 실패 시, 실패 참여자에게 가장 나쁜(대안 있는) 축을 금지하고 그 축부터 재협상
+        movable = [ax for ax in scenario.axes
+                   if ax.name in agreed and len(ax.values) - len(forbidden[ax.name]) > 1]
+        if final_retries >= final_confirm_retries or not movable:
+            trace.append(f"최종 확인 실패 (참여자 {fb.idx}) → 결렬")
+            orch_log("final_confirm_failed", agent=fb.idx,
+                     utility=round(fb.utility(outcome), 4), floor=fb.initial_threshold,
+                     reason="조립된 전체 합의가 바닥선 미달 (재시도 소진/움직일 축 없음)")
             return SequentialResult(None, rounds, proposals, backtracks, comms=comms, trace=trace)
-    orch_log("final_confirmed", agreement={k: v.name for k, v in agreed.items()})
-    return SequentialResult(
-        {name: value.name for name, value in agreed.items()}, rounds, proposals, backtracks,
-        comms=comms, axis_rounds=axis_rounds, trace=trace,
-    )
+        culprit = min(movable,
+                      key=lambda ax: fb.weights[ax.name] * fb.scores[ax.name][agreed[ax.name].name])
+        ci = scenario.axes.index(culprit)
+        forbidden[culprit.name].add(agreed[culprit.name].name)
+        trace.append(f"최종확인 실패(참여자 {fb.idx}) → {culprit.name}={agreed[culprit.name].name} 금지 재협상(T3)")
+        orch_log("final_confirm_backtrack", agent=fb.idx, forbid_axis=culprit.name,
+                 forbid_value=agreed[culprit.name].name, retry=final_retries + 1,
+                 reason="T3: 최종확인 실패 → 원인 축 금지 후 재협상")
+        for ax in scenario.axes[ci:]:
+            agreed.pop(ax.name, None)
+        del axis_rounds[ci:]
+        final_retries += 1
+        i = ci

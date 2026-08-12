@@ -378,6 +378,9 @@ class Plan21Tree(_StyleBase):
         rounds = 0  # 라운드 = 바퀴당 트리 병합 1회
         self._eval_calls = sum(len(a.ranked) for a in self.agents)
         for sweep in range(1, self.max_sweeps + 1):
+            if sweep > 1:  # 바퀴 전환 신호 — root가 "교집합 없음, 다음 바퀴" 방송
+                bb.counter.add("tick", self.n - 1, {"tick": sweep})
+                bb.phase()
             boundary = self._snapshot(delivered)
             batch_log = {}
             for a in self.agents:  # 리프: 이번 바퀴 배치 준비 (로컬)
@@ -588,6 +591,15 @@ class Plan6ITree(_StyleBase):
                 a.ptr = 0
             while rounds < cap:
                 boundary = self._snapshot(delivered)
+                # 라운드 진행 신호: 자식은 라운드마다 아무것도 받지 않아 자기 동기화가
+                # 불가능 — root가 트리 간선을 따라 하향 틱 (간선 N-1건, 깊이만큼 phase).
+                # 제어 신호는 신뢰 채널 가정(injector 제외). PL 지적 반영 (2026-08-12)
+                if self.n > 1:
+                    max_lvl = self._level(self.n - 1)
+                    for lvl in range(1, max_lvl + 1):
+                        cnt = sum(1 for j in range(self.n) if self._level(j) == lvl)
+                        bb.counter.add("tick", cnt, {"tick": sweep})
+                        bb.phase()
                 pending: dict[int, object] = {}
                 for i, a in enumerate(self.agents):
                     c = a.peek(sweep)
@@ -678,6 +690,9 @@ class Plan22Rotate(_StyleBase):
         for sweep in range(1, self.max_sweeps + 1):
             coord = (sweep - 1) % self.n
             self._coord_idx = coord  # RU 귀속: 현 바퀴 담당자
+            if sweep > 1:  # 바퀴 전환 신호 — 신임 담당자가 "다음 바퀴" 방송
+                bb.counter.add("tick", self.n - 1, {"tick": sweep})
+                bb.phase()
             boundary = self._snapshot(delivered)
             batch_log = {}
             for i, a in enumerate(self.agents):
@@ -783,6 +798,10 @@ class Plan7RotCollect(_StyleBase):
                 boundary = self._snapshot(delivered)
                 coord = rounds % self.n
                 self._coord_idx = coord
+                # 라운드 진행 신호: 순번 수집자가 전원에게 "이번 라운드 제출" 틱 —
+                # 수집자 교대라 참여자가 스스로 라운드를 넘길 수 없다 (신뢰 채널 가정)
+                bb.counter.add("tick", self.n - 1, {"tick": sweep})
+                bb.phase()
                 submitted, any_pending = {}, False
                 for i, a in enumerate(self.agents):
                     c = a.peek(sweep)
@@ -1030,6 +1049,10 @@ class Plan10Shard(_StyleBase):
                 a.ptr = 0
             while rounds < cap:
                 boundary = self._snapshot(delivered)
+                # 라운드 진행 신호: 샤딩에는 라운드 완료를 아는 노드가 없어 페이서(P0)가
+                # 틱을 방송한다고 가정 (대안: 시간 슬롯 — 시계 동기 전제. 보수적으로 계수)
+                bb.counter.add("tick", self.n - 1, {"tick": sweep})
+                bb.phase()
                 submitted, any_pending = {}, False
                 for i, a in enumerate(self.agents):
                     c = a.peek(sweep)

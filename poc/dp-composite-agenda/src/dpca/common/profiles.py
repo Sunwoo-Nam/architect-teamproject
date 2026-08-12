@@ -50,6 +50,9 @@ def _normalize(values: list[float]) -> list[float]:
 
 
 def build_truth_profiles(scenario: Scenario) -> list[TruthProfile]:
+    frozen = getattr(scenario, "frozen_profiles", None)
+    if frozen is not None:   # fixture: 프로파일을 파일에서 고정 로드 (시드 생성 우회)
+        return frozen
     seed = scenario.profile_seed
     styles = scenario.participants.get("styles", ["default"] * scenario.n_participants)
     rho = float(scenario.meta.get("conflict_rho", 0.0))

@@ -490,7 +490,7 @@ def resolve_plans(spec: str | None) -> list[str]:
     """--plans 인자 해석 — 방안 번호("2,6,10") 또는 내부 이름("plan2,plan6itree") 혼용 허용."""
     from .protocol import PLAN_NAMES
 
-    if not spec:
+    if not spec or spec.strip().lower() == "all":
         return list(PLAN_NAMES)
     by_number = {}
     for name in PLAN_NAMES:

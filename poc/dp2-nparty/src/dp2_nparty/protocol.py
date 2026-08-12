@@ -170,8 +170,16 @@ class _BasePlan:
             bytes=bb.counter.total_bytes, eval_calls=self._eval_calls, n=self.n,
         )
 
+    def _round_tick(self, bb, sweep):
+        """라운드 진행 신호 비용 — 참여자가 스스로 라운드를 넘길 신호가 없는 방안만 지불.
+
+        방안 1은 라운드 결과 공지가 곧 다음 라운드 신호라 추가 비용이 없다(기본 no-op).
+        제어 신호는 신뢰 채널(재전송 내장) 가정 — injector 유실 대상에서 제외한다.
+        (24 §3.2 집계 범위 "라운드 제어 포함" 반영 — PL 지적, 2026-08-12)"""
+
     def _one_round(self, bb, sweep, round_no, injector, kill_at, events):
         """한 라운드. 반환 (성립 결과 | None, 전원 소진 여부)."""
+        self._round_tick(bb, sweep)
         submitted: dict[str, Candidate] = {}
         any_pending = False
         for i, a in enumerate(self.agents):
@@ -259,6 +267,12 @@ class Plan2Cumulative(_BasePlan):
     def __init__(self, profiles, tie_breaker: TieBreaker | None = None, **kw):
         super().__init__(profiles, tie_breaker or RankSumThenStdThenRunoff(), **kw)
 
+    def _round_tick(self, bb, sweep):
+        # 참여자는 남의 제출을 못 보므로 담당자의 진행 신호 없이는 라운드를 넘길 수 없다.
+        # 신호 없이 흘려보내면 성립 후에도 하위 순위가 전송돼 점진 공개가 무너진다(§7).
+        bb.counter.add("tick", self.n - 1, {"tick": sweep})
+        bb.phase()
+
     def _judge(self, bb, submitted, sweep, round_no, injector, kill_at, events):
         for pid, c in submitted.items():
             bb.proposed_by.setdefault(pid, set()).add(c)
@@ -323,6 +337,9 @@ class Plan20Batch(_BasePlan):
         )
 
     def _one_sweep(self, bb, sweep, round_no, injector, kill_at, events):
+        if sweep > 1:  # 바퀴 전환 신호 — "교집합 없음, 다음 바퀴 진행" (담당자 → 전원)
+            bb.counter.add("tick", self.n - 1, {"tick": sweep})
+            bb.phase()
         batch_log: dict[str, list] = {}
         for i, a in enumerate(self.agents):
             th = a.th.at_sweep(sweep)
