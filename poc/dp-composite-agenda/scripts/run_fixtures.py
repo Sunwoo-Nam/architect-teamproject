@@ -37,39 +37,47 @@ def main() -> int:
         print("fixtures 없음 — 먼저 make_fixtures.py 실행")
         return 1
 
+    from statistics import mean, median
     rows = []
-    print(f"{'fixture':<24}{'축':>3}{'U(x*)':>8}  " +
-          "".join(f"{st+' 달성/합의':>16}" for st in strategies))
+    print("=== ① 정확도(달성률=U(r)/U(x*)) + 피크 메모리(MB) ===")
+    print(f"{'fixture':<22}{'축':>3}  " +
+          "".join(f"{st:>18}" for st in strategies))
     for path in paths:
         sc, known = load_fixture(path)
         uxs = known["u_xstar"]
-        # 라운드트립 검증: 로드한(고정) 시나리오의 x*가 저장값과 일치해야
-        rt = exact_xstar(sc)["u_xstar"]
-        rt_ok = abs(rt - uxs) < 1e-6
+        rt_ok = abs(exact_xstar(sc)["u_xstar"] - uxs) < 1e-6   # 라운드트립 검증
         cells = []
         for st in strategies:
             r = run_one(sc, st)
-            if r.agreement:
-                rate = true_total(sc, r.agreement) / uxs
-                cells.append(f"{rate:>10.1%}/합의")
-            else:
-                rate = None
-                cells.append(f"{'—':>10}/결렬")
+            rate = true_total(sc, r.agreement) / uxs if r.agreement else None
+            cells.append(f"{(f'{rate:.0%}' if rate is not None else '결렬'):>6}/{r.peak_kib/1024:>6.1f}MB")
             rows.append({"fixture": path.stem, "n_axes": len(sc.axes), "strategy": st,
                          "u_xstar": round(uxs, 4),
                          "achieved": round(rate, 4) if rate is not None else None,
-                         "agreed": r.agreement is not None, "roundtrip_ok": rt_ok})
-        flag = "" if rt_ok else "  ⚠x*불일치"
-        print(f"{path.stem:<24}{len(sc.axes):>3}{uxs:>8.3f}  " +
-              "".join(f"{c:>16}" for c in cells) + flag)
+                         "agreed": r.agreement is not None,
+                         "peak_mb": round(r.peak_kib / 1024, 3), "wall_ms": round(r.wall_ms, 1),
+                         "phases": r.phases, "roundtrip_ok": rt_ok})
+        flag = "" if rt_ok else " ⚠x*불일치"
+        print(f"{path.stem:<22}{len(sc.axes):>3}  " + "".join(f"{c:>18}" for c in cells) + flag)
+
+    # 집계 QA 비교
+    print("\n=== ② 전략별 QA 집계 (12 fixture) ===")
+    print(f"{'전략':<6}{'FC 달성률µ':>12}{'합의율':>8}{'메모리 중앙MB':>14}{'시간 중앙ms':>12}")
+    for st in strategies:
+        rs = [r for r in rows if r["strategy"] == st]
+        ach = [r["achieved"] for r in rs if r["achieved"] is not None]
+        print(f"{st:<6}{mean(ach) if ach else 0:>12.1%}"
+              f"{sum(r['agreed'] for r in rs)/len(rs):>8.0%}"
+              f"{median(r['peak_mb'] for r in rs):>14.2f}"
+              f"{median(r['wall_ms'] for r in rs):>12.1f}")
 
     out = ROOT / "results" / "fixtures_result.jsonl"
     with out.open("w", encoding="utf-8") as f:
         for row in rows:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
     print(f"\n{len(rows)} rows → {out}")
-    if all(r["roundtrip_ok"] for r in rows):
-        print("라운드트립 OK — 로드한 고정본의 x*가 저장값과 전부 일치")
+    print("라운드트립 OK — 로드한 x*가 저장값과 전부 일치" if all(r["roundtrip_ok"] for r in rows)
+          else "⚠ 라운드트립 불일치 존재")
     return 0
 
 
