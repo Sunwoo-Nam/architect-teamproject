@@ -253,26 +253,47 @@ def render_markdown(raw: dict) -> str:
             "쉽게 찾는다. 대신 점진형이 일찍 멈춰 **1인 최대 메모리**가 낮아질 것으로 예상되는 조건."
         )
         A("")
-        A("| 방안 | A 달성률(s,★) | A 1인최대 | B 달성률(s,★) | B 1인최대 | A 라운드/B 라운드 |")
-        A("|---|---|---|---|---|---|")
-        for p in P:
-            d = isec.get(p, {})
-            a, b = d.get("a", {}), d.get("b", {})
-            if not a or not b:
-                continue
-            A(
-                f"| {p} | {a['mean_ratio']:.3f} (s{a['s']:.2f}, {_stars(a['stars'])}) "
-                f"| {a['median_person_peak_bytes']/1024:.1f} KiB "
-                f"| {b['mean_ratio']:.3f} (s{b['s']:.2f}, {_stars(b['stars'])}) "
-                f"| {b['median_person_peak_bytes']/1024:.1f} KiB "
-                f"| {a['median_rounds']:.0f} / {b['median_rounds']:.0f} |"
-            )
+        c = isec["config"].get("constants", {})
+        A(f"시간 = 협상 1건(시작~합의)의 추정 소요. 합성 시간(통신 {c.get('t_rtt_ms', 0):.0f}ms/phase ·"
+          f" 평가 {c.get('t_eval_ms', 0)*1000:.0f}µs/건 ÷N 병렬 보정 ·"
+          f" 대역 {c.get('bw_bytes_per_s', 0)/1000:.0f}kB/s) + 프로토콜 계산 실측(PoC 벽시계, K=1).")
+        A("**상수는 잠정 — 절대값이 아니라 방안 간 상대 비교용이다.**")
         A("")
-        A(
-            "> A·B의 1인 최대 메모리가 서로 다르면(B가 낮으면) '점진형이 넓은 공간에서 유리·좁은 "
-            "공간에서 불리'라는 가설이 확인된 것이다. 같으면 메모리 축의 판별 대상은 방안 간 "
-            "제출 방식(점진/일괄)이 아니라 중앙집중/계층분산 여부로 봐야 한다."
-        )
+        for track in ("a", "b"):
+            A(f"### {track.upper()} 트랙 — {labels.get(track, track.upper())}")
+            A("")
+            A("| 조합 수 | 방안 | 건수 | 달성률(s) | 협상 1건 시간 min/평균/중앙/max |"
+              " 단말 총 점유 | 프로토콜 상태 | 라운드 | phase |")
+            A("|---|---|---|---|---|---|---|---|---|")
+            levels = sorted({int(s) for p in P for s in isec.get(p, {}).get(track, {}).get("by_s", {})})
+            for S in levels:
+                for p in P:
+                    v = isec.get(p, {}).get(track, {}).get("by_s", {}).get(str(S))
+                    if not v:
+                        continue
+                    t = v["t_total_s"]
+                    A(f"| {S:,} | {p} | {v['cases']} | {v['mean_ratio']:.3f} (s{v['s']:.2f})"
+                      f" | {t['min']:.1f} / {t['mean']:.1f} / {t['median']:.1f} / {t['max']:.1f} s"
+                      f" | {v['median_device_bytes']/1024/1024:.2f} MB"
+                      f" | {_kib(v['median_protocol_bytes'])}"
+                      f" | {v['median_rounds']:,} | {v['median_phases']:,} |")
+            A("")
+            base_note = []
+            for S in levels:
+                for p in P:
+                    v = isec.get(p, {}).get(track, {}).get("by_s", {}).get(str(S))
+                    if v:
+                        base_note.append(f"S={S:,} → {v['median_base_bytes']/1024/1024:.2f} MB")
+                        break
+            A("> **단말 총 점유 = 공통 기저 + 프로토콜 상태.** 공통 기저(효용 테이블·순위표·"
+              "역인덱스)는 방안과 무관하게 조합 수에만 비례한다 — " + " · ".join(base_note) + ". "
+              "방안 선택으로 줄일 수 없는 하한이므로, 조합 공간 규모 상한은 이 값으로 판단한다. "
+              "프로토콜 상태(holder_sizes 1인 최대)가 방안 간 차이가 나는 부분이다. "
+              "전송 바이트는 점유량이 아니므로 이 축에서 제외했다 (통신 시간 항으로만 계상).")
+            A("")
+        A("> 시간의 항별 내역(통신·전송·평가·계산)은 raw.json의 `t_parts_median_s` 참조. "
+          "규모를 섞은 대표값 하나로는 오해를 부르므로 조합 수(S)별로 나눠 싣는다 — "
+          "같은 규모 안에서도 케이스 편차가 커서 min/max를 병기한다.")
         A("")
 
     if "an_kit" in raw:

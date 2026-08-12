@@ -7,8 +7,8 @@
 - §10 의제 조합(issue-space) A·B 트랙 → 정적 벤치마크. A(실후보 0.5%)는 정확도 판별용,
   B(5%)는 단말 부담 판별용 — 하나의 케이스로 둘 다 재려 하면 한쪽이 사라진다는 것이
   사전 검증으로 확인되어 트랙을 나눴다 (01-테스트-케이스-확장-계획.md §8 개정 참조).
-  §4와 역할이 다르다 — §4는 조합 수 S의 전 구간 스윕(탄력성 c), §10은 고정 규모(6만~13만)
-  에서의 방안별 정확도·1인 메모리·전원 합계다.
+  §4와 역할이 다르다 — §4는 조합 수 S의 전 구간 스윕(탄력성 c), §10은 조합 규모(S)별로
+  나눈 방안별 정확도·단말 점유·협상 1건당 시간이다.
 
 출력 raw dict의 키 구조는 campaign과 동일 — report.render_markdown·build_index가 그대로 동작한다.
 
@@ -21,6 +21,7 @@
 from __future__ import annotations
 
 import statistics
+import time
 from datetime import datetime
 
 from .benchmark import CASES_DIR, BenchmarkCase, JsonBenchmarkLoader
@@ -55,67 +56,147 @@ def _scalability_cases() -> list[BenchmarkCase]:
 
 
 def _issue_space_cases(subdir: str):
-    """의제 조합 케이스(전개 전)를 case_id 사전순으로 — 전개는 방안 공유를 위해 호출부에서."""
+    """의제 조합 케이스(전개 전)를 case_id 사전순으로 — 전개(expand)는 호출부에서 한다.
+
+    expand()는 방안마다 다시 부른다(공유하지 않는다). 방안별로 새 Profile을 받아야
+    순위표 캐시가 냉시작이라 구축 비용을 동일하게 지불하기 때문이다 — 측정 공정성이
+    expand 중복 비용(조합 62,208 케이스에서 케이스당 약 0.1초)보다 우선한다.
+    """
     from .issue_space import IssueSpaceLoader
 
     return sorted(IssueSpaceLoader(root=CASES_DIR / subdir).issue_cases(), key=lambda c: c.case_id)
 
 
+def _dist(vals: list[float], nd: int = 2) -> dict:
+    """min/평균/중앙/max — 케이스별로 먼저 합산한 뒤 분포를 낸다.
+
+    항목별 중앙값을 각각 내서 더하면 실재하지 않는 케이스가 만들어진다 (중앙값의 합 ≠
+    합의 중앙값). §10은 조합 규모가 3자릿수 차이 나는 케이스를 섞으므로 편차가 커
+    대표값 하나로 보고하면 오해를 부른다 — 실측 예: 방안 2가 중앙 0.07s / 최대 39s.
+    """
+    if not vals:
+        return {"min": 0.0, "mean": 0.0, "median": 0.0, "max": 0.0}
+    return {"min": round(min(vals), nd), "mean": round(statistics.mean(vals), nd),
+            "median": round(statistics.median(vals), nd), "max": round(max(vals), nd)}
+
+
 def _issue_space_section(track_cases: dict[str, list]) -> dict:
-    """§10 의제 조합 A·B 트랙 — 방안별 정확도·1인 메모리·전원 합계·동작량.
+    """§10 의제 조합 A·B 트랙 — 조합 규모(S)별 정확도·단말 점유·협상 1건당 시간.
 
     예산 제약을 걸지 않은 전체 공간 기준 측정이다(제약 실험은 scripts/budget_report.py 소관).
-    케이스당 expand()는 방안 수만큼이 아니라 **한 번만** 호출해 방안끼리 공유한다.
+
+    **집계 단위는 조합 규모 S별이다** — 케이스 셋이 S=64·1,728·62,208을 섞고 있어 전체를
+    한 대표값으로 뭉개면 규모 효과가 중앙값 하나에 가려진다.
+
+    **시간**은 협상 1건(케이스 1개, 시작~합의)의 추정 소요다:
+        T = 합성 시간(§6: 통신 + 평가÷N + 전송) + 프로토콜 계산 실측(PoC 벽시계)
+    합성 시간의 평가 항이 순위표 구축을 이미 값 매기므로 생성 시간은 따로 더하지 않는다
+    (방안 1-A의 라운드별 재평가분만 두 항에 겹치나, 벽시계 기준 0.08µs 수준이라 무시).
+    벽시계는 K=1 단발이다 — 계산 항이 총 시간의 0.02~0.3%라 반복 정밀화의 실익이 없다.
+    tracemalloc·payload JSON 계측이 붙으면 벽시계가 오염되므로 이 구간에서는 쓰지 않는다.
+
+    **메모리**는 두 축으로 낸다 (전송 바이트는 점유량이 아니므로 이 축에서 제외):
+    - 단말 총 점유 = 공통 기저(ru_person.base_size — 방안 무관) + 프로토콜 상태
+      → 핸드북 §2의 앱 예산 대비 판정·조합 규모 상한 판단용
+    - 프로토콜 상태 = holder_sizes 1인 최대 → 방안 간 비교용
     """
+    import gc
+
     from .issue_space import expand
+    from .measures.ru_person import base_size
 
     sec: dict = {
         "config": {
             "tracks": {t: len(track_cases[t]) for t, _d, _label in ISSUE_SPACE_TRACKS},
             "track_labels": {t: label for t, _d, label in ISSUE_SPACE_TRACKS},
+            "constants": dict(tbmod.DEFAULT_CONSTANTS),
             "note": "채점은 케이스가 정의하는 전체 조합 공간 기준 x* 대비 달성률. "
-                    "메모리는 논리 상태 귀속(ru_person) — 1인 최대가 실제 단말 제약과 대응한다.",
+                    "시간은 협상 1건당 추정(합성 시간 + 프로토콜 계산 실측, K=1). "
+                    "메모리는 단말 총 점유(공통 기저+프로토콜 상태)와 프로토콜 상태 2축.",
         }
     }
+    base_cache: dict[str, int] = {}  # 공통 기저는 방안 무관 — 케이스당 1회만 계산
     for name, cls in PLANS:
         by_track: dict[str, dict] = {}
         for track, _dirname, _label in ISSUE_SPACE_TRACKS:
-            cases = track_cases[track]
-            ratios, baselines = [], []
-            person_peaks, total_peaks = [], []
-            rounds, msgs, byts, times = [], [], [], []
-            agreed = 0
-            for case in cases:
+            groups: dict[int, dict[str, list]] = {}
+            for case in track_cases[track]:
                 bc = expand(case)
-                plan = cls(bc.profiles, collect_log=False)
-                session = plan.run()
+                for p in bc.profiles:
+                    p.clear_caches()  # 방안마다 순위표 구축 비용을 동일하게 지불 (측정 공정성)
+                gc.disable()
+                try:
+                    plan = cls(bc.profiles, collect_log=False)
+                    t0 = time.perf_counter()
+                    session = plan.run()
+                    t_proto = time.perf_counter() - t0
+                finally:
+                    gc.enable()
                 sizes = holder_sizes(plan)  # 종료 후 1회 — 라운드 콜백 금지 (모듈 docstring 참조)
+                if case.case_id not in base_cache:
+                    base_cache[case.case_id] = base_size(bc.profiles[0])
+                base = base_cache[case.case_id]
+                proto = max(sizes) if sizes else 0
+                st = tbmod.synth_time(session)
                 f = fcmod.score(session.outcome, bc.candidates, bc.profiles)
-                ratios.append(f.ratio)
-                baselines.append(f.baseline)
-                agreed += session.agreed
-                person_peaks.append(max(sizes) if sizes else 0)
-                total_peaks.append(sum(sizes))
-                rounds.append(session.rounds)
-                msgs.append(session.messages)
-                byts.append(session.bytes)
-                times.append(tbmod.synth_time(session).total_ms)
-            mr = statistics.mean(ratios) if ratios else 0.0
-            mb = statistics.mean(baselines) if baselines else 0.0
-            sv = (mr - mb) / (1 - mb) if mb < 1 else 1.0
+                g = groups.setdefault(len(bc.candidates), {
+                    "ratio": [], "baseline": [], "agreed": [], "t_total": [], "t_proto": [],
+                    "t_comm": [], "t_eval": [], "t_transfer": [], "device": [], "protocol": [],
+                    "base": [], "rounds": [], "phases": [], "messages": [], "bytes": [],
+                })
+                g["ratio"].append(f.ratio)
+                g["baseline"].append(f.baseline)
+                g["agreed"].append(int(session.agreed))
+                g["t_total"].append(st.total_ms / 1000.0 + t_proto)
+                g["t_proto"].append(t_proto)
+                g["t_comm"].append(st.rtt_ms / 1000.0)
+                g["t_eval"].append(st.eval_ms / 1000.0)
+                g["t_transfer"].append(st.transfer_ms / 1000.0)
+                g["device"].append(base + proto)
+                g["protocol"].append(proto)
+                g["base"].append(base)
+                g["rounds"].append(session.rounds)
+                g["phases"].append(session.phases)
+                g["messages"].append(session.messages)
+                g["bytes"].append(session.bytes)
+            by_s: dict[str, dict] = {}
+            all_r, all_b, n_ok, n_all = [], [], 0, 0
+            for S in sorted(groups):
+                g = groups[S]
+                mr, mb = statistics.mean(g["ratio"]), statistics.mean(g["baseline"])
+                all_r += g["ratio"]
+                all_b += g["baseline"]
+                n_ok += sum(g["agreed"])
+                n_all += len(g["agreed"])
+                med = lambda k: int(statistics.median(g[k]))  # noqa: E731
+                by_s[str(S)] = {
+                    "cases": len(g["ratio"]),
+                    "agreed": sum(g["agreed"]),
+                    "mean_ratio": round(mr, 4),
+                    "mean_baseline": round(mb, 4),
+                    "s": round((mr - mb) / (1 - mb) if mb < 1 else 1.0, 4),
+                    "t_total_s": _dist(g["t_total"]),
+                    "t_parts_median_s": {
+                        "comm": round(statistics.median(g["t_comm"]), 2),
+                        "transfer": round(statistics.median(g["t_transfer"]), 2),
+                        "eval": round(statistics.median(g["t_eval"]), 4),
+                        "compute": round(statistics.median(g["t_proto"]), 3),
+                    },
+                    "median_device_bytes": med("device"),
+                    "median_protocol_bytes": med("protocol"),
+                    "median_base_bytes": med("base"),
+                    "median_rounds": med("rounds"),
+                    "median_phases": med("phases"),
+                    "median_messages": med("messages"),
+                    "median_bytes": med("bytes"),
+                }
+            mr = statistics.mean(all_r) if all_r else 0.0
+            mb = statistics.mean(all_b) if all_b else 0.0
             by_track[track] = {
-                "cases": len(cases),
-                "mean_ratio": round(mr, 4),
-                "mean_baseline": round(mb, 4),
-                "s": round(sv, 4),
-                "stars": fcmod.stars_from_s(sv),
-                "agreed": agreed,
-                "median_person_peak_bytes": int(statistics.median(person_peaks)) if person_peaks else 0,
-                "median_total_logical_bytes": int(statistics.median(total_peaks)) if total_peaks else 0,
-                "median_rounds": statistics.median(rounds) if rounds else 0,
-                "median_messages": statistics.median(msgs) if msgs else 0,
-                "median_bytes": statistics.median(byts) if byts else 0,
-                "median_time_ms": round(statistics.median(times), 1) if times else 0.0,
+                "cases": n_all, "agreed": n_ok,
+                "mean_ratio": round(mr, 4), "mean_baseline": round(mb, 4),
+                "s": round((mr - mb) / (1 - mb) if mb < 1 else 1.0, 4),
+                "by_s": by_s,
             }
         sec[name] = by_track
     return sec

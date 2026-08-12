@@ -133,16 +133,29 @@ def render_html(raw: dict) -> str:
         [None] * len(P),
         "종합 등급으로 압축하지 않음 (PL 방침) — 전 N 상세는 §7 카드"))
     if isec:
+        _top = max((int(s) for p in P if p in isec
+                    for s in isec[p]["a"].get("by_s", {})), default=0)
+
+        def _isum(p: str) -> str:
+            if p not in isec:
+                return "-"
+            out = []
+            for tk in ("a", "b"):
+                v = isec[p][tk].get("by_s", {}).get(str(_top))
+                if not v:
+                    continue
+                out.append(f"{tk.upper()} {v['mean_ratio']:.3f} · "
+                           f"{v['t_total_s']['median']:.0f}s · "
+                           f"{v['median_device_bytes']/1024/1024:.1f}MB")
+            return " / ".join(out) or "-"
+
         rows.append(row(
-            '§10 의제 조합 — A(정확도)/B(단말부담) 트랙 <span class="badge sub">신규</span>',
-            [(f"A {isec[p]['a']['mean_ratio']:.3f}(★{isec[p]['a']['stars']}) "
-              f"{isec[p]['a']['median_person_peak_bytes']/1024:.0f}KiB"
-              f" · B {isec[p]['b']['mean_ratio']:.3f}(★{isec[p]['b']['stars']}) "
-              f"{isec[p]['b']['median_person_peak_bytes']/1024:.0f}KiB")
-             if p in isec else "-" for p in P],
+            f'§10 의제 조합 — 최대 규모 S={_top:,} 기준 <span class="badge sub">신규</span>',
+            [_isum(p) for p in P],
             [None] * len(P),
+            "달성률 · 협상 1건 시간(중앙) · 단말 총 점유 — "
             f"A {isec['config']['tracks'].get('a', 0)}건 · B {isec['config']['tracks'].get('b', 0)}건"
-            " · 1인 최대 메모리 기준 (상세는 §10 카드)"))
+            " · 규모(S)별 전체는 §10 카드"))
     if raw.get("an_kit"):
         rows.append(row(
             '§8 AN — 진단 실험 킷 <span class="badge aux">비핵심</span>',
@@ -282,23 +295,39 @@ def render_html(raw: dict) -> str:
 
     if isec:
         ip = [p for p in P if p in isec]
-        details.append(sec(
-            "§10 의제 조합(issue-space) — A·B 트랙 상세", "신규", "sub",
-            f"A(정확도 판별, 실후보 0.5%) {isec['config']['tracks'].get('a', 0)}건 · "
-            f"B(단말 부담 판별, 실후보 5%) {isec['config']['tracks'].get('b', 0)}건 · "
-            "채점은 케이스 전체 조합 공간 기준 x* 대비 달성률 · 메모리는 논리 상태 귀속(1인 최대)",
-            tbl(["방안", "A 달성률(s)", "A 별점", "A 1인최대/합계(KiB)", "A 라운드",
-                 "B 달성률(s)", "B 별점", "B 1인최대/합계(KiB)", "B 라운드"],
-                [[PLAN_LABELS.get(p, p),
-                  f"{isec[p]['a']['mean_ratio']:.3f} (s{isec[p]['a']['s']:.2f})",
-                  _stars(isec[p]['a']['stars']),
-                  f"{isec[p]['a']['median_person_peak_bytes']/1024:.1f} / {isec[p]['a']['median_total_logical_bytes']/1024:.1f}",
-                  f"{isec[p]['a']['median_rounds']:.0f}",
-                  f"{isec[p]['b']['mean_ratio']:.3f} (s{isec[p]['b']['s']:.2f})",
-                  _stars(isec[p]['b']['stars']),
-                  f"{isec[p]['b']['median_person_peak_bytes']/1024:.1f} / {isec[p]['b']['median_total_logical_bytes']/1024:.1f}",
-                  f"{isec[p]['b']['median_rounds']:.0f}"]
-                 for p in ip])))
+        ic = isec["config"]
+        kc = ic.get("constants", {})
+        for tk, tlabel in (("a", "A(정확도 판별, 실후보 0.5%)"), ("b", "B(단말 부담 판별, 실후보 5%)")):
+            lv = sorted({int(s) for p in ip for s in isec[p][tk].get("by_s", {})})
+            body = []
+            for S in lv:
+                for p in ip:
+                    v = isec[p][tk].get("by_s", {}).get(str(S))
+                    if not v:
+                        continue
+                    t = v["t_total_s"]
+                    pt = v["t_parts_median_s"]
+                    body.append([
+                        f"{S:,}", PLAN_LABELS.get(p, p), str(v["cases"]),
+                        f"{v['mean_ratio']:.3f} (s{v['s']:.2f})",
+                        f"{t['min']:.1f} / {t['mean']:.1f} / {t['median']:.1f} / {t['max']:.1f}",
+                        f"통신 {pt['comm']:.1f} · 전송 {pt['transfer']:.1f} · 계산 {pt['compute']:.2f}",
+                        f"{v['median_device_bytes']/1024/1024:.2f} MB",
+                        f"{v['median_protocol_bytes']/1024:.1f} KiB",
+                        f"{v['median_rounds']:,} / {v['median_phases']:,}",
+                    ])
+            base_note = " · ".join(
+                f"S={S:,} → {isec[ip[0]][tk]['by_s'][str(S)]['median_base_bytes']/1024/1024:.2f} MB"
+                for S in lv if str(S) in isec[ip[0]][tk].get("by_s", {}))
+            details.append(sec(
+                f"§10 의제 조합 — {tk.upper()} 트랙 (조합 규모별)", "신규", "sub",
+                f"{tlabel} {ic['tracks'].get(tk, 0)}건 · 시간 = 협상 1건(시작~합의) 추정 = "
+                f"합성(통신 {kc.get('t_rtt_ms', 0):.0f}ms/phase · 평가 {kc.get('t_eval_ms', 0)*1000:.0f}µs/건 ÷N · "
+                f"대역 {kc.get('bw_bytes_per_s', 0)/1000:.0f}kB/s) + 프로토콜 계산 실측(K=1). "
+                f"상수 잠정 — 절대값 아님. 단말 총 점유 = 공통 기저(방안 무관: {base_note}) + 프로토콜 상태. "
+                "전송 바이트는 점유량이 아니라 통신 시간 항으로만 계상.",
+                tbl(["조합 수", "방안", "건수", "달성률(s)", "협상 1건 시간 min/평균/중앙/max (s)",
+                     "항별 중앙 (s)", "단말 총 점유", "프로토콜 상태", "라운드/phase"], body)))
 
     return f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">

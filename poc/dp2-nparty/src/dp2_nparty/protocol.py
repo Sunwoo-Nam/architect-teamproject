@@ -160,14 +160,14 @@ class _BasePlan:
                     return SessionResult(
                         self.plan_name, winner, rounds, sweep, bb.counter.total,
                         phases=bb.phases, tie_break_used=tie_used, log=events,
-                        bytes=bb.counter.total_bytes, eval_calls=self._eval_calls,
+                        bytes=bb.counter.total_bytes, eval_calls=self._eval_calls, n=self.n,
                     )
         bb.final_notice({"outcome": NO_DEAL})
         bb.phase()
         return SessionResult(
             self.plan_name, NO_DEAL, rounds, self.max_sweeps, bb.counter.total,
             phases=bb.phases, tie_break_used=False, log=events,
-            bytes=bb.counter.total_bytes, eval_calls=self._eval_calls,
+            bytes=bb.counter.total_bytes, eval_calls=self._eval_calls, n=self.n,
         )
 
     def _one_round(self, bb, sweep, round_no, injector, kill_at, events):
@@ -312,14 +312,14 @@ class Plan20Batch(_BasePlan):
                 return SessionResult(
                     self.plan_name, winner, rounds, sweep, bb.counter.total,
                     phases=bb.phases, tie_break_used=tie_used, log=events,
-                    bytes=bb.counter.total_bytes, eval_calls=self._eval_calls,
+                    bytes=bb.counter.total_bytes, eval_calls=self._eval_calls, n=self.n,
                 )
         bb.final_notice({"outcome": NO_DEAL})
         bb.phase()
         return SessionResult(
             self.plan_name, NO_DEAL, rounds, self.max_sweeps, bb.counter.total,
             phases=bb.phases, tie_break_used=False, log=events,
-            bytes=bb.counter.total_bytes, eval_calls=self._eval_calls,
+            bytes=bb.counter.total_bytes, eval_calls=self._eval_calls, n=self.n,
         )
 
     def _one_sweep(self, bb, sweep, round_no, injector, kill_at, events):

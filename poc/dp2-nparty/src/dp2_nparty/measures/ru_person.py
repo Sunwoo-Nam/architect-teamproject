@@ -39,6 +39,27 @@ def deep_size(obj, _seen: set | None = None) -> int:
     return size
 
 
+def base_size(profile) -> int:
+    """참여자 1인이 **방안과 무관하게** 자기 단말에 들고 있어야 하는 공통 기저 bytes.
+
+    holder_sizes()가 의도적으로 제외하는 부분이다(모듈 docstring 참조) — 방안 비교에는
+    상쇄되지만, "단말이 실제로 얼마나 점유하는가"(핸드북 §2의 앱 예산 대비 판정)에는
+    이쪽이 지배적이다. 조합 62,208개 케이스 실측에서 공통 기저 14.5MB · 프로토콜 상태는
+    방안 1-A 3.7KB / 방안 2 26.1MB였다.
+
+    구성: 효용 테이블(조합→utility, 조합 튜플 포함) + 순위표 리스트 + 순위 역인덱스.
+    리스트·인덱스는 조합 튜플을 효용 테이블과 공유하므로 컨테이너 크기만 더한다.
+    """
+    total = deep_size(profile.utilities)  # 조합 튜플이 키로 여기 포함된다
+    ranked = profile.__dict__.get("_ranked")
+    if ranked is not None:
+        total += sys.getsizeof(ranked)
+    idx = profile.__dict__.get("_rank_index")
+    if idx is not None:
+        total += sys.getsizeof(idx)
+    return total
+
+
 def _delivered_map(plan) -> dict:
     d = getattr(plan, "_delivered_ref", None)
     if d is not None:

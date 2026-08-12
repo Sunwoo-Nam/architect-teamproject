@@ -62,7 +62,7 @@ class _StyleBase:
         return SessionResult(
             self.plan_name, outcome, rounds, sweep, bb.counter.total,
             phases=bb.phases, tie_break_used=tie_used, log=events,
-            bytes=bb.counter.total_bytes, eval_calls=self._eval_calls,
+            bytes=bb.counter.total_bytes, eval_calls=self._eval_calls, n=self.n,
         )
 
 
