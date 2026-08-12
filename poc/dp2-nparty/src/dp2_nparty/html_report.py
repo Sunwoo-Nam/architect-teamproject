@@ -4,6 +4,7 @@
 """
 from __future__ import annotations
 
+from .measures.tb import phase_latency_ms
 from .protocol import PLAN_LABELS, PLAN_NAMES
 
 _CSS = """
@@ -249,7 +250,7 @@ def render_html(raw: dict) -> str:
              for p in P])))
     details.append(sec(
         "§6 TB — 합성 시간 상세", "비핵심", "aux",
-        f"T = phase×{tb['config']['constants']['t_rtt_ms']:g}ms + 평가×{tb['config']['constants']['t_eval_ms']:g}ms + bytes÷대역 (상수 잠정)",
+        f"T = phase×{phase_latency_ms(tb['config']['constants']):g}ms(편도) + 평가×{tb['config']['constants']['t_eval_ms']:g}ms + bytes÷대역 (상수 잠정)",
         tbl(["방안", "합성 시간", "통신", "평가", "전송", "지배 항"],
             [[PLAN_LABELS.get(p, p), f"{tb[p]['median_total_ms']/1000:.2f}s", f"{tb[p]['median_rtt_ms']/1000:.2f}s",
               f"{tb[p]['median_eval_ms']/1000:.2f}s", f"{tb[p]['median_transfer_ms']/1000:.3f}s", tb[p]["dominant"]]
@@ -322,7 +323,7 @@ def render_html(raw: dict) -> str:
             details.append(sec(
                 f"§10 의제 조합 — {tk.upper()} 트랙 (조합 규모별)", "신규", "sub",
                 f"{tlabel} {ic['tracks'].get(tk, 0)}건 · 시간 = 협상 1건(시작~합의) 추정 = "
-                f"합성(통신 {kc.get('t_rtt_ms', 0):.0f}ms/phase · 평가 {kc.get('t_eval_ms', 0)*1000:.0f}µs/건 ÷N · "
+                f"합성(통신 {phase_latency_ms(kc):.0f}ms/phase 편도 · 평가 {kc.get('t_eval_ms', 0)*1000:.0f}µs/건 ÷N · "
                 f"대역 {kc.get('bw_bytes_per_s', 0)/1000:.0f}kB/s) + 프로토콜 계산 실측(K=1). "
                 f"상수 잠정 — 절대값 아님. 단말 총 점유 = 공통 기저(방안 무관: {base_note}) + 프로토콜 상태. "
                 "전송 바이트는 점유량이 아니라 통신 시간 항으로만 계상.",

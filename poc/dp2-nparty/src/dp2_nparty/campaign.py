@@ -253,7 +253,7 @@ def _rec_section(seed: int, sessions: int) -> dict:
 
 
 def _tb_section(seed: int, runs: int, constants: dict | None = None) -> dict:
-    """[§6] 합성 시간 — T = phase×t_rtt + 평가×t_eval + bytes÷bw. 상수는 잠정(실측 대체 자리)."""
+    """[§6] 합성 시간 — T = phase×t_phase(편도) + 평가×t_eval + bytes÷bw. 상수는 잠정(실측 대체 자리)."""
     c = {**tbmod.DEFAULT_CONSTANTS, **(constants or {})}
     sec: dict = {"config": {"n": 3, "candidates": 12, "runs": runs, "constants": c,
                             "note": "상수 3종은 잠정(분석자 제안) — ENV-B 실측으로 대체 예정. 절대값 아님, 상대 비교·지배 항 파악용"}}

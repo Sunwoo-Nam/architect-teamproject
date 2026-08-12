@@ -4,6 +4,7 @@ raw.json만 있으면 언제든 재생성 가능하다. 별점 척도는 핸드�
 """
 from __future__ import annotations
 
+from .measures.tb import phase_latency_ms
 from .protocol import PLAN_NAMES
 
 
@@ -141,7 +142,7 @@ def render_markdown(raw: dict) -> str:
         A("")
         cst = tb["config"]["constants"]
         A(
-            f"모델: T = phase×{cst['t_rtt_ms']:g}ms + 평가×{cst['t_eval_ms']:g}ms + bytes÷{cst['bw_bytes_per_s']:g}B/s"
+            f"모델: T = phase×{phase_latency_ms(cst):g}ms(편도) + 평가×{cst['t_eval_ms']:g}ms + bytes÷{cst['bw_bytes_per_s']:g}B/s"
             f" — {tb['config']['note']}"
         )
         A("")
@@ -254,7 +255,7 @@ def render_markdown(raw: dict) -> str:
         )
         A("")
         c = isec["config"].get("constants", {})
-        A(f"시간 = 협상 1건(시작~합의)의 추정 소요. 합성 시간(통신 {c.get('t_rtt_ms', 0):.0f}ms/phase ·"
+        A(f"시간 = 협상 1건(시작~합의)의 추정 소요. 합성 시간(통신 {phase_latency_ms(c):.0f}ms/phase 편도 ·"
           f" 평가 {c.get('t_eval_ms', 0)*1000:.0f}µs/건 ÷N 병렬 보정 ·"
           f" 대역 {c.get('bw_bytes_per_s', 0)/1000:.0f}kB/s) + 프로토콜 계산 실측(PoC 벽시계, K=1).")
         A("**상수는 잠정 — 절대값이 아니라 방안 간 상대 비교용이다.**")
