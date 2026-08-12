@@ -1,0 +1,992 @@
+{
+ "meta": {
+  "run_id": "full-20260812T121447KST",
+  "timestamp": "2026-08-12T12:14:47+09:00",
+  "seed": 20260811,
+  "git_commit": "8073a72",
+  "negmas_version": "0.15.7",
+  "python": "3.14.4",
+  "provider": "정적 벤치마크 셋 (functional·scalability) — §4 SC-의제만 개발용 대체",
+  "caveat": "입력은 확정 벤치마크 셋 (결정론 — 같은 입력이면 같은 결과). 예외: §4 SC-의제는 벤치마크 보류 상태라 개발용 multi-issue 생성으로 대체 측정 (잠정), §5-1의 p_env·§6의 상수는 ENV-B 실측 대체 전의 잠정값.",
+  "plans": [
+   "plan1a",
+   "plan2"
+  ],
+  "caveat_plans": "부분 실행 — 선택된 방안만 측정됨 (--plans)"
+ },
+ "fc": {
+  "config": {
+   "cases": 160,
+   "input": "벤치마크 functional",
+   "participants": [
+    3,
+    5,
+    7
+   ]
+  },
+  "plan1a": {
+   "by_participants": {
+    "3": {
+     "cases": 100,
+     "mean_ratio": 0.9299,
+     "mean_baseline": 0.8795,
+     "s": 0.4186,
+     "stars": 3,
+     "agreed": 80,
+     "optimal_hit": 40
+    },
+    "5": {
+     "cases": 30,
+     "mean_ratio": 0.8982,
+     "mean_baseline": 0.8744,
+     "s": 0.1894,
+     "stars": 1,
+     "agreed": 24,
+     "optimal_hit": 12
+    },
+    "7": {
+     "cases": 30,
+     "mean_ratio": 0.8777,
+     "mean_baseline": 0.8654,
+     "s": 0.0918,
+     "stars": 1,
+     "agreed": 24,
+     "optimal_hit": 12
+    }
+   },
+   "mean_ratio": 0.9142,
+   "mean_baseline": 0.8759,
+   "s": 0.3086,
+   "stars": 2,
+   "agreed": 128,
+   "optimal_hit": 64,
+   "nodeal_correct": 32,
+   "nodeal_wrong": 0,
+   "tie_break_used": 0,
+   "median_rounds": 11.0,
+   "median_phases": 28.0,
+   "median_messages": 64.0,
+   "median_bytes": 2087.5
+  },
+  "plan2": {
+   "by_participants": {
+    "3": {
+     "cases": 100,
+     "mean_ratio": 0.9716,
+     "mean_baseline": 0.8795,
+     "s": 0.7639,
+     "stars": 4,
+     "agreed": 80,
+     "optimal_hit": 80
+    },
+    "5": {
+     "cases": 30,
+     "mean_ratio": 0.9646,
+     "mean_baseline": 0.8744,
+     "s": 0.7184,
+     "stars": 4,
+     "agreed": 24,
+     "optimal_hit": 24
+    },
+    "7": {
+     "cases": 30,
+     "mean_ratio": 0.9588,
+     "mean_baseline": 0.8654,
+     "s": 0.6942,
+     "stars": 4,
+     "agreed": 24,
+     "optimal_hit": 25
+    }
+   },
+   "mean_ratio": 0.9679,
+   "mean_baseline": 0.8759,
+   "s": 0.7411,
+   "stars": 4,
+   "agreed": 128,
+   "optimal_hit": 129,
+   "nodeal_correct": 32,
+   "nodeal_wrong": 0,
+   "tie_break_used": 0,
+   "median_rounds": 13.0,
+   "median_phases": 14.0,
+   "median_messages": 30.0,
+   "median_bytes": 596.0
+  }
+ },
+ "ru_memory": {
+  "config": {
+   "cases": 100,
+   "input": "벤치마크 functional (3인)",
+   "note": "관찰 로그 제외 · 평균은 라운드 경계 표집 — Peak/Average RSS의 ENV-A 대체",
+   "person_note": "1인당·합계는 논리 상태의 귀속 계상(ru_person 모델) — 복제 구조(mesh 등)의 비용을 반영. 프로세스 피크는 참고치"
+  },
+  "plan1a": {
+   "median_peak_bytes": 6377,
+   "median_avg_bytes": 4668,
+   "median_person_peak_bytes": 1547,
+   "median_total_logical_bytes": 1547
+  },
+  "plan2": {
+   "median_peak_bytes": 4726,
+   "median_avg_bytes": 3010,
+   "median_person_peak_bytes": 2425,
+   "median_total_logical_bytes": 2425
+  }
+ },
+ "sc_participants": {
+  "config": {
+   "levels": [
+    3,
+    4,
+    5,
+    6,
+    8,
+    10,
+    15,
+    20,
+    30,
+    50
+   ],
+   "runs": 30,
+   "provider": "정적 벤치마크 scalability family"
+  },
+  "plan1a": {
+   "agreed_by_n": {
+    "3": 30,
+    "4": 30,
+    "5": 30,
+    "6": 30,
+    "8": 30,
+    "10": 30,
+    "15": 30,
+    "20": 30,
+    "30": 30,
+    "50": 30
+   },
+   "median_messages_by_n": {
+    "3": 44.0,
+    "4": 83.5,
+    "5": 120.0,
+    "6": 170.0,
+    "8": 307.5,
+    "10": 450.0,
+    "15": 908.0,
+    "20": 1517.5,
+    "30": 3071.0,
+    "50": 7933.0
+   },
+   "median_bytes_by_n": {
+    "3": 1608.5,
+    "4": 3362.0,
+    "5": 5859.5,
+    "6": 9284.0,
+    "8": 19962.0,
+    "10": 35758.5,
+    "15": 100739.0,
+    "20": 222263.5,
+    "30": 672341.5,
+    "50": 2875042.0
+   },
+   "median_rounds_by_n": {
+    "3": 8.0,
+    "4": 10.0,
+    "5": 12.0,
+    "6": 14.0,
+    "8": 19.0,
+    "10": 22.0,
+    "15": 29.5,
+    "20": 36.5,
+    "30": 50.0,
+    "50": 78.0
+   },
+   "median_peak_bytes_by_n": {
+    "3": 4285.5,
+    "4": 5816.0,
+    "5": 7680.0,
+    "6": 11036.0,
+    "8": 16596.0,
+    "10": 22988.0,
+    "15": 40180.0,
+    "20": 65792.0,
+    "30": 144268.0,
+    "50": 336196.0
+   },
+   "median_person_peak_by_n": {
+    "3": 1237.0,
+    "4": 2077.0,
+    "5": 3032.0,
+    "6": 4259.0,
+    "8": 6750.0,
+    "10": 9382.0,
+    "15": 14725.0,
+    "20": 25718.0,
+    "30": 66366.0,
+    "50": 126174.0
+   },
+   "median_time_ms_by_n": {
+    "3": 2952.8680000000004,
+    "4": 4986.896000000001,
+    "5": 7696.876,
+    "6": 11194.272,
+    "8": 21909.696,
+    "10": 37136.068,
+    "15": 97300.9,
+    "20": 208076.04,
+    "30": 608028.732,
+    "50": 2505200.336
+   },
+   "fc_ratio_by_n": {
+    "3": 0.9976,
+    "4": 1.0,
+    "5": 0.9917,
+    "6": 0.9975,
+    "8": 0.998,
+    "10": 0.997,
+    "15": 0.9908,
+    "20": 0.9935,
+    "30": 0.9919,
+    "50": 0.9947
+   },
+   "gate_ok": true,
+   "b_msg": 1.8223,
+   "ci": [
+    1.7832,
+    1.8614
+   ],
+   "r2": 0.9993,
+   "stars": 0,
+   "ci_spans_3_grades": false,
+   "n_max": 50,
+   "stars_n_max": 5,
+   "b_mem": 1.6351,
+   "b_mem_ci": [
+    1.5456,
+    1.7245
+   ],
+   "b_mem_r2": 0.9955,
+   "stars_b_mem": 0
+  },
+  "plan2": {
+   "agreed_by_n": {
+    "3": 30,
+    "4": 30,
+    "5": 30,
+    "6": 30,
+    "8": 30,
+    "10": 30,
+    "15": 30,
+    "20": 30,
+    "30": 30,
+    "50": 30
+   },
+   "median_messages_by_n": {
+    "3": 20.0,
+    "4": 42.0,
+    "5": 69.0,
+    "6": 100.5,
+    "8": 193.0,
+    "10": 302.0,
+    "15": 711.0,
+    "20": 1270.0,
+    "30": 2887.0,
+    "50": 8065.0
+   },
+   "median_bytes_by_n": {
+    "3": 436.0,
+    "4": 918.0,
+    "5": 1510.0,
+    "6": 2201.0,
+    "8": 4232.0,
+    "10": 6626.0,
+    "15": 15614.0,
+    "20": 27902.0,
+    "30": 63456.0,
+    "50": 177332.0
+   },
+   "median_rounds_by_n": {
+    "3": 10.5,
+    "4": 15.5,
+    "5": 19.0,
+    "6": 23.0,
+    "8": 33.0,
+    "10": 40.0,
+    "15": 63.0,
+    "20": 82.5,
+    "30": 120.5,
+    "50": 202.5
+   },
+   "median_peak_bytes_by_n": {
+    "3": 1843.0,
+    "4": 4107.0,
+    "5": 4835.0,
+    "6": 5979.0,
+    "8": 7792.0,
+    "10": 20773.5,
+    "15": 36536.0,
+    "20": 47888.0,
+    "30": 73688.0,
+    "50": 422488.0
+   },
+   "median_person_peak_by_n": {
+    "3": 1329.0,
+    "4": 3889.0,
+    "5": 4890.0,
+    "6": 5956.0,
+    "8": 7912.0,
+    "10": 21342.0,
+    "15": 37834.0,
+    "20": 50294.0,
+    "30": 75582.0,
+    "50": 427230.0
+   },
+   "median_time_ms_by_n": {
+    "3": 1298.488,
+    "4": 2112.872,
+    "5": 3012.08,
+    "6": 4097.784,
+    "8": 6854.647999999999,
+    "10": 10104.504,
+    "15": 21325.440000000002,
+    "20": 36398.568,
+    "30": 78585.112,
+    "50": 211589.34399999998
+   },
+   "fc_ratio_by_n": {
+    "3": 0.9927,
+    "4": 0.9769,
+    "5": 0.9662,
+    "6": 0.9741,
+    "8": 0.9743,
+    "10": 0.9838,
+    "15": 0.9816,
+    "20": 0.9824,
+    "30": 0.9764,
+    "50": 0.9916
+   },
+   "gate_ok": true,
+   "b_msg": 2.1113,
+   "ci": [
+    2.0582,
+    2.1644
+   ],
+   "r2": 0.999,
+   "stars": 0,
+   "ci_spans_3_grades": false,
+   "n_max": 50,
+   "stars_n_max": 5,
+   "b_mem": 1.8496,
+   "b_mem_ci": [
+    1.6044,
+    2.0949
+   ],
+   "b_mem_r2": 0.9742,
+   "stars_b_mem": 0
+  }
+ },
+ "sc_issues": {
+  "config": {
+   "levels": [
+    "10x10",
+    "7x7x7",
+    "10x10x10",
+    "8x8x8x8",
+    "10x10x10x10",
+    "8x8x8x8x8"
+   ],
+   "runs": 5,
+   "note": "복합의제 튜플 곱집합 · 로그 제외 메모리 · 별점 기준 d=4 (핸드북 §4.3)"
+  },
+  "plan1a": {
+   "median_peak_by_S": {
+    "100": 12608,
+    "343": 40326,
+    "1000": 115288,
+    "4096": 715128,
+    "10000": 1804984,
+    "32768": 6030248
+   },
+   "agreed": "30/30",
+   "gate_ok": true,
+   "c": 1.0896,
+   "ci": [
+    1.0159,
+    1.1633
+   ],
+   "r2": 0.9976,
+   "stars": 0
+  },
+  "plan2": {
+   "median_peak_by_S": {
+    "100": 11816,
+    "343": 40326,
+    "1000": 115288,
+    "4096": 715128,
+    "10000": 1804984,
+    "32768": 6030248
+   },
+   "agreed": "30/30",
+   "gate_ok": true,
+   "c": 1.0977,
+   "ci": [
+    1.0315,
+    1.164
+   ],
+   "r2": 0.9981,
+   "stars": 0
+  }
+ },
+ "tb": {
+  "config": {
+   "cases": 100,
+   "constants": {
+    "t_rtt_ms": 50.0,
+    "t_eval_ms": 20.0,
+    "bw_bytes_per_s": 125000.0
+   },
+   "input": "벤치마크 functional (3인)",
+   "note": "상수 3종은 잠정(분석자 제안) — ENV-B 실측 대체 예정. 상대 비교·지배 항 파악용"
+  },
+  "plan1a": {
+   "median_total_ms": 3363.3,
+   "median_rtt_ms": 1300.0,
+   "median_eval_ms": 2070.0,
+   "median_transfer_ms": 13.3,
+   "dominant": "eval"
+  },
+  "plan2": {
+   "median_total_ms": 1373.8,
+   "median_rtt_ms": 650.0,
+   "median_eval_ms": 720.0,
+   "median_transfer_ms": 3.7,
+   "dominant": "eval"
+  }
+ },
+ "ft": {
+  "config": {
+   "p_env": 0.01,
+   "p_env_note": "잠정 (ENV-B 실측 대체 전)",
+   "multiples": [
+    1,
+    2,
+    5,
+    10,
+    20,
+    50
+   ],
+   "runs_base": 100,
+   "runs_each": 100,
+   "input": "벤치마크 functional (3인)"
+  },
+  "plan1a": {
+   "baseline_agree_rate": 0.8,
+   "agree_rates": {
+    "0.0": 0.8,
+    "1": 0.8,
+    "2": 0.8,
+    "5": 0.79,
+    "10": 0.77,
+    "20": 0.79,
+    "50": 0.6
+   },
+   "critical_multiple": 50,
+   "margin": 50,
+   "stars": 5
+  },
+  "plan2": {
+   "baseline_agree_rate": 0.8,
+   "agree_rates": {
+    "0.0": 0.8,
+    "1": 0.8,
+    "2": 0.8,
+    "5": 0.8,
+    "10": 0.8,
+    "20": 0.8,
+    "50": 0.8
+   },
+   "critical_multiple": null,
+   "margin": 100,
+   "stars": 5
+  }
+ },
+ "rec": {
+  "config": {
+   "sessions": 10,
+   "input": "벤치마크 functional (3인) 선두 표본",
+   "note": "시간 대체 = phase 비용. 중단 유형(프로세스/네트워크)은 ENV-A에서 동일 취급"
+  },
+  "plan1a": {
+   "trials": 90,
+   "fr_failures": 0,
+   "invalid_trials": 22,
+   "median_ratio": 1.07,
+   "restart_cost_R": 9.0,
+   "stars": 4
+  },
+  "plan2": {
+   "trials": 60,
+   "fr_failures": 0,
+   "invalid_trials": 22,
+   "median_ratio": 1.833,
+   "restart_cost_R": 11.5,
+   "stars": 4
+  }
+ },
+ "confidentiality": {
+  "config": {
+   "e2": {
+    "A": 0.6333,
+    "B": 0.1667,
+    "samples": 30
+   },
+   "m_note": "노출 배수 m = Σ관찰자 깊이 ÷ e₂ (핸드북 §7.3 — 별점 사다리는 잠정)",
+   "cases": 100,
+   "candidates": 12,
+   "input": "벤치마크 functional (3인)",
+   "by_n_levels": [
+    3,
+    4,
+    5,
+    6,
+    8,
+    10,
+    15,
+    20,
+    30,
+    50
+   ],
+   "by_n_runs": 30,
+   "by_n_input": "벤치마크 scalability family (후보 4N)",
+   "viewpoints": "participant=P1(트리에선 내부 노드 — 비루트 최악 관찰자) · coordinator=P0(담당자·루트)"
+  },
+  "plan1a": {
+   "participant": {
+    "accuracy": 0.0833,
+    "gain_pp": 0.0,
+    "exposure_rate": 0.0,
+    "stars": 5
+   },
+   "coordinator": {
+    "accuracy": 1.0,
+    "gain_pp": 91.67,
+    "exposure_rate": 1.0,
+    "stars": 0
+   },
+   "multiple": {
+    "m_A": 0.677,
+    "m_B": 0.75,
+    "stars_m_A": 3,
+    "stars_m_B": 3,
+    "max_single_depth_A": 0.429
+   },
+   "by_n": {
+    "3": {
+     "participant": {
+      "gain_pp": -0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 91.67,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.395,
+      "m_B": 0.857,
+      "stars_m_A": 4,
+      "stars_m_B": 3,
+      "max_single_depth_A": 0.25
+     }
+    },
+    "4": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 93.75,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.462,
+      "m_B": 0.6,
+      "stars_m_A": 4,
+      "stars_m_B": 3,
+      "max_single_depth_A": 0.293
+     }
+    },
+    "5": {
+     "participant": {
+      "gain_pp": -0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 95.0,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.49,
+      "m_B": 0.5,
+      "stars_m_A": 4,
+      "stars_m_B": 4,
+      "max_single_depth_A": 0.31
+     }
+    },
+    "6": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 95.83,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.526,
+      "m_B": 0.4,
+      "stars_m_A": 3,
+      "stars_m_B": 4,
+      "max_single_depth_A": 0.333
+     }
+    },
+    "8": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 96.88,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.549,
+      "m_B": 0.3,
+      "stars_m_A": 3,
+      "stars_m_B": 4,
+      "max_single_depth_A": 0.348
+     }
+    },
+    "10": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 97.5,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.547,
+      "m_B": 0.25,
+      "stars_m_A": 3,
+      "stars_m_B": 5,
+      "max_single_depth_A": 0.346
+     }
+    },
+    "15": {
+     "participant": {
+      "gain_pp": -0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 98.33,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.526,
+      "m_B": 0.167,
+      "stars_m_A": 3,
+      "stars_m_B": 5,
+      "max_single_depth_A": 0.333
+     }
+    },
+    "20": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 98.75,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.516,
+      "m_B": 0.125,
+      "stars_m_A": 3,
+      "stars_m_B": 5,
+      "max_single_depth_A": 0.327
+     }
+    },
+    "30": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 99.17,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.51,
+      "m_B": 0.083,
+      "stars_m_A": 3,
+      "stars_m_B": 5,
+      "max_single_depth_A": 0.323
+     }
+    },
+    "50": {
+     "participant": {
+      "gain_pp": -0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 99.5,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.504,
+      "m_B": 0.05,
+      "stars_m_A": 3,
+      "stars_m_B": 5,
+      "max_single_depth_A": 0.319
+     }
+    }
+   }
+  },
+  "plan2": {
+   "participant": {
+    "accuracy": 0.0833,
+    "gain_pp": 0.0,
+    "exposure_rate": 0.0,
+    "stars": 5
+   },
+   "coordinator": {
+    "accuracy": 1.0,
+    "gain_pp": 91.67,
+    "exposure_rate": 1.0,
+    "stars": 0
+   },
+   "multiple": {
+    "m_A": 1.184,
+    "m_B": 0.75,
+    "stars_m_A": 2,
+    "stars_m_B": 3,
+    "max_single_depth_A": 0.75
+   },
+   "by_n": {
+    "3": {
+     "participant": {
+      "gain_pp": -0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 91.67,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.789,
+      "m_B": 0.857,
+      "stars_m_A": 3,
+      "stars_m_B": 3,
+      "max_single_depth_A": 0.5
+     }
+    },
+    "4": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 93.75,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.005,
+      "m_B": 0.6,
+      "stars_m_A": 2,
+      "stars_m_B": 3,
+      "max_single_depth_A": 0.636
+     }
+    },
+    "5": {
+     "participant": {
+      "gain_pp": -0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 95.0,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.105,
+      "m_B": 0.5,
+      "stars_m_A": 2,
+      "stars_m_B": 4,
+      "max_single_depth_A": 0.7
+     }
+    },
+    "6": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 95.83,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.156,
+      "m_B": 0.4,
+      "stars_m_A": 2,
+      "stars_m_B": 4,
+      "max_single_depth_A": 0.732
+     }
+    },
+    "8": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 96.88,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.353,
+      "m_B": 0.3,
+      "stars_m_A": 2,
+      "stars_m_B": 4,
+      "max_single_depth_A": 0.857
+     }
+    },
+    "10": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 97.5,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.427,
+      "m_B": 0.25,
+      "stars_m_A": 2,
+      "stars_m_B": 5,
+      "max_single_depth_A": 0.904
+     }
+    },
+    "15": {
+     "participant": {
+      "gain_pp": -0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 98.33,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.536,
+      "m_B": 0.167,
+      "stars_m_A": 2,
+      "stars_m_B": 5,
+      "max_single_depth_A": 0.973
+     }
+    },
+    "20": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 98.75,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.579,
+      "m_B": 0.125,
+      "stars_m_A": 2,
+      "stars_m_B": 5,
+      "max_single_depth_A": 1.0
+     }
+    },
+    "30": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 99.17,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.579,
+      "m_B": 0.083,
+      "stars_m_A": 2,
+      "stars_m_B": 5,
+      "max_single_depth_A": 1.0
+     }
+    },
+    "50": {
+     "participant": {
+      "gain_pp": -0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 99.5,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.579,
+      "m_B": 0.05,
+      "stars_m_A": 2,
+      "stars_m_B": 5,
+      "max_single_depth_A": 1.0
+     }
+    }
+   }
+  }
+ },
+ "an_kit": {
+  "cases": 40,
+  "dir": "/home/changbae/workspace/architect-teamproject/poc/dp2-nparty/results/full-20260812T121447KST/an-kit"
+ }
+}

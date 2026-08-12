@@ -206,11 +206,16 @@ def _cf_section(cases: list[BenchmarkCase], scal_cases: list[BenchmarkCase]) -> 
     관점 정의: participant = P1 (트리 구조에서는 자식을 둔 내부 노드 — 비루트 최악 관찰자의
     보수적 대표), coordinator = P0 (담당자·루트·문서 시작점).
     """
+    from .measures.cf_depth import e2_anchor, exposure_multiple
+
     n_cands = len(cases[0].candidates)
     by_n_groups: dict[int, list[BenchmarkCase]] = {}
     for c in scal_cases:
         by_n_groups.setdefault(len(c.profiles), []).append(c)
+    e2 = e2_anchor(cases, Plan2Cumulative)  # 1:1 기준 노출량 — N=2 실측 앵커 (방안 무관 공통)
     sec: dict = {"config": {
+        "e2": {k: (round(v, 4) if isinstance(v, float) else v) for k, v in e2.items()},
+        "m_note": "노출 배수 m = Σ관찰자 깊이 ÷ e₂ (핸드북 §7.3 — 별점 사다리는 잠정)",
         "cases": len(cases), "candidates": n_cands, "input": "벤치마크 functional (3인)",
         "by_n_levels": sorted(by_n_groups), "by_n_runs": len(next(iter(by_n_groups.values()))),
         "by_n_input": "벤치마크 scalability family (후보 4N)",
@@ -224,6 +229,7 @@ def _cf_section(cases: list[BenchmarkCase], scal_cases: list[BenchmarkCase]) -> 
             rate = exposure_rate(g, n_cands)
             sec[name][vp] = {"accuracy": round(g.accuracy, 4), "gain_pp": round(g.gain_pp, 2),
                              "exposure_rate": round(rate, 4), "stars": stars_exposure(rate)}
+        sec[name]["multiple"] = exposure_multiple(runs, e2)  # 판정 지표 m (3인 정밀)
         by_n = {}
         for n in sorted(by_n_groups):
             grp = by_n_groups[n]
@@ -235,6 +241,7 @@ def _cf_section(cases: list[BenchmarkCase], scal_cases: list[BenchmarkCase]) -> 
                 rate = exposure_rate(g, nc)
                 entry[vp] = {"gain_pp": round(g.gain_pp, 2),
                              "exposure_rate": round(rate, 4), "stars": stars_exposure(rate)}
+            entry["multiple"] = exposure_multiple(gruns, e2)
             by_n[str(n)] = entry
         sec[name]["by_n"] = by_n
     return sec
@@ -247,40 +254,70 @@ def _sc_participants_section(cases: list[BenchmarkCase]) -> dict:
     ns = sorted(by_n)
     sec: dict = {"config": {"levels": ns, "runs": len(by_n[ns[0]]),
                             "provider": "정적 벤치마크 scalability family"}}
+    from .measures.ru_person import holder_sizes
+    from .measures.scaling import stars_b_mem, stars_n_max
+
     for name, cls in PLANS:
         agreed, med, med_b = {}, {}, {}
         med_r, med_mem, med_t = {}, {}, {}  # 라운드 · 피크 메모리 · 합성 지연시간
+        med_person, fc_ratio = {}, {}  # 최대 부하 단말 피크(P_N) · FC 달성률 평균
         for n in ns:
-            done, peaks = [], []
+            done, peaks, persons, ratios = [], [], [], []
             for c in by_n[n]:
-                s, peak = peak_memory_bytes(lambda cc=c: cls(cc.profiles, collect_log=False).run())
+                plan = cls(c.profiles, collect_log=False)
+                s, peak = peak_memory_bytes(plan.run)
                 done.append(s)
                 peaks.append(peak)
+                # P_N: 세션 종료 시점 상태로 근사 — 누적 구조(교집합·지식 집합)는 단조
+                # 증가라 정확하고, 라운드 국소 구조는 근사 (핸드북 §3.3 명시)
+                persons.append(max(holder_sizes(plan)))
+                ratios.append(fcmod.score(s.outcome, c.candidates, c.profiles).ratio)
             agreed[n] = sum(s.agreed for s in done)
-            ok = [(s, pk) for s, pk in zip(done, peaks) if s.agreed]
-            med[n] = statistics.median(s.messages for s, _ in ok) if ok else None
-            med_b[n] = statistics.median(s.bytes for s, _ in ok) if ok else None
-            med_r[n] = statistics.median(s.rounds for s, _ in ok) if ok else None
-            med_mem[n] = statistics.median(pk for _, pk in ok) if ok else None
-            med_t[n] = statistics.median(tbmod.synth_time(s).total_ms for s, _ in ok) if ok else None
+            fc_ratio[n] = statistics.mean(ratios)
+            ok = [(s, pk, pp) for s, pk, pp in zip(done, peaks, persons) if s.agreed]
+            med[n] = statistics.median(s.messages for s, _, _ in ok) if ok else None
+            med_b[n] = statistics.median(s.bytes for s, _, _ in ok) if ok else None
+            med_r[n] = statistics.median(s.rounds for s, _, _ in ok) if ok else None
+            med_mem[n] = statistics.median(pk for _, pk, _ in ok) if ok else None
+            med_person[n] = statistics.median(pp for _, _, pp in ok) if ok else None
+            med_t[n] = statistics.median(tbmod.synth_time(s).total_ms for s, _, _ in ok) if ok else None
         gate = completion_gate(agreed[ns[0]], len(by_n[ns[0]]), agreed[ns[-1]], len(by_n[ns[-1]]))
         xs = [n for n in ns if med[n] is not None]
         fit = loglog_fit(xs, [med[n] for n in xs])
+        # 판정 ② b_mem: P_N의 로그-로그 회귀 (핸드북 §3.3 — 완결률 게이트 준용)
+        xm = [n for n in ns if med_person[n]]
+        fit_mem = loglog_fit(xm, [med_person[n] for n in xm])
+        # 판정 ① N_max: 오름차순 게이트 검사 — 완결률(N=3 대비) + FC 유지(하락 ≤ 0.05 잠정).
+        # 자원 게이트(피크 ≤ 한도)는 실기기(ENV-B) 소관 — PoC 미적용 명시 (핸드북 §3.3).
+        n_max = ns[0] if agreed[ns[0]] else 0
+        for n in ns[1:]:
+            comp_ok = completion_gate(agreed[ns[0]], len(by_n[ns[0]]), agreed[n], len(by_n[n]))
+            fc_ok = fc_ratio[n] >= fc_ratio[ns[0]] - 0.05
+            if comp_ok and fc_ok:
+                n_max = n
+            else:
+                break
         sec[name] = {
             "agreed_by_n": {str(n): agreed[n] for n in ns},
             "median_messages_by_n": {str(n): med[n] for n in ns},
             "median_bytes_by_n": {str(n): med_b[n] for n in ns},
             "median_rounds_by_n": {str(n): med_r[n] for n in ns},
             "median_peak_bytes_by_n": {str(n): med_mem[n] for n in ns},
+            "median_person_peak_by_n": {str(n): med_person[n] for n in ns},
             "median_time_ms_by_n": {str(n): med_t[n] for n in ns},
-            # b_msg는 리포트 표에서 제외했다 (지수만으로는 해석이 어렵고, 물리 전송 건수
-            # 정의상 별점 5점이 도달 불가능하다 — results/01-SC-참여자수-측정-해설.md).
-            # 원자료에는 남겨 둔다: scalability_report.py 와 해설 문서가 참조한다.
+            "fc_ratio_by_n": {str(n): round(fc_ratio[n], 4) for n in ns},
+            # b_msg는 보조 관측 (2026-08-12 강등 — 핸드북 §3.3-보조). 원자료 유지.
             "gate_ok": gate, "b_msg": round(fit.b, 4),
             "ci": [round(fit.ci_low, 4), round(fit.ci_high, 4)],
             "r2": round(fit.r2, 4),
             "stars": stars_b_msg(fit.b) if gate else 0,
             "ci_spans_3_grades": ci_spans_grades(fit),
+            # 판정 2축 (경계 잠정 — 핸드북 §3.3)
+            "n_max": n_max, "stars_n_max": stars_n_max(n_max),
+            "b_mem": round(fit_mem.b, 4),
+            "b_mem_ci": [round(fit_mem.ci_low, 4), round(fit_mem.ci_high, 4)],
+            "b_mem_r2": round(fit_mem.r2, 4),
+            "stars_b_mem": stars_b_mem(fit_mem.b) if gate else 0,
         }
     return sec
 
@@ -293,12 +330,15 @@ def resolve_plans(spec: str | None) -> list[str]:
         return list(PLAN_NAMES)
     by_number = {}
     for name in PLAN_NAMES:
+        rest = name[4:]
         num = ""
-        for ch in name[4:]:
+        for ch in rest:
             if not ch.isdigit():
                 break
             num += ch
-        by_number[num] = name
+        suffix = rest[len(num):]
+        key = num + suffix if len(suffix) == 1 else num  # plan1a → "1a" (plan1과 구분)
+        by_number[key] = name
     out = []
     for tok in spec.split(","):
         tok = tok.strip()

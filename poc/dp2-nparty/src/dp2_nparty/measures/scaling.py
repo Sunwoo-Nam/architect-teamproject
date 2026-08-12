@@ -71,3 +71,20 @@ def stars_c(c: float, d: int = 4) -> int:
         return 5
     width = (1.0 - lo) / 5
     return max(1, 5 - math.ceil(round((c - lo) / width, 10)) + 1)
+
+
+def stars_n_max(n_max: int) -> int:
+    """판정 ① N_max 별점 — [7, 50] 로그 등분 반올림 경계 (잠정, 핸드북 §3.3).
+    7명 미만 = 요구(참여자 3-7명) 미달 — 즉시 결함(0점)."""
+    for stars, lo in ((5, 34), (4, 23), (3, 16), (2, 11), (1, 7)):
+        if n_max >= lo:
+            return stars
+    return 0
+
+
+def stars_b_mem(b: float) -> int:
+    """판정 ② b_mem 별점 — 무증가(0)-선형(1) 5등분 (잠정, 핸드북 §3.3)."""
+    for stars, hi in ((5, 0.2), (4, 0.4), (3, 0.6), (2, 0.8), (1, 1.0)):
+        if b <= hi:
+            return stars
+    return 0
