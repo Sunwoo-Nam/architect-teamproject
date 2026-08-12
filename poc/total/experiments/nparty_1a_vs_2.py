@@ -26,12 +26,18 @@ from total.adapters.nparty._vendor.benchmark import (  # noqa: E402
 from total.adapters.nparty._vendor.domain import Profile  # noqa: E402
 from total.campaign import PlanRuns, measure  # noqa: E402
 from total.qa import cf  # noqa: E402
-from total.qa.contract import SweepPoint  # noqa: E402
+from total.qa.contract import Dataset, SweepPoint  # noqa: E402
 from total.qa.report import RunMeta, make_run_id, now_stamp, write_run  # noqa: E402
 
 EXPERIMENT = "nparty-1a-vs-2"
 E2_REFERENCE_PLAN = "plan2"      # 참조 양자 프로토콜 (dp2 관례와 동일)
 E2_SAMPLES = 30
+
+
+def _fit_counts(counts: list[int], d: int) -> list[int]:
+    """Dataset은 의제 수와 값 개수 목록의 길이가 같아야 한다 — 기준 구성에 맞춰 자른다."""
+    counts = [c for c in counts if c > 0][:d]
+    return counts + [2] * (d - len(counts))
 
 
 def _mkcase(bc) -> NpartyCase:
@@ -113,13 +119,22 @@ def main() -> int:
     raw, rows = measure(plans, e2=anchor, d=d,
                         viewpoints=[cf.COORDINATOR_FIRST, cf.worst_participant()])
 
+    base = sweep_cases[len(sweep_cases) // 2] if sweep_cases else None
+    dataset = Dataset(
+        name="nparty benchmark",
+        n_participants=min((len(c.profiles) for c in functional), default=3),
+        n_issues=d,
+        issue_value_counts=_fit_counts(
+            list(base.meta.get("issue_sizes", [])) if base else [], d),
+        seed=0,
+        note=f"기준 구성에서 스윕: 참여자 3·5·7 (functional {len(functional)}건) · "
+             f"의제 조합 {len(sweep_cases)}건 (의제 수 3·6·10)",
+    )
     meta = RunMeta(
         run_id=make_run_id(EXPERIMENT, now_stamp()),
         experiment=EXPERIMENT,
-        seed=0,
-        dataset={"name": "nparty benchmark", "n_participants": "3·5·7 (functional)",
-                 "n_issues": d, "functional_cases": len(functional),
-                 "issue_space_cases": len(sweep_cases)},
+        seed=dataset.seed,
+        dataset=dataset.as_dict(),
         plans=["plan1a", "plan2"],
         note="방안 1-A vs 방안 2. 입력은 확정 벤치마크 셋(결정론) — 같은 입력이면 같은 결과.",
     )

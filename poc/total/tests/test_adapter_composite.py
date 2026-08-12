@@ -224,3 +224,27 @@ class TestBeliefVersusTruth:
         p = s01_case.preferences[0]
         assert len(p.ranked()) < len(list(s01_case.candidates()))
         assert all(s01_case.hard_violations(o) == [] for o in p.ranked()[:20])
+
+
+class TestSweepIntegrity:
+    """스윕이 거짓 데이터를 만들지 않는지 — 조용히 같은 실행을 반복하면 c가 왜곡된다."""
+
+    def test_scenario_axis_cap_is_real(self):
+        from total.adapters.composite._vendor.common.scenario import load_scenario
+
+        path = next(p for p in scenario_paths() if p.stem.startswith("S11"))
+        full = load_scenario(path)
+        # 정의된 축보다 많이 요구하면 load_scenario는 조용히 전체를 준다
+        over = load_scenario(path, n_axes=len(full.axes) + 5)
+        assert len(over.axes) == len(full.axes)
+
+    def test_sweep_point_is_lightweight(self):
+        """스윕은 후보 공간을 열거하지 않아야 한다 — 10축이면 900만 조합이라 죽는다."""
+        from total.adapters.composite import run_sweep_point
+        from total.adapters.composite._vendor.common.scenario import load_scenario
+
+        path = next(p for p in scenario_paths() if p.stem.startswith("S11"))
+        sc = load_scenario(path)
+        point = run_sweep_point(sc, "pool", len(sc.axes))
+        assert point.scale == sc.space_size()
+        assert point.peak_bytes > 0

@@ -25,18 +25,25 @@ from total.adapters.composite import (  # noqa: E402
     CompositeCase,
     load,
     run_session,
+    run_sweep_point,
     scenario_paths,
 )
 from total.adapters.composite._vendor.common.scenario import load_scenario  # noqa: E402
 from total.campaign import PlanRuns, measure  # noqa: E402
 from total.qa import cf  # noqa: E402
-from total.qa.contract import SweepPoint  # noqa: E402
+from total.qa.contract import Dataset, SweepPoint  # noqa: E402,F401
 from total.qa.report import RunMeta, make_run_id, now_stamp, write_run  # noqa: E402
 
 EXPERIMENT = "composite-1-vs-2"
 DEFAULT_PLANS = ("seq2", "pool")
 SWEEP_SCENARIO = "S11"           # 축 수 스윕 전용 TC
 E2_SAMPLES = 8
+
+
+def _fit_counts(counts: list[int], d: int) -> list[int]:
+    """Dataset은 의제 수와 값 개수 목록의 길이가 같아야 한다 — 기준 구성에 맞춰 자른다."""
+    counts = [c for c in counts if c > 0][:d]
+    return counts + [2] * (d - len(counts))
 
 
 def _viewpoints():
@@ -56,24 +63,25 @@ def e2_anchor(scenarios, cases):
 def _sweep_points(plan: str, axes_levels: list[int]) -> list[SweepPoint]:
     """축 수를 키우며 규모별 피크를 잰다 — 탄력성 c와 최대 의제 수의 입력."""
     path = next(p for p in scenario_paths() if p.stem.startswith(SWEEP_SCENARIO))
+    available = len(load_scenario(path).axes)
+    usable = [n for n in axes_levels if n <= available]
+    dropped = [n for n in axes_levels if n > available]
+    if dropped:
+        # 시나리오에 정의된 축보다 많이 요구하면 load_scenario가 조용히 전체를 준다 —
+        # 그러면 12·14·16축이 전부 같은 10축 실행이 되어 스윕이 거짓이 된다.
+        print(f"    [주의] {SWEEP_SCENARIO}의 축은 {available}개뿐 — "
+              f"{dropped} 수준은 제외한다 (조용히 중복 실행되는 것을 막는다)")
     out: list[SweepPoint] = []
-    for n_axes in axes_levels:
+    for n_axes in usable:
         sc = load_scenario(path, n_axes=n_axes)
-        case = CompositeCase(f"{sc.id}-{n_axes}axes", sc, enumeration_limit=10 ** 9)
         try:
-            session, _ = run_session(sc, plan, case=case)
+            point = run_sweep_point(sc, plan, n_axes)
         except Exception as exc:               # 규모가 커 실패하면 그 자체가 관측이다
             print(f"    {plan} {n_axes}축: 실행 실패 ({type(exc).__name__}) — 건너뜀")
             continue
-        out.append(SweepPoint(
-            scale=max(1, sc.space_size()),
-            peak_bytes=session.peak_bytes,
-            base_bytes=0,      # 스윕은 프로토콜 피크만 본다 — 기저는 전 방안 공통
-            agreed=session.agreed,
-            n_issues=n_axes,
-        ))
+        out.append(point)
         print(f"    {plan} {n_axes}축: 조합 {sc.space_size():,} · "
-              f"피크 {session.peak_bytes / 1024 / 1024:.2f}MB · 합의 {session.agreed}")
+              f"피크 {point.peak_bytes / 1024 / 1024:.2f}MB · 합의 {point.agreed}")
     return out
 
 
@@ -118,13 +126,21 @@ def main() -> int:
 
     raw, rows = measure(plans, e2=anchor, d=d, viewpoints=_viewpoints())
 
+    base = scenarios[0]
+    dataset = Dataset(
+        name="composite scenarios",
+        n_participants=base.n_participants,
+        n_issues=d,
+        issue_value_counts=_fit_counts([len(a.values) for a in base.axes], d),
+        seed=base.profile_seed,
+        note=f"기준 구성 {base.id}에서 스윕: 시나리오 {len(scenarios)}건 · "
+             f"축 수 {axes_levels}",
+    )
     meta = RunMeta(
         run_id=make_run_id(EXPERIMENT, now_stamp()),
         experiment=EXPERIMENT,
-        seed=scenarios[0].profile_seed if scenarios else 0,
-        dataset={"name": "composite scenarios", "n_participants": 2,
-                 "n_issues": d, "scenarios": len(scenarios),
-                 "sweep_axes": axes_levels},
+        seed=dataset.seed,
+        dataset=dataset.as_dict(),
         plans=plan_names,
         note="1안(seq2) vs 2안(pool). 2인 교대 제안이라 CF 관점은 1개다. "
              "1안은 축값을, 2안은 전체 조합을 교환하므로 조합 공간 기준 노출 깊이는 "

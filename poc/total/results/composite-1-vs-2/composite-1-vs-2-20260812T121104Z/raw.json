@@ -1,14 +1,14 @@
 {
   "fc": {
     "seq2": {
-      "cases": 4,
-      "agreed": 4,
-      "mean_achieved": 0.84001,
-      "mean_s": 0.412711,
-      "stars_achieved": 2,
-      "stars_s": 3,
+      "cases": 10,
+      "agreed": 9,
+      "mean_achieved": 0.765786,
+      "mean_s": 0.040471,
+      "stars_achieved": 1,
+      "stars_s": 1,
       "optimal_hit": 0,
-      "fr_violation_cases": 0,
+      "fr_violation_cases": 1,
       "bands": {
         "s": {
           "name": "FC 개선 비율 s",
@@ -37,14 +37,14 @@
       }
     },
     "pool": {
-      "cases": 4,
-      "agreed": 4,
-      "mean_achieved": 0.914156,
-      "mean_s": 0.653124,
-      "stars_achieved": 4,
-      "stars_s": 4,
+      "cases": 10,
+      "agreed": 9,
+      "mean_achieved": 0.770578,
+      "mean_s": 0.045369,
+      "stars_achieved": 1,
+      "stars_s": 1,
       "optimal_hit": 1,
-      "fr_violation_cases": 0,
+      "fr_violation_cases": 3,
       "bands": {
         "s": {
           "name": "FC 개선 비율 s",
@@ -75,11 +75,11 @@
   },
   "tb": {
     "seq2": {
-      "sessions": 4,
-      "median_total_ms": 4880.269,
-      "median_phase_ms": 4875.0,
+      "sessions": 10,
+      "median_total_ms": 6155.358,
+      "median_phase_ms": 6150.0,
       "median_eval_ms": 5.04,
-      "median_transfer_ms": 0.229,
+      "median_transfer_ms": 0.318,
       "dominant": "phase",
       "constants": {
         "t_phase_ms": 75.0,
@@ -90,11 +90,11 @@
       }
     },
     "pool": {
-      "sessions": 4,
-      "median_total_ms": 6643.795,
-      "median_phase_ms": 6637.5,
+      "sessions": 10,
+      "median_total_ms": 7881.479,
+      "median_phase_ms": 7875.0,
       "median_eval_ms": 5.04,
-      "median_transfer_ms": 1.255,
+      "median_transfer_ms": 1.439,
       "dominant": "phase",
       "constants": {
         "t_phase_ms": 75.0,
@@ -107,16 +107,16 @@
   },
   "ru": {
     "seq2": {
-      "sessions": 4,
-      "median_peak_mb": 0.0855,
-      "median_base_mb": 1.4668,
-      "median_total_mb": 1.5523,
-      "max_total_mb": 1.5725,
+      "sessions": 10,
+      "median_peak_mb": 0.103,
+      "median_base_mb": 1.2719,
+      "median_total_mb": 1.3531,
+      "max_total_mb": 55.0563,
       "ceiling_bytes": 268435456,
-      "median_r_total": 0.006064,
-      "max_r_total": 0.006142,
+      "median_r_total": 0.005286,
+      "max_r_total": 0.215064,
       "stars_median": 5,
-      "stars_max": 5,
+      "stars_max": 4,
       "over_ceiling_sessions": 0,
       "band": {
         "name": "RU 사용률 r",
@@ -133,16 +133,16 @@
       "note": "별점은 단말 총 점유(공통 기저 + 프로토콜 상태) 기준 (24 §2.8 단서). 작은 규모에서는 포화하므로 절대 MB를 함께 읽어야 한다"
     },
     "pool": {
-      "sessions": 4,
-      "median_peak_mb": 0.1006,
-      "median_base_mb": 1.4668,
-      "median_total_mb": 1.5674,
-      "max_total_mb": 1.5743,
+      "sessions": 10,
+      "median_peak_mb": 0.1224,
+      "median_base_mb": 1.2719,
+      "median_total_mb": 1.3736,
+      "max_total_mb": 55.0509,
       "ceiling_bytes": 268435456,
-      "median_r_total": 0.006123,
-      "max_r_total": 0.00615,
+      "median_r_total": 0.005365,
+      "max_r_total": 0.215043,
       "stars_median": 5,
-      "stars_max": 5,
+      "stars_max": 4,
       "over_ceiling_sessions": 0,
       "band": {
         "name": "RU 사용률 r",
@@ -161,12 +161,13 @@
   },
   "cf": {
     "seq2": {
-      "m_A": 0.27,
-      "m_B": 0.0,
+      "m_A": 0.335,
+      "m_B": null,
       "stars_m_A": 4,
-      "stars_m_B": 5,
-      "max_single_depth_A": 0.005,
-      "victims": 8,
+      "stars_m_B": null,
+      "max_single_depth_A": 0.009,
+      "victims": 20,
+      "b_note": "e₂ 앵커의 B축이 0에 가까워 배수가 성립하지 않는다 — 참조 프로토콜에서도 접두 복원이 일어나지 않는다는 뜻이다 (예: 에이전트가 자기 선호를 부분적으로만 아는 도메인)",
       "band": {
         "name": "CF 노출 배수 m",
         "thresholds": [
@@ -180,26 +181,28 @@
         "note": "24 §7.3 — 3점 경계(m=1)가 1:1 협상 등가. **잠정 사다리**(PL 조율 예정)이므로 별점만 보지 말고 m·깊이·노출률 원지표를 함께 읽어야 한다"
       },
       "participant_accuracy": 0.0,
-      "participant_random_baseline": 0.0006,
-      "participant_gain_pp": -0.06,
+      "participant_random_baseline": 0.0005,
+      "participant_gain_pp": -0.05,
       "participant_exposure_rate": 0.0,
       "participant_stars": 5,
-      "participant_samples": 4,
+      "participant_samples": 10,
       "e2": {
-        "A": 0.0182,
+        "A": 0.028276,
         "B": 0.0,
-        "samples": 4,
+        "samples": 8,
+        "degenerate": true,
         "note": "1:1 기준 노출량 — 참조 양자 프로토콜에서 상대 1인이 도달하는 깊이. m의 분모이며 도메인별로 따로 측정한다"
       },
       "attacker": "frequency 고정 규칙 3개 (24 §7.4) — 변경 시 전 측정 재실행"
     },
     "pool": {
-      "m_A": 0.873,
-      "m_B": 0.0,
+      "m_A": 0.682,
+      "m_B": null,
       "stars_m_A": 3,
-      "stars_m_B": 5,
-      "max_single_depth_A": 0.016,
-      "victims": 8,
+      "stars_m_B": null,
+      "max_single_depth_A": 0.019,
+      "victims": 20,
+      "b_note": "e₂ 앵커의 B축이 0에 가까워 배수가 성립하지 않는다 — 참조 프로토콜에서도 접두 복원이 일어나지 않는다는 뜻이다 (예: 에이전트가 자기 선호를 부분적으로만 아는 도메인)",
       "band": {
         "name": "CF 노출 배수 m",
         "thresholds": [
@@ -212,16 +215,17 @@
         "direction": "at_most",
         "note": "24 §7.3 — 3점 경계(m=1)가 1:1 협상 등가. **잠정 사다리**(PL 조율 예정)이므로 별점만 보지 말고 m·깊이·노출률 원지표를 함께 읽어야 한다"
       },
-      "participant_accuracy": 0.0,
-      "participant_random_baseline": 0.0006,
-      "participant_gain_pp": -0.06,
-      "participant_exposure_rate": 0.0,
-      "participant_stars": 5,
-      "participant_samples": 4,
+      "participant_accuracy": 0.3,
+      "participant_random_baseline": 0.0005,
+      "participant_gain_pp": 29.95,
+      "participant_exposure_rate": 0.2996,
+      "participant_stars": 4,
+      "participant_samples": 10,
       "e2": {
-        "A": 0.0182,
+        "A": 0.028276,
         "B": 0.0,
-        "samples": 4,
+        "samples": 8,
+        "degenerate": true,
         "note": "1:1 기준 노출량 — 참조 양자 프로토콜에서 상대 1인이 도달하는 깊이. m의 분모이며 도메인별로 따로 측정한다"
       },
       "attacker": "frequency 고정 규칙 3개 (24 §7.4) — 변경 시 전 측정 재실행"
@@ -229,32 +233,32 @@
   },
   "sc_issue": {
     "seq2": {
-      "c": 0.103,
-      "ci_low": 0.1025,
-      "ci_high": 0.1035,
-      "r2": 1.0,
+      "c": 0.0552,
+      "ci_low": 0.0315,
+      "ci_high": 0.0789,
+      "r2": 0.8778,
       "stars_c": 5,
       "ci_spans_three_grades": false,
-      "max_issues": 8,
-      "stars_max_issues": 1,
+      "max_issues": 10,
+      "stars_max_issues": 2,
       "censored": true,
       "gate_ok": true,
       "gate_rate_small": 1.0,
       "gate_rate_large": 1.0,
       "defect": false,
-      "d": 6,
+      "d": 7,
       "bands": {
         "c": {
-          "name": "SC-의제 탄력성 c (d=6)",
+          "name": "SC-의제 탄력성 c (d=7)",
           "thresholds": [
-            0.33333333333333337,
-            0.5,
-            0.6666666666666666,
-            0.8333333333333334,
-            1.0000000000000002
+            0.3142857142857143,
+            0.4857142857142857,
+            0.657142857142857,
+            0.8285714285714285,
+            1.0
           ],
           "direction": "at_most",
-          "note": "24 §4.3 — 이론 이상 1/d=0.167 와 전체 열거 1.0 사이 5등분"
+          "note": "24 §4.3 — 이론 이상 1/d=0.143 와 전체 열거 1.0 사이 5등분"
         },
         "max_issues": {
           "name": "SC-의제 최대 의제 수",
@@ -271,32 +275,32 @@
       }
     },
     "pool": {
-      "c": 0.0441,
-      "ci_low": -0.0521,
-      "ci_high": 0.1404,
-      "r2": 0.9714,
+      "c": 0.0586,
+      "ci_low": 0.0093,
+      "ci_high": 0.1079,
+      "r2": 0.6513,
       "stars_c": 5,
       "ci_spans_three_grades": false,
-      "max_issues": 8,
-      "stars_max_issues": 1,
+      "max_issues": 10,
+      "stars_max_issues": 2,
       "censored": true,
       "gate_ok": true,
       "gate_rate_small": 1.0,
       "gate_rate_large": 1.0,
       "defect": false,
-      "d": 6,
+      "d": 7,
       "bands": {
         "c": {
-          "name": "SC-의제 탄력성 c (d=6)",
+          "name": "SC-의제 탄력성 c (d=7)",
           "thresholds": [
-            0.33333333333333337,
-            0.5,
-            0.6666666666666666,
-            0.8333333333333334,
-            1.0000000000000002
+            0.3142857142857143,
+            0.4857142857142857,
+            0.657142857142857,
+            0.8285714285714285,
+            1.0
           ],
           "direction": "at_most",
-          "note": "24 §4.3 — 이론 이상 1/d=0.167 와 전체 열거 1.0 사이 5등분"
+          "note": "24 §4.3 — 이론 이상 1/d=0.143 와 전체 열거 1.0 사이 5등분"
         },
         "max_issues": {
           "name": "SC-의제 최대 의제 수",

@@ -29,7 +29,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterator, Sequence
 
-from ...qa.contract import NO_AGREEMENT, ObservationEvent, Outcome, SessionResult
+from ...qa.contract import (
+    NO_AGREEMENT,
+    ObservationEvent,
+    Outcome,
+    SessionResult,
+    SweepPoint,
+)
 from ...qa.ru import deep_size
 from ._vendor.common.oracle import analyze
 from ._vendor.common.profiles import build_truth_profiles, truth_utility
@@ -316,6 +322,25 @@ def run_session(
         },
     )
     return session, case
+
+
+def run_sweep_point(scenario: Scenario, plan: str, n_issues: int, **kw) -> SweepPoint:
+    """SC-의제 스윕용 **경량 실행** — 후보 공간을 열거하지 않는다.
+
+    스윕은 규모별 피크만 필요한데, `run_session`은 FC를 위해 후보를 전수 열거한다.
+    축이 10개면 조합이 900만을 넘어 열거만으로 프로세스가 죽는다 — 실제로 그랬다.
+    여기서는 프로토콜만 돌리고 피크를 읽는다.
+    """
+    if plan not in PLANS:
+        raise KeyError(f"알 수 없는 방안: {plan} (등록: {sorted(PLANS)})")
+    run = run_one(scenario, plan, **kw)
+    return SweepPoint(
+        scale=max(1, scenario.space_size()),
+        peak_bytes=int(run.peak_kib * 1024),
+        base_bytes=0,      # 공통 기저는 전 방안 동일 — 스윕은 프로토콜 몫만 본다
+        agreed=run.agreement is not None,
+        n_issues=n_issues,
+    )
 
 
 def oracle_report(scenario: Scenario):

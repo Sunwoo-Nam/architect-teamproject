@@ -64,6 +64,19 @@ def stars(n: int | None) -> str:
     return "★" * n + "☆" * (5 - n) + f" ({n}점)"
 
 
+def cell(value) -> str:
+    """표 한 칸. **`None`을 'None'으로 찍지 않는다** — 안 쟀다는 뜻이 드러나야 한다."""
+    if value is None:
+        return "—"
+    if isinstance(value, bool):
+        return "예" if value else "**아니오**"
+    if isinstance(value, float):
+        return f"{value:,.4f}".rstrip("0").rstrip(".")
+    if isinstance(value, int):
+        return f"{value:,}"
+    return str(value)
+
+
 @dataclass
 class RunMeta:
     run_id: str
@@ -157,15 +170,38 @@ def _section(qa: str, data: dict, plans: Sequence[str]) -> list[str]:
 
     rows = []
     for key, label in keys:
-        values = []
+        values, seen = [], False
         for p in plans:
-            v = (data.get(p) or {}).get(key, "—")
-            values.append(stars(v) if key.startswith("stars") and isinstance(v, int) else v)
-        if any(v != "—" for v in values):
+            v = (data.get(p) or {}).get(key)
+            if v is not None:
+                seen = True
+            values.append(stars(v) if key.startswith("stars") and isinstance(v, int)
+                          else cell(v))
+        if seen:
             rows.append((label, values))
     if not rows:
         return []
-    return [f"### {QA_TITLES[qa]}", ""] + _table(plans, rows)
+
+    out = [f"### {QA_TITLES[qa]}", ""] + _table(plans, rows)
+    for note in _notes(qa, data, plans):
+        out += [f"> {note}", ""]
+    return out
+
+
+def _notes(qa: str, data: dict, plans: Sequence[str]) -> list[str]:
+    """수치만으로는 오독되는 지점을 표 아래에 붙인다."""
+    notes: list[str] = []
+    for p in plans:
+        d = data.get(p) or {}
+        if qa == "cf" and d.get("m_B") is None and d.get("b_note"):
+            notes.append(f"`{p}` B축: {d['b_note']}")
+        if qa == "sc_issue" and d.get("censored"):
+            notes.append(f"`{p}` 최대 의제 수는 **하한**이다 — 스윕이 메모리 한도에 닿지 "
+                         f"못해 실제 최대는 더 클 수 있다")
+        if qa == "sc_issue" and d.get("defect"):
+            notes.append(f"`{p}` **완결률 게이트 실패** — 규모가 커질수록 결렬이 늘어 "
+                         f"탄력성이 좋아 보이는 왜곡이다 (24 §4.4). c 별점은 0으로 덮었다")
+    return list(dict.fromkeys(notes))[:6]      # 순서 유지 중복 제거
 
 
 def render_markdown(meta: RunMeta, raw: dict) -> str:

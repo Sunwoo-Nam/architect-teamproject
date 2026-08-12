@@ -155,3 +155,54 @@ class TestValidation:
     def test_rejects_case_without_plan(self, tmp_path):
         with pytest.raises(ValueError):
             write_run(tmp_path, meta(), RAW, [{"case_id": "c"}])
+
+
+class TestCellRendering:
+    """표 한 칸 — None을 'None'으로 찍으면 '안 쟀다'와 '0이다'가 뒤섞인다."""
+
+    def test_none_becomes_dash(self):
+        from total.qa.report import cell
+        assert cell(None) == "—"
+
+    def test_bool_is_korean_and_negative_is_emphasised(self):
+        from total.qa.report import cell
+        assert cell(True) == "예"
+        assert "**" in cell(False)
+
+    def test_float_trimmed(self):
+        from total.qa.report import cell
+        assert cell(0.765786) == "0.7658"
+        assert cell(1.0) == "1"
+
+    def test_int_thousand_separator(self):
+        from total.qa.report import cell
+        assert cell(1234567) == "1,234,567"
+
+
+class TestSectionNotes:
+    def test_degenerate_cf_anchor_explained(self):
+        md = render_markdown(meta(plans=["A"]), {
+            "cf": {"A": {"m_A": 0.3, "m_B": None, "b_note": "앵커 퇴화"}}})
+        assert "앵커 퇴화" in md
+
+    def test_censored_max_issues_flagged(self):
+        md = render_markdown(meta(plans=["A"]), {
+            "sc_issue": {"A": {"c": 0.1, "max_issues": 10, "censored": True}}})
+        assert "하한" in md
+
+    def test_gate_defect_flagged(self):
+        md = render_markdown(meta(plans=["A"]), {
+            "sc_issue": {"A": {"c": 0.1, "defect": True, "gate_ok": False}}})
+        assert "게이트 실패" in md
+
+    def test_no_note_when_clean(self):
+        md = render_markdown(meta(plans=["A"]), {
+            "sc_issue": {"A": {"c": 0.1, "max_issues": 10, "censored": False}}})
+        assert "하한" not in md
+
+    def test_identical_notes_deduped(self):
+        md = render_markdown(meta(plans=["A", "B"]), {
+            "sc_issue": {"A": {"c": 0.1, "censored": True},
+                         "B": {"c": 0.2, "censored": True}}})
+        # 방안마다 다른 문구라 2건 — 같은 문구가 두 번 나오지는 않아야 한다
+        assert md.count("최대 의제 수는") == 2
