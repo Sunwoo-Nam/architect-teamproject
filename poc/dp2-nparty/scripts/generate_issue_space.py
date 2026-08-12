@@ -116,8 +116,14 @@ PER_CONFIG = 10  # (의제 수 단계 × 참여자 수)당 케이스 수 → 4 �
 # 목표 비율의 근거: 전원 수락 가능한 조합의 비율이 3% 이상이면 메모리가 부족해 일부만
 # 검토해도 좋은 안을 쉽게 찾아 방안 간 차이가 사라지고, 0.05% 이하면 양쪽 다 결렬해서
 # 역시 차이가 사라진다. 0.3~1.0% 구간에서만 방안이 구분된다 (사전 검증 실측).
-FEASIBLE_RATIO_TARGET = 0.005  # 전원 수락 가능한 조합의 목표 비율 (0.5%)
-FEASIBLE_RATIO_BAND = (0.003, 0.010)  # 이 범위를 벗어나면 생성 실패로 본다
+# 트랙별 목표 비율 — 두 측정이 서로 반대되는 난이도를 요구하므로 케이스를 나눈다.
+#   A 트랙(0.5%): 합의안이 각자 순위표의 깊은 곳에 있어, 메모리가 부족해 일부만 검토하면
+#       좋은 안을 놓친다 → **정확도**가 갈린다. 대신 점진형도 거의 전 조합을 훑게 되어
+#       담당자 보유량이 일괄형과 같아지므로 메모리는 갈리지 않는다 (실측 확인).
+#   B 트랙(5%): 합의안이 얕아 점진형이 일찍 멈춘다 → **단말 1대의 보유량**이 갈린다.
+#       대신 좁게 검토해도 쉽게 찾으므로 정확도는 갈리지 않는다.
+TRACK_RATIOS = {"a": 0.005, "b": 0.05}
+FEASIBLE_RATIO_TARGET = TRACK_RATIOS["a"]  # 기본값 (--track 으로 바꾼다)
 THRESHOLD_JITTER = 0.03  # 참여자마다 기준값을 조금씩 다르게 (전원 같은 값이면 비현실적)
 MIN_WEIGHT = 0.08  # 가중치가 0에 가까우면 그 의제가 사실상 사라져 조합 구조가 무너진다
 
@@ -173,7 +179,8 @@ def build_participant(pid: str, issues: list[dict], rng: random.Random, shift: f
     }
 
 
-def solve_thresholds(issues: list[dict], participants: list[dict], rng: random.Random) -> int:
+def solve_thresholds(issues: list[dict], participants: list[dict], rng: random.Random,
+                     target_ratio: float = FEASIBLE_RATIO_TARGET) -> int:
     """전원 수락 가능한 조합이 목표 비율이 되도록 참여자별 수락 기준값을 정한다.
 
     참여자 i의 기준값을 `t + offset_i` 로 두면(offset은 사람마다 다른 고정 지터),
@@ -189,7 +196,7 @@ def solve_thresholds(issues: list[dict], participants: list[dict], rng: random.R
         (min(u - o for u, o in zip(vals, offs)) for vals in zip(*grids)), reverse=True
     )
     total = len(margins)
-    k = max(1, min(total, round(total * FEASIBLE_RATIO_TARGET)))
+    k = max(1, min(total, round(total * target_ratio)))
     # k번째로 큰 값을 기준으로 잡으면 정확히 k개가 통과한다. 3자리로 반올림하면 경계가
     # 움직일 수 있으므로, 내림(더 관대한 쪽)해서 목표보다 적어지지 않게 한다.
     t = math.floor(margins[k - 1] * 1000) / 1000
@@ -238,15 +245,16 @@ def analyse(issues: list[dict], participants: list[dict]) -> tuple[int, float, f
 
 
 def build_case(case_id: str, sizes: tuple[int, ...], n_part: int,
-               rng: random.Random, shift: float) -> dict:
+               rng: random.Random, shift: float, target_ratio: float = FEASIBLE_RATIO_TARGET,
+               track: str = 'a') -> dict:
     issues = build_issues(sizes)
     participants = [build_participant(f"P{j}", issues, rng, shift) for j in range(n_part)]
     combos = 1
     for issue in issues:
         combos *= len(issue["values"])
-    feasible_n = solve_thresholds(issues, participants, rng)
+    feasible_n = solve_thresholds(issues, participants, rng, target_ratio)
     ratio = feasible_n / combos
-    lo, hi = FEASIBLE_RATIO_BAND
+    lo, hi = target_ratio * 0.6, target_ratio * 2.0
     if not (lo <= ratio <= hi):
         raise SystemExit(
             f"{case_id}: 전원 수락 가능한 조합 비율 {ratio:.4%} 가 목표 구간 "
@@ -265,6 +273,8 @@ def build_case(case_id: str, sizes: tuple[int, ...], n_part: int,
             "issue_sizes": [len(i["values"]) for i in issues],
             "common_feasible_count": feasible_n,
             "expected_no_deal": feasible_n == 0,
+            "tags": [f"track:{track}", f"issues:{len(issues)}",
+                     f"participants:{n_part}", f"feasible_ratio:{ratio:.4f}"],
             "description": (
                 f"영화 약속 {n_part}인 사례 — 의제 {len(issues)}개({shape}) = 조합 {combos:,}개. "
                 "후보는 의제 값의 곱이며 utility는 의제 가중합으로 실행 시 계산한다. "
@@ -389,13 +399,15 @@ def validate_case(raw: dict, source: str) -> list[str]:
 
 # --- 생성 ----------------------------------------------------------------------
 
-def _case_id(n_part: int, combos: int, seq: int) -> str:
+def _case_id(n_part: int, combos: int, seq: int, track: str = "a") -> str:
     """정렬했을 때 참여자 수 → 조합 수 → 일련번호 순으로 늘어서도록 자리수를 맞춘다."""
-    return f"I-{n_part:02d}p-S{combos:06d}-{seq:03d}"
+    suffix = "" if track == "a" else track.upper()
+    return f"I{suffix}-{n_part:02d}p-S{combos:06d}-{seq:03d}"
 
 
 def _build_all(steps: tuple[int, ...], participant_counts: tuple[int, ...],
-               per_config: int, rng: random.Random, start: int, shift: float) -> list[dict]:
+               per_config: int, rng: random.Random, start: int, shift: float,
+               target_ratio: float, track: str) -> list[dict]:
     cases = []
     for step in steps:
         sizes = ISSUE_LEVELS[step - 1]
@@ -404,13 +416,14 @@ def _build_all(steps: tuple[int, ...], participant_counts: tuple[int, ...],
             combos *= k
         for n_part in participant_counts:
             for i in range(per_config):
-                case_id = _case_id(n_part, combos, start + i)
-                cases.append(build_case(case_id, sizes, n_part, rng, shift))
+                case_id = _case_id(n_part, combos, start + i, track)
+                cases.append(build_case(case_id, sizes, n_part, rng, shift, target_ratio, track))
     return cases
 
 
 def generate(steps: tuple[int, ...], participant_counts: tuple[int, ...], per_config: int,
-             seed: int, start: int, out_dir: Path, max_retry: int = 4) -> tuple[list[Path], float]:
+             seed: int, start: int, out_dir: Path, max_retry: int = 4,
+             target_ratio: float = FEASIBLE_RATIO_TARGET, track: str = 'a') -> tuple[list[Path], float]:
     """케이스를 만들고 결렬 비율을 확인한 뒤 파일로 쓴다.
 
     전 케이스가 결렬(공통 실후보 0개)로만 채워지면 표본이 쓸모없다. 결렬이 절반을 넘으면
@@ -421,7 +434,7 @@ def generate(steps: tuple[int, ...], participant_counts: tuple[int, ...], per_co
     cases: list[dict] = []
     for attempt in range(max_retry + 1):
         rng = random.Random(seed + attempt)
-        cases = _build_all(steps, participant_counts, per_config, rng, start, shift)
+        cases = _build_all(steps, participant_counts, per_config, rng, start, shift, target_ratio, track)
         zero = sum(1 for c in cases if c["meta"]["expected_no_deal"])
         print(f"  시도 {attempt + 1}: 기준값 보정 {shift:+.2f} → 결렬 {zero}/{len(cases)}건 "
               f"({zero / len(cases):.1%})")
@@ -471,10 +484,16 @@ def main() -> None:
                     help=f"생성할 S 단계 번호 1..{len(ISSUE_LEVELS)} (기본: 전체)")
     ap.add_argument("--seed", type=int, default=20260812)
     ap.add_argument("--start", type=int, default=1, help="case_id 일련번호 시작값")
-    ap.add_argument("--out", type=Path, default=OUT_DIR)
+    ap.add_argument("--track", choices=sorted(TRACK_RATIOS), default="a",
+                    help="a=정확도 판별용(실후보 0.5%%) · b=단말 부담 판별용(5%%)")
+    ap.add_argument("--out", type=Path, default=None,
+                    help="생략 시 트랙에 맞는 폴더 (issue-space / issue-space-b)")
     args = ap.parse_args()
 
     steps = tuple(args.steps)
+    target_ratio = TRACK_RATIOS[args.track]
+    out_dir = args.out or (OUT_DIR if args.track == "a" else OUT_DIR.with_name(f"issue-space-{args.track}"))
+    print(f"  트랙 {args.track.upper()} — 전원 수락 가능한 조합 목표 비율 {target_ratio:.1%}")
     for s in steps:
         if not 1 <= s <= len(ISSUE_LEVELS):
             raise SystemExit(f"--steps 는 1..{len(ISSUE_LEVELS)} 범위여야 한다 (받은 값: {s})")
@@ -491,7 +510,8 @@ def main() -> None:
 
     t0 = time.perf_counter()
     written, shift = generate(steps, tuple(args.participants), args.per_config,
-                              args.seed, args.start, args.out)
+                              args.seed, args.start, out_dir,
+                              target_ratio=target_ratio, track=args.track)
     elapsed = time.perf_counter() - t0
 
     total_kb = sum(p.stat().st_size for p in written) / 1024
@@ -502,7 +522,7 @@ def main() -> None:
                            raw["meta"]["common_feasible_count"]))
     _report(cases_meta)
 
-    print(f"\n  {len(written)}건 생성 ({total_kb:.1f} KB, {elapsed:.1f}초) → {args.out}")
+    print(f"\n  {len(written)}건 생성 ({total_kb:.1f} KB, {elapsed:.1f}초) → {out_dir}")
     print(f"  자체 검증 통과 — 전 케이스 weights 합·scores 범위·조합 수·utility 범위·"
           f"공통 실후보 수 재계산 일치 (기준값 보정 {shift:+.2f})")
 
