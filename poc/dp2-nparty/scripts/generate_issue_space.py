@@ -14,24 +14,26 @@
 `weights` 합이 정확히 1이고 모든 `scores` 값이 [0,1]이므로 utility ∈ [0,1]이 구조적으로
 보장된다 — 후보를 펼치지 않고도 값 범위를 증명할 수 있다는 것이 이 형식의 이점이다.
 
-`common_feasible_count`는 **역산하지 않는다.** 무작위로 만든 뒤 실제로 세어 기록만 한다
-(`generate_functional.py`의 역방향 구성과 반대). 이 축에서 측정하려는 것은 달성률이 아니라
-조합 수 `S`에 대한 자원 탄력성이므로, 난이도를 인위적으로 고정하면 오히려 표본이 왜곡된다.
+수락 기준값(`initial_threshold`)은 **계산해서 정한다.** 의제가 많아질수록 utility가
+평균 근처로 몰려서, 기준값을 눈대중으로 고르면 대부분의 케이스가 "전부 통과" 아니면
+"전부 결렬"이 된다 — 어느 쪽이든 방안을 구분하지 못한다. 전원 수락 가능한 조합이
+목표 비율이 되는 기준값을 조합을 실제로 세어 정한다 (solve_thresholds).
 
 로더 의존 없음: `src/dp2_nparty/benchmark.py`의 `validate_case`는 `benchmark-case.v1`
 전용이고 스키마가 다르다. 또한 `issue-space-case.v1` 로더는 현재 별도 작업 중이므로,
 본 생성기는 검증을 **스크립트 안에서 자체적으로** 수행한다.
 
 사용:
-    .venv/bin/python scripts/generate_issue_space.py                # 6단계 × 2종 × 10건 = 120건
+    .venv/bin/python scripts/generate_issue_space.py                # 4단계 × 2종 × 10건 = 80건
     .venv/bin/python scripts/generate_issue_space.py --per-config 2 # 축소 (단계·인원당 2건)
-    .venv/bin/python scripts/generate_issue_space.py --steps 1 2    # 작은 단계만
+    .venv/bin/python scripts/generate_issue_space.py --steps 1 2    # 의제 4·6개만
 """
 from __future__ import annotations
 
 import argparse
 import itertools
 import json
+import math
 import random
 import time
 from datetime import date, timedelta
@@ -45,8 +47,7 @@ SCENARIO_TYPE = "movie_appointment"
 
 # --- 의제 정의 -----------------------------------------------------------------
 #
-# 의제는 4개로 고정하고 **값 개수만** 바꿔 조합 수 S를 늘린다. 의제 개수까지 함께 늘리면
-# S의 증가가 '의제 수 효과'와 '값 개수 효과'로 갈려 독립 변수가 두 개가 된다.
+# 의제 수를 4 → 10으로 늘리면서 조합 수는 비슷하게 유지한다 (아래 ISSUE_LEVELS).
 #
 # 값 풀에서 **앞에서부터 잘라** 쓴다 — 단계가 올라가도 작은 단계의 값이 그대로 남고 새 값만
 # 추가되므로, 단계 사이 차이에 '문제가 통째로 바뀐 효과'가 섞이지 않는다
@@ -65,33 +66,59 @@ MOVIE_POOL = [
     "우연한 여행자", "달의 뒷면", "낮은 목소리", "회색 항구", "봄의 알고리즘",
 ]
 
-# (의제 id, 표시 이름, 값 풀) — 순서가 곧 조합 튜플의 자리 순서다
+SEAT_POOL = ["일반", "프리미엄", "리클라이너", "커플석"]
+FORMAT_POOL = ["2D", "3D", "IMAX", "4DX"]
+MEAL_POOL = ["관람 전 식사", "관람 후 식사", "간식만", "식사 없음"]
+TRANSPORT_POOL = ["지하철", "버스", "자차", "택시"]
+BUDGET_POOL = ["1만원대", "1만5천원대", "2만원대", "2만5천원대"]
+AFTER_POOL = ["바로 귀가", "카페", "가벼운 술자리", "산책"]
+
+# (의제 id, 표시 이름, 값 풀) — 순서가 곧 조합 튜플의 자리 순서다.
+# 앞 4개는 약속의 뼈대이고, 뒤 6개는 의제 수를 10개까지 늘릴 때 덧붙이는 항목이다.
 ISSUE_DEFS = (
     ("date", "날짜", DATE_POOL),
     ("time", "시간", TIME_POOL),
     ("venue", "영화관", VENUE_POOL),
     ("movie", "영화", MOVIE_POOL),
+    ("seat", "좌석", SEAT_POOL),
+    ("format", "상영 형식", FORMAT_POOL),
+    ("meal", "식사", MEAL_POOL),
+    ("transport", "이동", TRANSPORT_POOL),
+    ("budget", "예산", BUDGET_POOL),
+    ("after", "관람 후", AFTER_POOL),
 )
 
-# S를 10² ~ 10⁵ 로그 등간격 6단계로 — 단계마다 약 4배(4⁵ = 1,024 ≈ 10³)다.
-# 이상적 목표값은 100 / 398 / 1,585 / 6,310 / 25,119 / 100,000 이고, 아래는 의제별 값
-# 개수의 곱으로 낼 수 있는 근사값이다. 실제 S는 meta에 계산해 기록한다.
+# **의제 수를 4 → 10으로 늘리되 조합 수는 6만~13만으로 비슷하게 유지한다.**
+# 조합 수를 함께 바꾸면 "의제가 늘어난 효과"와 "후보가 많아진 효과"가 섞여, 의제 수의
+# 영향만 따로 볼 수 없다. 조합 수를 고정하면 달라지는 것이 의제 수 하나가 된다.
+#
+# 이 규모를 쓰는 이유: 조합 6,300개에서는 일괄 계열의 피크 메모리가 17 MB뿐이라
+# 수백 MB 단말 예산에서 어떤 방안도 제약을 받지 않는다(전부 동점). 조합 10만 개에서
+# 일괄형 235 MB · 점진형 19 MB로 갈리기 시작한다 (2026-08-12 실측).
 ISSUE_LEVELS = (
-    (5, 5, 2, 2),      # = 100
-    (5, 5, 4, 4),      # = 400
-    (9, 7, 5, 5),      # = 1,575
-    (10, 10, 9, 7),    # = 6,300
-    (21, 12, 10, 10),  # = 25,200
-    (25, 20, 10, 20),  # = 100,000
+    (25, 20, 10, 20),                       # d=4  → 100,000
+    (10, 10, 8, 8, 4, 4),                   # d=6  → 102,400
+    (6, 6, 5, 5, 4, 4, 3, 3),               # d=8  → 129,600
+    (4, 4, 4, 3, 3, 3, 3, 3, 2, 2),         # d=10 →  62,208
 )
 
-PARTICIPANT_COUNTS = (3, 10)
-PER_CONFIG = 10  # (S 단계 × 참여자 수) 조합당 케이스 수 → 6 × 2 × 10 = 120건
+PARTICIPANT_COUNTS = (10, 20)
+PER_CONFIG = 10  # (의제 수 단계 × 참여자 수)당 케이스 수 → 4 × 2 × 10 = 80건
 
-# 수락 기준값은 세 대역 부근에서 뽑는다. 특정 실후보 수를 맞추려는 역산이 아니라 분포를
-# 넓히기 위한 것이다. 결렬 케이스가 절반을 넘으면 generate()가 이 대역을 통째로 낮춘다.
-THRESHOLD_BASES = (0.35, 0.45, 0.55)
-THRESHOLD_JITTER = 0.03
+# 수락 기준값은 **계산해서 정한다.**
+#
+# 눈대중으로 고를 수 없는 이유: utility가 의제별 점수의 가중평균이라 의제가 많아질수록
+# 값이 평균(0.5) 근처로 몰린다 — 참여자 1인의 utility 표준편차가 의제 2개에서 0.287,
+# 10개에서 0.087이다. 그래서 의제 10개에서는 기준값 0.45와 0.48 사이(0.03 차이)에서
+# 전원 수락 가능한 조합이 303개에서 46개로 바뀐다. 고정 대역을 뿌리면 대부분의 케이스가
+# "전부 통과" 아니면 "전부 결렬"이 되어 측정이 성립하지 않는다.
+#
+# 목표 비율의 근거: 전원 수락 가능한 조합의 비율이 3% 이상이면 메모리가 부족해 일부만
+# 검토해도 좋은 안을 쉽게 찾아 방안 간 차이가 사라지고, 0.05% 이하면 양쪽 다 결렬해서
+# 역시 차이가 사라진다. 0.3~1.0% 구간에서만 방안이 구분된다 (사전 검증 실측).
+FEASIBLE_RATIO_TARGET = 0.005  # 전원 수락 가능한 조합의 목표 비율 (0.5%)
+FEASIBLE_RATIO_BAND = (0.003, 0.010)  # 이 범위를 벗어나면 생성 실패로 본다
+THRESHOLD_JITTER = 0.03  # 참여자마다 기준값을 조금씩 다르게 (전원 같은 값이면 비현실적)
 MIN_WEIGHT = 0.08  # 가중치가 0에 가까우면 그 의제가 사실상 사라져 조합 구조가 무너진다
 
 TOL = 1e-9
@@ -101,11 +128,16 @@ CROSS_CHECK_MAX = 2000  # 이 크기 이하에서는 정의 그대로의 이중 
 # --- 케이스 구성 ---------------------------------------------------------------
 
 def build_issues(sizes: tuple[int, ...]) -> list[dict]:
-    """의제별 값 개수를 받아 의제 목록을 만든다 (값 풀의 앞에서부터 자른다)."""
-    if len(sizes) != len(ISSUE_DEFS):
-        raise SystemExit(f"의제 개수는 {len(ISSUE_DEFS)}개로 고정이다 (받은 값: {len(sizes)}개)")
+    """의제별 값 개수를 받아 의제 목록을 만든다.
+
+    의제는 `ISSUE_DEFS`의 앞에서부터 `len(sizes)`개를 쓰고, 각 의제의 값도 값 풀의
+    앞에서부터 자른다 — 의제 수가 늘어도 앞 단계의 의제·값이 그대로 남으므로,
+    단계 사이 차이에 '문제가 통째로 바뀐 효과'가 섞이지 않는다.
+    """
+    if not 1 <= len(sizes) <= len(ISSUE_DEFS):
+        raise SystemExit(f"의제 개수는 1~{len(ISSUE_DEFS)}개여야 한다 (받은 값: {len(sizes)}개)")
     issues = []
-    for (iid, name, pool), k in zip(ISSUE_DEFS, sizes):
+    for (iid, name, pool), k in zip(ISSUE_DEFS[: len(sizes)], sizes):
         if not 1 <= k <= len(pool):
             raise SystemExit(f"의제 '{iid}'의 값 개수 {k}는 값 풀 크기 {len(pool)}를 벗어난다")
         issues.append({"id": iid, "name": name, "values": list(pool[:k])})
@@ -130,14 +162,43 @@ def build_participant(pid: str, issues: list[dict], rng: random.Random, shift: f
         issue["id"]: {v: round(rng.random(), 4) for v in issue["values"]}
         for issue in issues
     }
-    base = rng.choice(THRESHOLD_BASES) + shift
-    threshold = round(base + rng.uniform(-THRESHOLD_JITTER, THRESHOLD_JITTER), 3)
+    # initial_threshold 는 여기서 정하지 않는다 — 전 조합의 utility를 계산한 뒤
+    # solve_thresholds() 가 목표 비율에 맞춰 채운다.
     return {
         "pid": pid,
-        "initial_threshold": threshold,
+        "initial_threshold": None,
         "weights": weights,
         "scores": scores,
+        "_offset": round(rng.uniform(-THRESHOLD_JITTER, THRESHOLD_JITTER), 4),
     }
+
+
+def solve_thresholds(issues: list[dict], participants: list[dict], rng: random.Random) -> int:
+    """전원 수락 가능한 조합이 목표 비율이 되도록 참여자별 수락 기준값을 정한다.
+
+    참여자 i의 기준값을 `t + offset_i` 로 두면(offset은 사람마다 다른 고정 지터),
+    조합 c를 전원이 수락할 조건은 `모든 i에 대해 u_i(c) ≥ t + offset_i`,
+    즉 `min_i (u_i(c) − offset_i) ≥ t` 이다. 그래서 조합마다 이 최솟값을 한 번 구해
+    내림차순 정렬해 두면, 목표 개수 k번째 값이 곧 정답 t다 — 탐색이 필요 없다.
+
+    반환: 실제로 전원 수락 가능해진 조합 수.
+    """
+    grids = [utility_grid(issues, p) for p in participants]
+    offs = [p["_offset"] for p in participants]
+    margins = sorted(
+        (min(u - o for u, o in zip(vals, offs)) for vals in zip(*grids)), reverse=True
+    )
+    total = len(margins)
+    k = max(1, min(total, round(total * FEASIBLE_RATIO_TARGET)))
+    # k번째로 큰 값을 기준으로 잡으면 정확히 k개가 통과한다. 3자리로 반올림하면 경계가
+    # 움직일 수 있으므로, 내림(더 관대한 쪽)해서 목표보다 적어지지 않게 한다.
+    t = math.floor(margins[k - 1] * 1000) / 1000
+    for p, o in zip(participants, offs):
+        p["initial_threshold"] = round(min(1.0, max(0.0, t + o)), 4)
+        del p["_offset"]
+    # 반올림·클램프 이후의 실제 개수를 다시 센다 (기록되는 값은 이것이다)
+    ths = [p["initial_threshold"] for p in participants]
+    return sum(1 for vals in zip(*grids) if all(u >= th for u, th in zip(vals, ths)))
 
 
 def utility_grid(issues: list[dict], participant: dict) -> list[float]:
@@ -183,7 +244,14 @@ def build_case(case_id: str, sizes: tuple[int, ...], n_part: int,
     combos = 1
     for issue in issues:
         combos *= len(issue["values"])
-    feasible_n, _, _ = analyse(issues, participants)
+    feasible_n = solve_thresholds(issues, participants, rng)
+    ratio = feasible_n / combos
+    lo, hi = FEASIBLE_RATIO_BAND
+    if not (lo <= ratio <= hi):
+        raise SystemExit(
+            f"{case_id}: 전원 수락 가능한 조합 비율 {ratio:.4%} 가 목표 구간 "
+            f"{lo:.1%}~{hi:.1%} 를 벗어났다 ({feasible_n}/{combos})"
+        )
     shape = " × ".join(f"{i['name']} {len(i['values'])}" for i in issues)
     return {
         "case_id": case_id,
@@ -198,7 +266,7 @@ def build_case(case_id: str, sizes: tuple[int, ...], n_part: int,
             "common_feasible_count": feasible_n,
             "expected_no_deal": feasible_n == 0,
             "description": (
-                f"영화 약속 {n_part}인 사례 — 의제 4개({shape}) = 조합 {combos:,}개. "
+                f"영화 약속 {n_part}인 사례 — 의제 {len(issues)}개({shape}) = 조합 {combos:,}개. "
                 "후보는 의제 값의 곱이며 utility는 의제 가중합으로 실행 시 계산한다. "
                 f"전원의 initial threshold를 넘는 공통 실후보는 {feasible_n:,}개다."
             ),
@@ -411,14 +479,15 @@ def main() -> None:
         if not 1 <= s <= len(ISSUE_LEVELS):
             raise SystemExit(f"--steps 는 1..{len(ISSUE_LEVELS)} 범위여야 한다 (받은 값: {s})")
 
-    print("  S 단계별 의제 구성")
-    print(f"    {'단계':>4} {'날짜':>4} {'시간':>4} {'영화관':>5} {'영화':>4} {'조합 S':>9}")
+    print("  단계별 의제 구성 — 의제 수를 늘리되 조합 수는 비슷하게 유지한다")
+    print(f"    {'단계':>4} {'의제 수':>6} {'조합 S':>9}  의제별 값 개수")
     for s in steps:
         sizes = ISSUE_LEVELS[s - 1]
         combos = 1
         for k in sizes:
             combos *= k
-        print(f"    {s:>4} {sizes[0]:>4} {sizes[1]:>4} {sizes[2]:>5} {sizes[3]:>4} {combos:>9,}")
+        names = " × ".join(f"{ISSUE_DEFS[j][1]} {k}" for j, k in enumerate(sizes))
+        print(f"    {s:>4} {len(sizes):>6} {combos:>9,}  {names}")
 
     t0 = time.perf_counter()
     written, shift = generate(steps, tuple(args.participants), args.per_config,
