@@ -211,6 +211,49 @@ def render_markdown(raw: dict) -> str:
                     f"{bn[n][vp]['exposure_rate']:.2f} (★{bn[n][vp]['stars']})" for n in ns) + " |")
             A("")
 
+    isec = raw.get("issue_space")
+    if isec:
+        A("## [§10] 의제 조합(issue-space) — A·B 트랙")
+        A("")
+        labels = isec["config"]["track_labels"]
+        counts = isec["config"]["tracks"]
+        A(f"조건: {isec['config']['note']}")
+        A("")
+        A(
+            "- **A 트랙** ("
+            + labels.get("a", "A")
+            + f", {counts.get('a', 0)}건): 전원 수락 가능한 조합이 드물어 합의안이 각자 순위표의 "
+            "깊은 곳에 있다 — 검토 범위가 좁으면 좋은 안을 놓친다. **정확도**가 갈리는 조건."
+        )
+        A(
+            "- **B 트랙** ("
+            + labels.get("b", "B")
+            + f", {counts.get('b', 0)}건): 전원 수락 가능한 조합이 흔해 합의안이 얕다 — 좁게 봐도 "
+            "쉽게 찾는다. 대신 점진형이 일찍 멈춰 **1인 최대 메모리**가 낮아질 것으로 예상되는 조건."
+        )
+        A("")
+        A("| 방안 | A 달성률(s,★) | A 1인최대 | B 달성률(s,★) | B 1인최대 | A 라운드/B 라운드 |")
+        A("|---|---|---|---|---|---|")
+        for p in P:
+            d = isec.get(p, {})
+            a, b = d.get("a", {}), d.get("b", {})
+            if not a or not b:
+                continue
+            A(
+                f"| {p} | {a['mean_ratio']:.3f} (s{a['s']:.2f}, {_stars(a['stars'])}) "
+                f"| {a['median_person_peak_bytes']/1024:.1f} KiB "
+                f"| {b['mean_ratio']:.3f} (s{b['s']:.2f}, {_stars(b['stars'])}) "
+                f"| {b['median_person_peak_bytes']/1024:.1f} KiB "
+                f"| {a['median_rounds']:.0f} / {b['median_rounds']:.0f} |"
+            )
+        A("")
+        A(
+            "> A·B의 1인 최대 메모리가 서로 다르면(B가 낮으면) '점진형이 넓은 공간에서 유리·좁은 "
+            "공간에서 불리'라는 가설이 확인된 것이다. 같으면 메모리 축의 판별 대상은 방안 간 "
+            "제출 방식(점진/일괄)이 아니라 중앙집중/계층분산 여부로 봐야 한다."
+        )
+        A("")
+
     if "an_kit" in raw:
         A("## [§8] Analysability — 진단 실험 킷")
         A("")

@@ -1,0 +1,167 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="515EXP" name="51-5 정보 노출 — 방안 1-A vs 방안 2">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1450" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="51-5. 정보 노출 구조 — 방안 1-A vs 방안 2" style="text;html=1;fontSize=15;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="14" width="760" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="누가 누구의 제안·판정을 볼 수 있는가 — QA-CF-2(역추론 방지) 공격 실험의 입력이 되는 구조." style="text;html=1;fontSize=11;align=left;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="1000" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="banner" value="⚠ Confidentiality(기밀성 — 역추론 방지)는 2026-08-12 PL 지시로 비핵심 7위 → 핵심 5위로 상향되었다 (23-핵심-QA-최종-확정.md). 이 그림은 참고용이 아니라 핵심 QA 근거다 — 51 원문의 &quot;참고 관찰&quot; 주석은 상향 이전 표기다." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="64" width="1320" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lg1" value="실선 화살표 = 관찰 가능" style="text;html=1;fontSize=10;align=left;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="180" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2" value="노출 0 (안 보임)" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="230" y="98" width="150" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="lg3" value="점선 화살표 = 조건부·약한 신호만" style="text;html=1;fontSize=10;align=left;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="400" y="100" width="240" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 좌: 방안 1-A ===== -->
+        <mxCell id="hdrL" value="방안 1-A" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="130" width="640" height="26" as="geometry" />
+        </mxCell>
+
+        <mxCell id="LpartCt" value="① 참여자 관점 (임의의 참여자 Pk 기준)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="168" width="640" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="Lp1" value="나(Pk)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="LpartCt">
+          <mxGeometry x="20" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="Lp2" value="담당자(P0)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="LpartCt">
+          <mxGeometry x="480" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="Lp3" value="다른 참여자들&#10;(안 보임 — 노출 0)" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontColor=#7a2020;" vertex="1" parent="LpartCt">
+          <mxGeometry x="250" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="Lpe1" value="제출/회신 보냄" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=9;exitY=0.25;entryY=0.25;" edge="1" parent="LpartCt" source="Lp1" target="Lp2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Lpe2" value="익명 배포만 받음&#10;(제안자·O/X 불명)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#999999;fontSize=9;exitY=0.75;entryY=0.75;" edge="1" parent="LpartCt" source="Lp2" target="Lp1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="LcoordCt" value="② 담당자 관점 (P0 기준)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="328" width="640" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="Lc1" value="참여자 전원&#10;(P1…P(N-1))" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="LcoordCt">
+          <mxGeometry x="20" y="35" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="Lc2" value="담당자(P0)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="LcoordCt">
+          <mxGeometry x="440" y="35" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="Lce1" value="전 제출 + 전 O/X 수신&#10;(판정 신호 포함)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=9;" edge="1" parent="LcoordCt" source="Lc1" target="Lc2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 우: 방안 2 ===== -->
+        <mxCell id="hdrR" value="방안 2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="720" y="130" width="640" height="26" as="geometry" />
+        </mxCell>
+
+        <mxCell id="RpartCt" value="① 참여자 관점 (임의의 참여자 Pk 기준)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="720" y="168" width="640" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="Rp1" value="나(Pk)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="RpartCt">
+          <mxGeometry x="20" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="Rp2" value="담당자(P0)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="RpartCt">
+          <mxGeometry x="480" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="Rp3" value="다른 참여자들&#10;(안 보임 — 노출 0)" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontColor=#7a2020;" vertex="1" parent="RpartCt">
+          <mxGeometry x="250" y="40" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="Rpe1" value="제출만 보냄" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=9;exitY=0.25;entryY=0.25;" edge="1" parent="RpartCt" source="Rp1" target="Rp2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Rpe2" value="성립 시 통지만&#10;(판정 신호 없음)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#999999;fontSize=9;exitY=0.75;entryY=0.75;" edge="1" parent="RpartCt" source="Rp2" target="Rp1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="RcoordCt" value="② 담당자 관점 (P0 기준)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="720" y="328" width="640" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="Rc1" value="참여자 전원&#10;(P1…P(N-1))" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="RcoordCt">
+          <mxGeometry x="20" y="35" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="Rc2" value="담당자(P0)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="RcoordCt">
+          <mxGeometry x="440" y="35" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="Rce1" value="전 제출 수신&#10;(제출=수락 의사, O/X 없음)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#333333;fontSize=9;" edge="1" parent="RcoordCt" source="Rc1" target="Rc2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 대비 표 ===== -->
+        <mxCell id="tblT" value="노출 구조 대비 (51-5 §5 근거)" style="text;html=1;fontSize=12;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="464" width="600" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="th0" value="관점" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#999999;fontSize=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="492" width="200" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="th1" value="방안 1-A" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#999999;fontSize=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="240" y="492" width="610" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="th2" value="방안 2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#999999;fontSize=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="850" y="492" width="510" height="28" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r1a" value="참여자 간 노출" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="520" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="r1b" value="없음 (재배포 익명)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="240" y="520" width="610" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="r1c" value="없음" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="850" y="520" width="510" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r2a" value="담당자가 보는 것" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="550" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="r2b" value="전 제출 + 전 O/X (판정 신호 포함)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="240" y="550" width="610" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="r2c" value="전 제출 (판정 신호 없음)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="850" y="550" width="510" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r3a" value="담당자 관점 역추론 재료" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="580" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="r3b" value="더 많음 — O/X로 문턱 근처 추정 가능" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="240" y="580" width="610" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="r3c" value="더 적음 — 제출 여부만" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="850" y="580" width="510" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r4a" value="일반 참여자 관점 역추론 이득" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="610" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="r4b" value="0 (방안 1 대비, 51 §3-1)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="240" y="610" width="610" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="r4c" value="0" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="850" y="610" width="510" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="measBox" value="실측 코드 일치 확인 — poc/dp2-nparty/src/dp2_nparty/measures/confidentiality.py&#10;공격자: frequency 계열 상대 모델(빈도·시점 기반 opponent modeling). 지표: 1순위 후보 추정 정확도 − 무작위 기준선(1/후보 수) = 이득(%p) — 23 문서의 &quot;정규화 노출률&quot;.&#10;관점(viewpoint) 정의가 위 구조와 일치: coordinator는 두 방안 모두 전체 제출을 보고, 1-A는 O/X까지 본다 (14-18행)." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=9;align=left;spacingLeft=8;spacingTop=6;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="40" y="650" width="1320" height="66" as="geometry" />
+        </mxCell>
+
+        <mxCell id="src" value="근거 — docs/changbae/51-구조도/51-5-정보노출-구조-검토.md. 51 원문 &quot;(참고 관찰 — Confidentiality는 비핵심)&quot; 주석은 2026-08-12 상향 이전 표기이며, 51 문서 자체의 수정은 이 작업 범위 밖." style="text;html=1;fontSize=10;align=left;fontColor=#777777;" vertex="1" parent="1">
+          <mxGeometry x="40" y="726" width="1320" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

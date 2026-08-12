@@ -1,0 +1,126 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="513MSG" name="51-3 메시지 페이로드 결합 — 방안 1-A vs 방안 2">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1450" pageHeight="740" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="51-3. 메시지 페이로드 결합 구조 — 방안 1-A vs 방안 2" style="text;html=1;fontSize=15;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="14" width="760" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="메시지 1건 안에 어떤 필드가 실리는가 — 필드가 묶일수록 1건 유실 시 잃는 정보가 커진다." style="text;html=1;fontSize=11;align=left;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="1000" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lg1" value="필드(정상 상태)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="64" width="150" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2" value="유실 시 사라짐" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="200" y="64" width="150" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="lg3" value="굵은 테두리 = 메시지 1건(전송 단위)" style="text;html=1;fontSize=10;align=left;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="360" y="64" width="280" height="22" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 좌: 방안 1-A ===== -->
+        <mxCell id="hdrL" value="방안 1-A — 회신 메시지 (votes + next 결합)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="96" width="640" height="26" as="geometry" />
+        </mxCell>
+
+        <mxCell id="Lenv" value="회신 메시지 1건 (SAO reply)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#333333;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="40" y="132" width="640" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="Lf1" value="votes: {candidate: O/X, ...} — 그 라운드 배포분 전체" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="Lenv">
+          <mxGeometry x="30" y="40" width="580" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="Lf2" value="next: 다음 순위 후보" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="Lenv">
+          <mxGeometry x="30" y="130" width="580" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="Lcode" value="코드: protocol_styles.py Plan1aSao._exchange&#10;bb.counter.add(&quot;reply&quot;, 1, {votes: {...}, next: ...})" style="text;html=1;fontSize=9;align=left;fontColor=#777777;fontFamily=monospace;" vertex="1" parent="1">
+          <mxGeometry x="40" y="358" width="640" height="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="Lloss" value="1건 유실 → votes(판정)와 next(제안) 동시 소실.&#10;포인터 유지 → 같은 후보는 다음 라운드 재시도되지만, 이번 라운드 만장일치 판정에서는 이 참여자가 통째로 빠진다." style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontColor=#7a2020;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="404" width="640" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="Leloss" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#b85450;" edge="1" parent="1" source="Lenv" target="Lloss">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 우: 방안 2 ===== -->
+        <mxCell id="hdrR" value="방안 2 — 제출 메시지 (candidate 단일)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="720" y="96" width="640" height="26" as="geometry" />
+        </mxCell>
+
+        <mxCell id="Renv" value="제출 메시지 1건" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#333333;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="720" y="132" width="640" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="Rf1" value="candidate: 이번 순위 후보" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="Renv">
+          <mxGeometry x="30" y="40" width="580" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="Rcode" value="코드: protocol.py _BasePlan._one_round&#10;bb.submit(a.p.pid, i == 0, {&quot;candidate&quot;: str(c)})" style="text;html=1;fontSize=9;align=left;fontColor=#777777;fontFamily=monospace;" vertex="1" parent="1">
+          <mxGeometry x="720" y="258" width="640" height="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="Rloss" value="1건 유실 → candidate(제안) 하나만 소실.&#10;판정 필드 자체가 없으므로(투표 없는 구조) 함께 사라지는 다른 정보가 없다. 포인터 유지 → 다음 라운드 재시도." style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontColor=#7a2020;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="720" y="404" width="640" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="Reloss" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#b85450;" edge="1" parent="1" source="Renv" target="Rloss">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 대비 표 ===== -->
+        <mxCell id="tblT" value="필드 결합 대비 (51-3 §4 근거)" style="text;html=1;fontSize=12;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="510" width="600" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="th0" value="관점" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#999999;fontSize=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="538" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="th1" value="방안 1-A" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#999999;fontSize=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="240" y="538" width="610" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="th2" value="방안 2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#999999;fontSize=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="850" y="538" width="510" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r1a" value="필드" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="568" width="200" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r1b" value="votes(그 라운드 후보 전체 O/X) + next(다음 후보)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="240" y="568" width="610" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r1c" value="candidate(이번 후보) 1개" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="850" y="568" width="510" height="32" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r2a" value="유실 시 잃는 정보" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="600" width="200" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r2b" value="판정(votes) + 제안(next) 동시" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="240" y="600" width="610" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r2c" value="제안(candidate) 하나만" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="850" y="600" width="510" height="32" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r3a" value="결합 원인" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="632" width="200" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r3b" value="배포↔회신 2-phase 왕복을 유지하면서 판정+제안 정보를 병합 (51 §3-1)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="240" y="632" width="610" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r3c" value="애초에 판정 필드가 없음 — 투표 없는 구조 (51 §4)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="850" y="632" width="510" height="32" as="geometry" />
+        </mxCell>
+
+        <mxCell id="src" value="근거 — docs/changbae/51-구조도/51-3-메시지페이로드-구조-검토.md. 51-1 §2.5(세션 종료 시 통지 유실)와 범위가 다르다 — 이 그림은 라운드 진행 중 유실을 다룬다." style="text;html=1;fontSize=10;align=left;fontColor=#777777;" vertex="1" parent="1">
+          <mxGeometry x="40" y="674" width="1320" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -4,15 +4,26 @@
 - §1 FC · §2 RU · §5 FT/REC · §6 TB · §7 CF → 정적 벤치마크 functional 트랙
 - §3 SC-참여자 → 정적 벤치마크 scalability family 트랙
 - §4 SC-의제 → 벤치마크 보류 상태라 개발용 multi-issue 생성으로 대체 (라벨 명시)
+- §10 의제 조합(issue-space) A·B 트랙 → 정적 벤치마크. A(실후보 0.5%)는 정확도 판별용,
+  B(5%)는 단말 부담 판별용 — 하나의 케이스로 둘 다 재려 하면 한쪽이 사라진다는 것이
+  사전 검증으로 확인되어 트랙을 나눴다 (01-테스트-케이스-확장-계획.md §8 개정 참조).
+  §4와 역할이 다르다 — §4는 조합 수 S의 전 구간 스윕(탄력성 c), §10은 고정 규모(6만~13만)
+  에서의 방안별 정확도·1인 메모리·전원 합계다.
 
 출력 raw dict의 키 구조는 campaign과 동일 — report.render_markdown·build_index가 그대로 동작한다.
+
+성능 주의(§10 구현 시 실측으로 확인한 함정): `measures/ru_person.holder_sizes()`를
+라운드마다(on_round_end 콜백으로) 부르면 안 된다 — deep_size가 상태 전체를 재귀 순회하므로
+조합 6만 개대 케이스에서 수 분~수십 분이 걸린다. 세션 종료 후 plan 객체에 대해 **1회만**
+불러야 한다(상태가 누적되므로 종료 시점이 곧 최대치). 아래 _issue_space_section이 이 방식을
+쓴다 — §2 RU의 _ru_section과 다른 점이다(그쪽은 3인·후보 12개로 작아 문제되지 않는다).
 """
 from __future__ import annotations
 
 import statistics
 from datetime import datetime
 
-from .benchmark import BenchmarkCase, JsonBenchmarkLoader
+from .benchmark import CASES_DIR, BenchmarkCase, JsonBenchmarkLoader
 from .campaign import KST, _meta, _sc_issues_section
 from .domain import NO_DEAL
 from .faults import FaultInjector
@@ -22,12 +33,17 @@ from .measures import rec as recmod
 from .measures import tb as tbmod
 from .measures.confidentiality import exposure_rate, measure_gain, stars_exposure
 from .measures.ru_memory import peak_memory_bytes
+from .measures.ru_person import holder_sizes
 from .measures.scaling import ci_spans_grades, completion_gate, loglog_fit, stars_b_msg
 from .protocol import Plan1Vote, Plan2Cumulative, Plan20Batch
 
 from .protocol import all_plans
 
 PLANS = all_plans()
+
+# issue-space 트랙 폴더명과 표시 이름 — 순서가 리포트 표의 열 순서다.
+ISSUE_SPACE_TRACKS = (("a", "issue-space", "A(정확도, 실후보 0.5%)"),
+                      ("b", "issue-space-b", "B(단말 부담, 실후보 5%)"))
 
 
 def _functional_cases() -> list[BenchmarkCase]:
@@ -36,6 +52,73 @@ def _functional_cases() -> list[BenchmarkCase]:
 
 def _scalability_cases() -> list[BenchmarkCase]:
     return sorted(JsonBenchmarkLoader(track="scalability").cases(), key=lambda c: c.case_id)
+
+
+def _issue_space_cases(subdir: str):
+    """의제 조합 케이스(전개 전)를 case_id 사전순으로 — 전개는 방안 공유를 위해 호출부에서."""
+    from .issue_space import IssueSpaceLoader
+
+    return sorted(IssueSpaceLoader(root=CASES_DIR / subdir).issue_cases(), key=lambda c: c.case_id)
+
+
+def _issue_space_section(track_cases: dict[str, list]) -> dict:
+    """§10 의제 조합 A·B 트랙 — 방안별 정확도·1인 메모리·전원 합계·동작량.
+
+    예산 제약을 걸지 않은 전체 공간 기준 측정이다(제약 실험은 scripts/budget_report.py 소관).
+    케이스당 expand()는 방안 수만큼이 아니라 **한 번만** 호출해 방안끼리 공유한다.
+    """
+    from .issue_space import expand
+
+    sec: dict = {
+        "config": {
+            "tracks": {t: len(track_cases[t]) for t, _d, _label in ISSUE_SPACE_TRACKS},
+            "track_labels": {t: label for t, _d, label in ISSUE_SPACE_TRACKS},
+            "note": "채점은 케이스가 정의하는 전체 조합 공간 기준 x* 대비 달성률. "
+                    "메모리는 논리 상태 귀속(ru_person) — 1인 최대가 실제 단말 제약과 대응한다.",
+        }
+    }
+    for name, cls in PLANS:
+        by_track: dict[str, dict] = {}
+        for track, _dirname, _label in ISSUE_SPACE_TRACKS:
+            cases = track_cases[track]
+            ratios, baselines = [], []
+            person_peaks, total_peaks = [], []
+            rounds, msgs, byts, times = [], [], [], []
+            agreed = 0
+            for case in cases:
+                bc = expand(case)
+                plan = cls(bc.profiles, collect_log=False)
+                session = plan.run()
+                sizes = holder_sizes(plan)  # 종료 후 1회 — 라운드 콜백 금지 (모듈 docstring 참조)
+                f = fcmod.score(session.outcome, bc.candidates, bc.profiles)
+                ratios.append(f.ratio)
+                baselines.append(f.baseline)
+                agreed += session.agreed
+                person_peaks.append(max(sizes) if sizes else 0)
+                total_peaks.append(sum(sizes))
+                rounds.append(session.rounds)
+                msgs.append(session.messages)
+                byts.append(session.bytes)
+                times.append(tbmod.synth_time(session).total_ms)
+            mr = statistics.mean(ratios) if ratios else 0.0
+            mb = statistics.mean(baselines) if baselines else 0.0
+            sv = (mr - mb) / (1 - mb) if mb < 1 else 1.0
+            by_track[track] = {
+                "cases": len(cases),
+                "mean_ratio": round(mr, 4),
+                "mean_baseline": round(mb, 4),
+                "s": round(sv, 4),
+                "stars": fcmod.stars_from_s(sv),
+                "agreed": agreed,
+                "median_person_peak_bytes": int(statistics.median(person_peaks)) if person_peaks else 0,
+                "median_total_logical_bytes": int(statistics.median(total_peaks)) if total_peaks else 0,
+                "median_rounds": statistics.median(rounds) if rounds else 0,
+                "median_messages": statistics.median(msgs) if msgs else 0,
+                "median_bytes": statistics.median(byts) if byts else 0,
+                "median_time_ms": round(statistics.median(times), 1) if times else 0.0,
+            }
+        sec[name] = by_track
+    return sec
 
 
 def _fc_section(cases: list[BenchmarkCase]) -> dict:
@@ -313,7 +396,18 @@ def resolve_plans(spec: str | None) -> list[str]:
     return out
 
 
-def run_full(seed: int = 20260811, plans: list[str] | None = None) -> dict:
+def run_full(
+    seed: int = 20260811,
+    plans: list[str] | None = None,
+    issue_space_limit: int | None = None,
+) -> dict:
+    """issue_space_limit: 트랙(A·B)당 사용할 케이스 수를 제한한다 (None=전체 80+80건).
+
+    §10은 방안 11개가 순위를 한 칸씩 제출하는 방식이라, 조합 6만~13만짜리 케이스에서
+    라운드가 수만 회에 이른다(실측: 조합 62,208·10인에서 방안2가 34,256라운드·10.4초).
+    전체 방안 × 전체 A·B 160건을 돌리면 수 시간이 걸릴 수 있으므로, 처음 재는 실행은
+    이 인자로 규모를 줄여 시간을 재고 판단하는 것을 권한다.
+    """
     from . import campaign as _campaign
 
     selected = tuple((n, c) for n, c in all_plans() if plans is None or n in plans)
@@ -324,21 +418,31 @@ def run_full(seed: int = 20260811, plans: list[str] | None = None) -> dict:
     _campaign.PLANS = selected
     _campaign.PLAN_NAMES = tuple(n for n, _c in selected)
     try:
-        return _run_full_inner(seed, selected)
+        return _run_full_inner(seed, selected, issue_space_limit)
     finally:
         PLANS, _campaign.PLANS, _campaign.PLAN_NAMES = saved
 
 
-def _run_full_inner(seed: int, selected) -> dict:
+def _run_full_inner(seed: int, selected, issue_space_limit: int | None = None) -> dict:
     functional = _functional_cases()
     f3 = [c for c in functional if len(c.profiles) == 3]
     scal = _scalability_cases()
+    track_cases = {
+        track: _issue_space_cases(dirname)[:issue_space_limit]
+        for track, dirname, _label in ISSUE_SPACE_TRACKS
+    }
     meta = _meta(seed)
     meta["run_id"] = "full-" + datetime.now(KST).strftime("%Y%m%dT%H%M%S") + "KST"
-    meta["provider"] = "정적 벤치마크 셋 (functional·scalability) — §4 SC-의제만 개발용 대체"
+    meta["provider"] = (
+        "정적 벤치마크 셋 (functional·scalability·issue-space A/B) — §4 SC-의제만 개발용 대체"
+    )
     meta["plans"] = [n for n, _c in selected]
     if len(selected) != len(all_plans()):
         meta["caveat_plans"] = "부분 실행 — 선택된 방안만 측정됨 (--plans)"
+    if issue_space_limit is not None:
+        meta["caveat_issue_space"] = (
+            f"§10 의제 조합은 트랙당 {issue_space_limit}건으로 축소 실행됨 (--issue-space-cases)"
+        )
     meta["caveat"] = (
         "입력은 확정 벤치마크 셋 (결정론 — 같은 입력이면 같은 결과). "
         "예외: §4 SC-의제는 벤치마크 보류 상태라 개발용 multi-issue 생성으로 대체 측정 (잠정), "
@@ -350,6 +454,7 @@ def _run_full_inner(seed: int, selected) -> dict:
         "ru_memory": _ru_section(f3),
         "sc_participants": _sc_participants_section(scal),
         "sc_issues": _sc_issues_section(seed, 5),  # 벤치마크 보류 — 개발용 대체 (config note 참조)
+        "issue_space": _issue_space_section(track_cases),
         "tb": _tb_section(f3),
         "ft": _ft_section(f3, seed),
         "rec": _rec_section(f3[:10]),

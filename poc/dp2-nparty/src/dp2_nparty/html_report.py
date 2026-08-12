@@ -38,6 +38,7 @@ def render_html(raw: dict) -> str:
     m = raw["meta"]
     fc, ru = raw["fc"], raw["ru_memory"]
     sp, si = raw["sc_participants"], raw["sc_issues"]
+    isec = raw.get("issue_space")
     tb, ft, rc, cf = raw.get("tb"), raw["ft"], raw["rec"], raw["confidentiality"]
     P = [p for p in PLAN_NAMES if p in fc]
 
@@ -114,6 +115,17 @@ def render_html(raw: dict) -> str:
           f"{cf[p].get('by_n', {}).get('50', {}).get('coordinator', {}).get('exposure_rate', 0):.2f}") for p in P],
         [None] * len(P),
         "종합 등급으로 압축하지 않음 (PL 방침) — 전 N 상세는 §7 카드"))
+    if isec:
+        rows.append(row(
+            '§10 의제 조합 — A(정확도)/B(단말부담) 트랙 <span class="badge sub">신규</span>',
+            [(f"A {isec[p]['a']['mean_ratio']:.3f}(★{isec[p]['a']['stars']}) "
+              f"{isec[p]['a']['median_person_peak_bytes']/1024:.0f}KiB"
+              f" · B {isec[p]['b']['mean_ratio']:.3f}(★{isec[p]['b']['stars']}) "
+              f"{isec[p]['b']['median_person_peak_bytes']/1024:.0f}KiB")
+             if p in isec else "-" for p in P],
+            [None] * len(P),
+            f"A {isec['config']['tracks'].get('a', 0)}건 · B {isec['config']['tracks'].get('b', 0)}건"
+            " · 1인 최대 메모리 기준 (상세는 §10 카드)"))
     if raw.get("an_kit"):
         rows.append(row(
             '§8 AN — 진단 실험 킷 <span class="badge aux">비핵심</span>',
@@ -239,6 +251,26 @@ def render_html(raw: dict) -> str:
                  for p in P],
              ["RU 프로세스 피크/평균 (참고 KiB)"] + [f"{ru[p]['median_peak_bytes']/1024:.1f} / {ru[p]['median_avg_bytes']/1024:.1f}" for p in P],
              ["SC-의제 c [CI] · 별점"] + [f"{si[p]['c']:.2f} [{si[p]['ci'][0]:.2f}, {si[p]['ci'][1]:.2f}] · {_stars(si[p]['stars'])}" for p in P]])))
+
+    if isec:
+        ip = [p for p in P if p in isec]
+        details.append(sec(
+            "§10 의제 조합(issue-space) — A·B 트랙 상세", "신규", "sub",
+            f"A(정확도 판별, 실후보 0.5%) {isec['config']['tracks'].get('a', 0)}건 · "
+            f"B(단말 부담 판별, 실후보 5%) {isec['config']['tracks'].get('b', 0)}건 · "
+            "채점은 케이스 전체 조합 공간 기준 x* 대비 달성률 · 메모리는 논리 상태 귀속(1인 최대)",
+            tbl(["방안", "A 달성률(s)", "A 별점", "A 1인최대/합계(KiB)", "A 라운드",
+                 "B 달성률(s)", "B 별점", "B 1인최대/합계(KiB)", "B 라운드"],
+                [[PLAN_LABELS.get(p, p),
+                  f"{isec[p]['a']['mean_ratio']:.3f} (s{isec[p]['a']['s']:.2f})",
+                  _stars(isec[p]['a']['stars']),
+                  f"{isec[p]['a']['median_person_peak_bytes']/1024:.1f} / {isec[p]['a']['median_total_logical_bytes']/1024:.1f}",
+                  f"{isec[p]['a']['median_rounds']:.0f}",
+                  f"{isec[p]['b']['mean_ratio']:.3f} (s{isec[p]['b']['s']:.2f})",
+                  _stars(isec[p]['b']['stars']),
+                  f"{isec[p]['b']['median_person_peak_bytes']/1024:.1f} / {isec[p]['b']['median_total_logical_bytes']/1024:.1f}",
+                  f"{isec[p]['b']['median_rounds']:.0f}"]
+                 for p in ip])))
 
     return f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">

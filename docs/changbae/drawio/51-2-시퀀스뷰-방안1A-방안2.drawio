@@ -1,0 +1,218 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="512SEQ" name="51-2 시퀀스 뷰 — 방안 1-A vs 방안 2">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="540" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="51-2. 라운드 시퀀스 — 방안 1-A vs 방안 2" style="text;html=1;fontSize=15;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="14" width="700" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="바퀴(sweep) 하나 안에서 라운드가 반복되는 동안 메시지가 어떤 순서·방향으로 오가는지. loop 박스 안이 라운드 1회에 해당한다." style="text;html=1;fontSize=11;align=left;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="1000" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lg1" value="점선 화살표 = 메시지 (라벨은 화살표 쌍 위에 한 번만 표기 — 동일 메시지가 N-1명에게 병렬 전송)" style="text;html=1;fontSize=10;align=left;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="40" y="64" width="620" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2" value="회색 실선 세로선 = 단말의 생존 기간(lifeline) · loop 박스 = 라운드 반복 구간" style="text;html=1;fontSize=10;align=left;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="700" y="64" width="640" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 좌: 방안 1-A ===== -->
+        <mxCell id="hdrL" value="방안 1-A — 순차 SAO 투표형" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="96" width="640" height="26" as="geometry" />
+        </mxCell>
+
+        <mxCell id="La0" value="담당자 P0" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="132" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="La1" value="참여자 P1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="260" y="132" width="110" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="Ldots" value="&#8942;" style="text;html=1;fontSize=16;align=center;fontColor=#888888;" vertex="1" parent="1">
+          <mxGeometry x="390" y="132" width="40" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="La2" value="참여자 P(N-1)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="450" y="132" width="170" height="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="LlineP0" style="html=1;endArrow=none;dashed=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="135" y="166" as="sourcePoint" />
+            <mxPoint x="135" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LlineP1" style="html=1;endArrow=none;dashed=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="315" y="166" as="sourcePoint" />
+            <mxPoint x="315" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LlineP2" style="html=1;endArrow=none;dashed=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="535" y="166" as="sourcePoint" />
+            <mxPoint x="535" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="LcollectLbl" value="«collect» 후보 1개 — 바퀴 시작 1회, N-1건 병렬" style="text;html=1;fontSize=9;fontColor=#b85450;align=center;" vertex="1" parent="1">
+          <mxGeometry x="40" y="176" width="640" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="LcollectA1" style="html=1;endArrow=block;dashed=1;strokeColor=#b85450;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="315" y="196" as="sourcePoint" />
+            <mxPoint x="135" y="196" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LcollectA2" style="html=1;endArrow=block;dashed=1;strokeColor=#b85450;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="535" y="196" as="sourcePoint" />
+            <mxPoint x="135" y="196" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="LloopFrame" value="loop&#10;[라운드마다 — 전원 O 나올 때까지, 최대 5바퀴]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;verticalAlign=top;align=left;spacingLeft=6;spacingTop=4;fontSize=9;fontStyle=1;fontColor=#444444;" vertex="1" parent="1">
+          <mxGeometry x="40" y="224" width="640" height="148" as="geometry" />
+        </mxCell>
+        <mxCell id="LofferLbl" value="«offer» 익명 후보 목록" style="text;html=1;fontSize=9;fontColor=#b85450;align=center;" vertex="1" parent="1">
+          <mxGeometry x="40" y="254" width="640" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="LofferA1" style="html=1;endArrow=block;dashed=1;strokeColor=#b85450;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="135" y="272" as="sourcePoint" />
+            <mxPoint x="315" y="272" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LofferA2" style="html=1;endArrow=block;dashed=1;strokeColor=#b85450;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="135" y="272" as="sourcePoint" />
+            <mxPoint x="535" y="272" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LreplyLbl" value="«reply» O/X + 다음 후보 (한 메시지로 결합)" style="text;html=1;fontSize=9;fontColor=#b85450;align=center;" vertex="1" parent="1">
+          <mxGeometry x="40" y="304" width="640" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="LreplyA1" style="html=1;endArrow=block;dashed=1;strokeColor=#b85450;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="315" y="322" as="sourcePoint" />
+            <mxPoint x="135" y="322" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LreplyA2" style="html=1;endArrow=block;dashed=1;strokeColor=#b85450;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="535" y="322" as="sourcePoint" />
+            <mxPoint x="135" y="322" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LjudgeNote" value="판정(P0 로컬): 이번 라운드 후보 중 전원 O가 있으면 loop 탈출, 없으면 다음 라운드" style="text;html=1;fontSize=9;fontColor=#555555;align=center;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="346" width="640" height="18" as="geometry" />
+        </mxCell>
+
+        <mxCell id="LfinalLbl" value="«final» 성립 시에만 통지 (미성립 공지 없음)" style="text;html=1;fontSize=9;fontColor=#b85450;align=center;" vertex="1" parent="1">
+          <mxGeometry x="40" y="408" width="640" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="LfinalA1" style="html=1;endArrow=block;dashed=1;strokeColor=#b85450;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="135" y="426" as="sourcePoint" />
+            <mxPoint x="315" y="426" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LfinalA2" style="html=1;endArrow=block;dashed=1;strokeColor=#b85450;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="135" y="426" as="sourcePoint" />
+            <mxPoint x="535" y="426" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="LsumNote" value="라운드당 2 phase · 2(N-1)건 (offer + reply)" style="text;html=1;fontSize=10;fontColor=#333333;align=center;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="452" width="640" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 우: 방안 2 ===== -->
+        <mxCell id="hdrR" value="방안 2 — 누적 공통제안형" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="720" y="96" width="640" height="26" as="geometry" />
+        </mxCell>
+
+        <mxCell id="Ra0" value="담당자 P0" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="740" y="132" width="150" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="Ra1" value="참여자 P1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="940" y="132" width="110" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="Rdots" value="&#8942;" style="text;html=1;fontSize=16;align=center;fontColor=#888888;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="132" width="40" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="Ra2" value="참여자 P(N-1)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="132" width="170" height="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="RlineP0" style="html=1;endArrow=none;dashed=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="815" y="166" as="sourcePoint" />
+            <mxPoint x="815" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RlineP1" style="html=1;endArrow=none;dashed=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="995" y="166" as="sourcePoint" />
+            <mxPoint x="995" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RlineP2" style="html=1;endArrow=none;dashed=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="166" as="sourcePoint" />
+            <mxPoint x="1215" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="RnoCollectNote" value="별도 수집 단계 없음 — 라운드 1의 제출이 곧 각자 1순위 후보" style="text;html=1;fontSize=9;fontColor=#888888;align=center;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="720" y="188" width="640" height="16" as="geometry" />
+        </mxCell>
+
+        <mxCell id="RloopFrame" value="loop&#10;[라운드마다 — 누적 교집합 나올 때까지, 최대 5바퀴]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;verticalAlign=top;align=left;spacingLeft=6;spacingTop=4;fontSize=9;fontStyle=1;fontColor=#444444;" vertex="1" parent="1">
+          <mxGeometry x="720" y="224" width="640" height="102" as="geometry" />
+        </mxCell>
+        <mxCell id="RsubmitLbl" value="«submit» 자기 k순위 후보" style="text;html=1;fontSize=9;fontColor=#b85450;align=center;" vertex="1" parent="1">
+          <mxGeometry x="720" y="254" width="640" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="RsubmitA1" style="html=1;endArrow=block;dashed=1;strokeColor=#b85450;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="995" y="272" as="sourcePoint" />
+            <mxPoint x="815" y="272" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RsubmitA2" style="html=1;endArrow=block;dashed=1;strokeColor=#b85450;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="272" as="sourcePoint" />
+            <mxPoint x="815" y="272" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RjudgeNote" value="판정(P0 로컬): 1라운드부터 누적된 제안의 전원 교집합 확인 — 추가 메시지 없음" style="text;html=1;fontSize=9;fontColor=#555555;align=center;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="720" y="300" width="640" height="18" as="geometry" />
+        </mxCell>
+
+        <mxCell id="RfinalLbl" value="«final» 성립 시에만 통지 (미성립 공지 없음)" style="text;html=1;fontSize=9;fontColor=#b85450;align=center;" vertex="1" parent="1">
+          <mxGeometry x="720" y="408" width="640" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="RfinalA1" style="html=1;endArrow=block;dashed=1;strokeColor=#b85450;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="815" y="426" as="sourcePoint" />
+            <mxPoint x="995" y="426" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RfinalA2" style="html=1;endArrow=block;dashed=1;strokeColor=#b85450;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="815" y="426" as="sourcePoint" />
+            <mxPoint x="1215" y="426" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RsumNote" value="라운드당 1 phase · N-1건 (submit만)" style="text;html=1;fontSize=10;fontColor=#333333;align=center;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="720" y="452" width="640" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="src" value="근거 — docs/changbae/51-설계후보1-다자-합의-프로토콜.md §3-1·§4·§5, poc/dp2-nparty의 protocol.py(Plan2Cumulative)·protocol_styles.py(Plan1aSao). 두 loop 프레임의 높이 차이(148 vs 102)가 곧 '라운드당 phase 수' 차이(2 vs 1)다." style="text;html=1;fontSize=10;align=left;fontColor=#777777;" vertex="1" parent="1">
+          <mxGeometry x="40" y="490" width="1320" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

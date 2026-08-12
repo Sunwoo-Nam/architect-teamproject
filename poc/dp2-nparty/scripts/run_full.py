@@ -3,8 +3,13 @@
 사용: .venv/bin/python scripts/run_full.py                 # 기본 — 전 방안 측정
       .venv/bin/python scripts/run_full.py --plans 2,6,20  # 방안 번호로 부분 실행
       .venv/bin/python scripts/run_full.py --plans plan2,plan6itree  # 내부 이름도 허용
+      .venv/bin/python scripts/run_full.py --issue-space-cases 5  # §10을 트랙당 5건으로 축소
 출력: results/full-<KST>KST/ 에 raw.json + report.md + report.html (대시보드)
 부분 실행 결과에는 meta.plans / caveat_plans 로 선택 방안이 기록된다.
+
+주의(§10 의제 조합, A·B 트랙 160건): 방안 11개가 순위를 한 칸씩 제출하는 방식이라 조합
+6만~13만짜리 케이스에서 라운드가 수만 회다. 전 방안 14개 × 전체 160건을 --issue-space-cases
+없이 돌리면 수 시간이 걸릴 수 있다 — 처음에는 작은 값으로 시간을 재고 판단할 것을 권한다.
 """
 from __future__ import annotations
 
@@ -28,12 +33,14 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=20260811)
     ap.add_argument("--plans", default=None,
                     help="측정할 방안 선택 — 번호('2,6,10,20') 또는 내부 이름 혼용, 쉼표 구분. 생략 시 전체")
+    ap.add_argument("--issue-space-cases", type=int, default=None,
+                    help="§10 의제 조합을 트랙(A·B)당 이 건수로 축소 (생략 시 80+80건 전체)")
     args = ap.parse_args()
 
     from dp2_nparty.full_campaign import resolve_plans
 
     plans = resolve_plans(args.plans)
-    raw = run_full(seed=args.seed, plans=plans)
+    raw = run_full(seed=args.seed, plans=plans, issue_space_limit=args.issue_space_cases)
     base = ROOT / "results" / raw["meta"]["run_id"]
     run_dir, n = base, 2
     while run_dir.exists():

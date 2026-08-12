@@ -1,0 +1,195 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="511INFRA" name="51-1 인프라 배포 구조 — 방안 1-A vs 방안 2">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1450" pageHeight="960" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="51-1. 인프라 배포 구조 — 방안 1-A vs 방안 2" style="text;html=1;fontSize=15;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="14" width="700" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="51 모듈 뷰보다 한 단계 위 — 물리 단말·저장소·연결·확정 신뢰성. 두 방안 각각 독립된 그림." style="text;html=1;fontSize=11;align=left;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="900" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lg1" value="51 모듈 뷰 참조" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="64" width="140" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2" value="상태·저장소" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="190" y="64" width="110" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="lg3" value="방안 고유 인프라" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="310" y="64" width="130" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="lg4" value="설계 공백 (미정의)" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="450" y="64" width="150" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="lg5" value="점선 화살표 = 메시지 흐름" style="text;html=1;fontSize=10;align=left;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="612" y="64" width="220" height="22" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 좌: 방안 1-A ===== -->
+        <mxCell id="hdrL" value="방안 1-A — 담당자·참여자 모두 자기 단말에서 이중 역할" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="96" width="640" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="osL" value="OS 백그라운드 제약: Doze·OOM Killer 임의 종료 (CFR-I16, S9-F04/F06) — 두 단말 모두 적용" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontColor=#7a6000;" vertex="1" parent="1">
+          <mxGeometry x="40" y="128" width="640" height="24" as="geometry" />
+        </mxCell>
+
+        <mxCell id="coordL" value="담당자 단말 P0 (Android) — Negotiation Agent + Coordinator 역할 겸임" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="162" width="640" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="La1" value="프로토콜 모듈&#10;(51 모듈 뷰 참고)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="coordL">
+          <mxGeometry x="15" y="38" width="295" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="La2" value="Persistent Store 〈디스크〉&#10;라운드 경계 스냅샷 (§2.1)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="coordL">
+          <mxGeometry x="325" y="38" width="300" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="La3" value="Ack Collector&#10;확정 ACK 수집 — 37 요구, 설계 필요 (§2.5)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="coordL">
+          <mxGeometry x="15" y="104" width="295" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="La4" value="Succession Handler&#10;담당자 승계 — 공백, 미정의 (§2.2)" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontColor=#7a6000;" vertex="1" parent="coordL">
+          <mxGeometry x="325" y="104" width="300" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="La5" value="자원 부담: 참여자 역할 + N-1개 연결(양방향 반복 왕복) 처리를 한 단말이 동시에 짐 (§2.4)" style="text;html=1;fontSize=9;fontColor=#555555;align=left;spacingLeft=6;" vertex="1" parent="coordL">
+          <mxGeometry x="15" y="172" width="610" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="partL" value="참여자 단말 P1 … P(N-1) (Android)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="500" width="640" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="Lb1" value="프로토콜 모듈&#10;(51 모듈 뷰 참고)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="partL">
+          <mxGeometry x="15" y="38" width="295" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="Lb2" value="Coordinator Link&#10;연결 개통 방식 미정 (31 §3-A, §2.3)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="partL">
+          <mxGeometry x="325" y="38" width="300" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="Lb3" value="백그라운드 응답 경로 — 미정(경로 자체는 §2.3 공통 공백)&#10;1-A는 매 라운드 즉시 회신 필요 → 배칭 정책(S9-F09)과 상충 가능 (§3.2)" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontColor=#7a6000;align=left;spacingLeft=6;" vertex="1" parent="partL">
+          <mxGeometry x="15" y="104" width="610" height="56" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edgeL1" value="«offer» 익명 목록 — 라운드마다" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=block;strokeColor=#b85450;fontSize=9;fontColor=#b85450;exitX=0.32;exitY=1;exitDx=0;exitDy=0;entryX=0.32;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="coordL" target="partL">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" y="-10" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edgeL2" value="«reply» O/X + 다음 후보 — 라운드마다" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=block;strokeColor=#b85450;fontSize=9;fontColor=#b85450;exitX=0.68;exitY=0;exitDx=0;exitDy=0;entryX=0.68;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="partL" target="coordL">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" y="10" />
+          </mxGeometry>
+        </mxCell>
+        
+
+        <!-- ===== 우: 방안 2 ===== -->
+        <mxCell id="hdrR" value="방안 2 — 담당자·참여자 모두 자기 단말에서 이중 역할" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="720" y="96" width="640" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="osR" value="OS 백그라운드 제약: Doze·OOM Killer 임의 종료 (CFR-I16, S9-F04/F06) — 두 단말 모두 적용" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontColor=#7a6000;" vertex="1" parent="1">
+          <mxGeometry x="720" y="128" width="640" height="24" as="geometry" />
+        </mxCell>
+
+        <mxCell id="coordR" value="담당자 단말 P0 (Android) — Negotiation Agent + Coordinator 역할 겸임" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="720" y="162" width="640" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="Ra1" value="프로토콜 모듈&#10;(51 모듈 뷰 참고)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="coordR">
+          <mxGeometry x="15" y="38" width="295" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="Ra2" value="Persistent Store 〈디스크〉&#10;세션 누적 스냅샷 (§2.1)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="coordR">
+          <mxGeometry x="325" y="38" width="300" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="Ra3" value="Ack Collector&#10;확정 ACK 수집 — 37 요구, 설계 필요 (§2.5)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="coordR">
+          <mxGeometry x="15" y="104" width="295" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="Ra4" value="Succession Handler&#10;담당자 승계 — 공백, 미정의 (§2.2)" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontColor=#7a6000;" vertex="1" parent="coordR">
+          <mxGeometry x="325" y="104" width="300" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="Ra5" value="자원 부담: 참여자 역할 + N-1건 제출 수신·판정(상시 연결 아님)을 한 단말이 동시에 짐 (§2.4)" style="text;html=1;fontSize=9;fontColor=#555555;align=left;spacingLeft=6;" vertex="1" parent="coordR">
+          <mxGeometry x="15" y="172" width="610" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="partR" value="참여자 단말 P1 … P(N-1) (Android)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="720" y="500" width="640" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="Rb1" value="프로토콜 모듈&#10;(51 모듈 뷰 참고)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="partR">
+          <mxGeometry x="15" y="38" width="295" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="Rb2" value="Coordinator Link&#10;연결 개통 방식 미정 (31 §3-A, §2.3)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="partR">
+          <mxGeometry x="325" y="38" width="300" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="Rb3" value="백그라운드 응답 경로 — 미정(경로 자체는 §2.3 공통 공백)&#10;방안 2는 지연 허용 → 배칭 정책(S9-F09)과 양립 가능 (§3.2)" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontColor=#7a6000;align=left;spacingLeft=6;" vertex="1" parent="partR">
+          <mxGeometry x="15" y="104" width="610" height="56" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edgeR1" value="«submit» 편도 — 라운드마다" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=block;strokeColor=#b85450;fontSize=9;fontColor=#b85450;exitX=0.32;exitY=0;exitDx=0;exitDy=0;entryX=0.32;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="partR" target="coordR">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" y="10" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edgeR2" value="«final» 세션당 1회만" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=block;strokeColor=#b85450;fontSize=9;fontColor=#b85450;exitX=0.68;exitY=1;exitDx=0;exitDy=0;entryX=0.68;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="coordR" target="partR">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" y="-10" />
+          </mxGeometry>
+        </mxCell>
+        
+
+        <!-- ===== 비교 표 ===== -->
+        <mxCell id="tblT" value="인프라 관점 차이 (51-1 §3 근거)" style="text;html=1;fontSize=12;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="710" width="600" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="th0" value="관점" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#999999;fontSize=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="738" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="th1" value="방안 1-A" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#999999;fontSize=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="260" y="738" width="590" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="th2" value="방안 2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#999999;fontSize=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="850" y="738" width="510" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r1a" value="연결 패턴 (§3.2)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="768" width="220" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="r1b" value="라운드마다 양방향 왕복 (배포 + 회신)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="260" y="768" width="590" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="r1c" value="편도 제출 + 세션당 1회 통지" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="850" y="768" width="510" height="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r2a" value="담당자 가용성 민감도 (§3.1)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="802" width="220" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="r2b" value="높음 — 배포가 없으면 참여자 전원이 그 라운드를 진행하지 못한다" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="260" y="802" width="590" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="r2c" value="낮음 — 참여자는 자기 페이스로 제출, 판정만 담당자 소관" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="850" y="802" width="510" height="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r3a" value="배경 실행 정책과의 관계 (§3.2)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="836" width="220" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="r3b" value="즉시 회신 요구가 S9-F09(백그라운드 배칭·지연 실행)와 상충 가능" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="260" y="836" width="590" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="r3c" value="지연·배칭과 양립 가능" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="850" y="836" width="510" height="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r4a" value="상태 영속화 단위 (§3.3)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="870" width="220" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="r4b" value="라운드 단위 휘발(Carry Buffer) + Delivered Set 별도 유지 — 실질 이력량은 방안2와 비슷" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="260" y="870" width="590" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="r4c" value="세션 전체 누적(Submission Store)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="850" y="870" width="510" height="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="src" value="근거 — docs/changbae/51-구조도/51-1-인프라-구조-검토.md. 프로토콜 모듈 상세는 docs/changbae/drawio/51-모듈뷰-개념-방안2-방안1A.drawio 참고. 노란 점선 박스는 프로젝트 문서에 필요성만 서술되고 설계가 없는 항목이다." style="text;html=1;fontSize=10;align=left;fontColor=#777777;" vertex="1" parent="1">
+          <mxGeometry x="40" y="914" width="1320" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
