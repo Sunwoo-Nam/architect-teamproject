@@ -6,8 +6,9 @@
 전 방안 동일이므로 제외하고 **프로토콜 상태만** 잰다 — 방안 간 차이가 나는 부분이다.
 
 귀속 모델 (PL 승인 2026-08-11):
-- plan1 / plan1a / plan2 / plan20batch: 담당자 P0가 누적 제안 집합 전체 보유, 일반 참여자 ≈ 0
-  (plan1a는 게시판이 없지만 제출이 전부 담당자에게 사설 전송되므로 보유 구조가 같다 —
+- plan1 / plan2 / plan20batch: 담당자 P0가 누적 제안 집합 전체 보유, 일반 참여자 ≈ 0
+- plan1a: 담당자 P0가 **이번 라운드의 carried 후보 목록만** 보유 — 라운드별 판정이라
+  과거 상태 불필요 (누적 보유 제거: PL 지시 2026-08-12,
    방안 1과 나란히 비교하기 위해 같은 보수 모델을 쓴다)
 - plan22rotate: 현 바퀴 담당자가 누적 전체 보유로 **보수 계상** (스펙상 요약 인계면 더 작음)
 - plan3mesh: 전원이 누적 집합 전체를 복제 보유 → 합계 = 1부의 N배
@@ -80,8 +81,10 @@ def holder_sizes(plan) -> list[int]:
     d = _delivered_map(plan)
     pid_of = [a.p.pid for a in plan.agents]
     per = [0] * n
-    if name in ("plan1", "plan1a", "plan2", "plan20batch"):
+    if name in ("plan1", "plan2", "plan20batch"):
         per[0] = deep_size(d)
+    elif name == "plan1a":
+        per[0] = deep_size(getattr(plan, "_carried_ref", {}))  # 라운드 국소 O(N)
     elif name == "plan22rotate":
         per[getattr(plan, "_coord_idx", 0)] = deep_size(d)
     elif name == "plan3mesh":

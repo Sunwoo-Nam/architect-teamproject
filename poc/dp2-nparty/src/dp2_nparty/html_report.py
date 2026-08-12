@@ -68,11 +68,10 @@ def render_html(raw: dict) -> str:
         [fc[p]["stars"] for p in P],
         f"x* 도달은 올바른 결렬 포함 · R̄ {fc[P[0]]['mean_baseline']:.3f} · 결렬 오답 " + "/".join(str(fc[p]["nodeal_wrong"]) for p in P)))
     rows.append(row(
-        '§2 RU-메모리 — 1인 최대 / 전원 합계 / 프로세스(참고) <span class="badge core">핵심 2위</span>',
-        [f"{ru[p].get('median_person_peak_bytes', 0)/1024:.1f} / {ru[p].get('median_total_logical_bytes', 0)/1024:.1f}"
-         f" / {ru[p]['median_peak_bytes']/1024:.1f} KiB" for p in P],
+        '§2 RU-메모리 — 최대 부하 단말 순간 피크 (판정) / 프로세스(참고) <span class="badge core">핵심 2위</span>',
+        [f"{ru[p].get('median_person_peak_bytes', 0)/1024:.1f} / {ru[p]['median_peak_bytes']/1024:.1f} KiB" for p in P],
         [None] * len(P),
-        "논리 상태 귀속 계상 (복제 반영 — mesh는 전원 사본) · 별점 미확정, 정본은 실기기 RSS"))
+        "별점(한도 대비 % 15%p 등분)은 실기기 실측 몫 — PoC는 상대 비교 (핸드북 §2.8). 합계는 raw만"))
     rows.append(row(
         '§3 SC-참여자 수 — N=10 관측값 <span class="badge core">핵심 3위</span>',
         [(f"라운드 {sp[p]['median_rounds_by_n'].get('10') or 0:.0f}"
@@ -81,6 +80,17 @@ def render_html(raw: dict) -> str:
           f" · 지연 {(sp[p].get('median_time_ms_by_n', {}).get('10') or 0)/1000:.2f}s") for p in P],
         [None] * len(P),
         "확장 지수(b_msg)는 표에서 제외 — results/01-SC-참여자수-측정-해설.md 참조"))
+    if sp[P[0]].get("n_max") is not None:
+        rows.append(row(
+            '§3 판정 ① N_max — 최대 수용 인원 <span class="badge core">경계 잠정</span>',
+            [f"{sp[p]['n_max']}명" for p in P],
+            [sp[p]["stars_n_max"] for p in P],
+            "게이트: 완결률(N=3 대비) + FC 유지(하락 ≤0.05 잠정) — 자원 게이트는 실기기 몫"))
+        rows.append(row(
+            '§3 판정 ② b_mem — 1인 피크의 N 차수 <span class="badge core">경계 잠정</span>',
+            [f"{sp[p]['b_mem']:.3f} [{sp[p]['b_mem_ci'][0]:.2f}, {sp[p]['b_mem_ci'][1]:.2f}]" for p in P],
+            [sp[p]["stars_b_mem"] for p in P],
+            "참조점: 무증가 0 - 선형 1 등분 · P_N은 세션 종료 상태 근사"))
     rows.append(row(
         '§4 SC-의제 수 — 탄력성 c <span class="badge sub">대체 측정</span>',
         [f"{si[p]['c']:.3f} [{si[p]['ci'][0]:.2f}, {si[p]['ci'][1]:.2f}]" for p in P],
@@ -105,8 +115,15 @@ def render_html(raw: dict) -> str:
         [f"{tb[p]['median_total_ms']/1000:.2f}s (지배: {tb[p]['dominant']})" for p in P],
         [None] * len(P),
         "상수 잠정 — 절대값 아님, 상대 비교용"))
+    if "multiple" in cf[P[0]]:
+        rows.append(row(
+            '§7 CF 판정 — 1:1 대비 노출 배수 m (A축/B축) <span class="badge core">핵심 5위·경계 잠정</span>',
+            [f"{cf[p]['multiple']['m_A']:.2f} / {cf[p]['multiple']['m_B']:.2f}" for p in P],
+            [cf[p]["multiple"]["stars_m_A"] for p in P],
+            f"m=1이 1:1 등가(3점 경계) · e₂ A {cf['config']['e2']['A']:.2f}/B {cf['config']['e2']['B']:.2f}"
+            " · 최대 단일 관찰자 깊이 " + "/".join(f"{cf[p]['multiple']['max_single_depth_A']:.2f}" for p in P)))
     rows.append(row(
-        '§7 CF — 노출률 N=3(정밀)/10/50 · 참여자|담당자 <span class="badge core">핵심 5위</span>',
+        '§7 CF — 노출률 N=3(정밀)/10/50 · 참여자|담당자 <span class="badge aux">보조(구지표)</span>',
         [(f"참 {cf[p]['participant']['exposure_rate']:.2f}/"
           f"{cf[p].get('by_n', {}).get('10', {}).get('participant', {}).get('exposure_rate', 0):.2f}/"
           f"{cf[p].get('by_n', {}).get('50', {}).get('participant', {}).get('exposure_rate', 0):.2f}"
@@ -200,6 +217,7 @@ def render_html(raw: dict) -> str:
         + "<h3>라운드 수</h3>" + by_n_table("median_rounds_by_n", f_int)
         + "<h3>메시지 전송 건수</h3>" + by_n_table("median_messages_by_n", f_int)
         + "<h3>피크 추가 메모리 (KiB)</h3>" + by_n_table("median_peak_bytes_by_n", f_kib)
+        + "<h3>최대 부하 단말 피크 P_N (KiB) — 판정 ② 입력</h3>" + by_n_table("median_person_peak_by_n", f_kib)
         + "<h3>합성 지연시간 (초) — 상수 잠정</h3>" + by_n_table("median_time_ms_by_n", f_sec)))
     details.append(sec(
         "§5-1 FT — 상세", "비핵심", "aux",
@@ -231,6 +249,16 @@ def render_html(raw: dict) -> str:
               f"{cf[p][vp]['accuracy']*100:.1f}%", f"{cf[p][vp]['gain_pp']:+.1f}%p",
               f"{cf[p][vp]['exposure_rate']:.2f}", _stars(cf[p][vp]["stars"])]
              for p in P for vp in ("participant", "coordinator")])))
+    if "by_n" in cf[P[0]] and "multiple" in cf[P[0]]["by_n"][sorted(cf[P[0]]["by_n"], key=int)[0]]:
+        cf_ns0 = sorted(cf[P[0]]["by_n"], key=int)
+        details.append(sec(
+            "§7 CF 판정 — 노출 배수 m (A축, N별)", "핵심 5위·경계 잠정", "core",
+            "m = Σ관찰자 노출 깊이 ÷ e₂(1:1 실측 앵커) · m=1 = 1:1 등가 (3점 경계)",
+            tbl(["방안"] + [f"N={n}" for n in cf_ns0],
+                [[PLAN_LABELS.get(p, p)] + [
+                    f"{cf[p]['by_n'][n]['multiple']['m_A']:.2f} · {_stars(cf[p]['by_n'][n]['multiple']['stars_m_A'])}"
+                    for n in cf_ns0]
+                 for p in P])))
     if "by_n" in cf[P[0]]:
         cf_ns = sorted(cf[P[0]]["by_n"], key=int)
         for vp, vlabel in (("participant", "일반 참여자"), ("coordinator", "담당자·루트")):

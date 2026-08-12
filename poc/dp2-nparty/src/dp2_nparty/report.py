@@ -67,11 +67,10 @@ def render_markdown(raw: dict) -> str:
     A("")
     A(f"조건: {ru['config']['note']}. 정본(Peak/Average RSS·L_state 판정)은 실기기 소관 — 여기서는 상대 비교만.")
     A("")
-    A("| 방안 | 최대 부하 단말 (논리) | 전원 합계 (논리·복제 반영) | 프로세스 피크 (참고) | 프로세스 평균 (참고) |")
-    A("|---|---|---|---|---|")
+    A("| 방안 | 최대 부하 단말 순간 피크 (판정) | 프로세스 피크 (참고) | 프로세스 평균 (참고) |")
+    A("|---|---|---|---|")
     for p in P:
         A(f"| {p} | {_kib(ru[p].get('median_person_peak_bytes', 0))}"
-          f" | {_kib(ru[p].get('median_total_logical_bytes', 0))}"
           f" | {_kib(ru[p]['median_peak_bytes'])} | {_kib(ru[p]['median_avg_bytes'])} |")
     A("")
     A(f"귀속 모델: {ru['config'].get('person_note', '')}")
@@ -85,6 +84,16 @@ def render_markdown(raw: dict) -> str:
     A("")
     A("완결률 게이트: " + " · ".join(f"{p} {'통과' if sp[p]['gate_ok'] else '위반'}" for p in P))
     A("")
+    if sp[P[0]].get("n_max") is not None:
+        A("**판정 (경계 잠정 — 핸드북 §3.3)**:")
+        A("")
+        A("| 방안 | ① N_max | 별점 | ② b_mem [95% CI] | 별점 |")
+        A("|---|---|---|---|---|")
+        for p in P:
+            A(f"| {p} | {sp[p]['n_max']}명 | {_stars(sp[p]['stars_n_max'])}"
+              f" | {sp[p]['b_mem']:.3f} [{sp[p]['b_mem_ci'][0]:.2f}, {sp[p]['b_mem_ci'][1]:.2f}]"
+              f" | {_stars(sp[p]['stars_b_mem'])} |")
+    A("")
     A("> 확장 지수(b_msg)는 표에서 제외했다 — 지수만으로는 해석이 어렵고, 메시지를 물리 전송"
       " 건수로 세는 정의상 별점 5점이 도달 불가능하다. 근거와 이론 기준선 대조는"
       " [`01-SC-참여자수-측정-해설.md`](../01-SC-참여자수-측정-해설.md). 원자료(raw.json)에는 남아 있다.")
@@ -94,6 +103,7 @@ def render_markdown(raw: dict) -> str:
         ("라운드 수", "median_rounds_by_n", 1, ""),
         ("메시지 전송 건수", "median_messages_by_n", 1, ""),
         ("피크 추가 메모리 (KiB)", "median_peak_bytes_by_n", 1024, ""),
+        ("최대 부하 단말 피크 P_N (KiB) — 판정 ② 입력", "median_person_peak_by_n", 1024, ""),
         ("합성 지연시간 (초) — 상수 잠정", "median_time_ms_by_n", 1000, ""),
     ):
         A(f"### {title}")
@@ -186,6 +196,17 @@ def render_markdown(raw: dict) -> str:
     cf_n = cfc.get("cases") or cfc.get("runs")
     A(f"조건: 표본 {cf_n}건 · 후보 {cfc['candidates']} · frequency 공격자(고정 규칙) · {cfc.get('input', '개발용 무작위')}")
     A("")
+    if "multiple" in cf[P[0]]:
+        A(f"**판정 — 1:1 대비 노출 배수 m** (e₂: A {cf['config']['e2']['A']:.2f} / B {cf['config']['e2']['B']:.2f},"
+          " N=2 실측 앵커 · 별점 사다리 잠정 · m=1 = 1:1 등가):")
+        A("")
+        A("| 방안 | m (A 순위표 노출) | 별점 | m (B 접두 복원) | 별점 | 최대 단일 관찰자 깊이 |")
+        A("|---|---|---|---|---|---|")
+        for p in P:
+            d = cf[p]["multiple"]
+            A(f"| {p} | {d['m_A']:.2f} | {_stars(d['stars_m_A'])} | {d['m_B']:.2f}"
+              f" | {_stars(d['stars_m_B'])} | {d['max_single_depth_A']:.2f} |")
+        A("")
     A("| 방안 | 관점 | 정확도 | 이득 | 노출률 | 별점 |")
     A("|---|---|---|---|---|---|")
     for p in P:

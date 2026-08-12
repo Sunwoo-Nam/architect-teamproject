@@ -108,8 +108,6 @@ class Plan1aSao(_StyleBase):
     def run(self, injector=None, kill_at=None, on_round_end=None) -> SessionResult:
         bb = Blackboard(n=self.n)
         events: list[dict] = []
-        delivered: dict[str, set] = {}  # 담당자가 누적으로 받은 제안 (RU 귀속·복구 스냅샷)
-        self._delivered_ref = delivered
         coord = self.agents[0].p.pid
         rounds = 0
         self._eval_calls = sum(len(a.ranked) for a in self.agents)
@@ -118,18 +116,23 @@ class Plan1aSao(_StyleBase):
         for sweep in range(1, self.max_sweeps + 1):
             for a in self.agents:
                 a.ptr = 0  # 새 바퀴 — 낮아진 threshold로 처음부터 재순회
-            carried, any_offer = self._collect(bb, sweep, injector, delivered, coord)
+            carried, any_offer = self._collect(bb, sweep, injector, coord)
+            self._carried_ref = carried  # RU 귀속: 담당자의 라운드 국소 상태 (누적 없음)
             while rounds < cap and any_offer:
-                boundary = {**self._snapshot(delivered), "carried": dict(carried)}
+                # 라운드별 판정이라 과거 상태가 불필요 — 복구 스냅샷도 라운드 경계의
+                # 포인터·carried뿐이다 (누적 보유 제거: PL 지시 2026-08-12, REC 비핵심)
+                boundary = {"ptrs": [a.ptr for a in self.agents], "carried": dict(carried)}
                 try:
                     picked, carried, any_offer = self._exchange(
-                        bb, sweep, rounds + 1, injector, kill_at, events,
-                        delivered, coord, carried,
+                        bb, sweep, rounds + 1, injector, kill_at, events, coord, carried,
                     )
+                    self._carried_ref = carried
                 except _Kill:
                     # 복구: 라운드 경계 복원 + 담당자↔복귀 단말 재동기화 → 라운드 재수행
-                    self._restore(delivered, boundary)
+                    for a, ptr in zip(self.agents, boundary["ptrs"]):
+                        a.ptr = ptr
                     carried = dict(boundary["carried"])
+                    self._carried_ref = carried
                     bb.resync({"sweep": sweep})
                     kill_at = None  # 세션당 1회
                     continue
@@ -144,7 +147,7 @@ class Plan1aSao(_StyleBase):
         bb.phase()
         return self._result(bb, rounds, self.max_sweeps, NO_DEAL, False, events)
 
-    def _collect(self, bb, sweep, injector, delivered, coord):
+    def _collect(self, bb, sweep, injector, coord):
         """바퀴 시작 1회 — 각자 자기 순위 후보 1개를 담당자에게만 사설 전송 (게시 없음).
         이후 라운드의 제출은 회신 메시지에 실려 오므로 이 phase가 다시 나오지 않는다."""
         carried: dict[str, object] = {}
@@ -160,13 +163,12 @@ class Plan1aSao(_StyleBase):
                 if injector and injector.lost():
                     continue  # 유실 — ptr 유지 → 다음 회신에 같은 후보 재시도
             carried[a.p.pid] = c
-            delivered.setdefault(a.p.pid, set()).add(c)
             a.ptr += 1
         if any_offer:
             bb.phase()
         return carried, any_offer
 
-    def _exchange(self, bb, sweep, round_no, injector, kill_at, events, delivered, coord, carried):
+    def _exchange(self, bb, sweep, round_no, injector, kill_at, events, coord, carried):
         """라운드 1회 = 배포(offer) + 회신(O/X + 다음 후보). 반환 (성립|None, 다음 carried, 계속 여부)."""
         candidates = sorted(set(carried.values()), key=repr)
         # 익명 후보 목록 — 게시판이 없어 제안자 귀속이 실리지 않는다 (PL 확정 2026-08-12).
@@ -198,7 +200,6 @@ class Plan1aSao(_StyleBase):
             votes[a.p.pid] = bundle
             if nxt is not None:
                 nxt_carried[a.p.pid] = nxt
-                delivered.setdefault(a.p.pid, set()).add(nxt)
                 a.ptr += 1
         bb.phase()
         if self.collect_log:
