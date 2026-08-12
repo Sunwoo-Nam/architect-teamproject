@@ -17,6 +17,7 @@ def _kib(b) -> str:
 
 def render_markdown(raw: dict) -> str:
     m = raw["meta"]
+    P = [p for p in PLAN_NAMES if p in raw["fc"]]  # 부분 실행(--plans) 대응
     L: list[str] = []
     A = L.append
     A("# 측정 리포트 — 설계 후보 1 (방안 1 전원동의 투표형 vs 방안 2 누적 공통제안형)")
@@ -39,7 +40,7 @@ def render_markdown(raw: dict) -> str:
     fc_total = fcc.get("cases") or fcc.get("runs")
     A("| 방안 | 달성률 평균 | R̄ | s | 별점 | x\\* 도달 | 합의 | 결렬 정답/오답 | 라운드/phase/메시지/바이트 중앙값 |")
     A("|---|---|---|---|---|---|---|---|---|")
-    for p in PLAN_NAMES:
+    for p in P:
         d = fc[p]
         A(
             f"| {p} | {d['mean_ratio']:.3f} | {d['mean_baseline']:.3f} | {d['s']:.3f} | {_stars(d['stars'])}"
@@ -47,15 +48,15 @@ def render_markdown(raw: dict) -> str:
             f" | {d['median_rounds']:.0f} / {d['median_phases']:.0f} / {d['median_messages']:.0f} / {d['median_bytes']:.0f} |"
         )
     A("")
-    if "by_participants" in fc[PLAN_NAMES[0]]:
-        ns = sorted(fc[PLAN_NAMES[0]]["by_participants"], key=int)
-        counts = {n: fc[PLAN_NAMES[0]]["by_participants"][n]["cases"] for n in ns}
+    if "by_participants" in fc[P[0]]:
+        ns = sorted(fc[P[0]]["by_participants"], key=int)
+        counts = {n: fc[P[0]]["by_participants"][n]["cases"] for n in ns}
         A("**참여자 수별 분해** (판정은 위 통합 기준 · 표본 "
           + " · ".join(f"{n}인 {counts[n]}건" for n in ns) + "):")
         A("")
         A("| 방안 | " + " | ".join(f"{n}인 달성률 / s" for n in ns) + " |")
         A("|---" * (len(ns) + 1) + "|")
-        for p in PLAN_NAMES:
+        for p in P:
             bp = fc[p]["by_participants"]
             A("| " + p + " | " + " | ".join(
                 f"{bp[n]['mean_ratio']:.3f} / {bp[n]['s']:.3f}" for n in ns) + " |")
@@ -68,7 +69,7 @@ def render_markdown(raw: dict) -> str:
     A("")
     A("| 방안 | 최대 부하 단말 (논리) | 전원 합계 (논리·복제 반영) | 프로세스 피크 (참고) | 프로세스 평균 (참고) |")
     A("|---|---|---|---|---|")
-    for p in PLAN_NAMES:
+    for p in P:
         A(f"| {p} | {_kib(ru[p].get('median_person_peak_bytes', 0))}"
           f" | {_kib(ru[p].get('median_total_logical_bytes', 0))}"
           f" | {_kib(ru[p]['median_peak_bytes'])} | {_kib(ru[p]['median_avg_bytes'])} |")
@@ -82,7 +83,7 @@ def render_markdown(raw: dict) -> str:
     A(f"조건: N ∈ {sp['config']['levels']} · 각 {sp['config']['runs']}건의 중앙값 · {sp['config']['provider']}"
       " · 후보 수는 4N (참여자 1인당 4개, 기준 시나리오 3인·12개에서 도출)")
     A("")
-    A("완결률 게이트: " + " · ".join(f"{p} {'통과' if sp[p]['gate_ok'] else '위반'}" for p in PLAN_NAMES))
+    A("완결률 게이트: " + " · ".join(f"{p} {'통과' if sp[p]['gate_ok'] else '위반'}" for p in P))
     A("")
     A("> 확장 지수(b_msg)는 표에서 제외했다 — 지수만으로는 해석이 어렵고, 메시지를 물리 전송"
       " 건수로 세는 정의상 별점 5점이 도달 불가능하다. 근거와 이론 기준선 대조는"
@@ -99,7 +100,7 @@ def render_markdown(raw: dict) -> str:
         A("")
         A("| 방안 | " + " | ".join(f"N={n}" for n in levels) + " |")
         A("|---" * (len(levels) + 1) + "|")
-        for p in PLAN_NAMES:
+        for p in P:
             vals = sp[p].get(key, {})
             cells = []
             for n in levels:
@@ -115,7 +116,7 @@ def render_markdown(raw: dict) -> str:
     A("")
     A("| 방안 | 합의 | c [95% CI] | R² | 별점 | 피크 메모리 (S별, KiB) |")
     A("|---|---|---|---|---|---|")
-    for p in PLAN_NAMES:
+    for p in P:
         d = si[p]
         mem = " ".join(f"S{s}:{int(v) // 1024}" for s, v in d["median_peak_by_S"].items())
         A(
@@ -136,7 +137,7 @@ def render_markdown(raw: dict) -> str:
         A("")
         A("| 방안 | 합성 시간 중앙값 | 통신(RTT) | 평가 | 전송 | 지배 항 |")
         A("|---|---|---|---|---|---|")
-        for p in PLAN_NAMES:
+        for p in P:
             d = tb[p]
             A(
                 f"| {p} | **{d['median_total_ms'] / 1000:.2f}s** | {d['median_rtt_ms'] / 1000:.2f}s"
@@ -154,7 +155,7 @@ def render_markdown(raw: dict) -> str:
     A("")
     A("| 방안 | 베이스라인 완결률 | 강도별 완결률 | 임계 배수 | 여유 배수 | 별점 |")
     A("|---|---|---|---|---|---|")
-    for p in PLAN_NAMES:
+    for p in P:
         d = ft[p]
         rates = " ".join(f"{k}x:{v:.2f}" for k, v in d["agree_rates"].items() if k != "0.0")
         crit = d["critical_multiple"] if d["critical_multiple"] is not None else "없음(최대 강도까지)"
@@ -170,7 +171,7 @@ def render_markdown(raw: dict) -> str:
     A("")
     A("| 방안 | 시도 | FR 실패(재개·일치) | 복구 비율 중앙값 | 재시작 비용 R | 별점 |")
     A("|---|---|---|---|---|---|")
-    for p in PLAN_NAMES:
+    for p in P:
         d = rc[p]
         A(
             f"| {p} | {d['trials']} | {d['fr_failures']} | {d['median_ratio']}"
@@ -187,7 +188,7 @@ def render_markdown(raw: dict) -> str:
     A("")
     A("| 방안 | 관점 | 정확도 | 이득 | 노출률 | 별점 |")
     A("|---|---|---|---|---|---|")
-    for p in PLAN_NAMES:
+    for p in P:
         for vp in ("participant", "coordinator"):
             d = cf[p][vp]
             A(
@@ -195,8 +196,8 @@ def render_markdown(raw: dict) -> str:
                 f" | {d['accuracy'] * 100:.1f}% | {d['gain_pp']:+.1f}%p | {d['exposure_rate']:.2f} | {_stars(d['stars'])} |"
             )
     A("")
-    if "by_n" in cf[PLAN_NAMES[0]]:
-        ns = sorted(cf[PLAN_NAMES[0]]["by_n"], key=int)
+    if "by_n" in cf[P[0]]:
+        ns = sorted(cf[P[0]]["by_n"], key=int)
         A(f"**N별 노출률** ({cfc.get('by_n_input', '')} · 각 {cfc.get('by_n_runs')}건 · {cfc.get('viewpoints', '')}):")
         A("")
         for vp, label in (("participant", "일반 참여자 관점"), ("coordinator", "담당자·루트 관점")):
@@ -204,7 +205,7 @@ def render_markdown(raw: dict) -> str:
             A("")
             A("| 방안 | " + " | ".join(f"N={n}" for n in ns) + " |")
             A("|---" * (len(ns) + 1) + "|")
-            for p in PLAN_NAMES:
+            for p in P:
                 bn = cf[p]["by_n"]
                 A("| " + p + " | " + " | ".join(
                     f"{bn[n][vp]['exposure_rate']:.2f} (★{bn[n][vp]['stars']})" for n in ns) + " |")
@@ -221,30 +222,30 @@ def render_markdown(raw: dict) -> str:
 
     A("## 종합 — 별점 요약 (판정 기준 관점만)")
     A("")
-    A("| QA | " + " | ".join(PLAN_NAMES) + " |")
-    A("|---" * (len(PLAN_NAMES) + 1) + "|")
-    A("| §1 Functional Correctness (핵심 1위) | " + " | ".join(_stars(fc[p]["stars"]) for p in PLAN_NAMES) + " |")
-    A("| §2 RU-메모리 (핵심 2위) | " + " | ".join("상대 비교" for _ in PLAN_NAMES) + " |")
+    A("| QA | " + " | ".join(P) + " |")
+    A("|---" * (len(P) + 1) + "|")
+    A("| §1 Functional Correctness (핵심 1위) | " + " | ".join(_stars(fc[p]["stars"]) for p in P) + " |")
+    A("| §2 RU-메모리 (핵심 2위) | " + " | ".join("상대 비교" for _ in P) + " |")
     A("| §3 SC-참여자 수 (핵심 3위) | "
       + " | ".join(
           f"N=10 라운드 {sp[p]['median_rounds_by_n'].get('10') or 0:.0f}"
           f" · 메시지 {sp[p]['median_messages_by_n'].get('10') or 0:.0f}"
           f" · {(sp[p].get('median_peak_bytes_by_n', {}).get('10') or 0)/1024:.0f}KiB"
           f" · {(sp[p].get('median_time_ms_by_n', {}).get('10') or 0)/1000:.0f}s"
-          for p in PLAN_NAMES)
+          for p in P)
       + " |")
-    A("| §4 SC-의제 수 (핵심 4위) | " + " | ".join(_stars(si[p]["stars"]) for p in PLAN_NAMES) + " |")
+    A("| §4 SC-의제 수 (핵심 4위) | " + " | ".join(_stars(si[p]["stars"]) for p in P) + " |")
     A(
         "| §5 FT & REC (핵심 5위, min 통합) | "
         + " | ".join(
             f"{_stars(min(ft[p]['stars'], rc[p]['stars']))} (FT {ft[p]['stars']}·REC {rc[p]['stars']})"
-            for p in PLAN_NAMES
+            for p in P
         )
         + " |"
     )
     A(
         "| §7 Confidentiality (비핵심 — 참여자 관찰자) | "
-        + " | ".join(_stars(cf[p]["participant"]["stars"]) for p in PLAN_NAMES)
+        + " | ".join(_stars(cf[p]["participant"]["stars"]) for p in P)
         + " |"
     )
     A("")

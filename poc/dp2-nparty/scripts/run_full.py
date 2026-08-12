@@ -1,7 +1,10 @@
 """통합 실행 — 확정 벤치마크 기준 전 QA 측정, 한 timestamp·한 폴더.
 
-사용: .venv/bin/python scripts/run_full.py
+사용: .venv/bin/python scripts/run_full.py                 # 기본 — 전 방안 측정
+      .venv/bin/python scripts/run_full.py --plans 2,6,20  # 방안 번호로 부분 실행
+      .venv/bin/python scripts/run_full.py --plans plan2,plan6itree  # 내부 이름도 허용
 출력: results/full-<KST>KST/ 에 raw.json + report.md + report.html (대시보드)
+부분 실행 결과에는 meta.plans / caveat_plans 로 선택 방안이 기록된다.
 """
 from __future__ import annotations
 
@@ -23,9 +26,14 @@ def main() -> None:
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--seed", type=int, default=20260811)
+    ap.add_argument("--plans", default=None,
+                    help="측정할 방안 선택 — 번호('2,6,10,20') 또는 내부 이름 혼용, 쉼표 구분. 생략 시 전체")
     args = ap.parse_args()
 
-    raw = run_full(seed=args.seed)
+    from dp2_nparty.full_campaign import resolve_plans
+
+    plans = resolve_plans(args.plans)
+    raw = run_full(seed=args.seed, plans=plans)
     base = ROOT / "results" / raw["meta"]["run_id"]
     run_dir, n = base, 2
     while run_dir.exists():

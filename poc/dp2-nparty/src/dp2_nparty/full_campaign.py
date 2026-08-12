@@ -285,13 +285,60 @@ def _sc_participants_section(cases: list[BenchmarkCase]) -> dict:
     return sec
 
 
-def run_full(seed: int = 20260811) -> dict:
+def resolve_plans(spec: str | None) -> list[str]:
+    """--plans 인자 해석 — 방안 번호("2,6,10") 또는 내부 이름("plan2,plan6itree") 혼용 허용."""
+    from .protocol import PLAN_NAMES
+
+    if not spec:
+        return list(PLAN_NAMES)
+    by_number = {}
+    for name in PLAN_NAMES:
+        num = ""
+        for ch in name[4:]:
+            if not ch.isdigit():
+                break
+            num += ch
+        by_number[num] = name
+    out = []
+    for tok in spec.split(","):
+        tok = tok.strip()
+        if not tok:
+            continue
+        name = by_number.get(tok) or (tok if tok in PLAN_NAMES else None)
+        if name is None:
+            raise SystemExit(f"알 수 없는 방안: {tok!r} — 번호({', '.join(sorted(by_number, key=int))}) "
+                             f"또는 이름({', '.join(PLAN_NAMES)}) 사용")
+        if name not in out:
+            out.append(name)
+    return out
+
+
+def run_full(seed: int = 20260811, plans: list[str] | None = None) -> dict:
+    from . import campaign as _campaign
+
+    selected = tuple((n, c) for n, c in all_plans() if plans is None or n in plans)
+    # 부분 실행: 섹션들이 참조하는 모듈 전역을 실행 동안 치환 (단일 스레드 전제)
+    global PLANS
+    saved = (PLANS, _campaign.PLANS, _campaign.PLAN_NAMES)
+    PLANS = selected
+    _campaign.PLANS = selected
+    _campaign.PLAN_NAMES = tuple(n for n, _c in selected)
+    try:
+        return _run_full_inner(seed, selected)
+    finally:
+        PLANS, _campaign.PLANS, _campaign.PLAN_NAMES = saved
+
+
+def _run_full_inner(seed: int, selected) -> dict:
     functional = _functional_cases()
     f3 = [c for c in functional if len(c.profiles) == 3]
     scal = _scalability_cases()
     meta = _meta(seed)
     meta["run_id"] = "full-" + datetime.now(KST).strftime("%Y%m%dT%H%M%S") + "KST"
     meta["provider"] = "정적 벤치마크 셋 (functional·scalability) — §4 SC-의제만 개발용 대체"
+    meta["plans"] = [n for n, _c in selected]
+    if len(selected) != len(all_plans()):
+        meta["caveat_plans"] = "부분 실행 — 선택된 방안만 측정됨 (--plans)"
     meta["caveat"] = (
         "입력은 확정 벤치마크 셋 (결정론 — 같은 입력이면 같은 결과). "
         "예외: §4 SC-의제는 벤치마크 보류 상태라 개발용 multi-issue 생성으로 대체 측정 (잠정), "
