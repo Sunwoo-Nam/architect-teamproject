@@ -223,7 +223,7 @@ def _rec_section(seed: int, sessions: int) -> dict:
     sec: dict = {"config": {"sessions": sessions,
                             "note": "시간 대체 = phase 비용. 중단 유형(프로세스/네트워크)은 ENV-A에서 동일 취급"}}
     for name, cls in PLANS:
-        points = ["mid_round", "pre_final"] + (["post_votes"] if name == "plan1" else [])
+        points = ["mid_round", "pre_final"] + (["post_votes"] if name in ("plan1", "plan1a") else [])
         ratios, fr_fail, invalid = [], 0, 0
         ref_rounds = []
         for i in range(sessions):

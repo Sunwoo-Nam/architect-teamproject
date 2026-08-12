@@ -11,8 +11,8 @@ from dp2_nparty.measures import fc
 from dp2_nparty.measures.scaling import loglog_fit, stars_b_msg
 from dp2_nparty.protocol import Plan1Vote, Plan2Cumulative, Plan20Batch
 from dp2_nparty.protocol_styles import (
-    Plan3Mesh, Plan4Ring, Plan5Gossip, Plan6ITree, Plan7RotCollect, Plan8Hypercube,
-    Plan9Psi, Plan10Shard, Plan21Tree, Plan22Rotate,
+    Plan1aSao, Plan3Mesh, Plan4Ring, Plan5Gossip, Plan6ITree, Plan7RotCollect,
+    Plan8Hypercube, Plan9Psi, Plan10Shard, Plan21Tree, Plan22Rotate,
 )
 from dp2_nparty.threshold import SweepThreshold
 from dp2_nparty.ufun_provider import TableUfun
@@ -32,8 +32,8 @@ def test_both_plans_agree_on_obvious_case():
     profiles = [
         Profile(f"P{i}", {"A": 0.9, "B": 0.5 + i * 0.01, "C": 0.2}, 0.4) for i in range(3)
     ]
-    for cls in (Plan1Vote, Plan2Cumulative, Plan3Mesh, Plan4Ring, Plan5Gossip, Plan6ITree,
-                Plan20Batch, Plan21Tree, Plan22Rotate):
+    for cls in (Plan1Vote, Plan1aSao, Plan2Cumulative, Plan3Mesh, Plan4Ring, Plan5Gossip,
+                Plan6ITree, Plan20Batch, Plan21Tree, Plan22Rotate):
         r = cls(profiles).run()
         assert r.outcome == "A", (cls.__name__, r)
         assert r.messages > 0
@@ -46,8 +46,8 @@ def test_no_deal_when_infeasible():
         Profile("P1", {"A": 0.1, "B": 0.9}, 0.4),
         Profile("P2", {"A": 0.1, "B": 0.1}, 0.4),
     ]
-    for cls in (Plan1Vote, Plan2Cumulative, Plan3Mesh, Plan4Ring, Plan5Gossip, Plan6ITree,
-                Plan20Batch, Plan21Tree, Plan22Rotate):
+    for cls in (Plan1Vote, Plan1aSao, Plan2Cumulative, Plan3Mesh, Plan4Ring, Plan5Gossip,
+                Plan6ITree, Plan20Batch, Plan21Tree, Plan22Rotate):
         r = cls(profiles).run()
         assert r.outcome == NO_DEAL
         s = fc.score(r.outcome, ["A", "B"], profiles)
@@ -254,6 +254,49 @@ def test_new_incremental_steelmen_match_plan2():
         assert r.rounds >= 1
         tr = trial(cls, profiles, "mid_round", 1)
         assert tr.fr_ok, cls.plan_name
+
+
+def test_plan1a_sao_matches_plan1_and_cuts_cost():
+    """방안 1-A — 방안 1의 판정을 그대로 두고 게시판만 제거한 SAO 사설 메시지판."""
+    from dp2_nparty.faults import FaultInjector
+    from dp2_nparty.measures.confidentiality import measure_gain
+    from dp2_nparty.measures.rec import trial
+    from dp2_nparty.measures.ru_person import holder_sizes
+
+    cands = [f"s{j}" for j in range(15)]
+    for n in (3, 5, 8):
+        profiles = TableUfun().build_profiles(cands, n, random.Random(81 + n))
+        r1, ra = Plan1Vote(profiles).run(), Plan1aSao(profiles).run()
+        # 라운드 k의 판정 후보 집합이 "전원의 k순위"로 방안 1과 같다 → FC·라운드 수 동일
+        assert ra.outcome == r1.outcome, n
+        assert ra.rounds == r1.rounds, n
+        # 라운드당 4 phase·4(N-1)건 → 2 phase·2(N-1)건 (O/X와 다음 후보를 한 메시지로 병합)
+        assert ra.phases < r1.phases, n
+        assert ra.messages < r1.messages, n
+
+    cands20 = [f"s{j}" for j in range(20)]
+    profiles = TableUfun().build_profiles(cands20, 5, random.Random(82))
+    runs_a = [(Plan1aSao(profiles).run(), profiles)]
+    runs_1 = [(Plan1Vote(profiles).run(), profiles)]
+    # 노출: 익명 재배포 + O/X 결과 공지 없음 → 일반 참여자는 방안 2와 같은 무신호
+    assert abs(measure_gain(runs_a, 20, viewpoint="participant").gain_pp) < 1e-9
+    assert measure_gain(runs_1, 20, viewpoint="participant").gain_pp > 50
+    # 대가: 담당자 1인에게는 방안 1과 똑같이 전량이 모인다
+    assert abs(measure_gain(runs_a, 20, viewpoint="coordinator").gain_pp
+               - measure_gain(runs_1, 20, viewpoint="coordinator").gain_pp) < 1e-9
+    # RU 귀속: 게시판이 없어도 제출이 전부 담당자에게 가므로 보유 구조가 방안 1과 같다
+    plan = Plan1aSao(profiles, collect_log=False)
+    peaks = [0] * 5
+    def cb(plan=plan, peaks=peaks):
+        for i, s in enumerate(holder_sizes(plan)):
+            peaks[i] = max(peaks[i], s)
+    plan.run(on_round_end=cb)
+    assert peaks[0] > 0 and all(v == 0 for v in peaks[1:])
+    # 유실 내성: O/X와 다음 후보가 한 메시지에 결합돼도(1건 유실 = 둘 다 손실) 종결한다
+    assert Plan1aSao(profiles).run(injector=FaultInjector(0.3, 17)).rounds >= runs_a[0][0].rounds
+    # 중단-복구: 배포 직후·회신 직후·확정 직전 3지점 모두 무중단 실행과 같은 결과로 재개
+    for point in ("mid_round", "post_votes", "pre_final"):
+        assert trial(Plan1aSao, profiles, point, 2).fr_ok, point
 
 
 def test_new_plans_cf_visibility():

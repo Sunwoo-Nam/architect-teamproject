@@ -11,9 +11,11 @@ NegMAS의 SAO/GB 메커니즘 콜백에 결합되어 있어 자체 프로토콜(
 관점(viewpoint) — 각자가 정당하게 볼 수 있는 것만 입력으로 준다:
 - participant (일반 참여자 관찰자):
   방안 1 → 라운드 후보 공지(제안자 포함)와 공개된 O/X 결과를 본다.
+  방안 1-A → 게시판이 없고 재배포가 **익명 후보 목록**이라 귀속을 못 본다. O/X도 담당자에게만
+  가고 결과 공지가 없어, 참여자 관점은 방안 2와 같은 무신호다 (기본 분기가 그대로 처리).
   방안 2 → 참여자 간 배포가 없어 남의 제안·의견을 전혀 보지 못한다.
-- coordinator (Blackboard 담당자):
-  두 방안 모두 전체 제출을 본다. 방안 1은 O/X까지 본다.
+- coordinator (Blackboard 담당자 / 방안 1-A의 SAO 담당자):
+  세 방안 모두 전체 제출을 본다. 방안 1·1-A는 O/X까지 본다.
 
 지표 (21 확정): 1순위 후보 추정 정확도 − 무작위 기준선(1/후보 수) = 이득(%p).
 공격자가 아무 정보도 없으면 무작위 추측의 기대 정확도(1/M)로 계산한다.
@@ -113,8 +115,9 @@ def _visible_events(session: SessionResult, observer: str, coordinator: str) -> 
                     out.append({**ev, "submitted": {p: c for p, c in ev["submitted"].items() if p == observer}})
         return out
     if observer == coordinator:
-        return session.log  # BB 담당자는 전부 봄 (방안 2·3-A)
-    # 방안 2·3-A의 일반 참여자: 배포가 없어 자기 제출만 보인다
+        return session.log  # 담당자는 전부 봄 (방안 2·20·1-A — 1-A는 O/X까지)
+    # 방안 2·20·1-A의 일반 참여자: 귀속 있는 배포가 없어 자기 제출만 보인다
+    # (1-A는 익명 후보 목록만 받고 O/X 결과 공지도 없다 — "votes" 이벤트가 걸러진다)
     out = []
     for ev in session.log:
         if ev["t"] in ("round", "batch"):

@@ -28,6 +28,12 @@ CASES_DIR = DATA_DIR / "cases"
 SCHEMA_VERSION = "benchmark-case.v1"
 TRACKS = ("conformance", "functional", "scalability")
 
+# 이 로더가 읽지 않는 하위 폴더 — 다른 스키마를 쓰는 케이스가 들어 있다.
+# issue-space/ 는 issue-space-case.v1(의제별 점수만 저장) 형식이라 issue_space.IssueSpaceLoader 가 읽는다.
+# 폴더 이름으로 거르는 이유: 파일을 열어 schema_version 을 보고 건너뛰면 "조용히 건너뛰지 않는다"는
+# 로더 원칙과 충돌한다 — 어느 폴더가 누구 소관인지 경로로 못박는 편이 예측 가능하다.
+FOREIGN_SCHEMA_DIRS = ("issue-space",)
+
 # meta의 필수/선택 필드 — schema/benchmark-case-v1.schema.json 과 같은 목록이어야 한다
 META_REQUIRED = ("schema_version", "track", "scenario_type", "expected_no_deal", "description")
 META_OPTIONAL = ("family_id", "common_feasible_count", "tags")
@@ -282,7 +288,10 @@ class JsonBenchmarkLoader(BenchmarkLoader):
         found: list[Path] = []
         for root in self.roots:
             if root.exists():
-                found.extend(sorted(root.rglob("*.json")))
+                found.extend(
+                    p for p in sorted(root.rglob("*.json"))
+                    if not any(d in p.parts for d in FOREIGN_SCHEMA_DIRS)
+                )
         return found
 
     def cases(self) -> Iterator[BenchmarkCase]:

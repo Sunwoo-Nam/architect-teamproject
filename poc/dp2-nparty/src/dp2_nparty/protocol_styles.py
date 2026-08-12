@@ -3,6 +3,7 @@
 공통 유지: 순위 순서 제출·바퀴별 threshold 인하·만장일치(교집합)·순위합 최소 선별·
 최대 5바퀴 NO_DEAL. 다른 것은 **통신·상태의 구조**다:
 
+- Plan1aSao  (SAO 사설 메시지): 게시판 없음 — 담당자 1인이 양자 채널 N-1개로 offer/회신
 - Plan3Mesh  (P2P 브로드캐스트): 중앙 없음 — 전원이 전원에게 방송, 각자 로컬 판정
 - Plan4Ring  (Pipeline/token):  협상 문서가 고리를 순회 — 문서가 곧 상태, 홉마다 직렬
 - Plan21Tree  (Hierarchical):   쌍별 수락 집합을 트리로 병합 — 상위엔 개인 귀속 없는 집계만
@@ -14,7 +15,7 @@ from __future__ import annotations
 from .blackboard import Blackboard
 from .domain import NO_DEAL, SessionResult
 from .protocol import MAX_SWEEPS, _Agent, _Kill, KillAt
-from .tiebreak import RankSumThenStdThenRunoff, TieBreaker
+from .tiebreak import RankSumThenStdThenRunoff, RunoffMajority, TieBreaker
 
 
 class _StyleBase:
@@ -63,6 +64,163 @@ class _StyleBase:
             phases=bb.phases, tie_break_used=tie_used, log=events,
             bytes=bb.counter.total_bytes, eval_calls=self._eval_calls,
         )
+
+
+class Plan1aSao(_StyleBase):
+    """방안 1-A — 순차 SAO 투표형 (Blackboard 제거·점진 공개, 신규 2026-08-12).
+
+    방안 1의 **판정 규칙은 그대로**(그 라운드 후보에 전원 O = 성립) 두고, 공유 게시판을
+    없앤 뒤 통신을 NegMAS SAO의 메시지 의미론 — offer / (accept·reject + counter-offer) —
+    만으로 돌린다. 담당자 P0가 양자 채널 N-1개를 들고 있고, 게시가 아니라 사설 메시지가
+    오간다. (구현 주석: negmas `SAOMechanism` 클래스를 쓰지 않는다 — 그 메커니즘은 자체
+    프로토콜·계측 하니스에 직접 꽂히지 않아, `confidentiality.py`가 `FrequencyUFunModel`을
+    재구현한 것과 같은 방식으로 **메시지 의미론만** 가져왔다.)
+
+    절차 (바퀴 s):
+    1. 수집 — 바퀴 시작 1회. 각자 자기 순위 후보 1개를 담당자에게만 보낸다 (N-1건, 1 phase).
+    2. 배포(= SAO offer) — 담당자가 모인 후보를 **익명 목록**(누가 냈는지 없음)으로 전원에게
+       던진다 (N-1건, 1 phase).
+    3. 회신(= SAO accept/reject + counter-offer) — 각자 **O/X 번들과 자기 다음 순위 후보를
+       한 메시지에** 실어 답한다 (N-1건, 1 phase). 2-3을 반복한다.
+    4. 라운드 결과 공지가 없다 — 다음 배포가 곧 "미성립" 신호이고, 성립 시에만 최종 통지.
+
+    성질:
+    - 라운드당 2 phase · 2(N-1)건 — 방안 1(제출·공지·투표·결과 = 4 phase · 4(N-1)건)의 절반.
+      바퀴마다 수집 1 phase가 선행 비용으로 붙는다.
+    - **FC 동일성**: 라운드 k의 판정 후보 집합이 방안 1과 같은 "전원의 k순위"라, 무유실
+      조건에서 결과·라운드 수가 방안 1과 일치한다.
+    - 노출: 재배포가 익명이라 일반 참여자는 남의 귀속을 보지 못하고 O/X도 못 본다
+      (방안 1은 공유 게시판이라 전면 노출). 대신 담당자 1인이 전 제출 + 전 O/X를 본다 —
+      노출 지점이 담당자에게 집중된다.
+    - 유실: O/X와 다음 후보가 **한 메시지에 결합**돼 1건 유실이 둘을 함께 잃는다 (방안 1은
+      별개 사건). 포인터가 안 움직여 같은 후보를 다음 라운드에 재시도한다.
+    - 담당자가 받은 것이 없으면(전원 유실) 빈 후보 목록을 던져 재요청한다 — 회신이 곧
+      재전송 수단이라 배포 없이는 재시도가 일어나지 않는다.
+    """
+
+    plan_name = "plan1a"
+
+    def __init__(self, profiles, tie_breaker: TieBreaker | None = None, **kw):
+        # 방안 1과 같은 이유로 결선투표 — O/X는 문턱 통과 여부만 말해 주고, 만장일치 후보를
+        # 전원이 제안했다는 보장이 없어 순위 합을 쓸 수 없다.
+        super().__init__(profiles, tie_breaker or RunoffMajority(), **kw)
+
+    def run(self, injector=None, kill_at=None, on_round_end=None) -> SessionResult:
+        bb = Blackboard(n=self.n)
+        events: list[dict] = []
+        delivered: dict[str, set] = {}  # 담당자가 누적으로 받은 제안 (RU 귀속·복구 스냅샷)
+        self._delivered_ref = delivered
+        coord = self.agents[0].p.pid
+        rounds = 0
+        self._eval_calls = sum(len(a.ranked) for a in self.agents)
+        max_rank = max(len(a.ranked) for a in self.agents)
+        cap = self.max_sweeps * (max_rank + 20) * 3
+        for sweep in range(1, self.max_sweeps + 1):
+            for a in self.agents:
+                a.ptr = 0  # 새 바퀴 — 낮아진 threshold로 처음부터 재순회
+            carried, any_offer = self._collect(bb, sweep, injector, delivered, coord)
+            while rounds < cap and any_offer:
+                boundary = {**self._snapshot(delivered), "carried": dict(carried)}
+                try:
+                    picked, carried, any_offer = self._exchange(
+                        bb, sweep, rounds + 1, injector, kill_at, events,
+                        delivered, coord, carried,
+                    )
+                except _Kill:
+                    # 복구: 라운드 경계 복원 + 담당자↔복귀 단말 재동기화 → 라운드 재수행
+                    self._restore(delivered, boundary)
+                    carried = dict(boundary["carried"])
+                    bb.resync({"sweep": sweep})
+                    kill_at = None  # 세션당 1회
+                    continue
+                rounds += 1
+                if on_round_end:
+                    on_round_end()
+                if picked:
+                    bb.final_notice({"outcome": str(picked[0])})  # 성립 시에만 통지
+                    bb.phase()
+                    return self._result(bb, rounds, sweep, picked[0], picked[1], events)
+        bb.final_notice({"outcome": NO_DEAL})
+        bb.phase()
+        return self._result(bb, rounds, self.max_sweeps, NO_DEAL, False, events)
+
+    def _collect(self, bb, sweep, injector, delivered, coord):
+        """바퀴 시작 1회 — 각자 자기 순위 후보 1개를 담당자에게만 사설 전송 (게시 없음).
+        이후 라운드의 제출은 회신 메시지에 실려 오므로 이 phase가 다시 나오지 않는다."""
+        carried: dict[str, object] = {}
+        any_offer = False
+        for i, a in enumerate(self.agents):
+            c = a.peek(sweep)
+            if c is None:
+                continue
+            any_offer = True
+            if i != 0:  # 담당자 자신의 제출은 로컬 — 전송 0건
+                bb.counter.add("collect", 1, {"candidate": str(c)})
+                bb.load[coord] = bb.load.get(coord, 0) + 1  # 수신·처리 부하는 담당자에게
+                if injector and injector.lost():
+                    continue  # 유실 — ptr 유지 → 다음 회신에 같은 후보 재시도
+            carried[a.p.pid] = c
+            delivered.setdefault(a.p.pid, set()).add(c)
+            a.ptr += 1
+        if any_offer:
+            bb.phase()
+        return carried, any_offer
+
+    def _exchange(self, bb, sweep, round_no, injector, kill_at, events, delivered, coord, carried):
+        """라운드 1회 = 배포(offer) + 회신(O/X + 다음 후보). 반환 (성립|None, 다음 carried, 계속 여부)."""
+        candidates = sorted(set(carried.values()), key=repr)
+        # 익명 후보 목록 — 게시판이 없어 제안자 귀속이 실리지 않는다 (PL 확정 2026-08-12).
+        # 페이로드 형태는 방안 1의 후보 공지와 동일(맨 리스트)로 맞춘다 — 같은 정보를 담은
+        # 메시지가 포장 차이만으로 바이트에서 불리해지지 않도록 (§9.2 비교 공정성).
+        bb.counter.add("offer", self.n - 1, [str(c) for c in candidates])
+        for a in self.agents[1:]:
+            bb.load[a.p.pid] = bb.load.get(a.p.pid, 0) + 1
+        bb.phase()
+        if kill_at and kill_at.round_no == round_no and kill_at.point == "mid_round":
+            raise _Kill()  # 배포 직후·회신 전 중단
+        votes: dict[str, dict] = {}
+        nxt_carried: dict[str, object] = {}
+        any_offer = False
+        self._eval_calls += len(candidates) * self.n  # O/X = 전원이 라운드 후보 전부 재평가
+        for i, a in enumerate(self.agents):
+            bundle = {c: a.vote(c, sweep) for c in candidates}
+            nxt = a.peek(sweep)  # 다음 순위 후보 — 유실됐던 라운드면 같은 후보가 다시 나온다
+            if nxt is not None:
+                any_offer = True
+            if i != 0:  # 담당자 자신의 O/X·다음 후보는 로컬
+                bb.counter.add("reply", 1, {  # 반응 + 역제안 = SAO 1건
+                    "votes": {str(c): v for c, v in bundle.items()},
+                    "next": str(nxt) if nxt is not None else None,
+                })
+                bb.load[coord] = bb.load.get(coord, 0) + 1
+                if injector and injector.lost():
+                    continue  # 결합 유실 — O/X와 다음 후보를 함께 잃는다 (ptr 유지 → 재시도)
+            votes[a.p.pid] = bundle
+            if nxt is not None:
+                nxt_carried[a.p.pid] = nxt
+                delivered.setdefault(a.p.pid, set()).add(nxt)
+                a.ptr += 1
+        bb.phase()
+        if self.collect_log:
+            events.append({"t": "round", "sweep": sweep, "k": round_no, "submitted": dict(carried)})
+            events.append({"t": "votes", "sweep": sweep,
+                           "votes": {p: dict(b) for p, b in votes.items()}})
+        if kill_at and kill_at.round_no == round_no and kill_at.point == "post_votes":
+            raise _Kill()  # 회신 도착 직후·판정 전 중단
+        unanimous = [c for c in candidates
+                     if len(votes) == self.n and all(votes[p.pid][c] for p in self.profiles)]
+        picked = None
+        if unanimous:
+            tied = sorted(unanimous, key=repr)
+            if len(tied) == 1:
+                picked = (tied[0], False)  # 동률 아님 — 결선투표 비용을 물리지 않는다 (방안 1과 동일)
+            else:
+                pick, extra = self.tie.pick(tied, self.profiles)
+                bb.tie_break_messages(extra, {"tied": [str(c) for c in tied]})
+                picked = (pick, True)
+            if kill_at and kill_at.round_no == round_no and kill_at.point == "pre_final":
+                raise _Kill()
+        return picked, nxt_carried, any_offer
 
 
 class Plan3Mesh(_StyleBase):

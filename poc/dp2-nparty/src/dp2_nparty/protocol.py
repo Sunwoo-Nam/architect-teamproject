@@ -24,11 +24,12 @@ MAX_SWEEPS = 5  # PL 결정 (2026-08-11)
 # 비교 대상 방안 목록 — 측정·리포트 전체가 이 목록을 순회한다
 def all_plans():
     from .protocol_styles import (
-        Plan3Mesh, Plan4Ring, Plan5Gossip, Plan6ITree, Plan7RotCollect, Plan8Hypercube,
-        Plan9Psi, Plan10Shard, Plan21Tree, Plan22Rotate,
+        Plan1aSao, Plan3Mesh, Plan4Ring, Plan5Gossip, Plan6ITree, Plan7RotCollect,
+        Plan8Hypercube, Plan9Psi, Plan10Shard, Plan21Tree, Plan22Rotate,
     )
 
-    return (("plan1", Plan1Vote), ("plan2", Plan2Cumulative), ("plan3mesh", Plan3Mesh),
+    return (("plan1", Plan1Vote), ("plan1a", Plan1aSao),
+            ("plan2", Plan2Cumulative), ("plan3mesh", Plan3Mesh),
             ("plan4ring", Plan4Ring), ("plan5gossip", Plan5Gossip), ("plan6itree", Plan6ITree),
             ("plan7rotc", Plan7RotCollect), ("plan8hcube", Plan8Hypercube),
             ("plan9psi", Plan9Psi), ("plan10shard", Plan10Shard),
@@ -37,10 +38,11 @@ def all_plans():
 
 # 번호 체계 (PL 지시 2026-08-11): 점진 공개(라운드당 자기 순위 1개) = 방안 1-6,
 # 후보군 전체(일괄) 공개 = 방안 20부터.
-PLAN_NAMES = ("plan1", "plan2", "plan3mesh", "plan4ring", "plan5gossip", "plan6itree",
-              "plan7rotc", "plan8hcube", "plan9psi", "plan10shard",
+PLAN_NAMES = ("plan1", "plan1a", "plan2", "plan3mesh", "plan4ring", "plan5gossip",
+              "plan6itree", "plan7rotc", "plan8hcube", "plan9psi", "plan10shard",
               "plan20batch", "plan21tree", "plan22rotate")
-PLAN_LABELS = {"plan1": "방안 1 투표형(BB)", "plan2": "방안 2 누적형(BB)",
+PLAN_LABELS = {"plan1": "방안 1 투표형(BB)", "plan1a": "방안 1-A SAO 투표형(무BB)",
+               "plan2": "방안 2 누적형(BB)",
                "plan3mesh": "방안 3 브로드캐스트(P2P)", "plan4ring": "방안 4 릴레이(Ring)",
                "plan5gossip": "방안 5 가십(Epidemic)", "plan6itree": "방안 6 계층 교집합(Tree)",
                "plan7rotc": "방안 7 순환 수집(RotC)", "plan8hcube": "방안 8 하이퍼큐브(Sym)",

@@ -174,7 +174,7 @@ def _rec_section(cases: list[BenchmarkCase]) -> dict:
     sec: dict = {"config": {"sessions": len(cases), "input": "벤치마크 functional (3인) 선두 표본",
                             "note": "시간 대체 = phase 비용. 중단 유형(프로세스/네트워크)은 ENV-A에서 동일 취급"}}
     for name, cls in PLANS:
-        points = ["mid_round", "pre_final"] + (["post_votes"] if name == "plan1" else [])
+        points = ["mid_round", "pre_final"] + (["post_votes"] if name in ("plan1", "plan1a") else [])
         ratios, fr_fail, invalid, ref_rounds = [], 0, 0, []
         for case in cases:
             ref = cls(case.profiles).run()
