@@ -1,0 +1,304 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="51MV" name="51 모듈 뷰 — 방안 2 vs 방안 1-A">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1180" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="51. 설계 후보 1 — 모듈 뷰: 방안 2(누적 공통제안형) vs 방안 1-A(순차 SAO 투표형)" style="text;html=1;fontSize=15;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="14" width="1200" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="두 방안은 같은 협상 코어(아래 녹색 층)를 공유하고, 담당자·참여자 단말의 고유 모듈(주황)과 상태 보관 방식(파랑)만 다르다." style="text;html=1;fontSize=11;align=left;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="1300" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lg1" value="공통 모듈 (두 방안 동일)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="68" width="190" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2" value="이 방안의 고유 모듈" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="68" width="180" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="lg3" value="상태·저장소 모듈" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="430" y="68" width="160" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="lg4" value="실선 화살표 = uses(의존)&#160;&#160;·&#160;&#160;점선 화살표 = 메시지 인터페이스를 경유한 원격 uses&#160;&#160;·&#160;&#160;박스 중첩 = is-part-of" style="text;html=1;fontSize=10;align=left;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="605" y="68" width="700" height="24" as="geometry" />
+        </mxCell>
+
+        <!-- ================= 좌: 방안 2 ================= -->
+        <mxCell id="hdrL" value="방안 2 — 누적 공통제안형 · Blackboard 스타일 (문서 51 §2·§4)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="106" width="790" height="28" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cL1" value="담당자 단말 P0 — Blackboard 담당" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="142" width="790" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="L1" value="Round Controller&#10;라운드 개시·마감,&#10;바퀴(sweep) 진행" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="cL1">
+          <mxGeometry x="15" y="38" width="175" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="L2" value="Submission Store 〈상태〉&#10;참여자 → 제안 누적 집합&#10;(제안자 귀속 있음 · 라운드 넘어 유지)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="cL1">
+          <mxGeometry x="200" y="38" width="195" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="L3" value="Unanimity Judge&#10;누적 집합의 전원 교집합&#10;= 만장일치 성립" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="cL1">
+          <mxGeometry x="405" y="38" width="180" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="L4" value="Final Notifier&#10;성립·결렬 통지&#10;(N-1건 · 1회)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="cL1">
+          <mxGeometry x="595" y="38" width="180" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="L5" value="Tie Resolver — 공통 TieBreaker에 위임&#10;순위합 최소 → 표준편차 최소 → 결선투표&#10;(라운드=순위 규칙으로 전원의 순위를 복원할 수 있어 결정론적)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="cL1">
+          <mxGeometry x="405" y="112" width="370" height="62" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cL2" value="참여자 단말 P1 … P(N-1)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="400" width="790" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="LP1" value="Submitter&#10;순위 커서가 준 후보 1개를 제출&#10;(제출이 곧 수락 의사)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="cL2">
+          <mxGeometry x="200" y="30" width="195" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="LP2" value="투표 모듈·수신 모듈이 없다&#10;제출 자격 규칙이 수락 의사를 보장 → O/X 교환 불필요&#10;라운드 결과 수신 경로도 없음 — 최종 통지만 받는다" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=none;strokeColor=#999999;fontSize=10;fontColor=#555555;align=left;spacingLeft=6;" vertex="1" parent="cL2">
+          <mxGeometry x="405" y="30" width="370" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="LP3" value="이 방안의 참여자 고유 모듈은 Submitter 하나뿐 — Preference Ranker · Threshold Controller · Submission Cursor는 아래 공통 코어를 그대로 쓴다." style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=none;strokeColor=#cccccc;fontSize=10;fontColor=#777777;align=left;spacingLeft=6;" vertex="1" parent="cL2">
+          <mxGeometry x="15" y="98" width="760" height="42" as="geometry" />
+        </mxCell>
+
+        <!-- ================= 우: 방안 1-A ================= -->
+        <mxCell id="hdrR" value="방안 1-A — 순차 SAO 투표형 · 무 Blackboard (문서 51 §3-1)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="870" y="106" width="790" height="28" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cR1" value="담당자 단말 P0 — SAO 세션 담당 (양자 채널 N-1개, 공유 게시판 없음)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="870" y="142" width="790" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="R1" value="Sweep Collector&#10;바퀴 시작 1회 수집&#10;(N-1건 · 1 phase)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="cR1">
+          <mxGeometry x="15" y="38" width="175" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="R2" value="Anonymizing Offer Composer&#10;모인 후보 → 제안자 귀속을 제거한&#10;익명 후보 목록 (= SAO offer)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="cR1">
+          <mxGeometry x="200" y="38" width="195" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="R3" value="Vote Aggregator&#10;O/X 번들 집계 → 전원 O 후보 판정&#10;동률 시 공통 TieBreaker 호출" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="cR1">
+          <mxGeometry x="405" y="38" width="180" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="R4" value="Final Notifier&#10;성립 시에만 통지&#10;(미성립 공지 없음)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="cR1">
+          <mxGeometry x="595" y="38" width="180" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="R5" value="Carry Buffer 〈상태〉&#10;이번 라운드 후보 집합&#10;— 라운드 단위로 휘발" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="cR1">
+          <mxGeometry x="200" y="112" width="195" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="R6" value="Delivered Set 〈상태〉 — 담당자가 누적 수신한 제안&#10;복구 스냅샷·부하/노출 계측용이며 성립 판정에는 쓰이지 않는다&#10;(방안 2의 Submission Store와 역할이 다른 지점)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="cR1">
+          <mxGeometry x="405" y="112" width="370" height="62" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cR2" value="참여자 단말 P1 … P(N-1)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="870" y="400" width="790" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="R9" value="Counter-Offer Composer&#10;다음 순위 후보 1개&#10;(공통 Submission Cursor 사용)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="cR2">
+          <mxGeometry x="15" y="26" width="175" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="R7" value="Offer Receiver&#10;익명 후보 목록 수신&#10;(누가 냈는지는 알 수 없음)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="cR2">
+          <mxGeometry x="200" y="26" width="195" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="R10" value="Reply Packer&#10;O/X 번들 + 다음 후보를&#10;한 메시지로 결합" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="cR2">
+          <mxGeometry x="405" y="26" width="180" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="R11" value="SAO 메시지 의미론&#10;accept/reject + counter-offer&#10;(결합 유실 위험 지점)" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=none;strokeColor=#999999;fontSize=10;fontColor=#555555;" vertex="1" parent="cR2">
+          <mxGeometry x="595" y="26" width="180" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="R8" value="Vote Bundler — 받은 후보 전부에 대해 O/X 산출 (공통 Acceptance Evaluator 재사용: u(c) ≥ revised threshold)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="cR2">
+          <mxGeometry x="200" y="100" width="385" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- 메시지 인터페이스 (원격 uses) -->
+        <mxCell id="mL1" value="«submit(pid, candidate)» N-1건 · 1 phase" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=block;strokeColor=#b85450;fontSize=9;fontColor=#b85450;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="LP1" target="L2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mL2" value="«final(outcome)» N-1건" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=block;strokeColor=#b85450;fontSize=9;fontColor=#b85450;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.9;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="L4" target="cL2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mR1" value="«collect(candidate)» 바퀴 시작 1회 · N-1건" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=block;strokeColor=#b85450;fontSize=9;fontColor=#b85450;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="R9" target="R1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mR2" value="«offer(익명 후보 목록)» N-1건" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=block;strokeColor=#b85450;fontSize=9;fontColor=#b85450;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="R2" target="R7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mR3" value="«reply(O/X 번들 + 다음 후보)» N-1건" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=block;strokeColor=#b85450;fontSize=9;fontColor=#b85450;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="R10" target="R3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mR4" value="«final(outcome)» 성립 시에만" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=block;strokeColor=#b85450;fontSize=9;fontColor=#b85450;exitX=0.9;exitY=1;exitDx=0;exitDy=0;entryX=0.95;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="R4" target="cR2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 단말 내부 uses -->
+        <mxCell id="uL1" value="uses" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;strokeColor=#666666;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="L1" target="L2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uL2" value="reads" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;strokeColor=#666666;fontSize=9;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="L3" target="L2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uL3" value="동률 시" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;strokeColor=#666666;fontSize=9;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="L3" target="L5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uR1" value="uses" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;strokeColor=#666666;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="R1" target="R2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uR2" value="reads" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;strokeColor=#666666;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="R2" target="R5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uR3" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;strokeColor=#666666;fontSize=9;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="R7" target="R8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uR4" value="uses" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;strokeColor=#666666;fontSize=9;exitX=0.9;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="R8" target="R10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uR5" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;strokeColor=#666666;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.9;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="R9" target="R10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="972" y="492" />
+              <mxPoint x="1437" y="492" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ================= 공통 코어 ================= -->
+        <mxCell id="core" value="공통 협상 코어 — 두 방안이 동일하게 사용 (담당자 단말·참여자 단말 각각에 1벌씩 존재)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="40" y="590" width="1620" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="C1" value="Preference Ranker&#10;ufun으로 전 후보를 1회 평가해 내림차순 순위표를 만든다&#10;(효용 평가 호출의 주 비용 발생 지점)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="core">
+          <mxGeometry x="20" y="38" width="380" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="C2" value="Utility Function (ufun) · Profile&#10;후보 → 개인 utility. 점수 자체는 어떤 방안에서도 전송되지 않는다&#10;(두 방안 공통 전제)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="core">
+          <mxGeometry x="415" y="38" width="380" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="C3" value="Threshold Controller&#10;revised threshold를 바퀴 단위로 인하 (NegMAS 양보 곡선 재사용,&#10;기본 boulware · 하한은 initial threshold)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="core">
+          <mxGeometry x="810" y="38" width="380" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="C4" value="Submission Cursor&#10;라운드 k = 내 k순위. 제출이 도착 확인됐을 때만 전진하므로&#10;유실된 후보는 다음 라운드에 자동 재시도된다" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="core">
+          <mxGeometry x="1205" y="38" width="380" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="C5" value="Acceptance Evaluator&#10;u(c) ≥ revised threshold 판정&#10;방안 2: 제출 자격에만 사용 / 방안 1-A: 제출 자격 + O/X 산출에 재사용" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="core">
+          <mxGeometry x="20" y="122" width="380" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="C6" value="Sweep Controller&#10;전원 소진 → threshold 낮춰 다음 바퀴&#10;최대 5바퀴를 넘기면 NO_DEAL(결렬) 종료" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="core">
+          <mxGeometry x="415" y="122" width="380" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="C7" value="TieBreaker «플러그 인터페이스»&#10;방안 2: 순위합 최소 → 표준편차 최소 → 결선투표&#10;방안 1-A: 결선 다수결 (O/X만으로는 순위를 복원할 수 없어 순위합 불가)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="core">
+          <mxGeometry x="810" y="122" width="380" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="C8" value="교체되는 것은 위쪽 두 층뿐이다&#10;담당자·참여자의 고유 모듈만 방안별로 갈리고, 이 코어는 그대로 재사용된다&#10;— 두 방안을 같은 하니스로 비교할 수 있는 근거" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=none;strokeColor=#999999;fontSize=10;fontColor=#555555;" vertex="1" parent="core">
+          <mxGeometry x="1205" y="122" width="380" height="72" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uCore1" value="uses (전 모듈)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;strokeColor=#82b366;fontSize=9;fontColor=#5a8a3c;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="cL1" target="core">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="18" y="237" />
+              <mxPoint x="18" y="643" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="uCore2" value="uses (전 모듈)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;strokeColor=#82b366;fontSize=9;fontColor=#5a8a3c;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.15;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="cL2" target="core">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uCore3" value="uses (전 모듈)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;strokeColor=#82b366;fontSize=9;fontColor=#5a8a3c;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="cR1" target="core">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1682" y="237" />
+              <mxPoint x="1682" y="643" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="uCore4" value="uses (전 모듈)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;strokeColor=#82b366;fontSize=9;fontColor=#5a8a3c;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.85;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="cR2" target="core">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ================= 차이 요약 ================= -->
+        <mxCell id="tblT" value="모듈 구성이 만들어 내는 차이 (같은 코어 위에서 무엇이 갈리는가)" style="text;html=1;fontSize=12;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="822" width="800" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="th0" value="관점" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#999999;fontSize=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="848" width="200" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="th1" value="방안 2 — 누적 공통제안형" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#999999;fontSize=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="240" y="848" width="710" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="th2" value="방안 1-A — 순차 SAO 투표형" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#999999;fontSize=10;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="950" y="848" width="710" height="28" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r1a" value="판정 입력" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="876" width="200" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r1b" value="1라운드부터 누적된 제출 집합 (Submission Store)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="240" y="876" width="710" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r1c" value="이번 라운드 후보 집합(Carry Buffer) + 전원의 O/X 번들" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="950" y="876" width="710" height="32" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r2a" value="성립 조건" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="908" width="200" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r2b" value="전원이 그 후보를 직접 제안했을 때 — 보수적이고 늦다" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="240" y="908" width="710" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r2c" value="그 라운드 후보에 전원이 O — 남이 낸 안에 동의만 해도 성립 (방안 1과 동일 규칙)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="950" y="908" width="710" height="32" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r3a" value="공유 상태" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="940" width="200" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r3b" value="Blackboard에 제안자 귀속이 붙은 누적 제안이 남는다" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="240" y="940" width="710" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r3c" value="공유 저장소 없음 — 담당자의 라운드 버퍼뿐이고, 배포는 익명 목록" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="950" y="940" width="710" height="32" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r4a" value="라운드 통신" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="972" width="200" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r4b" value="제출 N-1건 · 1 phase (판정은 담당자 로컬)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="240" y="972" width="710" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r4c" value="배포 N-1 + 회신 N-1 · 2 phase, 바퀴마다 수집 1 phase가 선행" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="950" y="972" width="710" height="32" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r5a" value="동률 해소" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1004" width="200" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r5b" value="순위합 최소 → 표준편차 → 결선 (라운드=순위로 순위 복원 가능)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="240" y="1004" width="710" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r5c" value="결선 다수결 — O/X는 문턱 통과 여부만 말해 주어 순위 정보가 없다" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="950" y="1004" width="710" height="32" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r6a" value="노출 지점" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1036" width="200" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r6b" value="담당자가 전원의 공개 접두를 전량 본다 · 참여자 간 노출은 없다" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="240" y="1036" width="710" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r6c" value="담당자에 집중(전 제출 + 전 O/X) · 참여자는 익명 목록만 보고 O/X도 못 본다" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="950" y="1036" width="710" height="32" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r7a" value="유실 영향" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1068" width="200" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r7b" value="제출 1건 유실 = 후보 1개 손실 (커서가 유지돼 다음 라운드 재시도)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="240" y="1068" width="710" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r7c" value="회신 1건 유실 = O/X와 다음 후보를 함께 잃는다 (Reply Packer의 결합 대가)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="950" y="1068" width="710" height="32" as="geometry" />
+        </mxCell>
+
+        <mxCell id="src" value="근거 — 방안 2: docs/changbae/51-설계후보1-다자-합의-프로토콜.md §2·§4 및 poc/dp2-nparty의 protocol.py(Plan2Cumulative) / 방안 1-A: 같은 문서 §3-1 및 protocol_styles.py(Plan1aSao). 모듈 이름은 설계 수준 명칭으로 붙였으며 코드의 클래스·함수명과 1:1 대응은 아니다." style="text;html=1;fontSize=10;align=left;fontColor=#777777;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1110" width="1620" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
