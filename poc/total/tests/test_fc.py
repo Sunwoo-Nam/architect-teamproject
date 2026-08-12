@@ -10,7 +10,7 @@ from __future__ import annotations
 import pytest
 
 from total.qa.contract import NO_AGREEMENT, TableCase, TablePreference
-from total.qa.fc import FcScore, no_agreement_utility, score, total_utility, valid_candidates
+from total.qa.fc import no_agreement_utility, score, total_utility, valid_candidates
 
 
 def mk_case(tables, thresholds, case_id="c"):

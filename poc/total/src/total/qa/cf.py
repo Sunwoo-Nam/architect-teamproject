@@ -79,10 +79,21 @@ def worst_participant(coordinator_index: int = 0) -> Viewpoint:
 # --------------------------------------------------------------------------------------
 
 
+def valid_ranked(case: Case, victim: Preference) -> list[Outcome]:
+    """피해자의 **유효 후보만** 담은 순위표.
+
+    깊이의 기준을 전체 공간으로 잡으면 안 된다 — 피해자가 애초에 제안하지 않을
+    (바닥선 미달·실현 불가) 후보가 순위표 앞자리를 차지하면, 관찰 순서와 대조할 때
+    첫 항목부터 어긋나 B축이 늘 0이 된다. 분모(d_v)와 대조 대상을 같은 집합으로 맞춘다.
+    """
+    ranked = victim.ranked()
+    valid = {o for o in case.candidates() if victim.utility(o) >= victim.initial_threshold}
+    return [o for o in ranked if o in valid]
+
+
 def valid_count(case: Case, victim: Preference) -> int:
     """피해자의 유효 후보 수 d_v — 깊이의 분모. 0이 되지 않게 최소 1."""
-    n = sum(1 for o in case.candidates() if victim.utility(o) >= victim.initial_threshold)
-    return max(1, n)
+    return max(1, len(valid_ranked(case, victim)))
 
 
 def observed_subs(session: SessionResult, observer: str, victim: str) -> list[Sub]:
@@ -240,11 +251,17 @@ class E2Anchor:
     depth_b: float
     samples: int
 
+    @property
+    def degenerate(self) -> bool:
+        """앵커가 사실상 0 — m의 분모가 무의미하다는 신호. 조용히 넘기면 안 된다."""
+        return self.depth_a <= 1e-6 or self.depth_b <= 1e-6
+
     def as_dict(self) -> dict:
         return {
-            "A": round(self.depth_a, 4),
-            "B": round(self.depth_b, 4),
+            "A": round(self.depth_a, 6),
+            "B": round(self.depth_b, 6),
             "samples": self.samples,
+            "degenerate": self.degenerate,
             "note": "1:1 기준 노출량 — 참조 양자 프로토콜에서 상대 1인이 도달하는 깊이. "
                     "m의 분모이며 도메인별로 따로 측정한다",
         }
@@ -264,10 +281,11 @@ def e2_anchor(runs: Sequence[tuple[SessionResult, Case]]) -> E2Anchor:
         observer, victim_pid = session.participants[0], session.participants[1]
         by_pid = {p.pid: p for p in case.preferences}
         victim = by_pid[victim_pid]
-        d = valid_count(case, victim)
+        ranked = valid_ranked(case, victim)
+        d = max(1, len(ranked))
         subs = observed_subs(session, observer, victim_pid)
         a_vals.append(depth_a(subs, d))
-        b_vals.append(depth_b(subs, victim.ranked(), d))
+        b_vals.append(depth_b(subs, ranked, d))
     return E2Anchor(
         depth_a=max(1e-9, statistics.median(a_vals)),
         depth_b=max(1e-9, statistics.median(b_vals)),
@@ -278,20 +296,22 @@ def e2_anchor(runs: Sequence[tuple[SessionResult, Case]]) -> E2Anchor:
 @dataclass(frozen=True)
 class ExposureMultiple:
     m_a: float
-    m_b: float
+    m_b: float | None          # 앵커가 퇴화하면 None — 가짜 수를 내지 않는다
     stars_m_a: int
-    stars_m_b: int
+    stars_m_b: int | None
     max_single_depth_a: float
     victims: int
+    b_note: str = ""
 
     def as_dict(self) -> dict:
         return {
             "m_A": round(self.m_a, 3),
-            "m_B": round(self.m_b, 3),
+            "m_B": None if self.m_b is None else round(self.m_b, 3),
             "stars_m_A": self.stars_m_a,
             "stars_m_B": self.stars_m_b,
             "max_single_depth_A": round(self.max_single_depth_a, 3),
             "victims": self.victims,
+            "b_note": self.b_note,
             "band": BAND_CF_M.as_dict(),
         }
 
@@ -310,8 +330,8 @@ def exposure_multiple(
             victim = by_pid.get(victim_pid)
             if victim is None:
                 continue
-            d = valid_count(case, victim)
-            ranked = victim.ranked()
+            ranked = valid_ranked(case, victim)
+            d = max(1, len(ranked))
             sum_a = sum_b = best_a = 0.0
             for observer in session.participants:
                 if observer == victim_pid:
@@ -326,6 +346,16 @@ def exposure_multiple(
             single_a.append(best_a)
 
     med_a = statistics.median(m_a)
+    if anchor.degenerate:
+        # 앵커가 0에 가까우면 비율이 의미를 잃는다. 큰 수를 내놓으면 오독을 부르므로
+        # None으로 비우고 사유를 남긴다 — "안 쟀다"와 "0이다"는 다르다.
+        return ExposureMultiple(
+            m_a=med_a, m_b=None, stars_m_a=BAND_CF_M.stars(med_a), stars_m_b=None,
+            max_single_depth_a=statistics.median(single_a), victims=len(m_a),
+            b_note="e₂ 앵커의 B축이 0에 가까워 배수가 성립하지 않는다 — 참조 프로토콜에서도 "
+                   "접두 복원이 일어나지 않는다는 뜻이다 (예: 에이전트가 자기 선호를 "
+                   "부분적으로만 아는 도메인)",
+        )
     med_b = statistics.median(m_b)
     return ExposureMultiple(
         m_a=med_a, m_b=med_b,
