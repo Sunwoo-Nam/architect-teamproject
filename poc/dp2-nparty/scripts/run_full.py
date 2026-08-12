@@ -36,6 +36,8 @@ def main() -> None:
     ap.add_argument("--plans", default="1a,2",
                     help="측정할 방안 선택 — 번호('2,6,10,20') 또는 내부 이름 혼용, 쉼표 구분. "
                          "기본 '1a,2' (PL 지시 2026-08-12), 전체는 '--plans all'")
+    ap.add_argument("--skip-n-sweep", action="store_true",
+                    help="§11(참여자 수 3~50인 스윕)을 건너뛴다 — 방안 2개 기준 10분 안팎 절약")
     ap.add_argument("--issue-space-cases", type=int, default=None,
                     help="§10 의제 조합을 트랙(A·B)당 이 건수로 축소 (생략 시 전체)")
     args = ap.parse_args()
@@ -43,7 +45,8 @@ def main() -> None:
     from dp2_nparty.full_campaign import resolve_plans
 
     plans = resolve_plans(args.plans)
-    raw = run_full(seed=args.seed, plans=plans, issue_space_limit=args.issue_space_cases)
+    raw = run_full(seed=args.seed, plans=plans, issue_space_limit=args.issue_space_cases,
+                   skip_n_sweep=args.skip_n_sweep)
     base = ROOT / "results" / raw["meta"]["run_id"]
     run_dir, n = base, 2
     while run_dir.exists():

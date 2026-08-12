@@ -202,6 +202,126 @@ def _issue_space_section(track_cases: dict[str, list]) -> dict:
     return sec
 
 
+# §11 참여자 수 스윕 케이스 폴더 — §10(issue-space / issue-space-b)과 별도로 둔다.
+# 같은 폴더에 넣으면 §10의 조합 규모별 집계에 참여자 수가 다른 케이스가 섞여 들어간다.
+ISSUE_SPACE_N_DIR = "issue-space-n"
+
+
+def _issue_space_n_worker(payload: tuple[str, str]) -> dict:
+    """§11 워커 — 케이스 파일 1건 × 방안 1개를 재고 지표를 돌려준다 (프로세스 병렬용).
+
+    인자·반환이 전부 기본 타입이라 spawn 방식에서도 그대로 직렬화된다.
+    측정 절차는 `_issue_space_section`(§10)과 같게 맞춘다 — 두 섹션의 수치를 나란히 놓고
+    비교하려면 순위표 캐시 초기화·gc 정지·holder_sizes 호출 시점이 같아야 한다.
+    """
+    import gc
+
+    from .issue_space import expand, load_issue_case
+    from .measures.ru_person import base_size
+
+    case_path, plan_name = payload
+    cls = dict(all_plans())[plan_name]
+    bc = expand(load_issue_case(case_path))
+    for p in bc.profiles:
+        p.clear_caches()  # 방안마다 순위표 구축 비용을 동일하게 지불 (측정 공정성)
+    gc.disable()
+    try:
+        plan = cls(bc.profiles, collect_log=False)
+        t0 = time.perf_counter()
+        session = plan.run()
+        t_proto = time.perf_counter() - t0
+    finally:
+        gc.enable()
+    sizes = holder_sizes(plan)  # 종료 후 1회 — 라운드 콜백 금지 (모듈 docstring 참조)
+    proto = max(sizes) if sizes else 0
+    st = tbmod.synth_time(session)
+    f = fcmod.score(session.outcome, bc.candidates, bc.profiles)
+    return {
+        "plan": plan_name,
+        "n": len(bc.profiles),
+        "combos": len(bc.candidates),
+        "ratio": f.ratio,
+        "baseline": f.baseline,
+        "agreed": int(session.agreed),
+        "t_total": st.total_ms / 1000.0 + t_proto,
+        "device": base_size(bc.profiles[0]) + proto,
+        "protocol": proto,
+        "rounds": session.rounds,
+        "phases": session.phases,
+        "messages": session.messages,
+    }
+
+
+def _issue_space_n_section(selected, workers: int | None = None) -> dict:
+    """§11 의제 조합 — 참여자 수(N)별 상세.
+
+    §10이 참여자 10인 고정으로 조합 규모만 훑는 데 반해, 여기서는 조합 규모 3단계를
+    고정하고 참여자 수를 3~50인으로 훑는다. 집계 단위는 (방안, 조합 수, 참여자 수)다.
+
+    **프로세스 병렬**로 돈다 — 케이스 1건이 서로 독립이고, N=50·조합 62,208 한 칸이
+    단일 스레드로 방안당 90~130초라 직렬로는 전체가 40분을 넘는다. 워커는 케이스 파일
+    경로와 방안 이름만 받아 파일에서 직접 읽으므로 프로파일 객체를 직렬화하지 않는다.
+
+    케이스 폴더가 비어 있으면 빈 dict을 돌려준다 — 리포트 쪽에서 섹션을 건너뛴다.
+    """
+    import os
+    from concurrent.futures import ProcessPoolExecutor
+
+    paths = sorted((CASES_DIR / ISSUE_SPACE_N_DIR).glob("*.json"))
+    if not paths:
+        return {}
+    jobs = [(str(p), name) for name, _cls in selected for p in paths]
+    if workers is None:
+        workers = max(1, (os.cpu_count() or 2) - 2)
+    if workers <= 1:
+        results = [_issue_space_n_worker(j) for j in jobs]
+    else:
+        with ProcessPoolExecutor(max_workers=workers) as ex:
+            results = list(ex.map(_issue_space_n_worker, jobs, chunksize=1))
+
+    groups: dict[tuple[str, int, int], dict[str, list]] = {}
+    for r in results:
+        g = groups.setdefault((r["plan"], r["combos"], r["n"]), {
+            "ratio": [], "baseline": [], "agreed": [], "t_total": [], "device": [],
+            "protocol": [], "rounds": [], "phases": [], "messages": [],
+        })
+        for k in g:
+            g[k].append(r[k])
+
+    out: dict = {
+        "config": {
+            "track": "a",
+            "track_label": "A(정확도, 실후보 0.5%)",
+            "participants": sorted({r["n"] for r in results}),
+            "combos": sorted({r["combos"] for r in results}),
+            "cases_per_cell": len(paths) // max(1, len({(r["combos"], r["n"]) for r in results})),
+            "workers": workers,
+            "constants": dict(tbmod.DEFAULT_CONSTANTS),
+            "note": "조합 규모 3단계를 고정하고 참여자 수를 훑는다. 채점은 케이스가 정의하는 "
+                    "전체 조합 공간 기준 x* 대비 달성률. 시간은 협상 1건당 추정"
+                    "(합성 시간 + 프로토콜 계산 실측, K=1). 메모리는 단말 총 점유"
+                    "(공통 기저 + 프로토콜 상태).",
+        }
+    }
+    for (plan, S, n), g in sorted(groups.items()):
+        mr, mb = statistics.mean(g["ratio"]), statistics.mean(g["baseline"])
+        med = lambda k: int(statistics.median(g[k]))  # noqa: E731
+        out.setdefault(plan, {}).setdefault(str(S), {})[str(n)] = {
+            "cases": len(g["ratio"]),
+            "agreed": sum(g["agreed"]),
+            "mean_ratio": round(mr, 4),
+            "mean_baseline": round(mb, 4),
+            "s": round((mr - mb) / (1 - mb) if mb < 1 else 1.0, 4),
+            "median_time_s": round(statistics.median(g["t_total"]), 2),
+            "median_rounds": med("rounds"),
+            "median_phases": med("phases"),
+            "median_device_bytes": med("device"),
+            "median_protocol_bytes": med("protocol"),
+            "median_messages": med("messages"),
+        }
+    return out
+
+
 def _fc_section(cases: list[BenchmarkCase]) -> dict:
     sec: dict = {"config": {"cases": len(cases), "input": "벤치마크 functional",
                             "participants": sorted({len(c.profiles) for c in cases})}}
@@ -521,6 +641,7 @@ def run_full(
     seed: int = 20260811,
     plans: list[str] | None = None,
     issue_space_limit: int | None = None,
+    skip_n_sweep: bool = False,
 ) -> dict:
     """issue_space_limit: 트랙(A·B)당 사용할 케이스 수를 제한한다 (None=전체 80+80건).
 
@@ -528,6 +649,9 @@ def run_full(
     라운드가 수만 회에 이른다(실측: 조합 62,208·10인에서 방안2가 34,256라운드·10.4초).
     전체 방안 × 전체 A·B 160건을 돌리면 수 시간이 걸릴 수 있으므로, 처음 재는 실행은
     이 인자로 규모를 줄여 시간을 재고 판단하는 것을 권한다.
+
+    skip_n_sweep: §11(참여자 수 스윕)을 건너뛴다. §11은 프로세스 병렬로 돌지만 N=50·조합
+    62,208 칸이 무거워 방안 2개 기준 10분 안팎이 더 붙는다 — 빠른 확인용 실행에서 쓴다.
     """
     from . import campaign as _campaign
 
@@ -539,12 +663,13 @@ def run_full(
     _campaign.PLANS = selected
     _campaign.PLAN_NAMES = tuple(n for n, _c in selected)
     try:
-        return _run_full_inner(seed, selected, issue_space_limit)
+        return _run_full_inner(seed, selected, issue_space_limit, skip_n_sweep)
     finally:
         PLANS, _campaign.PLANS, _campaign.PLAN_NAMES = saved
 
 
-def _run_full_inner(seed: int, selected, issue_space_limit: int | None = None) -> dict:
+def _run_full_inner(seed: int, selected, issue_space_limit: int | None = None,
+                    skip_n_sweep: bool = False) -> dict:
     functional = _functional_cases()
     f3 = [c for c in functional if len(c.profiles) == 3]
     scal = _scalability_cases()
@@ -576,6 +701,7 @@ def _run_full_inner(seed: int, selected, issue_space_limit: int | None = None) -
         "sc_participants": _sc_participants_section(scal),
         "sc_issues": _sc_issues_section(seed, 5),  # 벤치마크 보류 — 개발용 대체 (config note 참조)
         "issue_space": _issue_space_section(track_cases),
+        "issue_space_n": {} if skip_n_sweep else _issue_space_n_section(selected),
         "tb": _tb_section(f3),
         "ft": _ft_section(f3, seed),
         "rec": _rec_section(f3[:10]),

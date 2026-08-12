@@ -1,0 +1,2551 @@
+{
+ "meta": {
+  "run_id": "full-20260812T185840KST",
+  "timestamp": "2026-08-12T18:58:40+09:00",
+  "seed": 20260811,
+  "git_commit": "9dc282f",
+  "negmas_version": "0.15.7",
+  "python": "3.14.6",
+  "provider": "정적 벤치마크 셋 (functional·scalability·issue-space A/B) — §4 SC-의제만 개발용 대체",
+  "caveat": "입력은 확정 벤치마크 셋 (결정론 — 같은 입력이면 같은 결과). 예외: §4 SC-의제는 벤치마크 보류 상태라 개발용 multi-issue 생성으로 대체 측정 (잠정), §5-1의 p_env·§6의 상수는 ENV-B 실측 대체 전의 잠정값.",
+  "plans": [
+   "plan1a",
+   "plan2"
+  ],
+  "caveat_plans": "부분 실행 — 선택된 방안만 측정됨 (--plans)"
+ },
+ "fc": {
+  "config": {
+   "cases": 160,
+   "input": "벤치마크 functional",
+   "participants": [
+    3,
+    5,
+    7
+   ]
+  },
+  "plan1a": {
+   "by_participants": {
+    "3": {
+     "cases": 100,
+     "mean_ratio": 0.9299,
+     "mean_baseline": 0.8795,
+     "s": 0.4186,
+     "stars": 3,
+     "agreed": 80,
+     "optimal_hit": 40
+    },
+    "5": {
+     "cases": 30,
+     "mean_ratio": 0.8982,
+     "mean_baseline": 0.8744,
+     "s": 0.1894,
+     "stars": 1,
+     "agreed": 24,
+     "optimal_hit": 12
+    },
+    "7": {
+     "cases": 30,
+     "mean_ratio": 0.8777,
+     "mean_baseline": 0.8654,
+     "s": 0.0918,
+     "stars": 1,
+     "agreed": 24,
+     "optimal_hit": 12
+    }
+   },
+   "mean_ratio": 0.9142,
+   "mean_baseline": 0.8759,
+   "s": 0.3086,
+   "stars": 2,
+   "agreed": 128,
+   "optimal_hit": 64,
+   "nodeal_correct": 32,
+   "nodeal_wrong": 0,
+   "tie_break_used": 0,
+   "median_rounds": 11.0,
+   "median_phases": 28.0,
+   "median_messages": 64.0,
+   "median_bytes": 2087.5
+  },
+  "plan2": {
+   "by_participants": {
+    "3": {
+     "cases": 100,
+     "mean_ratio": 0.9716,
+     "mean_baseline": 0.8795,
+     "s": 0.7639,
+     "stars": 4,
+     "agreed": 80,
+     "optimal_hit": 80
+    },
+    "5": {
+     "cases": 30,
+     "mean_ratio": 0.9646,
+     "mean_baseline": 0.8744,
+     "s": 0.7184,
+     "stars": 4,
+     "agreed": 24,
+     "optimal_hit": 24
+    },
+    "7": {
+     "cases": 30,
+     "mean_ratio": 0.9588,
+     "mean_baseline": 0.8654,
+     "s": 0.6942,
+     "stars": 4,
+     "agreed": 24,
+     "optimal_hit": 25
+    }
+   },
+   "mean_ratio": 0.9679,
+   "mean_baseline": 0.8759,
+   "s": 0.7411,
+   "stars": 4,
+   "agreed": 128,
+   "optimal_hit": 129,
+   "nodeal_correct": 32,
+   "nodeal_wrong": 0,
+   "tie_break_used": 0,
+   "median_rounds": 13.0,
+   "median_phases": 32.0,
+   "median_messages": 70.5,
+   "median_bytes": 1055.0
+  }
+ },
+ "ru_memory": {
+  "config": {
+   "cases": 100,
+   "input": "벤치마크 functional (3인)",
+   "note": "관찰 로그 제외 · 평균은 라운드 경계 표집 — Peak/Average RSS의 ENV-A 대체",
+   "person_note": "1인당·합계는 논리 상태의 귀속 계상(ru_person 모델) — 복제 구조(mesh 등)의 비용을 반영. 프로세스 피크는 참고치"
+  },
+  "plan1a": {
+   "median_peak_bytes": 4577,
+   "median_avg_bytes": 3019,
+   "median_person_peak_bytes": 445,
+   "median_total_logical_bytes": 445
+  },
+  "plan2": {
+   "median_peak_bytes": 4726,
+   "median_avg_bytes": 3010,
+   "median_person_peak_bytes": 2425,
+   "median_total_logical_bytes": 2425
+  }
+ },
+ "sc_participants": {
+  "config": {
+   "levels": [
+    3,
+    4,
+    5,
+    6,
+    8,
+    10,
+    15,
+    20,
+    30,
+    50
+   ],
+   "runs": 30,
+   "provider": "정적 벤치마크 scalability family"
+  },
+  "plan1a": {
+   "agreed_by_n": {
+    "3": 30,
+    "4": 30,
+    "5": 30,
+    "6": 30,
+    "8": 30,
+    "10": 30,
+    "15": 30,
+    "20": 30,
+    "30": 30,
+    "50": 30
+   },
+   "median_messages_by_n": {
+    "3": 44.0,
+    "4": 83.5,
+    "5": 120.0,
+    "6": 170.0,
+    "8": 307.5,
+    "10": 450.0,
+    "15": 908.0,
+    "20": 1517.5,
+    "30": 3071.0,
+    "50": 7933.0
+   },
+   "median_bytes_by_n": {
+    "3": 1608.5,
+    "4": 3362.0,
+    "5": 5859.5,
+    "6": 9284.0,
+    "8": 19962.0,
+    "10": 35758.5,
+    "15": 100739.0,
+    "20": 222263.5,
+    "30": 672341.5,
+    "50": 2875042.0
+   },
+   "median_rounds_by_n": {
+    "3": 8.0,
+    "4": 10.0,
+    "5": 12.0,
+    "6": 14.0,
+    "8": 19.0,
+    "10": 22.0,
+    "15": 29.5,
+    "20": 36.5,
+    "30": 50.0,
+    "50": 78.0
+   },
+   "median_peak_bytes_by_n": {
+    "3": 2727.0,
+    "4": 3072.5,
+    "5": 3220.0,
+    "6": 4854.0,
+    "8": 6178.0,
+    "10": 6908.0,
+    "15": 12574.0,
+    "20": 15248.0,
+    "30": 33497.5,
+    "50": 93029.0
+   },
+   "median_person_peak_by_n": {
+    "3": 451.0,
+    "4": 540.0,
+    "5": 629.0,
+    "6": 760.0,
+    "8": 938.0,
+    "10": 1116.0,
+    "15": 1735.0,
+    "20": 2162.0,
+    "30": 3338.0,
+    "50": 5821.0
+   },
+   "median_time_ms_by_n": {
+    "3": 1650.7594,
+    "4": 2101.2823,
+    "5": 2252.5283,
+    "6": 2554.1355,
+    "8": 3308.3837000000003,
+    "10": 3765.2866,
+    "15": 4917.3313,
+    "20": 6090.376200000001,
+    "30": 8209.3661,
+    "50": 13295.8354
+   },
+   "fc_ratio_by_n": {
+    "3": 0.9976,
+    "4": 1.0,
+    "5": 0.9917,
+    "6": 0.9975,
+    "8": 0.998,
+    "10": 0.997,
+    "15": 0.9908,
+    "20": 0.9935,
+    "30": 0.9919,
+    "50": 0.9947
+   },
+   "gate_ok": true,
+   "b_msg": 1.8223,
+   "ci": [
+    1.7832,
+    1.8614
+   ],
+   "r2": 0.9993,
+   "stars": 0,
+   "ci_spans_3_grades": false,
+   "n_max": 50,
+   "stars_n_max": 5,
+   "b_mem": 0.9127,
+   "b_mem_ci": [
+    0.8561,
+    0.9693
+   ],
+   "b_mem_r2": 0.9943,
+   "stars_b_mem": 1
+  },
+  "plan2": {
+   "agreed_by_n": {
+    "3": 30,
+    "4": 30,
+    "5": 30,
+    "6": 30,
+    "8": 30,
+    "10": 30,
+    "15": 30,
+    "20": 30,
+    "30": 30,
+    "50": 30
+   },
+   "median_messages_by_n": {
+    "3": 49.0,
+    "4": 103.5,
+    "5": 161.0,
+    "6": 236.5,
+    "8": 453.5,
+    "10": 700.0,
+    "15": 1654.5,
+    "20": 2915.5,
+    "30": 6516.5,
+    "50": 18159.0
+   },
+   "median_bytes_by_n": {
+    "3": 755.0,
+    "4": 1622.0,
+    "5": 2522.0,
+    "6": 3691.5,
+    "8": 7108.5,
+    "10": 11042.5,
+    "15": 26130.0,
+    "20": 46013.5,
+    "30": 103529.0,
+    "50": 288096.5
+   },
+   "median_rounds_by_n": {
+    "3": 10.5,
+    "4": 15.5,
+    "5": 19.0,
+    "6": 23.0,
+    "8": 33.0,
+    "10": 40.0,
+    "15": 63.0,
+    "20": 82.5,
+    "30": 120.5,
+    "50": 202.5
+   },
+   "median_peak_bytes_by_n": {
+    "3": 1843.0,
+    "4": 4107.0,
+    "5": 4835.0,
+    "6": 5979.0,
+    "8": 7856.0,
+    "10": 20789.5,
+    "15": 36536.0,
+    "20": 47904.0,
+    "30": 73688.0,
+    "50": 422600.0
+   },
+   "median_person_peak_by_n": {
+    "3": 1329.0,
+    "4": 3889.0,
+    "5": 4890.0,
+    "6": 5956.0,
+    "8": 7912.0,
+    "10": 21342.0,
+    "15": 37834.0,
+    "20": 50294.0,
+    "30": 75582.0,
+    "50": 427230.0
+   },
+   "median_time_ms_by_n": {
+    "3": 1950.3380000000002,
+    "4": 2700.6989999999996,
+    "5": 3226.0688,
+    "6": 3826.5552,
+    "8": 5327.968,
+    "10": 6379.5876,
+    "15": 9835.5792,
+    "20": 12768.6498,
+    "30": 18491.7518,
+    "50": 30865.8386
+   },
+   "fc_ratio_by_n": {
+    "3": 0.9927,
+    "4": 0.9769,
+    "5": 0.9662,
+    "6": 0.9741,
+    "8": 0.9743,
+    "10": 0.9838,
+    "15": 0.9816,
+    "20": 0.9824,
+    "30": 0.9764,
+    "50": 0.9916
+   },
+   "gate_ok": true,
+   "b_msg": 2.0818,
+   "ci": [
+    2.0325,
+    2.1311
+   ],
+   "r2": 0.9992,
+   "stars": 0,
+   "ci_spans_3_grades": false,
+   "n_max": 50,
+   "stars_n_max": 5,
+   "b_mem": 1.8496,
+   "b_mem_ci": [
+    1.6044,
+    2.0949
+   ],
+   "b_mem_r2": 0.9742,
+   "stars_b_mem": 0
+  }
+ },
+ "sc_issues": {
+  "config": {
+   "levels": [
+    "10x10",
+    "7x7x7",
+    "10x10x10",
+    "8x8x8x8",
+    "10x10x10x10",
+    "8x8x8x8x8"
+   ],
+   "runs": 5,
+   "note": "복합의제 튜플 곱집합 · 로그 제외 메모리 · 별점 기준 d=4 (핸드북 §4.3)"
+  },
+  "plan1a": {
+   "median_peak_by_S": {
+    "100": 8516,
+    "343": 40230,
+    "1000": 115240,
+    "4096": 707208,
+    "10000": 1805560,
+    "32768": 6029816
+   },
+   "agreed": "30/30",
+   "gate_ok": true,
+   "c": 1.1386,
+   "ci": [
+    1.0772,
+    1.2
+   ],
+   "r2": 0.9985,
+   "stars": 0
+  },
+  "plan2": {
+   "median_peak_by_S": {
+    "100": 11780,
+    "343": 40230,
+    "1000": 115240,
+    "4096": 707208,
+    "10000": 1805560,
+    "32768": 6029816
+   },
+   "agreed": "30/30",
+   "gate_ok": true,
+   "c": 1.098,
+   "ci": [
+    1.0332,
+    1.1627
+   ],
+   "r2": 0.9982,
+   "stars": 0
+  }
+ },
+ "issue_space": {
+  "config": {
+   "tracks": {
+    "a": 80,
+    "b": 80
+   },
+   "track_labels": {
+    "a": "A(정확도, 실후보 0.5%)",
+    "b": "B(단말 부담, 실후보 5%)"
+   },
+   "constants": {
+    "t_phase_ms": 75.0,
+    "t_eval_ms": 0.003,
+    "bw_bytes_per_s": 2500000.0
+   },
+   "note": "채점은 케이스가 정의하는 전체 조합 공간 기준 x* 대비 달성률. 시간은 협상 1건당 추정(합성 시간 + 프로토콜 계산 실측, K=1). 메모리는 단말 총 점유(공통 기저+프로토콜 상태)와 프로토콜 상태 2축."
+  },
+  "plan1a": {
+   "a": {
+    "cases": 80,
+    "agreed": 80,
+    "mean_ratio": 0.9811,
+    "mean_baseline": 0.9252,
+    "s": 0.7471,
+    "by_s": {
+     "64": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 1.0,
+      "mean_baseline": 0.8653,
+      "s": 1.0,
+      "t_total_s": {
+       "min": 3.34,
+       "mean": 5.35,
+       "median": 4.93,
+       "max": 8.18
+      },
+      "t_parts_median_s": {
+       "comm": 4.88,
+       "transfer": 0.05,
+       "eval": 0.0007,
+       "compute": 0.003
+      },
+      "median_device_bytes": 11603,
+      "median_protocol_bytes": 2009,
+      "median_base_bytes": 9594,
+      "median_rounds": 29,
+      "median_phases": 65,
+      "median_messages": 585,
+      "median_bytes": 133430
+     },
+     "192": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 1.0,
+      "mean_baseline": 0.8939,
+      "s": 1.0,
+      "t_total_s": {
+       "min": 6.71,
+       "mean": 12.1,
+       "median": 12.01,
+       "max": 18.13
+      },
+      "t_parts_median_s": {
+       "comm": 11.85,
+       "transfer": 0.16,
+       "eval": 0.0017,
+       "compute": 0.006
+      },
+      "median_device_bytes": 33952,
+      "median_protocol_bytes": 2268,
+      "median_base_bytes": 31684,
+      "median_rounds": 76,
+      "median_phases": 158,
+      "median_messages": 1422,
+      "median_bytes": 392485
+     },
+     "576": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9941,
+      "mean_baseline": 0.9335,
+      "s": 0.9115,
+      "t_total_s": {
+       "min": 10.59,
+       "mean": 21.11,
+       "median": 18.69,
+       "max": 38.18
+      },
+      "t_parts_median_s": {
+       "comm": 18.38,
+       "transfer": 0.27,
+       "eval": 0.0032,
+       "compute": 0.009
+      },
+      "median_device_bytes": 91256,
+      "median_protocol_bytes": 2552,
+      "median_base_bytes": 88704,
+      "median_rounds": 119,
+      "median_phases": 245,
+      "median_messages": 2205,
+      "median_bytes": 675920
+     },
+     "1728": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9828,
+      "mean_baseline": 0.9464,
+      "s": 0.6782,
+      "t_total_s": {
+       "min": 26.98,
+       "mean": 40.75,
+       "median": 40.33,
+       "max": 66.2
+      },
+      "t_parts_median_s": {
+       "comm": 39.53,
+       "transfer": 0.7,
+       "eval": 0.0088,
+       "compute": 0.021
+      },
+      "median_device_bytes": 299004,
+      "median_protocol_bytes": 2809,
+      "median_base_bytes": 296195,
+      "median_rounds": 260,
+      "median_phases": 527,
+      "median_messages": 4743,
+      "median_bytes": 1748807
+     },
+     "5184": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9672,
+      "mean_baseline": 0.9388,
+      "s": 0.4643,
+      "t_total_s": {
+       "min": 47.81,
+       "mean": 87.13,
+       "median": 87.89,
+       "max": 148.35
+      },
+      "t_parts_median_s": {
+       "comm": 86.03,
+       "transfer": 1.81,
+       "eval": 0.0231,
+       "compute": 0.051
+      },
+      "median_device_bytes": 857030,
+      "median_protocol_bytes": 3051,
+      "median_base_bytes": 853979,
+      "median_rounds": 570,
+      "median_phases": 1147,
+      "median_messages": 10323,
+      "median_bytes": 4518151
+     },
+     "15552": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9659,
+      "mean_baseline": 0.9379,
+      "s": 0.4511,
+      "t_total_s": {
+       "min": 129.87,
+       "mean": 183.42,
+       "median": 172.5,
+       "max": 303.48
+      },
+      "t_parts_median_s": {
+       "comm": 168.45,
+       "transfer": 4.1,
+       "eval": 0.062,
+       "compute": 0.106
+      },
+      "median_device_bytes": 2834310,
+      "median_protocol_bytes": 3311,
+      "median_base_bytes": 2830999,
+      "median_rounds": 1120,
+      "median_phases": 2246,
+      "median_messages": 20214,
+      "median_bytes": 10247928
+     },
+     "31104": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9698,
+      "mean_baseline": 0.9457,
+      "s": 0.4436,
+      "t_total_s": {
+       "min": 230.54,
+       "mean": 324.92,
+       "median": 292.09,
+       "max": 571.88
+      },
+      "t_parts_median_s": {
+       "comm": 283.8,
+       "transfer": 7.66,
+       "eval": 0.1183,
+       "compute": 0.191
+      },
+      "median_device_bytes": 6043878,
+      "median_protocol_bytes": 3535,
+      "median_base_bytes": 6040343,
+      "median_rounds": 1889,
+      "median_phases": 3784,
+      "median_messages": 34056,
+      "median_bytes": 19146862
+     },
+     "62208": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9689,
+      "mean_baseline": 0.9403,
+      "s": 0.48,
+      "t_total_s": {
+       "min": 323.91,
+       "mean": 664.54,
+       "median": 555.19,
+       "max": 1409.75
+      },
+      "t_parts_median_s": {
+       "comm": 540.23,
+       "transfer": 14.35,
+       "eval": 0.2282,
+       "compute": 0.345
+      },
+      "median_device_bytes": 12580418,
+      "median_protocol_bytes": 3745,
+      "median_base_bytes": 12576673,
+      "median_rounds": 3598,
+      "median_phases": 7203,
+      "median_messages": 64827,
+      "median_bytes": 35870885
+     }
+    }
+   },
+   "b": {
+    "cases": 80,
+    "agreed": 80,
+    "mean_ratio": 0.9559,
+    "mean_baseline": 0.912,
+    "s": 0.4995,
+    "by_s": {
+     "64": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9855,
+      "mean_baseline": 0.8864,
+      "s": 0.8723,
+      "t_total_s": {
+       "min": 3.49,
+       "mean": 5.27,
+       "median": 5.07,
+       "max": 7.26
+      },
+      "t_parts_median_s": {
+       "comm": 5.03,
+       "transfer": 0.05,
+       "eval": 0.0007,
+       "compute": 0.002
+      },
+      "median_device_bytes": 11539,
+      "median_protocol_bytes": 1945,
+      "median_base_bytes": 9594,
+      "median_rounds": 30,
+      "median_phases": 67,
+      "median_messages": 602,
+      "median_bytes": 123745
+     },
+     "192": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9436,
+      "mean_baseline": 0.902,
+      "s": 0.4247,
+      "t_total_s": {
+       "min": 7.33,
+       "mean": 12.33,
+       "median": 13.04,
+       "max": 16.69
+      },
+      "t_parts_median_s": {
+       "comm": 12.9,
+       "transfer": 0.14,
+       "eval": 0.0016,
+       "compute": 0.005
+      },
+      "median_device_bytes": 33942,
+      "median_protocol_bytes": 2258,
+      "median_base_bytes": 31684,
+      "median_rounds": 82,
+      "median_phases": 172,
+      "median_messages": 1548,
+      "median_bytes": 355542
+     },
+     "576": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9491,
+      "mean_baseline": 0.919,
+      "s": 0.3714,
+      "t_total_s": {
+       "min": 12.74,
+       "mean": 25.59,
+       "median": 23.54,
+       "max": 40.52
+      },
+      "t_parts_median_s": {
+       "comm": 23.18,
+       "transfer": 0.36,
+       "eval": 0.0037,
+       "compute": 0.011
+      },
+      "median_device_bytes": 91237,
+      "median_protocol_bytes": 2533,
+      "median_base_bytes": 88704,
+      "median_rounds": 151,
+      "median_phases": 309,
+      "median_messages": 2781,
+      "median_bytes": 890817
+     },
+     "1728": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9572,
+      "mean_baseline": 0.9248,
+      "s": 0.4312,
+      "t_total_s": {
+       "min": 34.49,
+       "mean": 48.46,
+       "median": 47.19,
+       "max": 77.11
+      },
+      "t_parts_median_s": {
+       "comm": 46.35,
+       "transfer": 0.81,
+       "eval": 0.0093,
+       "compute": 0.024
+      },
+      "median_device_bytes": 298959,
+      "median_protocol_bytes": 2764,
+      "median_base_bytes": 296195,
+      "median_rounds": 306,
+      "median_phases": 618,
+      "median_messages": 5562,
+      "median_bytes": 2021642
+     },
+     "5184": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9648,
+      "mean_baseline": 0.9142,
+      "s": 0.5892,
+      "t_total_s": {
+       "min": 54.06,
+       "mean": 109.92,
+       "median": 114.38,
+       "max": 176.14
+      },
+      "t_parts_median_s": {
+       "comm": 111.9,
+       "transfer": 2.29,
+       "eval": 0.0251,
+       "compute": 0.062
+      },
+      "median_device_bytes": 857030,
+      "median_protocol_bytes": 3051,
+      "median_base_bytes": 853979,
+      "median_rounds": 743,
+      "median_phases": 1492,
+      "median_messages": 13428,
+      "median_bytes": 5733459
+     },
+     "15552": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9369,
+      "mean_baseline": 0.9099,
+      "s": 0.3004,
+      "t_total_s": {
+       "min": 149.89,
+       "mean": 241.05,
+       "median": 234.56,
+       "max": 397.2
+      },
+      "t_parts_median_s": {
+       "comm": 228.75,
+       "transfer": 5.2,
+       "eval": 0.0659,
+       "compute": 0.135
+      },
+      "median_device_bytes": 2834318,
+      "median_protocol_bytes": 3319,
+      "median_base_bytes": 2830999,
+      "median_rounds": 1522,
+      "median_phases": 3050,
+      "median_messages": 27450,
+      "median_bytes": 12997875
+     },
+     "31104": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9495,
+      "mean_baseline": 0.9239,
+      "s": 0.3362,
+      "t_total_s": {
+       "min": 284.1,
+       "mean": 436.27,
+       "median": 383.79,
+       "max": 754.9
+      },
+      "t_parts_median_s": {
+       "comm": 372.75,
+       "transfer": 10.53,
+       "eval": 0.1277,
+       "compute": 0.255
+      },
+      "median_device_bytes": 6043861,
+      "median_protocol_bytes": 3518,
+      "median_base_bytes": 6040343,
+      "median_rounds": 2482,
+      "median_phases": 4970,
+      "median_messages": 44730,
+      "median_bytes": 26333312
+     },
+     "62208": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9609,
+      "mean_baseline": 0.9155,
+      "s": 0.5372,
+      "t_total_s": {
+       "min": 430.44,
+       "mean": 880.73,
+       "median": 742.35,
+       "max": 1783.51
+      },
+      "t_parts_median_s": {
+       "comm": 721.35,
+       "transfer": 20.28,
+       "eval": 0.2459,
+       "compute": 0.481
+      },
+      "median_device_bytes": 12580410,
+      "median_protocol_bytes": 3737,
+      "median_base_bytes": 12576673,
+      "median_rounds": 4806,
+      "median_phases": 9618,
+      "median_messages": 86562,
+      "median_bytes": 50693025
+     }
+    }
+   }
+  },
+  "plan2": {
+   "a": {
+    "cases": 80,
+    "agreed": 80,
+    "mean_ratio": 0.9795,
+    "mean_baseline": 0.9252,
+    "s": 0.7256,
+    "by_s": {
+     "64": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 1.0,
+      "mean_baseline": 0.8653,
+      "s": 1.0,
+      "t_total_s": {
+       "min": 8.94,
+       "mean": 12.1,
+       "median": 12.24,
+       "max": 15.69
+      },
+      "t_parts_median_s": {
+       "comm": 12.22,
+       "transfer": 0.01,
+       "eval": 0.0002,
+       "compute": 0.002
+      },
+      "median_device_bytes": 37394,
+      "median_protocol_bytes": 27800,
+      "median_base_bytes": 9594,
+      "median_rounds": 79,
+      "median_phases": 163,
+      "median_messages": 1218,
+      "median_bytes": 29884
+     },
+     "192": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 1.0,
+      "mean_baseline": 0.8939,
+      "s": 1.0,
+      "t_total_s": {
+       "min": 24.11,
+       "mean": 28.87,
+       "median": 29.44,
+       "max": 31.76
+      },
+      "t_parts_median_s": {
+       "comm": 29.4,
+       "transfer": 0.04,
+       "eval": 0.0006,
+       "compute": 0.004
+      },
+      "median_device_bytes": 126502,
+      "median_protocol_bytes": 94818,
+      "median_base_bytes": 31684,
+      "median_rounds": 193,
+      "median_phases": 392,
+      "median_messages": 2965,
+      "median_bytes": 97576
+     },
+     "576": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9821,
+      "mean_baseline": 0.9335,
+      "s": 0.7309,
+      "t_total_s": {
+       "min": 55.68,
+       "mean": 72.14,
+       "median": 67.84,
+       "max": 100.14
+      },
+      "t_parts_median_s": {
+       "comm": 67.72,
+       "transfer": 0.11,
+       "eval": 0.0017,
+       "compute": 0.011
+      },
+      "median_device_bytes": 360314,
+      "median_protocol_bytes": 271610,
+      "median_base_bytes": 88704,
+      "median_rounds": 449,
+      "median_phases": 903,
+      "median_messages": 6950,
+      "median_bytes": 272360
+     },
+     "1728": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.968,
+      "mean_baseline": 0.9464,
+      "s": 0.4033,
+      "t_total_s": {
+       "min": 126.66,
+       "mean": 194.53,
+       "median": 206.98,
+       "max": 241.74
+      },
+      "t_parts_median_s": {
+       "comm": 206.55,
+       "transfer": 0.37,
+       "eval": 0.0052,
+       "compute": 0.041
+      },
+      "median_device_bytes": 793772,
+      "median_protocol_bytes": 497577,
+      "median_base_bytes": 296195,
+      "median_rounds": 1374,
+      "median_phases": 2754,
+      "median_messages": 22021,
+      "median_bytes": 935923
+     },
+     "5184": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9624,
+      "mean_baseline": 0.9388,
+      "s": 0.3856,
+      "t_total_s": {
+       "min": 368.28,
+       "mean": 499.0,
+       "median": 492.56,
+       "max": 599.73
+      },
+      "t_parts_median_s": {
+       "comm": 491.25,
+       "transfer": 1.11,
+       "eval": 0.0156,
+       "compute": 0.135
+      },
+      "median_device_bytes": 2609124,
+      "median_protocol_bytes": 1755145,
+      "median_base_bytes": 853979,
+      "median_rounds": 3272,
+      "median_phases": 6550,
+      "median_messages": 54294,
+      "median_bytes": 2775597
+     },
+     "15552": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9758,
+      "mean_baseline": 0.9379,
+      "s": 0.6109,
+      "t_total_s": {
+       "min": 900.18,
+       "mean": 1224.78,
+       "median": 1275.33,
+       "max": 1473.37
+      },
+      "t_parts_median_s": {
+       "comm": 1271.1,
+       "transfer": 3.42,
+       "eval": 0.0467,
+       "compute": 0.534
+      },
+      "median_device_bytes": 9602668,
+      "median_protocol_bytes": 6771669,
+      "median_base_bytes": 2830999,
+      "median_rounds": 8471,
+      "median_phases": 16948,
+      "median_messages": 144148,
+      "median_bytes": 8546215
+     },
+     "31104": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9692,
+      "mean_baseline": 0.9457,
+      "s": 0.4339,
+      "t_total_s": {
+       "min": 1887.73,
+       "mean": 2426.79,
+       "median": 2350.19,
+       "max": 3057.68
+      },
+      "t_parts_median_s": {
+       "comm": 2341.05,
+       "transfer": 7.33,
+       "eval": 0.0933,
+       "compute": 1.737
+      },
+      "median_device_bytes": 15004284,
+      "median_protocol_bytes": 8963941,
+      "median_base_bytes": 6040343,
+      "median_rounds": 15604,
+      "median_phases": 31214,
+      "median_messages": 270460,
+      "median_bytes": 18326388
+     },
+     "62208": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9782,
+      "mean_baseline": 0.9403,
+      "s": 0.635,
+      "t_total_s": {
+       "min": 3588.68,
+       "mean": 4409.26,
+       "median": 4152.33,
+       "max": 6017.92
+      },
+      "t_parts_median_s": {
+       "comm": 4131.98,
+       "transfer": 13.29,
+       "eval": 0.1866,
+       "compute": 6.917
+      },
+      "median_device_bytes": 39845664,
+      "median_protocol_bytes": 27268991,
+      "median_base_bytes": 12576673,
+      "median_rounds": 27544,
+      "median_phases": 55093,
+      "median_messages": 459492,
+      "median_bytes": 33232222
+     }
+    }
+   },
+   "b": {
+    "cases": 80,
+    "agreed": 80,
+    "mean_ratio": 0.9704,
+    "mean_baseline": 0.912,
+    "s": 0.6642,
+    "by_s": {
+     "64": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9734,
+      "mean_baseline": 0.8864,
+      "s": 0.7658,
+      "t_total_s": {
+       "min": 9.09,
+       "mean": 11.55,
+       "median": 11.71,
+       "max": 13.44
+      },
+      "t_parts_median_s": {
+       "comm": 11.7,
+       "transfer": 0.01,
+       "eval": 0.0002,
+       "compute": 0.002
+      },
+      "median_device_bytes": 38162,
+      "median_protocol_bytes": 28568,
+      "median_base_bytes": 9594,
+      "median_rounds": 75,
+      "median_phases": 156,
+      "median_messages": 1228,
+      "median_bytes": 31171
+     },
+     "192": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9746,
+      "mean_baseline": 0.902,
+      "s": 0.7406,
+      "t_total_s": {
+       "min": 20.66,
+       "mean": 29.39,
+       "median": 29.75,
+       "max": 35.98
+      },
+      "t_parts_median_s": {
+       "comm": 29.7,
+       "transfer": 0.04,
+       "eval": 0.0006,
+       "compute": 0.005
+      },
+      "median_device_bytes": 132646,
+      "median_protocol_bytes": 100962,
+      "median_base_bytes": 31684,
+      "median_rounds": 195,
+      "median_phases": 396,
+      "median_messages": 3178,
+      "median_bytes": 105826
+     },
+     "576": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9666,
+      "mean_baseline": 0.919,
+      "s": 0.5876,
+      "t_total_s": {
+       "min": 49.52,
+       "mean": 69.37,
+       "median": 72.37,
+       "max": 84.52
+      },
+      "t_parts_median_s": {
+       "comm": 72.22,
+       "transfer": 0.12,
+       "eval": 0.0017,
+       "compute": 0.011
+      },
+      "median_device_bytes": 225146,
+      "median_protocol_bytes": 136442,
+      "median_base_bytes": 88704,
+      "median_rounds": 479,
+      "median_phases": 963,
+      "median_messages": 7547,
+      "median_bytes": 289793
+     },
+     "1728": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9696,
+      "mean_baseline": 0.9248,
+      "s": 0.5963,
+      "t_total_s": {
+       "min": 133.72,
+       "mean": 183.31,
+       "median": 190.09,
+       "max": 213.06
+      },
+      "t_parts_median_s": {
+       "comm": 189.68,
+       "transfer": 0.37,
+       "eval": 0.0052,
+       "compute": 0.039
+      },
+      "median_device_bytes": 793772,
+      "median_protocol_bytes": 497577,
+      "median_base_bytes": 296195,
+      "median_rounds": 1262,
+      "median_phases": 2529,
+      "median_messages": 20984,
+      "median_bytes": 934371
+     },
+     "5184": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9657,
+      "mean_baseline": 0.9142,
+      "s": 0.6003,
+      "t_total_s": {
+       "min": 378.72,
+       "mean": 478.44,
+       "median": 483.22,
+       "max": 624.7
+      },
+      "t_parts_median_s": {
+       "comm": 482.02,
+       "transfer": 1.06,
+       "eval": 0.0156,
+       "compute": 0.123
+      },
+      "median_device_bytes": 2706284,
+      "median_protocol_bytes": 1852305,
+      "median_base_bytes": 853979,
+      "median_rounds": 3211,
+      "median_phases": 6427,
+      "median_messages": 51819,
+      "median_bytes": 2652223
+     },
+     "15552": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9695,
+      "mean_baseline": 0.9099,
+      "s": 0.6611,
+      "t_total_s": {
+       "min": 943.9,
+       "mean": 1204.14,
+       "median": 1268.81,
+       "max": 1378.11
+      },
+      "t_parts_median_s": {
+       "comm": 1264.72,
+       "transfer": 3.33,
+       "eval": 0.0467,
+       "compute": 0.502
+      },
+      "median_device_bytes": 9814396,
+      "median_protocol_bytes": 6983397,
+      "median_base_bytes": 2830999,
+      "median_rounds": 8429,
+      "median_phases": 16863,
+      "median_messages": 143923,
+      "median_bytes": 8312558
+     },
+     "31104": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9638,
+      "mean_baseline": 0.9239,
+      "s": 0.5241,
+      "t_total_s": {
+       "min": 2065.67,
+       "mean": 2464.72,
+       "median": 2344.72,
+       "max": 3002.75
+      },
+      "t_parts_median_s": {
+       "comm": 2335.57,
+       "transfer": 7.3,
+       "eval": 0.0933,
+       "compute": 1.754
+      },
+      "median_device_bytes": 15009624,
+      "median_protocol_bytes": 8969281,
+      "median_base_bytes": 6040343,
+      "median_rounds": 15568,
+      "median_phases": 31141,
+      "median_messages": 269766,
+      "median_bytes": 18254105
+     },
+     "62208": {
+      "cases": 10,
+      "agreed": 10,
+      "mean_ratio": 0.9803,
+      "mean_baseline": 0.9155,
+      "s": 0.7674,
+      "t_total_s": {
+       "min": 3710.51,
+       "mean": 4199.0,
+       "median": 4057.92,
+       "max": 4706.5
+      },
+      "t_parts_median_s": {
+       "comm": 4038.07,
+       "transfer": 13.15,
+       "eval": 0.1866,
+       "compute": 6.1
+      },
+      "median_device_bytes": 41396000,
+      "median_protocol_bytes": 28819327,
+      "median_base_bytes": 12576673,
+      "median_rounds": 26918,
+      "median_phases": 53841,
+      "median_messages": 460992,
+      "median_bytes": 32873190
+     }
+    }
+   }
+  }
+ },
+ "issue_space_n": {
+  "config": {
+   "track": "a",
+   "track_label": "A(정확도, 실후보 0.5%)",
+   "participants": [
+    3,
+    5,
+    10,
+    15,
+    20,
+    30,
+    40,
+    50
+   ],
+   "combos": [
+    576,
+    5184,
+    62208
+   ],
+   "cases_per_cell": 5,
+   "workers": 9,
+   "constants": {
+    "t_phase_ms": 75.0,
+    "t_eval_ms": 0.003,
+    "bw_bytes_per_s": 2500000.0
+   },
+   "note": "조합 규모 3단계를 고정하고 참여자 수를 훑는다. 채점은 케이스가 정의하는 전체 조합 공간 기준 x* 대비 달성률. 시간은 협상 1건당 추정(합성 시간 + 프로토콜 계산 실측, K=1). 메모리는 단말 총 점유(공통 기저 + 프로토콜 상태)."
+  },
+  "plan1a": {
+   "576": {
+    "3": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 1.0,
+     "mean_baseline": 0.9599,
+     "s": 1.0,
+     "median_time_s": 10.08,
+     "median_rounds": 64,
+     "median_phases": 134,
+     "median_device_bytes": 89881,
+     "median_protocol_bytes": 1177,
+     "median_messages": 268
+    },
+    "5": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9883,
+     "mean_baseline": 0.937,
+     "s": 0.8136,
+     "median_time_s": 14.2,
+     "median_rounds": 91,
+     "median_phases": 188,
+     "median_device_bytes": 90337,
+     "median_protocol_bytes": 1633,
+     "median_messages": 752
+    },
+    "10": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9984,
+     "mean_baseline": 0.9178,
+     "s": 0.9808,
+     "median_time_s": 18.45,
+     "median_rounds": 118,
+     "median_phases": 242,
+     "median_device_bytes": 91302,
+     "median_protocol_bytes": 2598,
+     "median_messages": 2178
+    },
+    "15": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9988,
+     "mean_baseline": 0.9111,
+     "s": 0.9869,
+     "median_time_s": 19.15,
+     "median_rounds": 119,
+     "median_phases": 244,
+     "median_device_bytes": 92154,
+     "median_protocol_bytes": 3450,
+     "median_messages": 3416
+    },
+    "20": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9863,
+     "mean_baseline": 0.9142,
+     "s": 0.8408,
+     "median_time_s": 25.8,
+     "median_rounds": 157,
+     "median_phases": 320,
+     "median_device_bytes": 92814,
+     "median_protocol_bytes": 4110,
+     "median_messages": 6080
+    },
+    "30": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9784,
+     "mean_baseline": 0.9055,
+     "s": 0.7714,
+     "median_time_s": 44.87,
+     "median_rounds": 263,
+     "median_phases": 532,
+     "median_device_bytes": 94414,
+     "median_protocol_bytes": 5710,
+     "median_messages": 15428
+    },
+    "40": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9735,
+     "mean_baseline": 0.8858,
+     "s": 0.7682,
+     "median_time_s": 46.11,
+     "median_rounds": 249,
+     "median_phases": 504,
+     "median_device_bytes": 95734,
+     "median_protocol_bytes": 7030,
+     "median_messages": 19655
+    },
+    "50": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.984,
+     "mean_baseline": 0.8894,
+     "s": 0.8551,
+     "median_time_s": 56.78,
+     "median_rounds": 277,
+     "median_phases": 560,
+     "median_device_bytes": 97718,
+     "median_protocol_bytes": 9014,
+     "median_messages": 27438
+    }
+   },
+   "5184": {
+    "3": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9857,
+     "mean_baseline": 0.9468,
+     "s": 0.7314,
+     "median_time_s": 22.88,
+     "median_rounds": 149,
+     "median_phases": 304,
+     "median_device_bytes": 855450,
+     "median_protocol_bytes": 1471,
+     "median_messages": 608
+    },
+    "5": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.97,
+     "mean_baseline": 0.9427,
+     "s": 0.4764,
+     "median_time_s": 51.98,
+     "median_rounds": 342,
+     "median_phases": 690,
+     "median_device_bytes": 855988,
+     "median_protocol_bytes": 2009,
+     "median_messages": 2760
+    },
+    "10": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9756,
+     "mean_baseline": 0.9458,
+     "s": 0.5492,
+     "median_time_s": 79.52,
+     "median_rounds": 516,
+     "median_phases": 1038,
+     "median_device_bytes": 857076,
+     "median_protocol_bytes": 3097,
+     "median_messages": 9342
+    },
+    "15": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9709,
+     "mean_baseline": 0.948,
+     "s": 0.4406,
+     "median_time_s": 90.94,
+     "median_rounds": 576,
+     "median_phases": 1158,
+     "median_device_bytes": 858008,
+     "median_protocol_bytes": 4029,
+     "median_messages": 16212
+    },
+    "20": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9617,
+     "mean_baseline": 0.9531,
+     "s": 0.1842,
+     "median_time_s": 173.87,
+     "median_rounds": 1088,
+     "median_phases": 2182,
+     "median_device_bytes": 858748,
+     "median_protocol_bytes": 4769,
+     "median_messages": 41457
+    },
+    "30": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9671,
+     "mean_baseline": 0.9552,
+     "s": 0.2651,
+     "median_time_s": 174.34,
+     "median_rounds": 977,
+     "median_phases": 1960,
+     "median_device_bytes": 860596,
+     "median_protocol_bytes": 6617,
+     "median_messages": 56840
+    },
+    "40": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9793,
+     "mean_baseline": 0.9467,
+     "s": 0.6121,
+     "median_time_s": 236.73,
+     "median_rounds": 1185,
+     "median_phases": 2376,
+     "median_device_bytes": 862076,
+     "median_protocol_bytes": 8097,
+     "median_messages": 92664
+    },
+    "50": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9619,
+     "mean_baseline": 0.9536,
+     "s": 0.1784,
+     "median_time_s": 348.19,
+     "median_rounds": 1661,
+     "median_phases": 3328,
+     "median_device_bytes": 864308,
+     "median_protocol_bytes": 10329,
+     "median_messages": 163071
+    }
+   },
+   "62208": {
+    "3": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9651,
+     "mean_baseline": 0.9273,
+     "s": 0.52,
+     "median_time_s": 37.08,
+     "median_rounds": 242,
+     "median_phases": 490,
+     "median_device_bytes": 12578587,
+     "median_protocol_bytes": 1914,
+     "median_messages": 980
+    },
+    "5": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9792,
+     "mean_baseline": 0.9374,
+     "s": 0.6673,
+     "median_time_s": 277.58,
+     "median_rounds": 1834,
+     "median_phases": 3674,
+     "median_device_bytes": 12579190,
+     "median_protocol_bytes": 2517,
+     "median_messages": 14696
+    },
+    "10": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9639,
+     "mean_baseline": 0.9396,
+     "s": 0.4022,
+     "median_time_s": 735.64,
+     "median_rounds": 4773,
+     "median_phases": 9552,
+     "median_device_bytes": 12580464,
+     "median_protocol_bytes": 3791,
+     "median_messages": 85968
+    },
+    "15": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9631,
+     "mean_baseline": 0.9393,
+     "s": 0.3928,
+     "median_time_s": 636.33,
+     "median_rounds": 3967,
+     "median_phases": 7940,
+     "median_device_bytes": 12581516,
+     "median_protocol_bytes": 4843,
+     "median_messages": 111160
+    },
+    "20": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9646,
+     "mean_baseline": 0.951,
+     "s": 0.2773,
+     "median_time_s": 969.88,
+     "median_rounds": 5979,
+     "median_phases": 11964,
+     "median_device_bytes": 12582376,
+     "median_protocol_bytes": 5703,
+     "median_messages": 227316
+    },
+    "30": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.962,
+     "mean_baseline": 0.9517,
+     "s": 0.2146,
+     "median_time_s": 1570.83,
+     "median_rounds": 8723,
+     "median_phases": 17452,
+     "median_device_bytes": 12584464,
+     "median_protocol_bytes": 7791,
+     "median_messages": 506108
+    },
+    "40": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9667,
+     "mean_baseline": 0.9524,
+     "s": 0.2999,
+     "median_time_s": 2527.79,
+     "median_rounds": 13518,
+     "median_phases": 27042,
+     "median_device_bytes": 12586184,
+     "median_protocol_bytes": 9511,
+     "median_messages": 1054638
+    },
+    "50": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9688,
+     "mean_baseline": 0.9643,
+     "s": 0.1261,
+     "median_time_s": 2586.65,
+     "median_rounds": 11485,
+     "median_phases": 22976,
+     "median_device_bytes": 12588656,
+     "median_protocol_bytes": 11983,
+     "median_messages": 1125824
+    }
+   }
+  },
+  "plan2": {
+   "576": {
+    "3": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9698,
+     "mean_baseline": 0.9599,
+     "s": 0.2451,
+     "median_time_s": 29.19,
+     "median_rounds": 192,
+     "median_phases": 389,
+     "median_device_bytes": 126073,
+     "median_protocol_bytes": 37369,
+     "median_messages": 601
+    },
+    "5": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9928,
+     "mean_baseline": 0.937,
+     "s": 0.8859,
+     "median_time_s": 39.85,
+     "median_rounds": 263,
+     "median_phases": 531,
+     "median_device_bytes": 162799,
+     "median_protocol_bytes": 74095,
+     "median_messages": 1608
+    },
+    "10": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9752,
+     "mean_baseline": 0.9178,
+     "s": 0.6986,
+     "median_time_s": 85.9,
+     "median_rounds": 569,
+     "median_phases": 1143,
+     "median_device_bytes": 391078,
+     "median_protocol_bytes": 302374,
+     "median_messages": 9351
+    },
+    "15": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9507,
+     "mean_baseline": 0.9111,
+     "s": 0.4453,
+     "median_time_s": 84.63,
+     "median_rounds": 560,
+     "median_phases": 1125,
+     "median_device_bytes": 562554,
+     "median_protocol_bytes": 473850,
+     "median_messages": 13864
+    },
+    "20": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9813,
+     "mean_baseline": 0.9142,
+     "s": 0.7822,
+     "median_time_s": 101.12,
+     "median_rounds": 669,
+     "median_phases": 1343,
+     "median_device_bytes": 752270,
+     "median_protocol_bytes": 663566,
+     "median_messages": 21748
+    },
+    "30": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9897,
+     "mean_baseline": 0.9055,
+     "s": 0.8907,
+     "median_time_s": 109.33,
+     "median_rounds": 722,
+     "median_phases": 1449,
+     "median_device_bytes": 1107494,
+     "median_protocol_bytes": 1018790,
+     "median_messages": 36449
+    },
+    "40": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9742,
+     "mean_baseline": 0.8858,
+     "s": 0.7743,
+     "median_time_s": 114.46,
+     "median_rounds": 754,
+     "median_phases": 1513,
+     "median_device_bytes": 1437774,
+     "median_protocol_bytes": 1349070,
+     "median_messages": 52161
+    },
+    "50": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9852,
+     "mean_baseline": 0.8894,
+     "s": 0.8665,
+     "median_time_s": 119.41,
+     "median_rounds": 785,
+     "median_phases": 1575,
+     "median_device_bytes": 1768806,
+     "median_protocol_bytes": 1680102,
+     "median_messages": 68328
+    }
+   },
+   "5184": {
+    "3": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9914,
+     "mean_baseline": 0.9468,
+     "s": 0.8386,
+     "median_time_s": 108.61,
+     "median_rounds": 721,
+     "median_phases": 1447,
+     "median_device_bytes": 1120863,
+     "median_protocol_bytes": 266884,
+     "median_messages": 2731
+    },
+    "5": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9744,
+     "mean_baseline": 0.9427,
+     "s": 0.5538,
+     "median_time_s": 257.91,
+     "median_rounds": 1715,
+     "median_phases": 3435,
+     "median_device_bytes": 1374149,
+     "median_protocol_bytes": 520170,
+     "median_messages": 11534
+    },
+    "10": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9664,
+     "mean_baseline": 0.9458,
+     "s": 0.3787,
+     "median_time_s": 511.44,
+     "median_rounds": 3397,
+     "median_phases": 6799,
+     "median_device_bytes": 2707636,
+     "median_protocol_bytes": 1853657,
+     "median_messages": 56678
+    },
+    "15": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9809,
+     "mean_baseline": 0.948,
+     "s": 0.6334,
+     "median_time_s": 583.98,
+     "median_rounds": 3873,
+     "median_phases": 7751,
+     "median_device_bytes": 3364904,
+     "median_protocol_bytes": 2510925,
+     "median_messages": 101171
+    },
+    "20": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.968,
+     "mean_baseline": 0.9531,
+     "s": 0.3189,
+     "median_time_s": 718.19,
+     "median_rounds": 4757,
+     "median_phases": 9519,
+     "median_device_bytes": 4021564,
+     "median_protocol_bytes": 3167585,
+     "median_messages": 164334
+    },
+    "30": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9912,
+     "mean_baseline": 0.9552,
+     "s": 0.8023,
+     "median_time_s": 767.33,
+     "median_rounds": 5065,
+     "median_phases": 10135,
+     "median_device_bytes": 5335252,
+     "median_protocol_bytes": 4481273,
+     "median_messages": 272153
+    },
+    "40": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.971,
+     "mean_baseline": 0.9467,
+     "s": 0.4552,
+     "median_time_s": 875.43,
+     "median_rounds": 5758,
+     "median_phases": 11521,
+     "median_device_bytes": 6648572,
+     "median_protocol_bytes": 5794593,
+     "median_messages": 412421
+    },
+    "50": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9812,
+     "mean_baseline": 0.9536,
+     "s": 0.5953,
+     "median_time_s": 914.48,
+     "median_rounds": 6001,
+     "median_phases": 12007,
+     "median_device_bytes": 7962644,
+     "median_protocol_bytes": 7108665,
+     "median_messages": 534160
+    }
+   },
+   "62208": {
+    "3": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.989,
+     "mean_baseline": 0.9273,
+     "s": 0.8484,
+     "median_time_s": 396.03,
+     "median_rounds": 2634,
+     "median_phases": 5273,
+     "median_device_bytes": 13791475,
+     "median_protocol_bytes": 1214802,
+     "median_messages": 10274
+    },
+    "5": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9806,
+     "mean_baseline": 0.9374,
+     "s": 0.6908,
+     "median_time_s": 2310.71,
+     "median_rounds": 15365,
+     "median_phases": 30735,
+     "median_device_bytes": 20542457,
+     "median_protocol_bytes": 7965784,
+     "median_messages": 118211
+    },
+    "10": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9703,
+     "mean_baseline": 0.9396,
+     "s": 0.5084,
+     "median_time_s": 4909.39,
+     "median_rounds": 32463,
+     "median_phases": 64931,
+     "median_device_bytes": 39929184,
+     "median_protocol_bytes": 27352511,
+     "median_messages": 523724
+    },
+    "15": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9624,
+     "mean_baseline": 0.9393,
+     "s": 0.3815,
+     "median_time_s": 5869.59,
+     "median_rounds": 38544,
+     "median_phases": 77093,
+     "median_device_bytes": 52002612,
+     "median_protocol_bytes": 39425939,
+     "median_messages": 1028574
+    },
+    "20": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9844,
+     "mean_baseline": 0.951,
+     "s": 0.682,
+     "median_time_s": 6965.51,
+     "median_rounds": 45504,
+     "median_phases": 91013,
+     "median_device_bytes": 62489800,
+     "median_protocol_bytes": 49913127,
+     "median_messages": 1597070
+    },
+    "30": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9702,
+     "mean_baseline": 0.9517,
+     "s": 0.383,
+     "median_time_s": 8485.19,
+     "median_rounds": 54559,
+     "median_phases": 109123,
+     "median_device_bytes": 83464288,
+     "median_protocol_bytes": 70887615,
+     "median_messages": 2990938
+    },
+    "40": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9727,
+     "mean_baseline": 0.9524,
+     "s": 0.426,
+     "median_time_s": 9901.52,
+     "median_rounds": 63441,
+     "median_phases": 126887,
+     "median_device_bytes": 104438408,
+     "median_protocol_bytes": 91861735,
+     "median_messages": 4465300
+    },
+    "50": {
+     "cases": 5,
+     "agreed": 5,
+     "mean_ratio": 0.9741,
+     "mean_baseline": 0.9643,
+     "s": 0.2743,
+     "median_time_s": 10125.65,
+     "median_rounds": 64519,
+     "median_phases": 129043,
+     "median_device_bytes": 125413280,
+     "median_protocol_bytes": 112836607,
+     "median_messages": 5872070
+    }
+   }
+  }
+ },
+ "tb": {
+  "config": {
+   "cases": 100,
+   "constants": {
+    "t_phase_ms": 75.0,
+    "t_eval_ms": 0.003,
+    "bw_bytes_per_s": 2500000.0
+   },
+   "input": "벤치마크 functional (3인)",
+   "note": "상수 3종은 잠정(분석자 제안) — ENV-B 실측 대체 예정. 상대 비교·지배 항 파악용"
+  },
+  "plan1a": {
+   "median_total_ms": 1950.8,
+   "median_rtt_ms": 1950.0,
+   "median_eval_ms": 0.1,
+   "median_transfer_ms": 0.7,
+   "dominant": "rtt"
+  },
+  "plan2": {
+   "median_total_ms": 2212.9,
+   "median_rtt_ms": 2212.5,
+   "median_eval_ms": 0.0,
+   "median_transfer_ms": 0.3,
+   "dominant": "rtt"
+  }
+ },
+ "ft": {
+  "config": {
+   "p_env": 0.01,
+   "p_env_note": "잠정 (ENV-B 실측 대체 전)",
+   "multiples": [
+    1,
+    2,
+    5,
+    10,
+    20,
+    50
+   ],
+   "runs_base": 100,
+   "runs_each": 100,
+   "input": "벤치마크 functional (3인)"
+  },
+  "plan1a": {
+   "baseline_agree_rate": 0.8,
+   "agree_rates": {
+    "0.0": 0.8,
+    "1": 0.8,
+    "2": 0.8,
+    "5": 0.79,
+    "10": 0.79,
+    "20": 0.78,
+    "50": 0.7
+   },
+   "critical_multiple": null,
+   "margin": 100,
+   "stars": 5
+  },
+  "plan2": {
+   "baseline_agree_rate": 0.8,
+   "agree_rates": {
+    "0.0": 0.8,
+    "1": 0.8,
+    "2": 0.8,
+    "5": 0.8,
+    "10": 0.8,
+    "20": 0.8,
+    "50": 0.8
+   },
+   "critical_multiple": null,
+   "margin": 100,
+   "stars": 5
+  }
+ },
+ "rec": {
+  "config": {
+   "sessions": 10,
+   "input": "벤치마크 functional (3인) 선두 표본",
+   "note": "시간 대체 = phase 비용. 중단 유형(프로세스/네트워크)은 ENV-A에서 동일 취급"
+  },
+  "plan1a": {
+   "trials": 90,
+   "fr_failures": 0,
+   "invalid_trials": 22,
+   "median_ratio": 1.07,
+   "restart_cost_R": 9.0,
+   "stars": 4
+  },
+  "plan2": {
+   "trials": 60,
+   "fr_failures": 0,
+   "invalid_trials": 22,
+   "median_ratio": 1.211,
+   "restart_cost_R": 11.5,
+   "stars": 4
+  }
+ },
+ "confidentiality": {
+  "config": {
+   "e2": {
+    "A": 0.6333,
+    "B": 0.1667,
+    "samples": 30
+   },
+   "m_note": "노출 배수 m = Σ관찰자 깊이 ÷ e₂ (핸드북 §7.3 — 별점 사다리는 잠정)",
+   "cases": 100,
+   "candidates": 12,
+   "input": "벤치마크 functional (3인)",
+   "by_n_levels": [
+    3,
+    4,
+    5,
+    6,
+    8,
+    10,
+    15,
+    20,
+    30,
+    50
+   ],
+   "by_n_runs": 30,
+   "by_n_input": "벤치마크 scalability family (후보 4N)",
+   "viewpoints": "participant=P1(트리에선 내부 노드 — 비루트 최악 관찰자) · coordinator=P0(담당자·루트)"
+  },
+  "plan1a": {
+   "participant": {
+    "accuracy": 0.0833,
+    "gain_pp": 0.0,
+    "exposure_rate": 0.0,
+    "stars": 5
+   },
+   "coordinator": {
+    "accuracy": 1.0,
+    "gain_pp": 91.67,
+    "exposure_rate": 1.0,
+    "stars": 0
+   },
+   "multiple": {
+    "m_A": 0.677,
+    "m_B": 0.75,
+    "stars_m_A": 3,
+    "stars_m_B": 3,
+    "max_single_depth_A": 0.429
+   },
+   "by_n": {
+    "3": {
+     "participant": {
+      "gain_pp": -0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 91.67,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.395,
+      "m_B": 0.857,
+      "stars_m_A": 4,
+      "stars_m_B": 3,
+      "max_single_depth_A": 0.25
+     }
+    },
+    "4": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 93.75,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.462,
+      "m_B": 0.6,
+      "stars_m_A": 4,
+      "stars_m_B": 3,
+      "max_single_depth_A": 0.293
+     }
+    },
+    "5": {
+     "participant": {
+      "gain_pp": -0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 95.0,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.49,
+      "m_B": 0.5,
+      "stars_m_A": 4,
+      "stars_m_B": 4,
+      "max_single_depth_A": 0.31
+     }
+    },
+    "6": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 95.83,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.526,
+      "m_B": 0.4,
+      "stars_m_A": 3,
+      "stars_m_B": 4,
+      "max_single_depth_A": 0.333
+     }
+    },
+    "8": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 96.88,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.549,
+      "m_B": 0.3,
+      "stars_m_A": 3,
+      "stars_m_B": 4,
+      "max_single_depth_A": 0.348
+     }
+    },
+    "10": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 97.5,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.547,
+      "m_B": 0.25,
+      "stars_m_A": 3,
+      "stars_m_B": 5,
+      "max_single_depth_A": 0.346
+     }
+    },
+    "15": {
+     "participant": {
+      "gain_pp": -0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 98.33,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.526,
+      "m_B": 0.167,
+      "stars_m_A": 3,
+      "stars_m_B": 5,
+      "max_single_depth_A": 0.333
+     }
+    },
+    "20": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 98.75,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.516,
+      "m_B": 0.125,
+      "stars_m_A": 3,
+      "stars_m_B": 5,
+      "max_single_depth_A": 0.327
+     }
+    },
+    "30": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 99.17,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.51,
+      "m_B": 0.083,
+      "stars_m_A": 3,
+      "stars_m_B": 5,
+      "max_single_depth_A": 0.323
+     }
+    },
+    "50": {
+     "participant": {
+      "gain_pp": -0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 99.5,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.504,
+      "m_B": 0.05,
+      "stars_m_A": 3,
+      "stars_m_B": 5,
+      "max_single_depth_A": 0.319
+     }
+    }
+   }
+  },
+  "plan2": {
+   "participant": {
+    "accuracy": 0.0833,
+    "gain_pp": 0.0,
+    "exposure_rate": 0.0,
+    "stars": 5
+   },
+   "coordinator": {
+    "accuracy": 1.0,
+    "gain_pp": 91.67,
+    "exposure_rate": 1.0,
+    "stars": 0
+   },
+   "multiple": {
+    "m_A": 1.184,
+    "m_B": 0.75,
+    "stars_m_A": 2,
+    "stars_m_B": 3,
+    "max_single_depth_A": 0.75
+   },
+   "by_n": {
+    "3": {
+     "participant": {
+      "gain_pp": -0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 91.67,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 0.789,
+      "m_B": 0.857,
+      "stars_m_A": 3,
+      "stars_m_B": 3,
+      "max_single_depth_A": 0.5
+     }
+    },
+    "4": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 93.75,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.005,
+      "m_B": 0.6,
+      "stars_m_A": 2,
+      "stars_m_B": 3,
+      "max_single_depth_A": 0.636
+     }
+    },
+    "5": {
+     "participant": {
+      "gain_pp": -0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 95.0,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.105,
+      "m_B": 0.5,
+      "stars_m_A": 2,
+      "stars_m_B": 4,
+      "max_single_depth_A": 0.7
+     }
+    },
+    "6": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 95.83,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.156,
+      "m_B": 0.4,
+      "stars_m_A": 2,
+      "stars_m_B": 4,
+      "max_single_depth_A": 0.732
+     }
+    },
+    "8": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 96.88,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.353,
+      "m_B": 0.3,
+      "stars_m_A": 2,
+      "stars_m_B": 4,
+      "max_single_depth_A": 0.857
+     }
+    },
+    "10": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 97.5,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.427,
+      "m_B": 0.25,
+      "stars_m_A": 2,
+      "stars_m_B": 5,
+      "max_single_depth_A": 0.904
+     }
+    },
+    "15": {
+     "participant": {
+      "gain_pp": -0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 98.33,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.536,
+      "m_B": 0.167,
+      "stars_m_A": 2,
+      "stars_m_B": 5,
+      "max_single_depth_A": 0.973
+     }
+    },
+    "20": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 98.75,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.579,
+      "m_B": 0.125,
+      "stars_m_A": 2,
+      "stars_m_B": 5,
+      "max_single_depth_A": 1.0
+     }
+    },
+    "30": {
+     "participant": {
+      "gain_pp": 0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 99.17,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.579,
+      "m_B": 0.083,
+      "stars_m_A": 2,
+      "stars_m_B": 5,
+      "max_single_depth_A": 1.0
+     }
+    },
+    "50": {
+     "participant": {
+      "gain_pp": -0.0,
+      "exposure_rate": 0.0,
+      "stars": 5
+     },
+     "coordinator": {
+      "gain_pp": 99.5,
+      "exposure_rate": 1.0,
+      "stars": 0
+     },
+     "multiple": {
+      "m_A": 1.579,
+      "m_B": 0.05,
+      "stars_m_A": 2,
+      "stars_m_B": 5,
+      "max_single_depth_A": 1.0
+     }
+    }
+   }
+  }
+ },
+ "an_kit": {
+  "cases": 40,
+  "dir": "/Users/geneen/workspace/architect-teamproject/poc/dp2-nparty/results/full-20260812T185840KST/an-kit"
+ }
+}

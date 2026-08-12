@@ -65,7 +65,7 @@ def line_svg(curves, title, ylab, log_y, path, yfmt):
             s.append(f'<circle cx="{px(x):.1f}" cy="{py(y):.1f}" r="3.2" fill="{c}"/>')
         lx, ly = pts[-1]
         s.append(f'<text x="{px(lx)+8:.1f}" y="{py(ly)+4:.1f}" font-size="12" fill="{c}" '
-                 f'font-weight="bold">{label} ({SUB[label]})</text>')
+                 f'font-weight="bold">{label}</text>')
     s.append('</svg>')
     path.write_text("\n".join(s), encoding="utf-8")
     print(f"  → {path.name}")
