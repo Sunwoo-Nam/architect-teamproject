@@ -1,0 +1,307 @@
+{
+  "name": "고차원 4축 (seed 1212)",
+  "meta": {
+    "id": "FIX-HI-04",
+    "name": "축 수 스윕 — 하루 약속 풀 플랜 (n = 4/6/8/10, 축당 값 5 균일)",
+    "conflict_level": "mid",
+    "conflict_rho": 0.0,
+    "expected": "agreement",
+    "axis_sweep": [
+      4,
+      6,
+      8,
+      10
+    ]
+  },
+  "space_size": 625,
+  "n_axes": 4,
+  "axes": [
+    {
+      "name": "date",
+      "generator": "date_slots",
+      "values": [
+        {
+          "name": "mon",
+          "attrs": {
+            "weekend": false
+          }
+        },
+        {
+          "name": "tue",
+          "attrs": {
+            "weekend": false
+          }
+        },
+        {
+          "name": "wed",
+          "attrs": {
+            "weekend": false
+          }
+        },
+        {
+          "name": "thu",
+          "attrs": {
+            "weekend": false
+          }
+        },
+        {
+          "name": "fri",
+          "attrs": {
+            "weekend": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "time",
+      "generator": "time_slots",
+      "values": [
+        {
+          "name": "11:00",
+          "attrs": {
+            "late": false
+          }
+        },
+        {
+          "name": "13:00",
+          "attrs": {
+            "late": false
+          }
+        },
+        {
+          "name": "15:00",
+          "attrs": {
+            "late": false
+          }
+        },
+        {
+          "name": "17:00",
+          "attrs": {
+            "late": false
+          }
+        },
+        {
+          "name": "19:00",
+          "attrs": {
+            "late": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "region",
+      "generator": "regions",
+      "values": [
+        {
+          "name": "gangnam",
+          "attrs": {}
+        },
+        {
+          "name": "hongdae",
+          "attrs": {}
+        },
+        {
+          "name": "yeongdeungpo",
+          "attrs": {}
+        },
+        {
+          "name": "jamsil",
+          "attrs": {}
+        },
+        {
+          "name": "seongsu",
+          "attrs": {}
+        }
+      ]
+    },
+    {
+      "name": "movie",
+      "generator": "movies",
+      "values": [
+        {
+          "name": "mv1",
+          "attrs": {}
+        },
+        {
+          "name": "mv2",
+          "attrs": {}
+        },
+        {
+          "name": "mv3",
+          "attrs": {}
+        },
+        {
+          "name": "mv4",
+          "attrs": {}
+        },
+        {
+          "name": "mv5",
+          "attrs": {}
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "type": "hard",
+      "rule": "availability",
+      "subject": "movie",
+      "over": "region",
+      "coverage": 0.75
+    },
+    {
+      "type": "hard",
+      "rule": "membership",
+      "subject": "theater",
+      "region_axis": "region"
+    },
+    {
+      "type": "hard",
+      "rule": "membership",
+      "subject": "restaurant",
+      "region_axis": "region"
+    },
+    {
+      "type": "soft",
+      "rule": "same_region",
+      "a": "region",
+      "b": "cafe",
+      "penalty": 0.15
+    },
+    {
+      "type": "soft",
+      "rule": "conditional_pref",
+      "if_axis": "budget",
+      "if_values": [
+        "low"
+      ],
+      "then_axis": "menu",
+      "preferred": [
+        "korean",
+        "chinese"
+      ],
+      "penalty": 0.15
+    },
+    {
+      "type": "soft",
+      "rule": "conditional_home",
+      "if_axis": "transport",
+      "if_values": [
+        "walk"
+      ],
+      "then_axis": "region",
+      "penalty": 0.2
+    }
+  ],
+  "participants": {
+    "count": 2,
+    "profile_seed": 1212,
+    "initial_threshold": [
+      0.4,
+      0.4
+    ],
+    "styles": [
+      "default",
+      "default"
+    ]
+  },
+  "agent_view": {
+    "score_dropout": 0.0
+  },
+  "judge": {
+    "expected": "agreement"
+  },
+  "profiles": [
+    {
+      "weights": {
+        "date": 0.3731073368649389,
+        "time": 0.015984699458606134,
+        "region": 0.3208285282074176,
+        "movie": 0.29007943546903736
+      },
+      "scores": {
+        "date": {
+          "mon": 0.9749053516659704,
+          "tue": 0.6819535860154436,
+          "wed": 0.12038614794813485,
+          "thu": 0.5103709035644277,
+          "fri": 0.7355620268073723
+        },
+        "time": {
+          "11:00": 0.5789184329557802,
+          "13:00": 0.4861383741777697,
+          "15:00": 0.026272483480136,
+          "17:00": 0.21177534790409192,
+          "19:00": 0.5886540228693644
+        },
+        "region": {
+          "gangnam": 0.5453955297674522,
+          "hongdae": 0.30781726632553563,
+          "yeongdeungpo": 0.30365052239777535,
+          "jamsil": 0.40371385186077235,
+          "seongsu": 0.5320167342877574
+        },
+        "movie": {
+          "mv1": 0.667567269856895,
+          "mv2": 0.7362809101922705,
+          "mv3": 0.0293288701090626,
+          "mv4": 0.550655808065589,
+          "mv5": 0.11967998381400446
+        }
+      },
+      "home_region": "jamsil",
+      "initial_threshold": 0.4
+    },
+    {
+      "weights": {
+        "date": 0.17558259516014926,
+        "time": 0.09538603690932224,
+        "region": 0.1710824000952047,
+        "movie": 0.5579489678353239
+      },
+      "scores": {
+        "date": {
+          "mon": 0.8182203392772119,
+          "tue": 0.22229397240747334,
+          "wed": 1.0,
+          "thu": 0.9237847278466635,
+          "fri": 0.0
+        },
+        "time": {
+          "11:00": 0.2661419311708521,
+          "13:00": 1.0,
+          "15:00": 0.0,
+          "17:00": 0.4202745198427231,
+          "19:00": 0.9244980415333921
+        },
+        "region": {
+          "gangnam": 1.0,
+          "hongdae": 0.5940764801003415,
+          "yeongdeungpo": 0.7450844599251709,
+          "jamsil": 0.0,
+          "seongsu": 0.6295819086871581
+        },
+        "movie": {
+          "mv1": 0.08108556772825035,
+          "mv2": 0.581494894704989,
+          "mv3": 0.10147152602581523,
+          "mv4": 0.0,
+          "mv5": 1.0
+        }
+      },
+      "home_region": "hongdae",
+      "initial_threshold": 0.4
+    }
+  ],
+  "known_answer": {
+    "u_xstar": 1.549292917932862,
+    "outcome": {
+      "movie": "mv5",
+      "date": "mon",
+      "time": "13:00",
+      "region": "gangnam"
+    },
+    "unconstrained_valid": true,
+    "breakdown_total": 0.8
+  }
+}
