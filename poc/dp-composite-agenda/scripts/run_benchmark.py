@@ -24,8 +24,10 @@ from dpca.harness.runner import STRATEGIES, run_one  # noqa: E402
 
 def main() -> int:
     n_seeds = int(sys.argv[sys.argv.index("--seeds") + 1]) if "--seeds" in sys.argv else 30
+    perfect = "--perfect" in sys.argv
+    print(f"[정보 전제: {'완벽(뷰=진실)' if perfect else '부분(뷰 노이즈 有)'}]")
     paths = sorted((ROOT / "scenarios").glob("S*.yaml"))
-    out_path = ROOT / "results" / "fc_benchmark.jsonl"
+    out_path = ROOT / "results" / ("fc_benchmark_perfect.jsonl" if perfect else "fc_benchmark.jsonl")
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     # 워밍업 (측정 오염 방지)
@@ -43,6 +45,8 @@ def main() -> int:
             seed = base_seed + s
             scenario = load_scenario(path, n_axes=n_axes)
             scenario.participants["profile_seed"] = seed
+            if perfect:
+                scenario.agent_view = {"score_dropout": 0.0}  # 뷰=진실
             report = analyze(scenario)          # 이 (TC,시드)의 x*·U(x*)·R̄
             judge = Judge(scenario, report)
             for strategy in STRATEGIES:

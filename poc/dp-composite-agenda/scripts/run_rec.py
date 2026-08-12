@@ -27,6 +27,8 @@ from dpca.harness.runner import STRATEGIES, run_one  # noqa: E402
 
 def main() -> int:
     n_seeds = int(sys.argv[sys.argv.index("--seeds") + 1]) if "--seeds" in sys.argv else 20
+    perfect = "--perfect" in sys.argv
+    print(f"[정보 전제: {'완벽(뷰=진실)' if perfect else '부분(뷰 노이즈 有)'}]")
     paths = sorted((ROOT / "scenarios").glob("S*.yaml"))
     rows: list[dict] = []
 
@@ -37,6 +39,8 @@ def main() -> int:
         for s in range(n_seeds):
             scenario = load_scenario(path, n_axes=n_axes)
             scenario.participants["profile_seed"] = base_seed + s
+            if perfect:
+                scenario.agent_view = {"score_dropout": 0.0}  # 뷰=진실
             for strategy in STRATEGIES:
                 r = run_one(scenario, strategy)
                 if r.agreement is None:      # 결렬 세션은 복구 대상 아님 (재개할 합의가 없음)
@@ -49,7 +53,7 @@ def main() -> int:
                     "ratio": rec.ratio, "stars": rec.stars,
                 })
 
-    out = ROOT / "results" / "rec.jsonl"
+    out = ROOT / "results" / ("rec_perfect.jsonl" if perfect else "rec.jsonl")
     with out.open("w", encoding="utf-8") as f:
         for row in rows:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")

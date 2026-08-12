@@ -39,7 +39,9 @@ def stars_from_s(s: float) -> int:
 
 
 def main() -> int:
-    rows = load(ROOT / "results" / "fc_benchmark.jsonl")
+    fname = sys.argv[1] if len(sys.argv) > 1 else "fc_benchmark.jsonl"
+    rows = load(ROOT / "results" / fname)
+    print(f"[원자료: {fname}]")
     strategies = ("full", "seq", "pool")
 
     # --- 전략별 전체 집계 ---

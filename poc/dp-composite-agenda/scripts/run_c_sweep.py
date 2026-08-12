@@ -59,12 +59,17 @@ def stars_c(c: float, d: int = 4) -> int:
     return 0
 
 
+PERFECT = "--perfect" in sys.argv
+
+
 def run_sweep(name: str, levels: list[dict]) -> dict:
     """levels: [{'S': int, 'load': callable() -> scenario}]"""
     rows = []
     series: dict[str, tuple[list[float], list[float]]] = {st: ([], []) for st in STRATEGIES}
     for lv in levels:
         scenario = lv["load"]()
+        if PERFECT:
+            scenario.agent_view = {"score_dropout": 0.0}  # 뷰=진실
         S = scenario.space_size()
         for st in STRATEGIES:
             if st == "full" and S > FULL_SKIP_ABOVE:
@@ -80,6 +85,7 @@ def run_sweep(name: str, levels: list[dict]) -> dict:
 
 
 def main() -> int:
+    print(f"[정보 전제: {'완벽(뷰=진실)' if PERFECT else '부분(뷰 노이즈 有)'}]")
     # 워밍업
     warm = load_scenario(ROOT / "scenarios" / "S01-기준.yaml")
     for st in STRATEGIES:
@@ -100,7 +106,7 @@ def main() -> int:
     print("=== axes 방향 (S11, 축 수 4→10 · 축당 값 5) ===")
     a = run_sweep("axes", axes_levels)
 
-    out = ROOT / "results" / "c_sweep.jsonl"
+    out = ROOT / "results" / ("c_sweep_perfect.jsonl" if PERFECT else "c_sweep.jsonl")
     with out.open("w", encoding="utf-8") as f:
         for row in v["rows"] + a["rows"]:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
