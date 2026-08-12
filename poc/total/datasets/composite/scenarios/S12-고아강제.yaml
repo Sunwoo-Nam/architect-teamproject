@@ -1,0 +1,28 @@
+meta:
+  id: S12
+  name: 고아 강제 — 지역당 후보 다수(식당·영화관 지역당 3개)로 pool 압축의 고아 유발
+  conflict_level: mid
+  conflict_rho: 0.0
+  expected: agreement
+# 목적: region-연동 축(theater·restaurant)을 지역당 여러 개로 두면, pool의 축별 top-k(전역)
+#       압축이 한 지역에 몰려 다른 지역이 '고아'가 될 수 있다(그 region 값이 짝 없음).
+#       그때 x*가 고아 지역을 쓰면 pool은 못 담고 pool2(지역별 조건부 확장)는 담는다.
+#       → pool vs pool2의 x* 커버리지 차이를 자극하는 판별용 TC.
+axes:
+  - {name: date, generator: date_slots, base_count: 5}
+  - {name: time, generator: time_slots, base_count: 5}
+  - {name: region, generator: regions, base_count: 5}
+  - {name: movie, generator: movies, base_count: 10}
+  - {name: theater, generator: theaters, base_count: 15}      # 지역당 3개
+  - {name: restaurant, generator: restaurants, base_count: 15} # 지역당 3개
+dependencies:
+  - {type: hard, rule: availability, subject: movie, over: region, coverage: 0.75}
+  - {type: hard, rule: membership, subject: theater, region_axis: region}
+  - {type: hard, rule: membership, subject: restaurant, region_axis: region}
+participants:
+  count: 2
+  profile_seed: 1212
+  initial_threshold: [0.4, 0.4]
+  styles: [default, default]
+agent_view: {weights: quantized3, score_dropout: 0.3, constraints: pass_hard}
+judge: {expected: agreement}

@@ -1,0 +1,24 @@
+meta:
+  id: S08
+  name: 합의 불가능 — 정상 결렬이 정답 (억지 합의 검출)
+  conflict_level: extreme
+  conflict_rho: -0.9
+  expected: no_agreement
+axes:
+  - {name: date, generator: date_slots, base_count: 7}
+  - {name: time, generator: time_slots, base_count: 6}
+  - {name: region, generator: regions, base_count: 5}
+  - {name: movie, generator: movies, base_count: 8}
+dependencies:
+  - {type: hard, rule: availability, subject: movie, over: region, coverage: 0.75}
+participants:
+  count: 2
+  profile_seed: 1208
+  initial_threshold: [0.4, 0.4]   # 위임 바닥선 = 결렬 시 각자의 utility (24.2)
+  styles: [default, default]
+  constraints:
+    # 속성 기반 — c 스윕으로 date가 2주 이상(sat2, sun2 …)이 되어도 "주말만 vs 평일만" 의도 유지
+    - {participant: 0, axis: date, attr_equals: {weekend: true}}
+    - {participant: 1, axis: date, attr_equals: {weekend: false}}
+agent_view: {weights: quantized3, score_dropout: 0.3, constraints: pass_hard}
+judge: {expected: no_agreement}   # FC 채점은 24 정본(달성률 U(r)/U(x*)) — oracle이 x*·R̄ 산출

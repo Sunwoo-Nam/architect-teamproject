@@ -1,0 +1,24 @@
+meta:
+  id: S10
+  name: 비대칭 2인 — 제약 많은 1인 vs 무관심한 1인 (소수 제약 존중)
+  conflict_level: mid
+  conflict_rho: 0.0
+  conflict_check: skip          # 스타일 비대칭이라 상관 라벨 검증은 생략
+  expected: agreement
+axes:
+  - {name: date, generator: date_slots, base_count: 7}
+  - {name: time, generator: time_slots, base_count: 6}
+  - {name: region, generator: regions, base_count: 5}
+  - {name: movie, generator: movies, base_count: 8}
+dependencies:
+  - {type: hard, rule: availability, subject: movie, over: region, coverage: 0.75}
+participants:
+  count: 2
+  profile_seed: 1210
+  initial_threshold: [0.4, 0.4]   # 위임 바닥선 = 결렬 시 각자의 utility (24.2)
+  styles: [focused, indifferent]
+  constraints:
+    - {participant: 0, axis: date, values: [tue, sat]}
+    - {participant: 0, axis: region, values: [yeongdeungpo, seongsu]}
+agent_view: {weights: quantized3, score_dropout: 0.3, constraints: pass_hard}
+judge: {expected: agreement}   # FC 채점은 24 정본(달성률 U(r)/U(x*)) — oracle이 x*·R̄ 산출

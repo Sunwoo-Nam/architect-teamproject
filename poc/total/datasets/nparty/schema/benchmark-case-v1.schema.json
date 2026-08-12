@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DP2 N-party Benchmark Case v1",
+  "description": "다자 합의 프로토콜 PoC가 공통으로 사용하는 정적 벤치마크 케이스",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "candidates",
+    "profiles",
+    "meta"
+  ],
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+      "description": "Benchmark Set 전체에서 유일한 케이스 식별자"
+    },
+    "candidates": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "협상 후보 ID 목록. NO_DEAL은 측정기가 별도로 다루므로 포함하지 않는다.",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "not": {
+          "const": "NO_DEAL"
+        }
+      }
+    },
+    "profiles": {
+      "type": "array",
+      "minItems": 3,
+      "description": "참여자별 봉인 프로파일",
+      "items": {
+        "$ref": "#/$defs/profile"
+      }
+    },
+    "meta": {
+      "$ref": "#/$defs/meta"
+    }
+  },
+  "$defs": {
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pid",
+        "utilities",
+        "initial_threshold"
+      ],
+      "properties": {
+        "pid": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "케이스 안에서 유일한 참여자 식별자"
+        },
+        "utilities": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "후보 ID를 key로 갖는 utility map",
+          "propertyNames": {
+            "not": {
+              "const": "NO_DEAL"
+            }
+          },
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          }
+        },
+        "initial_threshold": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "참여자의 고정 수락 바닥선이자 결렬 시 utility"
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "track",
+        "scenario_type",
+        "expected_no_deal",
+        "description"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "benchmark-case.v1"
+        },
+        "track": {
+          "type": "string",
+          "enum": [
+            "conformance",
+            "functional",
+            "scalability"
+          ]
+        },
+        "scenario_type": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "expected_no_deal": {
+          "type": "boolean",
+          "description": "initial threshold 이상인 실후보가 하나도 없는 사례인지 나타내는 분류표"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "family_id": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "Scalability에서 참여자 수만 다른 연관 사례를 묶는 식별자"
+        },
+        "common_feasible_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "모든 참여자의 initial threshold 이상인 실후보 수"
+        },
+        "tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}
