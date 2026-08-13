@@ -460,8 +460,13 @@ def _trap_margins(fix, min_gap=0.12):
     gap = best_clean[0] - best_decoy[0]
     if gap < min_gap:
         return False, f"함정 격차 {gap:.3f} < {min_gap}"
-    if gap > 0.30:
-        return False, f"함정 격차 {gap:.3f} > 0.30 — 과도 (별점 격차 과대의 원인)"
+    if gap > 0.35:
+        # v9: 상한 0.30→0.35 (하한 0.15→0.22와 함께 대역 이동). v8 실측에서 대역
+        # [0.15,0.30]의 함정 실효(케이스당 미끼 손실 ~0.13)로는 seq2가 0.9007로
+        # ★4 경계 위 0.0007에 얹혔다 — 별점 격차는 1~2칸을 유지해야 하므로(PL:
+        # "FC가 별점 3개 차이는 이상해. 1-2개가 적당") 대역만 위로 밀어 격차를
+        # 벌린다. 상한은 여전히 둔다 — 무제한이면 별점 격차 과대(3칸+)로 회귀한다
+        return False, f"함정 격차 {gap:.3f} > 0.35 — 과도 (별점 격차 과대의 원인)"
     if best_clean[1] < 0.12:
         return False, f"정답 바닥선 여유 {best_clean[1]:.3f} < 0.12 (정답 쪽 막판 수락 방지)"
     return True, {"decoy_gap": round(gap, 4), "decoy_slack": round(best_decoy[1], 4)}
@@ -676,7 +681,7 @@ def main():
                 if ok and fix["meta"].get("planted"):
                     # mixed는 회피 대상이 3개(유인값+미끼 2)라 격차가 구조적으로 좁다
                     ok, trap_summary = _trap_margins(
-                        fix, min_gap=0.08 if kind == "mixed" else 0.15)
+                        fix, min_gap=0.08 if kind == "mixed" else 0.22)
                     if ok:
                         summary = {**summary, **trap_summary}
                     else:
