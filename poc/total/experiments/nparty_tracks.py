@@ -69,6 +69,13 @@ def load_tracks(limit):
     if main_root.exists():
         tracks["main"] = [issue_space.expand(issue_space.load_issue_case(f))
                           for f in sorted(main_root.glob("*.json"))][:limit]
+    # functional 확장 트랙 (PL 확정 2026-08-13 후자 논의): 컨셉 동일·N 3-50 8레벨×60 균등.
+    # cases/ 밖 배치 — 기존 functional 트랙 구성을 바꾸지 않기 위함 (main과 동일 이유).
+    ext_root = CASES_DIR.parent / "functional-ext"
+    if ext_root.exists():
+        tracks["functional-ext"] = sorted(
+            JsonBenchmarkLoader(roots=ext_root, track="functional").cases(),
+            key=lambda c: c.case_id)[:limit]
     return tracks
 
 
