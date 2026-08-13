@@ -6,6 +6,16 @@ from __future__ import annotations
 
 from .measures.tb import phase_latency_ms
 from .protocol import PLAN_LABELS, PLAN_NAMES
+from .report import (
+    _DASH,
+    _N_INTRO_RANK,
+    _N_INTRO_S,
+    _n_guard,
+    _n_hit,
+    _n_rank,
+    _n_unranked,
+    _n_unranked_note,
+)
 
 _CSS = """
 body{font-family:-apple-system,'Malgun Gothic','Noto Sans KR',sans-serif;margin:0;background:#f5f6f8;color:#1c1e21}
@@ -41,6 +51,20 @@ def _mem(b) -> str:
 
 def _dur(s) -> str:
     return f"{s:.1f}초" if s < 60 else f"{s / 60:.1f}분"
+
+
+# §11 셀 포맷 6개 — 행은 방안 × 조합 수, 열은 참여자 수 N.
+# 값 해석·문구는 markdown 리포트와 동일해야 하므로 report.py의 것을 그대로 쓴다
+# (숫자 포맷만 이 파일의 _dur·_mem을 탄다).
+_N_TABLES = (
+    ("최적해 적중률", _n_guard(_n_hit)),
+    ("선택 순위 중앙값 (1=최적)", _n_guard(_n_rank)),
+    ("달성률 (x* 대비)", _n_guard(lambda v: f"{v['mean_ratio']:.3f}")),
+    ("협상 1건 시간 (중앙값)", _n_guard(lambda v: _dur(v["median_time_s"]))),
+    ("라운드 / phase", _n_guard(
+        lambda v: f"{v['median_rounds']:,.0f} / {v['median_phases']:,.0f}")),
+    ("단말 총 점유 메모리 (중앙값)", _n_guard(lambda v: _mem(v["median_device_bytes"]))),
+)
 
 
 def render_html(raw: dict) -> str:
@@ -350,26 +374,25 @@ def render_html(raw: dict) -> str:
                 for S in nc["combos"]:
                     by_n = isn[p].get(str(S), {})  # 미측정 셀은 키가 없다
                     body.append([f"{PLAN_LABELS.get(p, p)} · S={S:,}"]
-                                + [fmt(by_n[n]) if n in by_n else "—" for n in n_levels])
+                                + [fmt(by_n[n]) if n in by_n else _DASH for n in n_levels])
             return tbl(["방안 · 조합 수"] + [f"N={n}" for n in n_levels], body)
 
         knc = nc.get("constants", {})
         n_sub = (f"{nc['track_label']} 트랙 · 조합 수 " + " · ".join(f"{S:,}" for S in nc["combos"])
                  + f" × 참여자 {nc['participants']} · 셀당 {nc['cases_per_cell']}건. {nc['note']}")
         if knc:
-            n_sub += (f" 합성 시간 상수: 통신 {knc.get('t_rtt_ms', 0):.0f}ms/phase ·"
+            n_sub += (f" 합성 시간 상수: 통신 {phase_latency_ms(knc):.0f}ms/phase ·"
                       f" 평가 {knc.get('t_eval_ms', 0)*1000:.0f}µs/건 ÷N · "
                       f"대역 {knc.get('bw_bytes_per_s', 0)/1000:.0f}kB/s. 상수 잠정 — 방안 간 상대 비교용.")
+        n_sub += f"<br>{_N_INTRO_S}<br>{_N_INTRO_RANK}"
+        unranked = _n_unranked(isn, inp, PLAN_LABELS)
+        n_body = []
+        for idx, (title, fmt) in enumerate(_N_TABLES):
+            n_body.append(f"<h3>{title}</h3>" + n_table(fmt))
+            if idx == 1 and unranked:  # 표 2 아래에 표 1·2 공통 각주
+                n_body.append(f'<div class="sub">{_n_unranked_note(unranked)}</div>')
         details.append(sec(
-            "§11 의제 조합 — 참여자 수(N)별 상세", "신규", "sub", n_sub,
-            "<h3>정확도 (s)</h3>"
-            + n_table(lambda v: f"{v['s']:.3f}")
-            + "<h3>달성률 (x* 대비)</h3>" + n_table(lambda v: f"{v['mean_ratio']:.3f}")
-            + "<h3>협상 1건 시간 (중앙값)</h3>" + n_table(lambda v: _dur(v["median_time_s"]))
-            + "<h3>라운드 / phase</h3>"
-            + n_table(lambda v: f"{v['median_rounds']:,.0f} / {v['median_phases']:,.0f}")
-            + "<h3>단말 총 점유 메모리 (중앙값)</h3>"
-            + n_table(lambda v: _mem(v["median_device_bytes"]))))
+            "§11 의제 조합 — 참여자 수(N)별 상세", "신규", "sub", n_sub, "".join(n_body)))
 
     return f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">

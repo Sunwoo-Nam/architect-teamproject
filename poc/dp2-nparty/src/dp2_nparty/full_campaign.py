@@ -207,12 +207,86 @@ def _issue_space_section(track_cases: dict[str, list]) -> dict:
 ISSUE_SPACE_N_DIR = "issue-space-n"
 
 
+def _fc_rank_score(outcome, candidates: list, profiles: list) -> dict:
+    """§11 채점 — 달성률·기준선에 더해 최적해 적중 여부와 선택 순위를 한 번의 순회로 낸다.
+
+    **왜 순위 지표를 넣는가.** 기존 정확도 지표 s = (달성률 − 기준선) / (1 − 기준선)은
+    칸(방안 × 조합 수 × 참여자 수)끼리 비교할 수 없다. 기준선이 칸마다 달라 분모 (1 − 기준선)이
+    0.036~0.111로 3배 차이나고, 그 결과 달성률이 더 높은 칸의 s가 더 낮게 나오는 역전이
+    실제 측정에서 나왔다:
+        조합 5,184 · N=10 → 달성률 0.9664, s 0.379
+        조합   576 · N=3  → 달성률 0.9698, s 0.245  (달성률이 더 높은데 s는 더 낮다)
+    최적해 적중(결과가 x*와 같은가)과 선택 순위(유효 후보를 총효용 내림차순으로 놓았을 때
+    결과가 몇 번째인가)는 기준선을 쓰지 않으므로 칸끼리 그대로 비교된다.
+    s는 추적성 때문에 계산을 유지하고 raw.json에 그대로 남긴다.
+
+    **판정 규칙은 `measures.fc`(§1·§10이 쓰는 것)와 같다** — 유효 후보는 전원의 utility가
+    자신의 initial_threshold 이상인 조합이고, 결렬(NO_DEAL)은 항상 유효 후보에 포함되며,
+    x*는 유효 후보 중 총효용이 최대인 것(동점은 repr 순으로 해소)이다.
+    달성률·기준선 값은 `fcmod.score()`의 결과와 일치한다.
+
+    **순회 비용.** `fcmod.score()`는 후보 전수를 유효 판정으로 한 번 훑은 뒤, 유효 후보의
+    총효용을 x* 선택과 기준선 합에서 각각 다시 계산한다(유효 후보당 2회). 여기서는 유효
+    판정과 같은 순회에서 총효용을 1회만 계산해 목록에 담아 두고, 그 목록으로 x*·기준선·
+    순위를 모두 구한다. 지표 2개를 더해도 조합 62,208 · 참여자 50인 케이스에서 후보 공간을
+    다시 훑지 않는다 — 순위·유효 후보 수 계산은 유효 후보 목록(수백 개)만 본다.
+
+    반환 키:
+        ratio / baseline — fcmod.score()와 같은 값
+        optimal_hit — 결과가 x*와 같으면 1, 아니면 0 (§1 _fc_section의 판정과 같다)
+        choice_rank — 1-기반 선택 순위, 결렬이면 None (순위를 매기지 않는다)
+        valid_count — 유효 후보 수 (결렬 포함 — measures.fc의 정의 그대로)
+    """
+    valid: list = []  # 유효 후보 — 입력 후보 순서를 유지한다
+    utils: list[float] = []  # 같은 자리의 총효용
+    for c in candidates:
+        for p in profiles:
+            if p.utility(c) < p.initial_threshold:
+                break  # 한 명이라도 initial_threshold 미만이면 유효 후보가 아니다
+        else:
+            valid.append(c)
+            # 합산은 fcmod.total_utility 를 그대로 쓴다. 여기서 직접 누적하면 마지막 자리에서
+            # 값이 갈린다 — CPython 3.12+ 의 sum()은 부동소수 오차 보정 합산을 쓰므로
+            # `tot += u` 누적과 결과가 1 ULP 어긋나고, 그 차이가 x* 선택과 순위를 뒤집는다.
+            utils.append(fcmod.total_utility(c, profiles))
+    valid.append(NO_DEAL)  # 결렬은 항상 유효 후보
+    utils.append(fcmod.total_utility(NO_DEAL, profiles))
+
+    u_star = max(utils)
+    # 총효용 최대가 여럿이면 repr 최대를 고른다 — fcmod.score의 x* 선택 규칙과 같다.
+    optimal = max((c for c, u in zip(valid, utils) if u == u_star), key=repr)
+    u_out = fcmod.total_utility(outcome, profiles)
+    ratio = u_out / u_star
+    baseline = sum(utils) / len(utils) / u_star
+
+    rank = None
+    if outcome != NO_DEAL:
+        # 총효용이 결과보다 큰 유효 후보 수 + 1. 총효용 동점은 x*와 같은 repr 순으로
+        # 가르므로 순위 1은 결과가 x*와 같은 경우에만 나온다.
+        higher = sum(1 for u in utils if u > u_out)
+        tied = [c for c, u in zip(valid, utils) if u == u_out]
+        if len(tied) > 1:
+            r_out = repr(outcome)
+            higher += sum(1 for c in tied if repr(c) > r_out)
+        rank = higher + 1
+    return {
+        "ratio": ratio,
+        "baseline": baseline,
+        "optimal_hit": int(outcome == optimal),
+        "choice_rank": rank,
+        "valid_count": len(valid),
+    }
+
+
 def _issue_space_n_worker(payload: tuple[str, str]) -> dict:
     """§11 워커 — 케이스 파일 1건 × 방안 1개를 재고 지표를 돌려준다 (프로세스 병렬용).
 
     인자·반환이 전부 기본 타입이라 spawn 방식에서도 그대로 직렬화된다.
     측정 절차는 `_issue_space_section`(§10)과 같게 맞춘다 — 두 섹션의 수치를 나란히 놓고
     비교하려면 순위표 캐시 초기화·gc 정지·holder_sizes 호출 시점이 같아야 한다.
+
+    채점만 §10과 다르다 — `fcmod.score()` 대신 `_fc_rank_score()`를 쓴다. 달성률·기준선은
+    같은 값이 나오고, 최적해 적중·선택 순위·유효 후보 수가 추가된다 (근거는 그 함수 참조).
     """
     import gc
 
@@ -235,13 +309,16 @@ def _issue_space_n_worker(payload: tuple[str, str]) -> dict:
     sizes = holder_sizes(plan)  # 종료 후 1회 — 라운드 콜백 금지 (모듈 docstring 참조)
     proto = max(sizes) if sizes else 0
     st = tbmod.synth_time(session)
-    f = fcmod.score(session.outcome, bc.candidates, bc.profiles)
+    f = _fc_rank_score(session.outcome, bc.candidates, bc.profiles)
     return {
         "plan": plan_name,
         "n": len(bc.profiles),
         "combos": len(bc.candidates),
-        "ratio": f.ratio,
-        "baseline": f.baseline,
+        "ratio": f["ratio"],
+        "baseline": f["baseline"],
+        "optimal_hit": f["optimal_hit"],
+        "choice_rank": f["choice_rank"],  # 결렬이면 None — 순위 집계에서 빠진다
+        "valid_count": f["valid_count"],
         "agreed": int(session.agreed),
         "t_total": st.total_ms / 1000.0 + t_proto,
         "device": base_size(bc.profiles[0]) + proto,
@@ -284,6 +361,7 @@ def _issue_space_n_section(selected, workers: int | None = None) -> dict:
         g = groups.setdefault((r["plan"], r["combos"], r["n"]), {
             "ratio": [], "baseline": [], "agreed": [], "t_total": [], "device": [],
             "protocol": [], "rounds": [], "phases": [], "messages": [],
+            "optimal_hit": [], "choice_rank": [], "valid_count": [],
         })
         for k in g:
             g[k].append(r[k])
@@ -298,7 +376,9 @@ def _issue_space_n_section(selected, workers: int | None = None) -> dict:
             "workers": workers,
             "constants": dict(tbmod.DEFAULT_CONSTANTS),
             "note": "조합 규모 3단계를 고정하고 참여자 수를 훑는다. 채점은 케이스가 정의하는 "
-                    "전체 조합 공간 기준 x* 대비 달성률. 시간은 협상 1건당 추정"
+                    "전체 조합 공간 기준 x* 대비 달성률. 정확도는 x* 적중 수와 선택 순위 "
+                    "중앙값으로 읽는다 — s는 기준선이 칸마다 달라 칸끼리 비교할 수 없어 "
+                    "추적용으로만 남긴다. 시간은 협상 1건당 추정"
                     "(합성 시간 + 프로토콜 계산 실측, K=1). 메모리는 단말 총 점유"
                     "(공통 기저 + 프로토콜 상태).",
         }
@@ -306,12 +386,20 @@ def _issue_space_n_section(selected, workers: int | None = None) -> dict:
     for (plan, S, n), g in sorted(groups.items()):
         mr, mb = statistics.mean(g["ratio"]), statistics.mean(g["baseline"])
         med = lambda k: int(statistics.median(g[k]))  # noqa: E731
+        cases = len(g["ratio"])
+        hits = sum(g["optimal_hit"])
+        ranks = [v for v in g["choice_rank"] if v is not None]  # 결렬은 순위가 없다
         out.setdefault(plan, {}).setdefault(str(S), {})[str(n)] = {
-            "cases": len(g["ratio"]),
+            "cases": cases,
             "agreed": sum(g["agreed"]),
             "mean_ratio": round(mr, 4),
             "mean_baseline": round(mb, 4),
             "s": round((mr - mb) / (1 - mb) if mb < 1 else 1.0, 4),
+            "optimal_hits": hits,
+            "optimal_hit_rate": round(hits / cases, 4) if cases else 0.0,
+            "median_choice_rank": int(statistics.median(ranks)) if ranks else None,
+            "median_valid_count": med("valid_count"),
+            "ranked_cases": len(ranks),
             "median_time_s": round(statistics.median(g["t_total"]), 2),
             "median_rounds": med("rounds"),
             "median_phases": med("phases"),
