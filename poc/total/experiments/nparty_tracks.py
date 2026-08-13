@@ -107,7 +107,7 @@ def measure_track(name, cases):
             t = tb.synth_time(session)
             b = baselines[bc.case_id]
             rhos.append(tb.rho(t.total_ms, b["T_ms"], b.get("capped", False)))
-            mv, sv = cf.exposure_values([(session, case)], anchor)
+            mv, sv = cf.exposure_values([(session, case)], anchor, agreed_only=False)
             meta = getattr(bc, "meta", {}) or {}
             case_rows.append({
                 "case_id": bc.case_id, "plan": plan,
@@ -129,7 +129,8 @@ def measure_track(name, cases):
                 "phases": session.phases, "messages": session.messages,
                 "bytes": session.bytes,
             })
-        m_vals, single_vals = cf.exposure_values(runs, anchor)
+        m_vals, single_vals = cf.exposure_values(runs, anchor)  # 모수 = 합의 세션만
+        agree_rate = sum(1 for s, _ in runs if s.agreed) / len(runs)
         sec = time.perf_counter() - t0
         mean_ach = statistics.mean(s.achieved for s in scores)
         mean_base = statistics.mean(s.baseline for s in scores)
@@ -147,6 +148,7 @@ def measure_track(name, cases):
             "cf": {"secret": round(1.0 - statistics.median(single_vals), 3),
                    "stars_secret": cf.BAND_CF_SECRET.stars(
                        1.0 - statistics.median(single_vals)),
+                   "agree_rate": round(agree_rate, 4),  # 모수=합의 세션 — 병기 의무 (24 §3.5)
                    "m": round(med_m, 3), "stars_m": cf.BAND_CF_M.stars(med_m),
                    "max_single_depth": round(statistics.median(single_vals), 3)},
             "tb": {"median_rho": round(med_rho, 4), "stars": BAND_TB_RHO.stars(med_rho),

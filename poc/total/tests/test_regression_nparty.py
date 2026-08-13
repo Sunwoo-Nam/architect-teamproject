@@ -118,7 +118,7 @@ class TestFcRegression:
 
 
 class TestCfRegression:
-    """CF — 노출 배수 m과 관점별 노출률."""
+    """CF — 잔여 비밀률(판정)·노출 배수 m(보조). 분모 = 전체 후보, 모수 = 합의 세션."""
 
     @pytest.fixture(scope="class")
     @staticmethod
@@ -146,13 +146,14 @@ class TestCfRegression:
         return out
 
     def test_e2_anchor_depth(self, anchor):
-        assert anchor.depth == pytest.approx(0.6333, abs=1e-3)
+        # 분모 = 전체 후보 (2026-08-13 재개정) — 2인 세션에서 상대가 12개 중 3개를 봄
+        assert anchor.depth == pytest.approx(0.25, abs=1e-3)
 
-    @pytest.mark.parametrize("plan,expected", [("plan1a", 0.677), ("plan2", 1.184)])
+    @pytest.mark.parametrize("plan,expected", [("plan1a", 0.667), ("plan2", 1.0)])
     def test_exposure_multiple(self, evaluated, plan, expected):
         assert evaluated[plan]["multiple"]["m"] == pytest.approx(expected, abs=1e-3)
 
-    @pytest.mark.parametrize("plan,expected", [("plan1a", 0.429), ("plan2", 0.75)])
+    @pytest.mark.parametrize("plan,expected", [("plan1a", 0.167), ("plan2", 0.25)])
     def test_max_single_depth(self, evaluated, plan, expected):
         assert evaluated[plan]["multiple"]["max_single_depth"] == pytest.approx(
             expected, abs=1e-3)
@@ -169,9 +170,11 @@ class TestCfRegression:
         # 실측 결론 — 노출 배수는 방안 1-A가 이긴다
         assert evaluated["plan1a"]["multiple"]["m"] < evaluated["plan2"]["multiple"]["m"]
 
-    def test_stars_reflect_one_to_one_boundary(self, evaluated):
-        assert evaluated["plan1a"]["multiple"]["stars_m"] == 3   # m ≤ 1 → 1:1 이하
-        assert evaluated["plan2"]["multiple"]["stars_m"] == 2    # m > 1 → 1:1 초과
+    def test_secret_verdict_discriminates(self, evaluated):
+        # 판정 = 잔여 비밀률 (2026-08-13 재개정) — functional 3인 표본에서 1-A가 한 등급 위
+        assert evaluated["plan1a"]["multiple"]["stars_secret"] == 5
+        assert evaluated["plan2"]["multiple"]["stars_secret"] == 4
+        assert evaluated["plan1a"]["multiple"]["secret"] > evaluated["plan2"]["multiple"]["secret"]
 
 
 class TestIntentionalChanges:

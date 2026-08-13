@@ -18,8 +18,8 @@ from total.qa.cf import (
     evaluate,
     exposure_multiple,
     inference_gain,
+    candidate_count,
     observed_subs,
-    valid_count,
     worst_participant,
 )
 from total.qa.contract import ObservationEvent, SessionResult, TableCase, TablePreference
@@ -44,14 +44,15 @@ def sub(sweep, rnd, actor, outcome, audience):
     return ObservationEvent(sweep, rnd, actor, "submit", outcome, tuple(audience))
 
 
-class TestValidCount:
-    def test_counts_above_threshold(self):
+class TestCandidateCount:
+    def test_counts_all_candidates(self):
+        # 분모 = 전체 후보 (2026-08-13 재개정, PL 확정) — 거부 후보의 선호도 비밀의 일부다
         v = TablePreference("V", {"a": 0.9, "b": 0.7, "c": 0.1}, 0.5)
-        assert valid_count(case((v,)), v) == 2
+        assert candidate_count(case((v,))) == 3
 
     def test_never_zero(self):
-        v = TablePreference("V", {"a": 0.1}, 0.9)
-        assert valid_count(case((v,)), v) == 1   # 0 나눗셈 방어
+        v = TablePreference("V", {}, 0.9)
+        assert candidate_count(case((v,))) == 1   # 0 나눗셈 방어
 
 
 class TestObservedSubs:

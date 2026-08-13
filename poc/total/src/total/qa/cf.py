@@ -9,7 +9,8 @@ r"""[24 §3] Confidentiality — 역추론 방지.
 지표는 3층이다 (2026-08-13 재개정 — PL 확정, 판정을 배수 m에서 잔여 비밀률로 교체):
 
 1. **판정 — 잔여 비밀률** = 1 − 최악 관찰자 노출 깊이 (피해자 1인 기준, 표본 중앙값).
-   "협상이 끝나도 공개되지 않고 남은 내 수락 가능 후보의 비율" — 0%(전량 공개)면 ★0.
+   "협상이 끝나도 공개되지 않고 남은 내 선호의 비율" — 분모는 **전체 후보**(2026-08-13
+   재개정: 거부 후보의 서열도 비밀의 일부다), 모수는 **합의 완료 세션만**.
 2. **보조** — 노출 배수 m = Σ(전 관찰자 깊이) ÷ e₂ (관찰자 폭 비교 — 브로드캐스트류용) ·
    정규화 노출률(1순위, 하위 호환)
 3. **원재료** — 역추론 정확도 (2의 계산 입력)
@@ -84,21 +85,17 @@ def worst_participant(coordinator_index: int = 0) -> Viewpoint:
 # --------------------------------------------------------------------------------------
 
 
-def valid_ranked(case: Case, victim: Preference) -> list[Outcome]:
-    """피해자의 **유효 후보만** 담은 순위표.
+def candidate_count(case: Case) -> int:
+    """전체 후보 수 — 깊이의 분모 (2026-08-13 재개정, PL 확정). 0이 되지 않게 최소 1.
 
-    깊이의 분모를 전체 공간으로 잡으면 안 된다 — 피해자가 애초에 제안하지 않을
-    (바닥선 미달·실현 불가) 후보가 분모를 부풀려 깊이가 과소평가된다.
-    분모(d_v)는 피해자가 실제로 드러낼 수 있는 집합의 크기여야 한다.
+    구 분모는 피해자의 **유효 후보 수**였다 ("깔 수 있는 것" 기준 — 제안하지 않을
+    후보가 분모를 부풀려 깊이가 과소평가된다는 논거). PL 재개정으로 **전체 후보**로
+    교체했다: 잔여 비밀의 모수는 내 선호 전체다 — 어떤 후보를 거부하는지, 하위
+    서열이 어떤지도 비밀의 일부이므로, "수락 가능한 패를 전부 깠다"가 잔여 0%로
+    읽히면 안 된다. 주의: 후보 공간이 조합적으로 거대한 도메인에서는 깊이가 0으로
+    퇴화한다 — CF는 nparty(명시 후보 목록) 담당이라 성립한다.
     """
-    ranked = victim.ranked()
-    valid = {o for o in case.candidates() if victim.utility(o) >= victim.initial_threshold}
-    return [o for o in ranked if o in valid]
-
-
-def valid_count(case: Case, victim: Preference) -> int:
-    """피해자의 유효 후보 수 d_v — 깊이의 분모. 0이 되지 않게 최소 1."""
-    return max(1, len(valid_ranked(case, victim)))
+    return max(1, len(list(case.candidates())))
 
 
 def observed_subs(session: SessionResult, observer: str, victim: str) -> list[Sub]:
@@ -265,11 +262,8 @@ def e2_anchor(runs: Sequence[tuple[SessionResult, Case]]) -> E2Anchor:
         if session.n < 2:
             raise ValueError(f"e₂ 앵커는 2인 이상 세션이 필요하다: n={session.n}")
         observer, victim_pid = session.participants[0], session.participants[1]
-        by_pid = {p.pid: p for p in case.preferences}
-        victim = by_pid[victim_pid]
-        d = valid_count(case, victim)
         subs = observed_subs(session, observer, victim_pid)
-        vals.append(depth(subs, d))
+        vals.append(depth(subs, candidate_count(case)))
     return E2Anchor(
         depth=max(1e-9, statistics.median(vals)),
         samples=len(vals),
@@ -302,8 +296,14 @@ class ExposureMultiple:
 def exposure_values(
     runs: Sequence[tuple[SessionResult, Case]],
     anchor: E2Anchor,
+    agreed_only: bool = True,
 ) -> tuple[list[float], list[float]]:
     """피해자별 (노출 배수 m, 최대 단일 관찰자 깊이) 원값 목록.
+
+    **모수는 합의 완료 세션만이다** (PL 확정 2026-08-13): 결렬 세션의 전량 노출은
+    방안과 무관한 결렬의 본성이라 변별 정보가 없다. 단, 합의율이 방안마다 다른
+    비교에서는 합의율을 반드시 병기해야 한다 (24 §3.5). 원자료 관측이 목적이면
+    agreed_only=False로 결렬 세션도 포함할 수 있다.
 
     트랙 총합(서로 다른 e₂ 앵커를 가진 트랙들의 병합 중앙값) 산출용 — 각 값은 자기
     트랙의 e₂로 이미 정규화되어 있어 그대로 이어붙여 집계할 수 있다 (2026-08-13).
@@ -312,12 +312,10 @@ def exposure_values(
         raise ValueError("측정할 세션이 없다")
     multiples, single = [], []
     for session, case in runs:
-        by_pid = {p.pid: p for p in case.preferences}
+        if agreed_only and not session.agreed:
+            continue
+        d = candidate_count(case)
         for victim_pid in session.participants:
-            victim = by_pid.get(victim_pid)
-            if victim is None:
-                continue
-            d = valid_count(case, victim)
             total = best = 0.0
             for observer in session.participants:
                 if observer == victim_pid:
@@ -334,8 +332,11 @@ def exposure_multiple(
     runs: Sequence[tuple[SessionResult, Case]],
     anchor: E2Anchor,
 ) -> ExposureMultiple:
-    """피해자별 노출 배수 m과 최대 단일 관찰자 깊이."""
+    """피해자별 노출 배수 m과 최대 단일 관찰자 깊이. 모수 = 합의 완료 세션 (24 §3.5)."""
     multiples, single = exposure_values(runs, anchor)
+    if not single:
+        raise ValueError("합의 완료 세션이 없어 CF 모수가 비었다 — 합의율 0인 표본은 "
+                         "판정 불가로 보고하라 (결렬 노출은 모수 제외, PL 확정 2026-08-13)")
 
     med_single = statistics.median(single)
     secret = 1.0 - med_single  # 중앙값의 단조 변환이라 median(1−e)와 동일

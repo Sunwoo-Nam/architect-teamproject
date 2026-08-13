@@ -205,13 +205,12 @@ class TestBeliefVersusTruth:
         assert s01.agent_view.get("score_dropout", 0) > 0
 
     def test_depth_discriminates_plans(self, s01, s01_case):
-        from total.qa.cf import depth, observed_subs, valid_ranked
+        from total.qa.cf import candidate_count, depth, observed_subs
 
         depths = {}
         for plan in ("full", "pool", "seq2"):
             session, case = run_session(s01, plan, case=s01_case)
-            victim = case.preferences[1]
-            d = len(valid_ranked(case, victim))
+            d = candidate_count(case)  # 분모 = 전체 후보 (2026-08-13 재개정)
             depths[plan] = depth(observed_subs(session, "P0", "P1"), d)
         assert depths["full"] > depths["pool"] > depths["seq2"]
 
