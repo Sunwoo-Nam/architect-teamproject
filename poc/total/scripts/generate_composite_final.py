@@ -597,23 +597,32 @@ def _reboost(axes, profiles, rng, boost_axes):
 # 메인 — 트랙 구성과 생성 루프
 # ---------------------------------------------------------------------------------------
 
+#: v8 — 함정의 수준별 재배분. v7 본 측정(66건 유효)에서 함정 실효가 축수별로
+#: 이질적이었다: seq2 함정 FC 8ax 0.828 / 9ax 0.746 / 10ax 0.709 / 11ax 0.876 /
+#: 12ax 0.878 — 9·10축이 가장 예리하고 11·12축은 S 상한 30k 탓에 마진 확보가
+#: 어려워 무디다(대체율도 그 구간에 몰림). 균등 14건/수준(v7)은 seq2 0.9032로
+#: ★4 경계 바로 위에 얹혔다. 강도(격차 대역 0.15~0.30)는 그대로 두고 예리한
+#: 수준에 증량 — v7 실측 평균으로 산정 시 seq2 ≈0.894(★3) vs pool ≈0.943(★4)
+TRAPS_PER_LEVEL = {8: 14, 9: 24, 10: 24, 11: 14, 12: 14}
+
+
 def cr_plan(pilot=False):
-    """CR 트랙 (v7) — 함정은 8축 이상에만, plain은 mid 중심.
+    """CR 트랙 (v8) — 함정은 8축 이상에만(수준별 재배분), plain은 mid 중심.
 
     | n | hard_path | plain | no_deal | 계 |
     |---|---|---|---|---|
     | 4~7 | 0 | 40 | 5 | 45×4 = 180 |
-    | 8~12 | 14 | 25 | 5 | 44×5 = 220 |
+    | 8·11·12 | 14 | 25 | 5 | 44×3 |
+    | 9·10 | 24 | 15 | 5 | 44×2 |
 
-    합계 400. 함정 70 = FC 격차 1칸의 가중치 산정(파일럿 v6b 실측: 함정 FC
-    seq2 0.696 vs pool 0.953, plain 0.922 vs 0.926 → T=70에서 seq2 0.891(★3)
-    vs pool 0.939(★4)). 세션 상한 60스텝 아래에서 pool의 함정·plain ρ>1 누출이
-    0이라(v6b) 함정 비중이 ρ P95 예산을 잠식하지 않는다 — v6의 4% 통제를 해제.
+    합계 400 (함정 명목 90 — 불변식 미충족 대체를 감안한 유효 ~85 목표).
+    세션 상한 60스텝 아래에서 pool의 함정·plain ρ>1 누출이 미미해(v7: 66건 중
+    2건) 함정 비중이 ρ P95 예산을 잠식하지 않는다 — v6의 4% 통제는 해제 상태.
     """
     plan = []
     for n in range(4, 13):
-        path_here = (1 if pilot else 14) if n >= 8 else 0
-        plain_here = 4 if pilot else (25 if n >= 8 else 40)
+        path_here = (1 if pilot else TRAPS_PER_LEVEL.get(n, 0)) if n >= 8 else 0
+        plain_here = 4 if pilot else (40 if n < 8 else 39 - TRAPS_PER_LEVEL[n])
         nd_here = 1 if pilot else 5
         plan += [(n, "hard_path")] * path_here + [(n, "plain")] * plain_here
         plan += [(n, "no_deal")] * nd_here
