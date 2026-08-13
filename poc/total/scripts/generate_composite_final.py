@@ -44,6 +44,14 @@
   진다 — S=500에서는 pool의 결렬 인지(라운드 상한)가 naive와 비슷해져 ρ≈1.02로
   누출됐다 (v5). S≥1,680부터 ρ≤0.72로 급락.
 
+**v7 갱신 (파일럿 v6b — 세션 상한 60스텝 도입 후).** 측정 캠페인이 협상 세션당
+스텝 예산을 60으로 선언하면서 (`experiments/composite_final.py SESSION_CAP` —
+boulware 양보가 n_steps에 비례 압축) pool의 plain 라운드가 40→14로 내려가 **pool의
+ρ>1 누출이 0건**이 됐다. 따라서 함정 총량의 4% 통제(위 v6 원리 2항)는 불필요해졌고,
+함정을 FC 격차 1칸에 필요한 70건(8~12축 14건/수준)으로 늘렸다. seq2는 축별 세션
+구조라 상한의 영향이 없다(축당 60이 원래 설계 정의) — 함정 백트랙 비용이 ρ 꼬리에
+그대로 남는 것이 seq2의 정직한 TB다.
+
 ## 재현
 
     .venv/bin/python scripts/generate_composite_final.py            # 500건 전체
@@ -590,19 +598,22 @@ def _reboost(axes, profiles, rng, boost_axes):
 # ---------------------------------------------------------------------------------------
 
 def cr_plan(pilot=False):
-    """CR 트랙 (v6) — 함정은 8축 이상에만, plain은 mid 중심.
+    """CR 트랙 (v7) — 함정은 8축 이상에만, plain은 mid 중심.
 
     | n | hard_path | plain | no_deal | 계 |
     |---|---|---|---|---|
     | 4~7 | 0 | 40 | 5 | 45×4 = 180 |
-    | 8~12 | 4 | 35 | 5 | 44×5 = 220 |
+    | 8~12 | 14 | 25 | 5 | 44×5 = 220 |
 
-    합계 400 (함정 20 = 전체 500의 4% — ρ P95 예산, 헤더 「v6 구성 원리」).
+    합계 400. 함정 70 = FC 격차 1칸의 가중치 산정(파일럿 v6b 실측: 함정 FC
+    seq2 0.696 vs pool 0.953, plain 0.922 vs 0.926 → T=70에서 seq2 0.891(★3)
+    vs pool 0.939(★4)). 세션 상한 60스텝 아래에서 pool의 함정·plain ρ>1 누출이
+    0이라(v6b) 함정 비중이 ρ P95 예산을 잠식하지 않는다 — v6의 4% 통제를 해제.
     """
     plan = []
     for n in range(4, 13):
-        path_here = (1 if pilot else 4) if n >= 8 else 0
-        plain_here = 4 if pilot else (35 if n >= 8 else 40)
+        path_here = (1 if pilot else 14) if n >= 8 else 0
+        plain_here = 4 if pilot else (25 if n >= 8 else 40)
         nd_here = 1 if pilot else 5
         plan += [(n, "hard_path")] * path_here + [(n, "plain")] * plain_here
         plan += [(n, "no_deal")] * nd_here
