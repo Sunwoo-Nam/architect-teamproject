@@ -144,7 +144,10 @@ def measure_track(name, cases):
                    "mean_baseline": round(mean_base, 4),
                    "s": round(s_val, 4), "stars_s": BAND_FC_S.stars(s_val),
                    "below_random_defect": s_val <= 0},
-            "cf": {"m": round(med_m, 3), "stars_m": cf.BAND_CF_M.stars(med_m),
+            "cf": {"secret": round(1.0 - statistics.median(single_vals), 3),
+                   "stars_secret": cf.BAND_CF_SECRET.stars(
+                       1.0 - statistics.median(single_vals)),
+                   "m": round(med_m, 3), "stars_m": cf.BAND_CF_M.stars(med_m),
                    "max_single_depth": round(statistics.median(single_vals), 3)},
             "tb": {"median_rho": round(med_rho, 4), "stars": BAND_TB_RHO.stars(med_rho),
                    "max_rho": round(max(r["rho"] for r in rhos), 4),
@@ -187,7 +190,8 @@ def main() -> int:
             d = out[p]
             print(f"  {p}: FC 달성률={d['fc']['mean_achieved']} ★{d['fc']['stars_achieved']}"
                   f"(s={d['fc']['s']}) | "
-                  f"CF m={d['cf']['m']} ★{d['cf']['stars_m']} | "
+                  f"CF 잔여비밀={d['cf']['secret']} ★{d['cf']['stars_secret']}"
+                  f"(m={d['cf']['m']}) | "
                   f"TB ρ={d['tb']['median_rho']} ★{d['tb']['stars']} "
                   f"[{d['sec']}s]")
 
@@ -206,7 +210,10 @@ def main() -> int:
                    "mean_baseline": round(mean_base, 4),
                    "s": round(s_val, 4), "stars_s": BAND_FC_S.stars(s_val),
                    "below_random_defect": s_val <= 0},
-            "cf": {"m": round(med_m, 3), "stars_m": cf.BAND_CF_M.stars(med_m),
+            "cf": {"secret": round(1.0 - statistics.median(d["single"]), 3),
+                   "stars_secret": cf.BAND_CF_SECRET.stars(
+                       1.0 - statistics.median(d["single"])),
+                   "m": round(med_m, 3), "stars_m": cf.BAND_CF_M.stars(med_m),
                    "max_single_depth": round(statistics.median(d["single"]), 3)},
             "tb": {"median_rho": round(med_rho, 4), "stars": BAND_TB_RHO.stars(med_rho),
                    "max_rho": round(max(d["rho"]), 4),

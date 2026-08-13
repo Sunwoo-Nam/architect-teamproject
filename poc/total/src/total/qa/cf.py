@@ -6,10 +6,12 @@ r"""[24 §3] Confidentiality — 역추론 방지.
 > 만드는 과잉 노출만 잰다. 다자 도메인에서는 관찰자가 N−1명이라 생기는 과잉을,
 > 2인 고정 도메인에서는 "무엇을 통째로 주고받는가"라는 설계 선택의 과잉을 같은 자로 잰다.
 
-지표는 3층이다:
+지표는 3층이다 (2026-08-13 재개정 — PL 확정, 판정을 배수 m에서 잔여 비밀률로 교체):
 
-1. **판정 — 노출 배수 m** = Σ(전 관찰자의 노출 깊이 e) ÷ e₂ (피해자 1인 기준)
-2. **병기** — 최대 단일 관찰자 깊이(집중도) · 정규화 노출률(1순위, 하위 호환)
+1. **판정 — 잔여 비밀률** = 1 − 최악 관찰자 노출 깊이 (피해자 1인 기준, 표본 중앙값).
+   "협상이 끝나도 공개되지 않고 남은 내 수락 가능 후보의 비율" — 0%(전량 공개)면 ★0.
+2. **보조** — 노출 배수 m = Σ(전 관찰자 깊이) ÷ e₂ (관찰자 폭 비교 — 브로드캐스트류용) ·
+   정규화 노출률(1순위, 하위 호환)
 3. **원재료** — 역추론 정확도 (2의 계산 입력)
 
 깊이 e = **순위표 노출 비율**: 귀속 노출된 고유 후보 수 ÷ 유효 후보 수. 공격자와
@@ -38,7 +40,7 @@ import statistics
 from dataclasses import dataclass
 from typing import Callable, Sequence
 
-from .constants import BAND_CF_M
+from .constants import BAND_CF_M, BAND_CF_SECRET
 from .contract import Case, Outcome, Preference, SessionResult
 
 #: 관찰 1건 — (바퀴, 라운드, 후보)
@@ -276,7 +278,9 @@ def e2_anchor(runs: Sequence[tuple[SessionResult, Case]]) -> E2Anchor:
 
 @dataclass(frozen=True)
 class ExposureMultiple:
-    m: float | None            # 앵커가 퇴화하면 None — 가짜 수를 내지 않는다
+    secret: float              # 잔여 비밀률 (판정) = 1 − 최악 관찰자 깊이, 피해자 중앙값
+    stars_secret: int
+    m: float | None            # 보조 — 앵커가 퇴화하면 None (가짜 수를 내지 않는다)
     stars_m: int | None
     max_single_depth: float
     victims: int
@@ -284,12 +288,14 @@ class ExposureMultiple:
 
     def as_dict(self) -> dict:
         return {
+            "secret": round(self.secret, 3),
+            "stars_secret": self.stars_secret,
             "m": None if self.m is None else round(self.m, 3),
             "stars_m": self.stars_m,
             "max_single_depth": round(self.max_single_depth, 3),
             "victims": self.victims,
             "note": self.note,
-            "band": BAND_CF_M.as_dict(),
+            "band": {"secret": BAND_CF_SECRET.as_dict(), "m": BAND_CF_M.as_dict()},
         }
 
 
@@ -331,19 +337,23 @@ def exposure_multiple(
     """피해자별 노출 배수 m과 최대 단일 관찰자 깊이."""
     multiples, single = exposure_values(runs, anchor)
 
+    med_single = statistics.median(single)
+    secret = 1.0 - med_single  # 중앙값의 단조 변환이라 median(1−e)와 동일
     if anchor.degenerate:
-        # 앵커가 0에 가까우면 비율이 의미를 잃는다. 큰 수를 내놓으면 오독을 부르므로
-        # None으로 비우고 사유를 남긴다 — "안 쟀다"와 "0이다"는 다르다.
+        # 앵커가 0에 가까우면 배수가 의미를 잃는다. 판정(잔여 비밀률)은 앵커와 무관하게
+        # 유효하므로 그대로 내고, 보조 m만 None으로 비운다 — "안 쟀다"와 "0이다"는 다르다.
         return ExposureMultiple(
+            secret=secret, stars_secret=BAND_CF_SECRET.stars(secret),
             m=None, stars_m=None,
-            max_single_depth=statistics.median(single), victims=len(multiples),
-            note="e₂ 앵커가 0에 가까워 배수가 성립하지 않는다 — 참조 2인 협상에서 "
-                 "귀속 노출이 관측되지 않았다는 뜻이므로 원지표(깊이)로 직접 비교할 것",
+            max_single_depth=med_single, victims=len(multiples),
+            note="e₂ 앵커가 0에 가까워 보조 배수 m이 성립하지 않는다 — 참조 2인 협상에서 "
+                 "귀속 노출이 관측되지 않았다는 뜻. 판정(잔여 비밀률)은 앵커 무관 유효",
         )
     med = statistics.median(multiples)
     return ExposureMultiple(
+        secret=secret, stars_secret=BAND_CF_SECRET.stars(secret),
         m=med, stars_m=BAND_CF_M.stars(med),
-        max_single_depth=statistics.median(single), victims=len(multiples),
+        max_single_depth=med_single, victims=len(multiples),
     )
 
 
@@ -352,7 +362,7 @@ def evaluate(
     anchor: E2Anchor,
     viewpoints: Sequence[Viewpoint],
 ) -> dict:
-    """판정(m) + 관점별 병기 + e₂ 출처를 한 번에.
+    """판정(잔여 비밀률)·보조(m) + 관점별 병기 + e₂ 출처를 한 번에.
 
     **별점만 남기지 않는다** — 사다리가 잠정이라 원지표를 항상 함께 낸다.
     """

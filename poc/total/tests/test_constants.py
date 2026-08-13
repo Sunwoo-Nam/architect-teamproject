@@ -73,22 +73,23 @@ class TestFcBands:
 
 
 class TestCfBand:
-    """24 §3.3 — 노출 배수 m. 3점 경계가 1:1 등가."""
+    """24 §3.3 — 판정 = 잔여 비밀률 (PL 확정 2026-08-13), m은 보조."""
 
-    def test_ladder(self):
+    def test_secret_ladder(self):
+        from total.qa.constants import BAND_CF_SECRET
+        assert BAND_CF_SECRET.thresholds == [0.8, 0.6, 0.4, 0.2, 0.0]
+        assert BAND_CF_SECRET.direction == "greater_than"
+        # 전량 공개(잔여 0)는 ★0, 근소한 잔여라도 있으면 ★1
+        assert BAND_CF_SECRET.stars(0.0) == 0
+        assert BAND_CF_SECRET.stars(0.001) == 1
+        assert BAND_CF_SECRET.stars(0.364) == 2   # functional-ext 방안 1-A 실측
+        assert BAND_CF_SECRET.stars(0.861) == 5   # main 방안 1-A 실측
+
+    def test_aux_m_ladder(self):
         assert BAND_CF_M.thresholds == [0.25, 0.5, 1.0, 2.0, 4.0]
         assert BAND_CF_M.direction == "at_most"
-
-    def test_one_to_one_equivalence_is_three_stars(self):
-        assert BAND_CF_M.stars(1.0) == 3
-
-    def test_real_values(self):
-        assert BAND_CF_M.stars(0.677) == 3    # dp2 방안 1-A 실측
-        assert BAND_CF_M.stars(1.184) == 2    # dp2 방안 2 실측
-
-    def test_note_marks_provisional(self):
-        # 24 §3.3이 "잠정 — PL 조율 예정"이라고 명시한 상태다
-        assert "잠정" in BAND_CF_M.note
+        assert BAND_CF_M.stars(1.0) == 3          # 1:1 등가
+        assert "보조" in BAND_CF_M.note
 
 
 class TestScBands:
