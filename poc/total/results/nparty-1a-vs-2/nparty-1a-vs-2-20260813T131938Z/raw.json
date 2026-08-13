@@ -1,0 +1,260 @@
+{
+  "fc": {
+    "plan1a": {
+      "cases": 160,
+      "agreed": 128,
+      "mean_achieved": 0.914192,
+      "stars_achieved": 4,
+      "mean_baseline": 0.87589,
+      "mean_s": 0.308613,
+      "stars_s": 2,
+      "below_random_defect": false,
+      "optimal_hit": 64,
+      "fr_violation_cases": 0,
+      "degenerate_cases": 32,
+      "degenerate_missed": 0,
+      "bands": {
+        "achieved": {
+          "name": "FC 달성률",
+          "thresholds": [
+            0.95,
+            0.9,
+            0.85,
+            0.8,
+            0.7
+          ],
+          "direction": "at_least",
+          "note": "24 §1.4 — 판정 지표 달성률 U(r)÷U(x*). 만점 1.0부터 5%p 계단(★1은 0.70-0.80) — 잠정. 2026-08-12 병행 시절 경계를 판정으로 승격 (PL 확정 2026-08-13)"
+        },
+        "s": {
+          "name": "FC 개선 비율 s (보조)",
+          "thresholds": [
+            0.8,
+            0.6,
+            0.4,
+            0.2,
+            0.0
+          ],
+          "direction": "greater_than",
+          "note": "24 §1.4 — s = (달성률 − R̄) ÷ (1 − R̄). 판정에서 보조로 강등(PL 확정 2026-08-13). s ≤ 0(무작위 이하)은 달성률 별점과 무관하게 즉시 결함"
+        }
+      }
+    },
+    "plan2": {
+      "cases": 160,
+      "agreed": 128,
+      "mean_achieved": 0.967871,
+      "stars_achieved": 5,
+      "mean_baseline": 0.87589,
+      "mean_s": 0.741121,
+      "stars_s": 4,
+      "below_random_defect": false,
+      "optimal_hit": 129,
+      "fr_violation_cases": 0,
+      "degenerate_cases": 32,
+      "degenerate_missed": 0,
+      "bands": {
+        "achieved": {
+          "name": "FC 달성률",
+          "thresholds": [
+            0.95,
+            0.9,
+            0.85,
+            0.8,
+            0.7
+          ],
+          "direction": "at_least",
+          "note": "24 §1.4 — 판정 지표 달성률 U(r)÷U(x*). 만점 1.0부터 5%p 계단(★1은 0.70-0.80) — 잠정. 2026-08-12 병행 시절 경계를 판정으로 승격 (PL 확정 2026-08-13)"
+        },
+        "s": {
+          "name": "FC 개선 비율 s (보조)",
+          "thresholds": [
+            0.8,
+            0.6,
+            0.4,
+            0.2,
+            0.0
+          ],
+          "direction": "greater_than",
+          "note": "24 §1.4 — s = (달성률 − R̄) ÷ (1 − R̄). 판정에서 보조로 강등(PL 확정 2026-08-13). s ≤ 0(무작위 이하)은 달성률 별점과 무관하게 즉시 결함"
+        }
+      }
+    }
+  },
+  "tb": {
+    "plan1a": {
+      "sessions": 160,
+      "median_total_ms": 2100.764,
+      "median_phase_ms": 2100.0,
+      "median_eval_ms": 0.056,
+      "median_transfer_ms": 0.835,
+      "dominant": "phase",
+      "constants": {
+        "t_phase_ms": 75.0,
+        "t_eval_ms": 0.0014,
+        "bw_bytes_per_s": 2500000.0,
+        "bdp_bytes": 187500.0,
+        "note": "24 §4.4 — t_phase는 편도. LTE 클라우드 릴레이 기준"
+      },
+      "median_rho": 0.4921,
+      "max_rho": 0.6668,
+      "stars": 3,
+      "defect_cases": 0,
+      "upper_bound_cases": 0,
+      "band": {
+        "name": "TB 시간 비율 ρ",
+        "thresholds": [
+          0.2,
+          0.4,
+          0.6,
+          0.8,
+          1.0
+        ],
+        "direction": "at_most",
+        "note": "24 §4.3 — ρ = T_설계 ÷ T_naive(SAOP baseline). naive 등가 1.0-순간 완료 0 등분. baseline이 벽시계 상한에 걸리면 T_naive는 하한 → ρ는 상한(보수 판정)"
+      }
+    },
+    "plan2": {
+      "sessions": 160,
+      "median_total_ms": 2400.381,
+      "median_phase_ms": 2400.0,
+      "median_eval_ms": 0.0168,
+      "median_transfer_ms": 0.422,
+      "dominant": "phase",
+      "constants": {
+        "t_phase_ms": 75.0,
+        "t_eval_ms": 0.0014,
+        "bw_bytes_per_s": 2500000.0,
+        "bdp_bytes": 187500.0,
+        "note": "24 §4.4 — t_phase는 편도. LTE 클라우드 릴레이 기준"
+      },
+      "median_rho": 0.5143,
+      "max_rho": 0.9459,
+      "stars": 3,
+      "defect_cases": 0,
+      "upper_bound_cases": 0,
+      "band": {
+        "name": "TB 시간 비율 ρ",
+        "thresholds": [
+          0.2,
+          0.4,
+          0.6,
+          0.8,
+          1.0
+        ],
+        "direction": "at_most",
+        "note": "24 §4.3 — ρ = T_설계 ÷ T_naive(SAOP baseline). naive 등가 1.0-순간 완료 0 등분. baseline이 벽시계 상한에 걸리면 T_naive는 하한 → ρ는 상한(보수 판정)"
+      }
+    }
+  },
+  "cf": {
+    "plan1a": {
+      "secret": 0.763,
+      "stars_secret": 4,
+      "m": 0.946,
+      "stars_m": 3,
+      "max_single_depth": 0.237,
+      "victims": 528,
+      "note": "",
+      "band": {
+        "secret": {
+          "name": "CF 잔여 비밀률",
+          "thresholds": [
+            0.8,
+            0.6,
+            0.4,
+            0.2,
+            0.0
+          ],
+          "direction": "greater_than",
+          "note": "24 §3.3 — 판정 지표: 협상이 끝나도 공개되지 않고 남은 내 선호의 비율 (분모 = 전체 후보, 최악 관찰자 기준, 피해자 평균, 모수 = 합의 세션). 무노출 1.0-전량 공개 0 사이 20%p 등분, 0은 ★0. 1:1 협상 실측 잔여 0.75(e₂=0.25)는 ★4 구간 — 병기 참조점"
+        },
+        "m": {
+          "name": "CF 노출 배수 m (보조)",
+          "thresholds": [
+            0.25,
+            0.5,
+            1.0,
+            2.0,
+            4.0
+          ],
+          "direction": "at_most",
+          "note": "24 §3.3 — 판정에서 보조로 강등 (PL 확정 2026-08-13, 잔여 비밀률로 교체). 관찰자 폭(몇 명이 아는가)을 잰다 — 브로드캐스트류 방안 비교용"
+        }
+      },
+      "coordinator_accuracy": 1.0,
+      "coordinator_random_baseline": 0.0833,
+      "coordinator_gain_pp": 91.67,
+      "coordinator_exposure_rate": 1.0,
+      "coordinator_stars": 0,
+      "coordinator_samples": 500,
+      "participant_accuracy": 0.0833,
+      "participant_random_baseline": 0.0833,
+      "participant_gain_pp": 0.0,
+      "participant_exposure_rate": 0.0,
+      "participant_stars": 5,
+      "participant_samples": 500,
+      "e2": {
+        "depth": 0.25,
+        "samples": 30,
+        "degenerate": false,
+        "note": "1:1 기준 노출량 — 참조 2인 협상에서 상대 1인이 도달하는 깊이. m의 분모이며 도메인별로 따로 측정한다"
+      },
+      "attacker": "frequency 고정 규칙 3개 (24 §3.4) — 변경 시 전 측정 재실행"
+    },
+    "plan2": {
+      "secret": 0.647,
+      "stars_secret": 4,
+      "m": 1.412,
+      "stars_m": 2,
+      "max_single_depth": 0.353,
+      "victims": 528,
+      "note": "",
+      "band": {
+        "secret": {
+          "name": "CF 잔여 비밀률",
+          "thresholds": [
+            0.8,
+            0.6,
+            0.4,
+            0.2,
+            0.0
+          ],
+          "direction": "greater_than",
+          "note": "24 §3.3 — 판정 지표: 협상이 끝나도 공개되지 않고 남은 내 선호의 비율 (분모 = 전체 후보, 최악 관찰자 기준, 피해자 평균, 모수 = 합의 세션). 무노출 1.0-전량 공개 0 사이 20%p 등분, 0은 ★0. 1:1 협상 실측 잔여 0.75(e₂=0.25)는 ★4 구간 — 병기 참조점"
+        },
+        "m": {
+          "name": "CF 노출 배수 m (보조)",
+          "thresholds": [
+            0.25,
+            0.5,
+            1.0,
+            2.0,
+            4.0
+          ],
+          "direction": "at_most",
+          "note": "24 §3.3 — 판정에서 보조로 강등 (PL 확정 2026-08-13, 잔여 비밀률로 교체). 관찰자 폭(몇 명이 아는가)을 잰다 — 브로드캐스트류 방안 비교용"
+        }
+      },
+      "coordinator_accuracy": 1.0,
+      "coordinator_random_baseline": 0.0833,
+      "coordinator_gain_pp": 91.67,
+      "coordinator_exposure_rate": 1.0,
+      "coordinator_stars": 0,
+      "coordinator_samples": 500,
+      "participant_accuracy": 0.0833,
+      "participant_random_baseline": 0.0833,
+      "participant_gain_pp": 0.0,
+      "participant_exposure_rate": 0.0,
+      "participant_stars": 5,
+      "participant_samples": 500,
+      "e2": {
+        "depth": 0.25,
+        "samples": 30,
+        "degenerate": false,
+        "note": "1:1 기준 노출량 — 참조 2인 협상에서 상대 1인이 도달하는 깊이. m의 분모이며 도메인별로 따로 측정한다"
+      },
+      "attacker": "frequency 고정 규칙 3개 (24 §3.4) — 변경 시 전 측정 재실행"
+    }
+  }
+}

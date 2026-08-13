@@ -5,10 +5,13 @@
 **시나리오/fixture 1건마다 별도 실행 폴더**를 만들어 그 케이스의 QA 수치를 낸다 —
 "어느 시나리오에서 두 방안이 갈리는가"를 케이스 단위로 볼 수 있다.
 
+**측정 범위는 FC·RU·TB** (PL 지시 2026-08-13 — `campaign.QA_COMPOSITE`). 복합 의제
+DP의 본질은 조합 폭발이라 RU가 핵심 변별축이다. CF는 잔여 비밀률의 분모(전체 후보)가
+조합적으로 거대해 퇴화하므로 nparty 담당 (`qa/cf.py` 참조).
+
 - 대상: `datasets/composite/scenarios/*.yaml` 12종 + `datasets/composite/fixtures/*.json`
 - 산출: `results/composite-per-case/composite-per-case-<ID>-<stamp>/` (meta·raw·cases·report)
   + 대상 전체 요약표 `results/composite-per-case/SUMMARY-<stamp>.md`
-- e₂ 앵커는 **케이스별**로 잰다 — 같은 케이스의 full(전수 교환) 실행이 참조 2인 협상이다.
 - 조합 수가 열거 한도를 넘는 대상(S11 977만 등)은 **표본으로 대체하지 않고 제외**하며
   (24 정본 FC는 전수 열거 전제), 제외 사실과 사유를 요약표에 남긴다.
 
@@ -28,7 +31,6 @@ sys.path.insert(0, str(ROOT / "src"))
 from total import pyversion  # noqa: E402
 from total.adapters.composite import (  # noqa: E402
     DATASETS,
-    E2_REFERENCE_PLAN,
     PLANS,
     CompositeCase,
     load,
@@ -38,8 +40,7 @@ from total.adapters.composite import (  # noqa: E402
 from total.adapters.composite._vendor.common.generators import Value  # noqa: E402
 from total.adapters.composite._vendor.common.scenario import Axis, Scenario  # noqa: E402
 from total.adapters.composite.baseline import baseline_t  # noqa: E402
-from total.campaign import PlanRuns, measure  # noqa: E402
-from total.qa import cf  # noqa: E402
+from total.campaign import QA_COMPOSITE, PlanRuns, measure  # noqa: E402
 from total.qa.contract import Dataset  # noqa: E402
 from total.qa.report import RunMeta, now_stamp, write_run  # noqa: E402
 
@@ -81,12 +82,9 @@ def targets_all() -> list[tuple[str, Scenario]]:
 
 def run_one(name: str, sc: Scenario, plan_names: list[str], limit: int,
             results_root: Path, stamp: str) -> dict:
-    """케이스 1건: e₂ 앵커(full) + 방안별 실행 → 실행 폴더 1개. 요약 행을 돌려준다."""
+    """케이스 1건: 방안별 실행 → 실행 폴더 1개. 요약 행을 돌려준다."""
     case = CompositeCase(sc.id, sc, enumeration_limit=limit)
     tb_baselines = {sc.id: baseline_t(sc)}
-
-    anchor_session, _ = run_session(sc, E2_REFERENCE_PLAN, case=case)
-    anchor = cf.e2_anchor([(anchor_session, case)])
 
     plans: list[PlanRuns] = []
     for pname in plan_names:
@@ -95,20 +93,7 @@ def run_one(name: str, sc: Scenario, plan_names: list[str], limit: int,
         pr.add(session, case, case.hard_violations(session.agreement))
         plans.append(pr)
 
-    cf_note = ""
-    try:
-        raw, rows = measure(plans, e2=anchor, d=len(sc.axes),
-                            viewpoints=[cf.worst_participant()],
-                            tb_baselines=tb_baselines)
-    except ValueError as err:
-        if "합의 완료 세션" not in str(err):
-            raise
-        # 합의율 0 표본(S08처럼 결렬이 정답) — 24 §3 규정: CF는 "판정 불가"로 보고.
-        # 결렬 노출은 모수에서 빠지므로 CF만 비우고 나머지 QA는 그대로 측정한다.
-        raw, rows = measure(plans, e2=None, d=len(sc.axes),
-                            viewpoints=[cf.worst_participant()],
-                            tb_baselines=tb_baselines)
-        cf_note = "합의 완료 세션 0건 — CF 판정 불가 (결렬 노출은 모수 제외, 24 §3)"
+    raw, rows = measure(plans, tb_baselines=tb_baselines, qa=QA_COMPOSITE)
 
     dataset = Dataset(
         name=f"composite {name}",
@@ -125,26 +110,23 @@ def run_one(name: str, sc: Scenario, plan_names: list[str], limit: int,
         seed=dataset.seed,
         dataset=dataset.as_dict(),
         plans=plan_names,
-        note=f"개별 케이스 측정 ({name}). e₂ 앵커는 이 케이스의 "
-             f"{E2_REFERENCE_PLAN}(전수 교환) 실행 1건 — 케이스별 참조라 표본 1개다. "
-             "SC-의제 스윕은 케이스 단위에서 정의되지 않아 비운다."
-             + (f" [{cf_note}]" if cf_note else ""),
+        note=f"개별 케이스 측정 ({name}). 측정 범위 FC·RU·TB (campaign.QA_COMPOSITE — "
+             "PL 지시 2026-08-13, CF는 nparty 담당).",
     )
     out = write_run(results_root, meta, raw, rows)
     print(f"  {name}: 저장 {out.name}")
 
     row = {"name": name, "space": sc.space_size(),
            "label": sc.meta.get("conflict_level", "?"),
-           "expected": sc.meta.get("expected", "?"), "cf_note": cf_note}
+           "expected": sc.meta.get("expected", "?")}
     for p in plan_names:
-        fc_, cf_, tb_, ru_ = (raw.get(k, {}).get(p, {}) for k in ("fc", "cf", "tb", "ru"))
+        fc_, ru_, tb_ = (raw.get(k, {}).get(p, {}) for k in ("fc", "ru", "tb"))
         row[p] = {
             "achieved": fc_.get("mean_achieved"), "stars_achieved": fc_.get("stars_achieved"),
             "s": fc_.get("mean_s"), "fr": fc_.get("fr_violation_cases"),
-            "secret": cf_.get("secret"), "stars_secret": cf_.get("stars_secret"),
-            "m": cf_.get("m"), "stars_m": cf_.get("stars_m"),
+            "total_mb": ru_.get("median_total_mb"), "stars_ru": ru_.get("stars_median"),
+            "over_ceiling": ru_.get("over_ceiling_sessions"),
             "rho": tb_.get("median_rho"), "stars_rho": tb_.get("stars"),
-            "total_mb": ru_.get("median_total_mb"),
         }
     return row
 
@@ -152,25 +134,22 @@ def run_one(name: str, sc: Scenario, plan_names: list[str], limit: int,
 def summary_md(rows: list[dict], skipped: list[tuple[str, str]],
                plan_names: list[str], stamp: str, limit: int) -> str:
     L = [f"# composite 개별 케이스 요약 — {stamp}", "",
-         f"방안 {list(plan_names)} · 열거 한도 {limit:,} · 각 케이스의 상세는 "
+         f"방안 {list(plan_names)} · 측정 범위 {list(QA_COMPOSITE)} · "
+         f"열거 한도 {limit:,} · 각 케이스의 상세는 "
          f"`composite-per-case-<ID>-{stamp}/report.md`", ""]
     for p in plan_names:
         L += [f"## {p}", "",
               "| 케이스 | 조합 | 성격 | 달성률 | 달성★ | s(보조) | FR위반 "
-              "| 잔여비밀률 | 비밀★ | m(보조) | ρ | ρ★ | 총점유MB |",
-              "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+              "| 총점유MB | RU★ | 한도초과 | ρ | ρ★ |",
+              "|---|---|---|---|---|---|---|---|---|---|---|---|"]
         for r in rows:
             d = r[p]
             fmt = lambda v, n=4: "—" if v is None else (f"{v:.{n}f}" if isinstance(v, float) else str(v))
             L.append(f"| {r['name']} | {r['space']:,} | {r['label']}/{r['expected']} "
                      f"| {fmt(d['achieved'])} | {d['stars_achieved']} | {fmt(d['s'])} | {d['fr']} "
-                     f"| {fmt(d['secret'], 3)} | {d['stars_secret']} | {fmt(d['m'], 3)} "
-                     f"| {fmt(d['rho'], 3)} | {d['stars_rho']} "
-                     f"| {fmt(d['total_mb'])} |")
+                     f"| {fmt(d['total_mb'])} | {d['stars_ru']} | {d['over_ceiling']} "
+                     f"| {fmt(d['rho'], 3)} | {d['stars_rho']} |")
         L.append("")
-    notes = [(r["name"], r["cf_note"]) for r in rows if r.get("cf_note")]
-    if notes:
-        L += ["## 비고", ""] + [f"- **{n}**: {why}" for n, why in notes] + [""]
     if skipped:
         L += ["## 제외 (측정하지 않음 — 0이 아니다)", ""]
         L += [f"- **{n}**: {why}" for n, why in skipped]

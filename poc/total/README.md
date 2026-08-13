@@ -50,6 +50,13 @@ python3.14 -m venv .venv && .venv/bin/pip install -r requirements.txt
 | `qa/ru.py` | Resource Utilization-메모리 | 프로세스 피크 · 공통 기저 (**각각**) | §2 |
 | `qa/sc_issue.py` | Scalability-의제 | 탄력성 c · 최대 의제 수 (**2지표 병행**) | §4 |
 
+**실험(DP)별 측정 범위** (PL 지시 2026-08-13 — `campaign.QA_NPARTY`·`QA_COMPOSITE`):
+
+| 실험 | 측정 QA | 근거 |
+|---|---|---|
+| nparty | **FC · CF · TB** | 다자 프로토콜 DP의 변별축은 품질·노출·시간. RU는 kB 수준이라 포화, 의제 조합은 composite 소관 |
+| composite | **FC · RU · TB** | 복합 의제 DP의 본질은 조합 폭발 → RU가 핵심. CF는 잔여 비밀률 분모(전체 후보)가 조합적으로 거대해 퇴화 — CF는 nparty 담당 |
+
 **제외**: FT·REC (측정 방식이 두 PoC에서 근본적으로 다름 — 정본 결정 선행 필요),
 SC-참여자 수 (dpca는 2인 고정), AN·AD (범위 밖). 사유는 `qa/__init__.py`에 기록.
 

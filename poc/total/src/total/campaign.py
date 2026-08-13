@@ -30,19 +30,28 @@ class PlanRuns:
         self.violations.append(list(violations))
 
 
+#: 실험(DP)별 측정 범위 — PL 지시 2026-08-13. QA 5종을 모든 실험에 획일 적용하지 않는다:
+#: nparty(다자 프로토콜 DP)는 노출·품질·시간이 변별축이고 RU는 kB 수준이라 포화,
+#: composite(복합 의제 DP)는 조합 폭발이 본질이라 RU가 핵심이고 CF는 잔여 비밀률의
+#: 분모(전체 후보)가 조합적으로 거대해 퇴화한다(cf.py 참조 — CF는 nparty 담당).
+QA_NPARTY = ("fc", "cf", "tb")
+QA_COMPOSITE = ("fc", "ru", "tb")
+
+
 def measure(
     plans: Sequence[PlanRuns],
     *,
-    e2: cf.E2Anchor | None,
-    viewpoints: Sequence[cf.Viewpoint],
-    d: int,
+    e2: cf.E2Anchor | None = None,
+    viewpoints: Sequence[cf.Viewpoint] = (),
+    d: int = 0,
     ceiling_bytes: int = RU_CEILING_BYTES,
     tb_baselines: dict | None = None,
+    qa: Sequence[str] = ("fc", "cf", "tb", "ru", "sc_issue"),
 ) -> tuple[dict, list[dict]]:
-    """QA 5종 집계와 케이스별 행을 만든다. 반환 (raw, cases).
+    """`qa`에 지정된 QA만 집계하고 케이스별 행을 만든다. 반환 (raw, cases).
 
     측정할 자료가 없는 QA는 **조용히 0으로 채우지 않고 섹션을 비운다** — 리포트에서
-    "안 쟀다"와 "0이다"가 구분되어야 한다.
+    "안 쟀다"와 "0이다"가 구분되어야 한다. 실험별 측정 범위는 QA_NPARTY·QA_COMPOSITE.
     """
     raw: dict[str, dict] = {}
     rows: list[dict] = []
@@ -54,27 +63,31 @@ def measure(
             fc.score(case, session.agreement, extra_violations=v)
             for (session, case), v in zip(pr.runs, pr.violations)
         ]
-        raw.setdefault("fc", {})[pr.plan] = fc.aggregate(scores)
+        if "fc" in qa:
+            raw.setdefault("fc", {})[pr.plan] = fc.aggregate(scores)
 
         times = [tb.synth_time(s) for s, _ in pr.runs]
-        raw.setdefault("tb", {})[pr.plan] = tb.aggregate(times)
-        if tb_baselines:
-            rhos = []
-            for (session, case), t in zip(pr.runs, times):
-                b = tb_baselines.get(getattr(case, "case_id", None))
-                if b:
-                    rhos.append(tb.rho(t.total_ms, b["T_ms"], b.get("capped", False)))
-            if rhos:
-                raw["tb"][pr.plan].update(tb.aggregate_rho(rhos))
+        if "tb" in qa:
+            raw.setdefault("tb", {})[pr.plan] = tb.aggregate(times)
+            if tb_baselines:
+                rhos = []
+                for (session, case), t in zip(pr.runs, times):
+                    b = tb_baselines.get(getattr(case, "case_id", None))
+                    if b:
+                        rhos.append(tb.rho(t.total_ms, b["T_ms"], b.get("capped", False)))
+                if rhos:
+                    raw["tb"][pr.plan].update(tb.aggregate_rho(rhos))
 
         mems = [ru.measure(s, ceiling_bytes) for s, _ in pr.runs]
-        raw.setdefault("ru", {})[pr.plan] = ru.aggregate(mems)
+        if "ru" in qa:
+            raw.setdefault("ru", {})[pr.plan] = ru.aggregate(mems)
 
-        if e2 is not None:
+        if "cf" in qa and e2 is not None:
             raw.setdefault("cf", {})[pr.plan] = _flatten_cf(
                 cf.evaluate(pr.runs, e2, viewpoints))
 
-        if len(pr.sweep) >= 3 and len({p.scale for p in pr.sweep}) >= 3:
+        if ("sc_issue" in qa and len(pr.sweep) >= 3
+                and len({p.scale for p in pr.sweep}) >= 3):
             raw.setdefault("sc_issue", {})[pr.plan] = _flatten_sc(
                 sc_issue.evaluate(pr.sweep, d=d, memory_limit_bytes=ceiling_bytes))
 
