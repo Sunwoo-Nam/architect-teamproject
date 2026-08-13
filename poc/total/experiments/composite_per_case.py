@@ -127,8 +127,8 @@ def run_one(name: str, sc: Scenario, plan_names: list[str], limit: int,
     for p in plan_names:
         fc_, cf_, tb_, ru_ = (raw.get(k, {}).get(p, {}) for k in ("fc", "cf", "tb", "ru"))
         row[p] = {
-            "achieved": fc_.get("mean_achieved"), "s": fc_.get("mean_s"),
-            "stars_s": fc_.get("stars_s"), "fr": fc_.get("fr_violation_cases"),
+            "achieved": fc_.get("mean_achieved"), "stars_achieved": fc_.get("stars_achieved"),
+            "s": fc_.get("mean_s"), "fr": fc_.get("fr_violation_cases"),
             "m": cf_.get("m"), "stars_m": cf_.get("stars_m"),
             "rho": tb_.get("median_rho"), "stars_rho": tb_.get("stars"),
             "total_mb": ru_.get("median_total_mb"),
@@ -143,13 +143,13 @@ def summary_md(rows: list[dict], skipped: list[tuple[str, str]],
          f"`composite-per-case-<ID>-{stamp}/report.md`", ""]
     for p in plan_names:
         L += [f"## {p}", "",
-              "| 케이스 | 조합 | 성격 | 달성률 | s | s★ | FR위반 | m | m★ | ρ | ρ★ | 총점유MB |",
+              "| 케이스 | 조합 | 성격 | 달성률 | 달성★ | s(보조) | FR위반 | m | m★ | ρ | ρ★ | 총점유MB |",
               "|---|---|---|---|---|---|---|---|---|---|---|---|"]
         for r in rows:
             d = r[p]
             fmt = lambda v, n=4: "—" if v is None else (f"{v:.{n}f}" if isinstance(v, float) else str(v))
             L.append(f"| {r['name']} | {r['space']:,} | {r['label']}/{r['expected']} "
-                     f"| {fmt(d['achieved'])} | {fmt(d['s'])} | {d['stars_s']} | {d['fr']} "
+                     f"| {fmt(d['achieved'])} | {d['stars_achieved']} | {fmt(d['s'])} | {d['fr']} "
                      f"| {fmt(d['m'], 3)} | {d['stars_m']} | {fmt(d['rho'], 3)} | {d['stars_rho']} "
                      f"| {fmt(d['total_mb'])} |")
         L.append("")

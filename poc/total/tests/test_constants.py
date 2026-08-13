@@ -60,11 +60,13 @@ class TestFcBands:
         assert BAND_FC_S.stars(0.81) == 5
         assert BAND_FC_S.stars(0.0) == 0
 
-    def test_s_is_the_only_fc_band(self):
-        # 별점은 s 단일 (PL 확정 2026-08-13) — 달성률 병행 밴드는 폐기됐다
-        from total.qa import constants
-        assert not hasattr(constants, "BAND_FC_ACHIEVED")
-        assert BAND_FC_S.stars(0.3086) == 2   # dp2 방안 1-A 실측 s
+    def test_achieved_is_the_fc_verdict_band(self):
+        # 판정 = 달성률 (PL 확정 2026-08-13 재개정) — s는 보조로 유지된다
+        from total.qa.constants import BAND_FC_ACHIEVED
+        assert BAND_FC_ACHIEVED.stars(0.9142) == 4   # 구 functional 방안 1-A 실측 달성률
+        assert BAND_FC_ACHIEVED.stars(0.95) == 5     # at_least — 경계 포함
+        assert BAND_FC_ACHIEVED.stars(0.699) == 0
+        assert BAND_FC_S.stars(0.3086) == 2          # 보조 s 밴드는 유지
 
     def test_bands_carry_source_note(self):
         assert "24" in BAND_FC_S.note

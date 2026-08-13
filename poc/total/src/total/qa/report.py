@@ -152,8 +152,8 @@ def _table(plans: Sequence[str], rows: Sequence[tuple[str, list]]) -> list[str]:
 def _section(qa: str, data: dict, plans: Sequence[str]) -> list[str]:
     """QA 1종의 표. 지표별로 방안을 가로로 늘어놓는다."""
     keys: list[tuple[str, str]] = {
-        "fc": [("mean_s", "개선 비율 s (판정)"), ("stars_s", "별점"),
-               ("mean_achieved", "달성률 (수치 병기)"),
+        "fc": [("mean_achieved", "달성률 (판정)"), ("stars_achieved", "별점"),
+               ("mean_s", "개선 비율 s (보조)"),
                ("mean_baseline", "무작위 베이스라인 R̄"),
                ("optimal_hit", "최적안 적중"), ("fr_violation_cases", "FR 위반 케이스"),
                ("degenerate_cases", "R̄=1 케이스 (s 판별력 없음)"),

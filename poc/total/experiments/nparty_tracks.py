@@ -2,7 +2,9 @@
 """탐색 실험 — nparty 3트랙(functional·scalability·issue-space) 전수에서 FC·CF·TB 측정.
 
 목적 (PL 지시 2026-08-13): 트랙 전수 실행의 실제 소요 시간 확정 + 트랙별/총합 QA 표.
-- 판정 정본은 functional 트랙 (측정 위계 — 나머지 두 트랙은 강건성 관측)
+- 판정 정본은 **functional-ext 트랙** (PL 확정 2026-08-13 — 구 functional의 컨셉 그대로
+  N 3-50 확장 480건). 나머지 트랙은 강건성 관측
+- FC 판정 = **달성률** (PL 확정 2026-08-13 재개정 — s는 보조 관측)
 - e₂ 앵커는 **트랙별로 따로** 잰다 (후보 공간 규모가 달라 남의 앵커는 분모 왜곡 — 24 §3)
 - 총합: FC = 전 케이스 가중 평균 달성률·R̄ → s (정본 환산 규칙), CF·TB = 케이스(피해자)별
   원값을 이어붙인 중앙값 — CF의 각 값은 자기 트랙 e₂로 정규화된 배수라 병합 가능.
@@ -27,7 +29,7 @@ from total.adapters.nparty._vendor import issue_space  # noqa: E402
 from total.adapters.nparty._vendor.benchmark import CASES_DIR, JsonBenchmarkLoader  # noqa: E402
 from total.adapters.nparty.baseline import baseline_t  # noqa: E402
 from total.qa import cf, fc, tb  # noqa: E402
-from total.qa.constants import BAND_FC_S, BAND_TB_RHO  # noqa: E402
+from total.qa.constants import BAND_FC_ACHIEVED, BAND_FC_S, BAND_TB_RHO  # noqa: E402
 
 PLANS = ("plan1a", "plan2")
 E2_REFERENCE_PLAN = "plan2"
@@ -137,8 +139,11 @@ def measure_track(name, cases):
         med_rho = statistics.median(r["rho"] for r in rhos)
         out[plan] = {
             "sec": round(sec, 1),
-            "fc": {"mean_achieved": round(mean_ach, 4), "mean_baseline": round(mean_base, 4),
-                   "s": round(s_val, 4), "stars_s": BAND_FC_S.stars(s_val)},
+            "fc": {"mean_achieved": round(mean_ach, 4),
+                   "stars_achieved": BAND_FC_ACHIEVED.stars(mean_ach),
+                   "mean_baseline": round(mean_base, 4),
+                   "s": round(s_val, 4), "stars_s": BAND_FC_S.stars(s_val),
+                   "below_random_defect": s_val <= 0},
             "cf": {"m": round(med_m, 3), "stars_m": cf.BAND_CF_M.stars(med_m),
                    "max_single_depth": round(statistics.median(single_vals), 3)},
             "tb": {"median_rho": round(med_rho, 4), "stars": BAND_TB_RHO.stars(med_rho),
@@ -180,7 +185,8 @@ def main() -> int:
                 pool_all[p][k].extend(pooled[p][k])
         for p in PLANS:
             d = out[p]
-            print(f"  {p}: FC s={d['fc']['s']} ★{d['fc']['stars_s']} | "
+            print(f"  {p}: FC 달성률={d['fc']['mean_achieved']} ★{d['fc']['stars_achieved']}"
+                  f"(s={d['fc']['s']}) | "
                   f"CF m={d['cf']['m']} ★{d['cf']['stars_m']} | "
                   f"TB ρ={d['tb']['median_rho']} ★{d['tb']['stars']} "
                   f"[{d['sec']}s]")
@@ -195,8 +201,11 @@ def main() -> int:
         med_rho = statistics.median(d["rho"])
         raw["combined"][p] = {
             "cases": len(d["ach"]),
-            "fc": {"mean_achieved": round(mean_ach, 4), "mean_baseline": round(mean_base, 4),
-                   "s": round(s_val, 4), "stars_s": BAND_FC_S.stars(s_val)},
+            "fc": {"mean_achieved": round(mean_ach, 4),
+                   "stars_achieved": BAND_FC_ACHIEVED.stars(mean_ach),
+                   "mean_baseline": round(mean_base, 4),
+                   "s": round(s_val, 4), "stars_s": BAND_FC_S.stars(s_val),
+                   "below_random_defect": s_val <= 0},
             "cf": {"m": round(med_m, 3), "stars_m": cf.BAND_CF_M.stars(med_m),
                    "max_single_depth": round(statistics.median(d["single"]), 3)},
             "tb": {"median_rho": round(med_rho, 4), "stars": BAND_TB_RHO.stars(med_rho),
@@ -204,7 +213,7 @@ def main() -> int:
                    "defect_cases": "n/a(케이스별 판정은 트랙 표 참조)"},
         }
     raw["wall_seconds"] = round(time.perf_counter() - wall0, 1)
-    raw["note"] = ("탐색 실행 — 판정 정본은 functional 트랙. scalability·issue-space는 "
+    raw["note"] = ("판정 정본은 functional-ext 트랙 (PL 확정 2026-08-13). 그 외 트랙은 "
                    "강건성 관측. e₂는 트랙별 앵커 (24 §3)")
 
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())

@@ -177,7 +177,8 @@ def main() -> int:
             "sc_issue": sc_issue.evaluate(points, d=d_med) if len(points) >= 3 else None,
         }
         f = raw["tracks"]["scenarios"][plan]
-        print(f"  {plan}: FC s={f['fc']['mean_s'] if f['fc'] else None} | "
+        print(f"  {plan}: FC 달성률={f['fc']['mean_achieved'] if f['fc'] else None} "
+              f"★{f['fc']['stars_achieved'] if f['fc'] else '-'} | "
               f"RU r중앙={f['ru']['median_r_total'] if f['ru'] else None} | "
               f"TB ρ중앙={f['tb'].get('median_rho')} ★{f['tb'].get('stars')} | "
               f"SC-의제 최대축={raw['tracks']['sweep'][plan]['sc_issue']['max_issues']['max_issues'] if raw['tracks']['sweep'][plan]['sc_issue'] else None} "

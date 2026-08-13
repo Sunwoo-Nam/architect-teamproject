@@ -11,9 +11,10 @@ r"""[24 §1] Functional Correctness — Total Utility 달성률.
 - **집계 수준** — 표본 전체의 **달성률 평균과 R̄ 평균을 먼저** 구한 뒤 s로 **한 번** 환산한다.
   세션별 s를 평균 내지 **않는다** (24 §1.4 「집계 수준」)
 
-**지표를 2개 병행한다** (사용자 지시 2026-08-12): `s`(베이스라인 정규화, 24 정본)와
-`달성률`(절대 수준). 둘은 어긋날 수 있다 — 후보 공간이 전부 좋으면 절대 달성률은
-높지만 무작위 대비 개선은 작다. 어느 쪽으로 좋은지가 다른 정보이므로 둘 다 낸다.
+**판정 지표는 달성률이다** (PL 확정 2026-08-13 — 종전 판정 s에서 교체). 별점은
+달성률 원값에 BAND_FC_ACHIEVED를 직접 적용한다. `s`는 보조 관측으로 유지한다 —
+후보 공간이 전부 좋으면 달성률은 높아도 무작위 대비 개선이 작을 수 있어, 그 확인과
+**s ≤ 0(무작위 이하) 즉시 결함** 감시가 s의 남은 역할이다.
 
 **FR 위반은 점수와 분리한다** (24 §1.7). 바닥선 밑 수락·하드 제약 위반은 달성률을
 깎는 것이 아니라 별도 플래그다 — "달성률이 높아도 지켜야 할 것을 어겼다"가 드러나야 한다.
@@ -24,7 +25,7 @@ import statistics
 from dataclasses import dataclass, field
 from typing import Sequence
 
-from .constants import BAND_FC_S
+from .constants import BAND_FC_ACHIEVED, BAND_FC_S
 from .contract import NO_AGREEMENT, Case, Outcome, Preference
 
 
@@ -78,9 +79,10 @@ def improvement_ratio(achieved: float, baseline: float) -> float:
 
 @dataclass(frozen=True)
 class FcScore:
-    achieved: float          # U(r) ÷ U(x*)
+    achieved: float          # U(r) ÷ U(x*) — 판정 지표
+    stars_achieved: int
     baseline: float          # R̄
-    s: float                 # (달성률 − R̄) ÷ (1 − R̄)
+    s: float                 # (달성률 − R̄) ÷ (1 − R̄) — 보조 관측
     stars_s: int
     optimal: Outcome
     u_optimal: float
@@ -92,6 +94,7 @@ class FcScore:
     def as_dict(self) -> dict:
         return {
             "achieved": round(self.achieved, 6),
+            "stars_achieved": self.stars_achieved,
             "baseline": round(self.baseline, 6),
             "s": round(self.s, 6),
             "stars_s": self.stars_s,
@@ -143,6 +146,7 @@ def score(
 
     return FcScore(
         achieved=achieved,
+        stars_achieved=BAND_FC_ACHIEVED.stars(achieved),
         baseline=baseline,
         s=s,
         stars_s=BAND_FC_S.stars(s),
@@ -174,9 +178,12 @@ def aggregate(scores: Sequence[FcScore]) -> dict:
         "cases": len(scores),
         "agreed": sum(1 for x in scores if x.agreed),
         "mean_achieved": round(mean_achieved, 6),
+        "stars_achieved": BAND_FC_ACHIEVED.stars(mean_achieved),  # 판정 (PL 확정 2026-08-13)
         "mean_baseline": round(mean_baseline, 6),
         "mean_s": round(mean_s, 6),
         "stars_s": BAND_FC_S.stars(mean_s),
+        # s ≤ 0 = 무작위 이하 — 달성률 별점과 무관하게 즉시 결함 (24 §1.4, 0점 정의 계승)
+        "below_random_defect": mean_s <= 0,
         "optimal_hit": sum(1 for x in scores if x.achieved >= 1.0 - 1e-9),
         "fr_violation_cases": sum(1 for x in scores if x.fr_violations),
         # R̄=1 케이스에서는 s가 1 아니면 0뿐이라 판별력이 없다. 24 §1.4가 "달성률 원값으로
@@ -186,5 +193,6 @@ def aggregate(scores: Sequence[FcScore]) -> dict:
             1 for x in scores
             if x.baseline >= 1.0 - 1e-12 and x.achieved < 1.0 - 1e-12
         ),
-        "bands": {"s": BAND_FC_S.as_dict()},  # 별점은 s 단일 (PL 확정 2026-08-13)
+        # 판정 = 달성률, s는 보조 (PL 확정 2026-08-13 재개정)
+        "bands": {"achieved": BAND_FC_ACHIEVED.as_dict(), "s": BAND_FC_S.as_dict()},
     }
