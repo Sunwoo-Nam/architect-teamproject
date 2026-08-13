@@ -44,6 +44,17 @@ class SynthTimeConstants:
 
 SYNTH_TIME = SynthTimeConstants()
 
+#: TB 판정 — 시간 비율 ρ = T(설계) ÷ T(naive baseline). 참조점: naive 등가(1.0)와
+#: 순간 완료(0)의 5등분 (24 §4.3, PL 확정 2026-08-13 — 경계는 잠정, 분포 보고 조율).
+#: ρ > 1(naive만도 못함)은 등급이 아니라 즉시 결함 — FC의 s ≤ 0과 동형.
+BAND_TB_RHO = Band(
+    name="TB 시간 비율 ρ",
+    thresholds=[0.2, 0.4, 0.6, 0.8, 1.0],
+    direction="at_most",
+    note="24 §4.3 — ρ = T_설계 ÷ T_naive(SAOP baseline). naive 등가 1.0-순간 완료 0 등분. "
+         "baseline이 벽시계 상한에 걸리면 T_naive는 하한 → ρ는 상한(보수 판정)",
+)
+
 # --------------------------------------------------------------------------------------
 # Functional Correctness — 24 §1. 지표 2개를 병행한다.
 # --------------------------------------------------------------------------------------
