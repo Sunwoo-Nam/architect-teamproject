@@ -33,6 +33,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from total import pyversion  # noqa: E402
 from total.adapters.nparty._vendor.full_campaign import resolve_plans, run_full  # noqa: E402
 from total.adapters.nparty._vendor.html_report import render_html  # noqa: E402
 from total.adapters.nparty._vendor.measures.an_kit import generate_kit  # noqa: E402
@@ -54,7 +55,10 @@ def main() -> int:
                     help="§10 의제 조합을 트랙(A·B)당 이 건수로 축소 (생략 시 전체)")
     ap.add_argument("--results", default=str(ROOT / "results"),
                     help="결과 루트 (기본: total/results)")
+    ap.add_argument("--allow-python-mismatch", action="store_true",
+                    help="3.14 고정 검사 우회 (수치는 판정에 쓰지 말 것)")
     args = ap.parse_args()
+    pyversion.require(args.allow_python_mismatch)
 
     plans = resolve_plans(args.plans)
     raw = run_full(seed=args.seed, plans=plans,

@@ -17,6 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from total import pyversion  # noqa: E402
 from total.adapters.nparty import PLANS, NpartyCase, run_session  # noqa: E402
 from total.adapters.nparty._vendor import issue_space  # noqa: E402
 from total.adapters.nparty._vendor.benchmark import (  # noqa: E402
@@ -83,7 +84,10 @@ def main() -> int:
     ap.add_argument("--cases", type=int, default=None, help="functional 케이스 상한")
     ap.add_argument("--sweep-cases", type=int, default=None, help="의제 조합 케이스 상한")
     ap.add_argument("--results", default=str(ROOT / "results"))
+    ap.add_argument("--allow-python-mismatch", action="store_true",
+                    help="3.14 고정 검사 우회 (수치는 판정에 쓰지 말 것)")
     args = ap.parse_args()
+    pyversion.require(args.allow_python_mismatch)
 
     functional = _functional(args.cases)
     sweep_cases = _issue_space_cases(args.sweep_cases)

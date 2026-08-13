@@ -19,6 +19,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from total import pyversion  # noqa: E402
 from total.adapters.composite import (  # noqa: E402
     E2_REFERENCE_PLAN,
     PLANS,
@@ -91,7 +92,10 @@ def main() -> int:
     ap.add_argument("--sweep-axes", default="4,6,8,10,12,14,16")
     ap.add_argument("--scenarios", type=int, default=None, help="시나리오 상한")
     ap.add_argument("--results", default=str(ROOT / "results"))
+    ap.add_argument("--allow-python-mismatch", action="store_true",
+                    help="3.14 고정 검사 우회 (수치는 판정에 쓰지 말 것)")
     args = ap.parse_args()
+    pyversion.require(args.allow_python_mismatch)
 
     plan_names = [p.strip() for p in args.plans.split(",") if p.strip()]
     axes_levels = [int(x) for x in args.sweep_axes.split(",") if x.strip()]

@@ -18,8 +18,12 @@ python3.14 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python experiments/composite_1_vs_2.py     # 1안 vs 2안 — QA 별점
 ```
 
-**파이썬은 3.14로 고정한다.** 총효용 합산 순서가 1 ULP만 달라져도 x* 선택이 뒤집히는
-사례가 실제로 있었다 — `python3`가 환경에 따라 다른 버전으로 잡히면 수치가 재현되지 않는다.
+**파이썬은 3.14로 고정하며, 실험 스크립트가 이를 강제한다** (`src/total/pyversion.py` —
+3.14가 아니면 실행 거부, 의도적 예외만 `--allow-python-mismatch`). 근거 두 가지:
+① RU-메모리는 tracemalloc이 재는 파이썬 객체 크기라 **인터프리터 버전에 따라 5~10%
+다르다** (3.11 vs 3.14 실측 — 00-설계안 §13-8). SC-의제 c도 여기서 회귀하므로 함께
+흔들린다. ② 총효용 합산 순서가 1 ULP만 달라져도 x* 선택이 뒤집히는 사례가 실제로
+있었다 — `python3`가 환경에 따라 다른 버전으로 잡히면 수치가 재현되지 않는다.
 
 **nparty 실험은 2종이고 각각 따로 실행한다.** 같은 두 방안을 재지만 자료의 수준이 다르다.
 
