@@ -6,38 +6,38 @@
   "expected": "agreement",
   "track": "cr",
   "type": "hard_path",
-  "seed": 1,
+  "seed": 14,
   "planted": {
    "trap": "path",
    "variant": "basic",
    "early": {
     "date": {
      "lure": "mon",
-     "alt": "thu"
+     "alt": "tue"
     }
    },
    "late": {
-    "theater": {
+    "transport": {
      "goods": [
-      "thtr-seongsu-1",
-      "thtr-gangnam-1"
+      "car",
+      "subway"
      ]
     }
    },
    "boost": [
     "date",
-    "theater"
+    "transport"
    ]
   },
   "oracle": {
-   "valid": 1128,
-   "u_xstar": 1.6748,
-   "r_bar": 0.791,
-   "corr": 0.12115955223200137,
-   "decoy_gap": 0.1657,
-   "decoy_slack": 0.226
+   "valid": 11430,
+   "u_xstar": 1.5516,
+   "r_bar": 0.7616,
+   "corr": 0.33953755109650446,
+   "decoy_gap": 0.1585,
+   "decoy_slack": 0.2062
   },
-  "attempts": 2
+  "attempts": 15
  },
  "axes": [
   {
@@ -51,7 +51,7 @@
      }
     },
     {
-     "name": "thu",
+     "name": "tue",
      "attrs": {
       "weekend": false
      }
@@ -63,13 +63,13 @@
    "generator": "time",
    "values": [
     {
-     "name": "15:00",
+     "name": "11:00",
      "attrs": {
       "late": false
      }
     },
     {
-     "name": "17:00",
+     "name": "13:00",
      "attrs": {
       "late": false
      }
@@ -81,15 +81,15 @@
    "generator": "region",
    "values": [
     {
+     "name": "hongdae",
+     "attrs": {}
+    },
+    {
      "name": "seongsu",
      "attrs": {}
     },
     {
-     "name": "gangnam",
-     "attrs": {}
-    },
-    {
-     "name": "yeongdeungpo",
+     "name": "jamsil",
      "attrs": {}
     }
    ]
@@ -117,21 +117,21 @@
    "generator": "restaurant",
    "values": [
     {
+     "name": "rest-hongdae-1",
+     "attrs": {
+      "region": "hongdae"
+     }
+    },
+    {
      "name": "rest-seongsu-1",
      "attrs": {
       "region": "seongsu"
      }
     },
     {
-     "name": "rest-gangnam-1",
+     "name": "rest-jamsil-1",
      "attrs": {
-      "region": "gangnam"
-     }
-    },
-    {
-     "name": "rest-yeongdeungpo-1",
-     "attrs": {
-      "region": "yeongdeungpo"
+      "region": "jamsil"
      }
     }
    ]
@@ -141,15 +141,15 @@
    "generator": "menu",
    "values": [
     {
+     "name": "mexican",
+     "attrs": {}
+    },
+    {
      "name": "chinese",
      "attrs": {}
     },
     {
      "name": "vegan",
-     "attrs": {}
-    },
-    {
-     "name": "mexican",
      "attrs": {}
     }
    ]
@@ -159,15 +159,15 @@
    "generator": "budget",
    "values": [
     {
-     "name": "low",
+     "name": "mid",
+     "attrs": {}
+    },
+    {
+     "name": "premium",
      "attrs": {}
     },
     {
      "name": "high",
-     "attrs": {}
-    },
-    {
-     "name": "mid",
      "attrs": {}
     }
    ]
@@ -177,21 +177,21 @@
    "generator": "theater",
    "values": [
     {
+     "name": "thtr-hongdae-1",
+     "attrs": {
+      "region": "hongdae"
+     }
+    },
+    {
      "name": "thtr-seongsu-1",
      "attrs": {
       "region": "seongsu"
      }
     },
     {
-     "name": "thtr-gangnam-1",
+     "name": "thtr-jamsil-1",
      "attrs": {
-      "region": "gangnam"
-     }
-    },
-    {
-     "name": "thtr-yeongdeungpo-1",
-     "attrs": {
-      "region": "yeongdeungpo"
+      "region": "jamsil"
      }
     }
    ]
@@ -209,7 +209,7 @@
      "attrs": {}
     },
     {
-     "name": "walk",
+     "name": "bus",
      "attrs": {}
     }
    ]
@@ -219,21 +219,21 @@
    "generator": "cafe",
    "values": [
     {
+     "name": "cafe-hongdae-1",
+     "attrs": {
+      "region": "hongdae"
+     }
+    },
+    {
      "name": "cafe-seongsu-1",
      "attrs": {
       "region": "seongsu"
      }
     },
     {
-     "name": "cafe-gangnam-1",
+     "name": "cafe-jamsil-1",
      "attrs": {
-      "region": "gangnam"
-     }
-    },
-    {
-     "name": "cafe-yeongdeungpo-1",
-     "attrs": {
-      "region": "yeongdeungpo"
+      "region": "jamsil"
      }
     }
    ]
@@ -243,22 +243,22 @@
   {
    "type": "hard",
    "rule": "availability_explicit",
-   "subject": "theater",
-   "subject_value": "thtr-seongsu-1",
+   "subject": "transport",
+   "subject_value": "car",
    "allowed": {
     "date": [
-     "thu"
+     "tue"
     ]
    }
   },
   {
    "type": "hard",
    "rule": "availability_explicit",
-   "subject": "theater",
-   "subject_value": "thtr-gangnam-1",
+   "subject": "transport",
+   "subject_value": "subway",
    "allowed": {
     "date": [
-     "thu"
+     "tue"
     ]
    }
   },
@@ -267,37 +267,29 @@
    "rule": "availability",
    "subject": "movie",
    "over": "region",
-   "coverage": 0.68
-  },
-  {
-   "type": "hard",
-   "rule": "membership",
-   "subject": "restaurant",
-   "region_axis": "region"
-  },
-  {
-   "type": "hard",
-   "rule": "membership",
-   "subject": "cafe",
-   "region_axis": "region"
+   "coverage": 0.7
   },
   {
    "type": "soft",
-   "rule": "conditional_home",
-   "if_axis": "time",
+   "rule": "conditional_pref",
+   "if_axis": "budget",
    "if_values": [
-    "21:00"
+    "low"
    ],
-   "then_axis": "region",
-   "penalty": 0.2
+   "then_axis": "menu",
+   "preferred": [
+    "korean",
+    "chinese"
+   ],
+   "penalty": 0.15
   }
  ],
  "participants": {
   "count": 2,
-  "profile_seed": 1,
+  "profile_seed": 14,
   "initial_threshold": [
-   0.44,
-   0.45
+   0.38,
+   0.43
   ],
   "styles": [
    "default",
@@ -311,135 +303,135 @@
  "profiles": [
   {
    "weights": {
-    "date": 0.259766,
-    "time": 0.04235,
-    "region": 0.04125,
-    "movie": 0.038058,
-    "restaurant": 0.027178,
-    "menu": 0.018713,
-    "budget": 0.028177,
-    "theater": 0.344045,
-    "transport": 0.197438,
-    "cafe": 0.003025
+    "date": 0.215113,
+    "time": 0.173311,
+    "region": 0.035508,
+    "movie": 0.167132,
+    "restaurant": 0.006708,
+    "menu": 0.00454,
+    "budget": 0.019236,
+    "theater": 0.046378,
+    "transport": 0.309504,
+    "cafe": 0.02257
    },
    "scores": {
     "date": {
-     "mon": 0.9462,
-     "thu": 0.7566
+     "mon": 0.9779,
+     "tue": 0.7117
     },
     "time": {
-     "15:00": 0.4466,
-     "17:00": 0.296
+     "11:00": 0.7203,
+     "13:00": 0.2312
     },
     "region": {
-     "seongsu": 0.5681,
-     "gangnam": 0.4721,
-     "yeongdeungpo": 0.864
+     "hongdae": 0.0513,
+     "seongsu": 0.1268,
+     "jamsil": 0.3552
     },
     "movie": {
-     "mv1": 0.2624,
-     "mv2": 0.4286,
-     "mv3": 0.1666
+     "mv1": 0.3337,
+     "mv2": 0.084,
+     "mv3": 0.0217
     },
     "restaurant": {
-     "rest-seongsu-1": 0.1021,
-     "rest-gangnam-1": 0.5605,
-     "rest-yeongdeungpo-1": 0.0916
+     "rest-hongdae-1": 0.2504,
+     "rest-seongsu-1": 0.0202,
+     "rest-jamsil-1": 0.5346
     },
     "menu": {
-     "chinese": 0.9339,
-     "vegan": 0.0163,
-     "mexican": 0.9193
+     "mexican": 0.6909,
+     "chinese": 0.5361,
+     "vegan": 0.6645
     },
     "budget": {
-     "low": 0.9354,
-     "high": 0.4479,
-     "mid": 0.6779
+     "mid": 0.1973,
+     "premium": 0.7856,
+     "high": 0.3782
     },
     "theater": {
-     "thtr-seongsu-1": 0.921,
-     "thtr-gangnam-1": 0.9118,
-     "thtr-yeongdeungpo-1": 0.5019
+     "thtr-hongdae-1": 0.099,
+     "thtr-seongsu-1": 0.3664,
+     "thtr-jamsil-1": 0.9623
     },
     "transport": {
-     "car": 0.8358,
-     "subway": 0.2535,
-     "walk": 0.8982
+     "car": 0.8862,
+     "subway": 0.9196,
+     "bus": 0.4977
     },
     "cafe": {
-     "cafe-seongsu-1": 0.2945,
-     "cafe-gangnam-1": 0.353,
-     "cafe-yeongdeungpo-1": 0.2111
-    }
-   },
-   "home_region": "gangnam",
-   "initial_threshold": 0.44
-  },
-  {
-   "weights": {
-    "date": 0.213529,
-    "time": 0.063709,
-    "region": 0.055199,
-    "movie": 0.133004,
-    "restaurant": 0.014912,
-    "menu": 0.038101,
-    "budget": 0.016051,
-    "theater": 0.275347,
-    "transport": 0.042302,
-    "cafe": 0.147846
-   },
-   "scores": {
-    "date": {
-     "mon": 0.9391,
-     "thu": 0.7477
-    },
-    "time": {
-     "15:00": 0.0,
-     "17:00": 1.0
-    },
-    "region": {
-     "seongsu": 1.0,
-     "gangnam": 0.0,
-     "yeongdeungpo": 0.7199
-    },
-    "movie": {
-     "mv1": 0.0,
-     "mv2": 0.206,
-     "mv3": 1.0
-    },
-    "restaurant": {
-     "rest-seongsu-1": 0.809,
-     "rest-gangnam-1": 0.0,
-     "rest-yeongdeungpo-1": 1.0
-    },
-    "menu": {
-     "chinese": 0.7463,
-     "vegan": 1.0,
-     "mexican": 0.0
-    },
-    "budget": {
-     "low": 0.0242,
-     "high": 0.0,
-     "mid": 1.0
-    },
-    "theater": {
-     "thtr-seongsu-1": 0.9281,
-     "thtr-gangnam-1": 0.9008,
-     "thtr-yeongdeungpo-1": 0.5226
-    },
-    "transport": {
-     "car": 1.0,
-     "subway": 0.9663,
-     "walk": 0.0
-    },
-    "cafe": {
-     "cafe-seongsu-1": 1.0,
-     "cafe-gangnam-1": 0.0,
-     "cafe-yeongdeungpo-1": 0.0439
+     "cafe-hongdae-1": 0.9061,
+     "cafe-seongsu-1": 0.7868,
+     "cafe-jamsil-1": 0.4308
     }
    },
    "home_region": "seongsu",
-   "initial_threshold": 0.45
+   "initial_threshold": 0.38
+  },
+  {
+   "weights": {
+    "date": 0.22524,
+    "time": 0.007569,
+    "region": 0.163647,
+    "movie": 0.017792,
+    "restaurant": 0.036228,
+    "menu": 0.084408,
+    "budget": 0.049159,
+    "theater": 0.022163,
+    "transport": 0.319032,
+    "cafe": 0.074761
+   },
+   "scores": {
+    "date": {
+     "mon": 0.9498,
+     "tue": 0.7598
+    },
+    "time": {
+     "11:00": 1.0,
+     "13:00": 0.0
+    },
+    "region": {
+     "hongdae": 0.4166,
+     "seongsu": 1.0,
+     "jamsil": 0.0
+    },
+    "movie": {
+     "mv1": 0.8836,
+     "mv2": 1.0,
+     "mv3": 0.0
+    },
+    "restaurant": {
+     "rest-hongdae-1": 0.0,
+     "rest-seongsu-1": 0.2791,
+     "rest-jamsil-1": 1.0
+    },
+    "menu": {
+     "mexican": 0.0,
+     "chinese": 1.0,
+     "vegan": 0.8144
+    },
+    "budget": {
+     "mid": 0.0,
+     "premium": 0.3854,
+     "high": 1.0
+    },
+    "theater": {
+     "thtr-hongdae-1": 1.0,
+     "thtr-seongsu-1": 0.3573,
+     "thtr-jamsil-1": 0.0
+    },
+    "transport": {
+     "car": 0.8809,
+     "subway": 0.9011,
+     "bus": 0.4999
+    },
+    "cafe": {
+     "cafe-hongdae-1": 1.0,
+     "cafe-seongsu-1": 0.0,
+     "cafe-jamsil-1": 0.939
+    }
+   },
+   "home_region": "jamsil",
+   "initial_threshold": 0.43
   }
  ]
 }
