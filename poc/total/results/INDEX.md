@@ -4,6 +4,7 @@
 |---|---|---|---|---|---|
 | `nparty-1a-vs-2-raw-20260813T090721Z` | nparty-1a-vs-2-raw | 2026-08-13T09:07:21+00:00 | `50ecc3d` | nparty benchmark | [md](nparty-1a-vs-2-raw/nparty-1a-vs-2-raw-20260813T090721Z/report.md) · [html](nparty-1a-vs-2-raw/nparty-1a-vs-2-raw-20260813T090721Z/report.html) |
 | `nparty-1a-vs-2-raw-20260813T015721Z` | nparty-1a-vs-2-raw | 2026-08-13T01:57:21+00:00 | `bfa7940` | nparty benchmark | [md](nparty-1a-vs-2-raw/nparty-1a-vs-2-raw-20260813T015721Z/report.md) · [html](nparty-1a-vs-2-raw/nparty-1a-vs-2-raw-20260813T015721Z/report.html) |
+| `nparty-1a-vs-2-20260813T092904Z` | nparty-1a-vs-2 | 2026-08-13T09:29:04+00:00 | `668b27d` | nparty benchmark | [md](nparty-1a-vs-2/nparty-1a-vs-2-20260813T092904Z/report.md) · [html](nparty-1a-vs-2/nparty-1a-vs-2-20260813T092904Z/report.html) |
 | `nparty-1a-vs-2-20260813T071045Z` | nparty-1a-vs-2 | 2026-08-13T07:10:45+00:00 | `58081ea` | nparty benchmark | [md](nparty-1a-vs-2/nparty-1a-vs-2-20260813T071045Z/report.md) · [html](nparty-1a-vs-2/nparty-1a-vs-2-20260813T071045Z/report.html) |
 | `nparty-1a-vs-2-20260813T065428Z` | nparty-1a-vs-2 | 2026-08-13T06:54:28+00:00 | `19ab399` | nparty benchmark | [md](nparty-1a-vs-2/nparty-1a-vs-2-20260813T065428Z/report.md) · [html](nparty-1a-vs-2/nparty-1a-vs-2-20260813T065428Z/report.html) |
 | `nparty-1a-vs-2-20260813T063312Z` | nparty-1a-vs-2 | 2026-08-13T06:33:12+00:00 | `2844128` | nparty benchmark | [md](nparty-1a-vs-2/nparty-1a-vs-2-20260813T063312Z/report.md) · [html](nparty-1a-vs-2/nparty-1a-vs-2-20260813T063312Z/report.html) |

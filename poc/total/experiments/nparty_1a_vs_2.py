@@ -64,7 +64,7 @@ def _issue_space_cases(limit: int | None):
                 out.append(issue_space.load_issue_case(path))
             except Exception:
                 continue
-    return out[:limit] if limit else out
+    return out if limit is None else out[:limit]  # 0 = 스윕 생략 (버그 수정 2026-08-13)
 
 
 def e2_anchor(cases):

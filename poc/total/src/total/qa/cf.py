@@ -293,11 +293,15 @@ class ExposureMultiple:
         }
 
 
-def exposure_multiple(
+def exposure_values(
     runs: Sequence[tuple[SessionResult, Case]],
     anchor: E2Anchor,
-) -> ExposureMultiple:
-    """피해자별 노출 배수 m과 최대 단일 관찰자 깊이."""
+) -> tuple[list[float], list[float]]:
+    """피해자별 (노출 배수 m, 최대 단일 관찰자 깊이) 원값 목록.
+
+    트랙 총합(서로 다른 e₂ 앵커를 가진 트랙들의 병합 중앙값) 산출용 — 각 값은 자기
+    트랙의 e₂로 이미 정규화되어 있어 그대로 이어붙여 집계할 수 있다 (2026-08-13).
+    """
     if not runs:
         raise ValueError("측정할 세션이 없다")
     multiples, single = [], []
@@ -317,6 +321,15 @@ def exposure_multiple(
                 best = max(best, e)
             multiples.append(total / anchor.depth)
             single.append(best)
+    return multiples, single
+
+
+def exposure_multiple(
+    runs: Sequence[tuple[SessionResult, Case]],
+    anchor: E2Anchor,
+) -> ExposureMultiple:
+    """피해자별 노출 배수 m과 최대 단일 관찰자 깊이."""
+    multiples, single = exposure_values(runs, anchor)
 
     if anchor.degenerate:
         # 앵커가 0에 가까우면 비율이 의미를 잃는다. 큰 수를 내놓으면 오독을 부르므로
