@@ -85,9 +85,9 @@ class TestMeasure:
         assert m.r_peak == pytest.approx(0.02)
 
     def test_stars_from_total_usage(self):
-        # r=0.10 → 15% 이하 → 5점
+        # r=0.10 → 로그 사다리(2026-08-13 개정)에서 ≤10% → 2점
         m = measure(mk(peak_bytes=2 * MB, base_bytes=8 * MB), ceiling_bytes=100 * MB)
-        assert m.stars == 5
+        assert m.stars == 2
 
     def test_stars_zero_over_ceiling(self):
         m = measure(mk(peak_bytes=200 * MB, base_bytes=0), ceiling_bytes=100 * MB)
@@ -115,8 +115,10 @@ class TestRealDataRegression:
     """dpca 실측(scaling_raw.jsonl)으로 밴드가 실제로 변별하는지 확인."""
 
     @pytest.mark.parametrize("peak_mb,expected_stars", [
-        (0.18, 5),     # seq2 16축
-        (8.23, 5),     # pool 16축 — 6.4%
+        # 로그 사다리 (2026-08-13 개정) — 구 선형 등분은 0.18과 8.23을 같은 ★5로
+        # 뭉갰다 (46배 차이인데도). 데케이드 등분이 이 실측 지점들을 변별한다.
+        (0.18, 3),     # seq2 16축 — r 0.14%
+        (8.23, 2),     # pool 16축 — r 6.4%
         (136.43, 0),   # pool 20축 — 107%: 협상 몫 한도(128MB, 2026-08-13 유도)에서 즉시 결함
         (563.44, 0),   # pool 22축 — 한도 초과
     ])
