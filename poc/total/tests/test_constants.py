@@ -126,12 +126,16 @@ class TestScBands:
 
     def test_max_issues_band(self):
         assert BAND_SC_MAX_ISSUES.direction == "at_least"
-        assert BAND_SC_MAX_ISSUES.thresholds == [30, 20, 14, 10, 6]
+        assert BAND_SC_MAX_ISSUES.thresholds == [12, 9, 7, 5, 4]  # [4,12] 로그 등분 (2026-08-13)
 
     def test_max_issues_stars(self):
-        assert BAND_SC_MAX_ISSUES.stars(32) == 5   # dpca seq2 실측 (32축까지 확인)
-        assert BAND_SC_MAX_ISSUES.stars(20) == 4   # dpca pool 실측
-        assert BAND_SC_MAX_ISSUES.stars(4) == 0
+        # 24 §4.3 (2026-08-13) — [요구 4, 실사용 최대 12] 로그 등분
+        assert BAND_SC_MAX_ISSUES.stars(12) == 5   # 실사용 최대 커버 = 만점
+        assert BAND_SC_MAX_ISSUES.stars(9) == 4
+        assert BAND_SC_MAX_ISSUES.stars(7) == 3
+        assert BAND_SC_MAX_ISSUES.stars(5) == 2
+        assert BAND_SC_MAX_ISSUES.stars(4) == 1    # 요구(기준 시나리오 4축) 딱 충족
+        assert BAND_SC_MAX_ISSUES.stars(3) == 0    # 요구 미달 — 즉시 결함
 
 
 class TestRuBand:

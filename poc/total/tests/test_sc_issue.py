@@ -89,12 +89,14 @@ class TestElasticity:
         d = elasticity(p, d=4).as_dict()
         assert set(d) >= {"c", "ci_low", "ci_high", "r2", "stars", "band"}
 
-    def test_uses_total_bytes_not_peak(self):
-        # 공통 기저가 조합 수에 비례하면 c가 올라가야 한다 (24 §2.8 단서)
+    def test_uses_peak_only_base_excluded(self):
+        # 24 §4 (2026-08-13) — 보조 관측 c는 프로토콜 상태만 회귀한다: 기저(설계로 못
+        # 줄이는 하한)를 넣으면 전 방안이 c≈1로 수렴해 변별이 죽는다. 판정(최대 의제 수)이
+        # 총 점유를 쓰므로 기저는 그쪽에서 반영된다.
         flat_peak = [(10, 50), (100, 50), (1000, 50), (10000, 50)]
         with_base = [SweepPoint(scale=s, peak_bytes=p, agreed=True, n_issues=4,
                                 base_bytes=s * 10) for s, p in flat_peak]
-        assert elasticity(with_base, d=4).c > elasticity(pts(flat_peak), d=4).c
+        assert elasticity(with_base, d=4).c == elasticity(pts(flat_peak), d=4).c
 
 
 class TestCompletionGate:
@@ -178,13 +180,25 @@ class TestEvaluate:
         assert "elasticity" in r and "max_issues" in r and "gate" in r
 
     def test_gate_failure_zeroes_elasticity_stars(self):
-        # 24 §4.4 — 게이트 위반이면 c와 무관하게 0점 + 결함 보고
+        # 24 §4 (2026-08-13) — 게이트 위반은 보조 관측 c의 별점만 0으로 덮는다.
+        # 판정(최대 의제 수)은 완결 실행만 세므로 defect는 서지 않는다.
         small = [SweepPoint(10, int(0.1 * MB), True, 4) for _ in range(30)]
         mid = [SweepPoint(1000, int(0.1 * MB), True, 8) for _ in range(30)]
         large = [SweepPoint(100000, int(0.1 * MB), i < 3, 12) for i in range(30)]
         r = evaluate(small + mid + large, d=4, memory_limit_bytes=100 * MB)
         assert r["gate"]["ok"] is False
         assert r["elasticity"]["stars"] == 0
+        assert r["elasticity"]["auxiliary"] is True
+        assert r["defect"] is False        # 12축까지 완결 실행 존재 — 요구 미달 아님
+        assert r["max_issues"]["stars"] == 5
+
+    def test_defect_only_on_requirement_miss(self):
+        # defect = 요구 미달(최대 의제 수 < 4축)일 때만 (PL 확정 2026-08-13)
+        only3 = ([SweepPoint(10, int(0.1 * MB), True, 3) for _ in range(30)]
+                 + [SweepPoint(100, int(0.1 * MB), False, 4) for _ in range(30)]
+                 + [SweepPoint(1000, int(0.1 * MB), False, 5) for _ in range(30)])
+        r = evaluate(only3, d=4, memory_limit_bytes=100 * MB)
+        assert r["max_issues"]["max_issues"] == 3
         assert r["defect"] is True
 
     def test_gate_pass_keeps_stars(self):

@@ -165,9 +165,10 @@ def _section(qa: str, data: dict, plans: Sequence[str]) -> list[str]:
         "ru": [("median_total_mb", "단말 총 점유 (MB)"), ("median_peak_mb", "프로토콜 상태 (MB)"),
                ("median_base_mb", "공통 기저 (MB)"), ("stars_median", "별점"),
                ("over_ceiling_sessions", "한도 초과 세션")],
-        "sc_issue": [("c", "탄력성 c"), ("stars_c", "c 별점"),
-                     ("max_issues", "최대 의제 수"), ("stars_max_issues", "최대 의제 수 별점"),
-                     ("gate_ok", "완결률 게이트")],
+        "sc_issue": [("max_issues", "최대 의제 수 (판정)"), ("stars_max_issues", "별점"),
+                     ("censored", "censored (스윕 미도달)"),
+                     ("c", "탄력성 c (보조)"), ("stars_c", "c 별점 (보조)"),
+                     ("gate_ok", "완결률 게이트 (보조)")],
     }[qa]
 
     rows = []

@@ -1,19 +1,15 @@
-r"""[24 §4] Scalability-의제 — 지표 2종을 병행한다.
+r"""[24 §4] Scalability-의제 — 단일 판정 지표: **최대 의제 수** (PL 확정 2026-08-13).
 
-| 지표 | 질문 | 성격 |
-|---|---|---|
-| **탄력성 c** | 조합 수가 늘 때 메모리가 어떻게 늘어나는가 | 구조 특성 |
-| **최대 의제 수** | 메모리 한도 안에서 몇 개까지 되는가 | 수용 한계 |
+> 협상 몫 한도(RU와 동일, 128MB) 안에서 **단말 총 점유(기저 1인분 + 프로토콜 상태)**로
+> 정상 완결 가능한 최대 의제(축) 수. nparty·composite 두 시나리오에 같은 정의를 쓴다.
 
-둘은 다른 질문이다 — c가 좋아도(증가가 완만해도) 절대 수준이 이미 높으면 몇 개 못 넣고,
-c가 나빠도 시작이 작으면 꽤 넣을 수 있다. 그래서 둘 다 낸다 (사용자 지시 2026-08-12).
-
-**메모리는 단말 총 점유(공통 기저 + 프로토콜 상태)로 본다** — 24 §2.8 단서. 공통 기저가
-조합 수에 비례하므로, 기저를 빼면 "조합이 늘어도 메모리가 안 는다"는 틀린 그림이 나온다.
-
-**완결률 게이트** (24 §4.4): S가 커질 때 빨리 결렬해 버리면 깊은 라운드에 도달하지 않아
-메모리가 적게 나온다 — "많이 실패해서 탄력성이 좋아지는" 왜곡이다. 최소 S와 최대 S의
-완결률을 비율 차 검정(95%)으로 비교해, 유의하게 떨어지면 **c와 무관하게 0점 + 결함 보고**.
+- **측정량 배정으로 기존 딜레마를 해소한다**: 판정(최대 의제 수)은 **총 점유** — "단말에
+  실제로 들어가느냐"의 질문이므로 기저 포함이 맞다. 보조 관측인 탄력성 c는 **프로토콜
+  상태만** — 기저(설계로 못 줄이는 하한)를 넣으면 전 방안이 c≈1로 수렴해 변별이 죽는다.
+- **결렬은 수용의 증거가 아니다**: 정상 완결한 실행만 센다 — "빨리 실패해서 좋아 보이는"
+  왜곡을 지표 정의가 차단한다. 스윕이 한도에 닿지 못하면 censored(값은 하한) 표시.
+- **보조 관측**: 탄력성 c(§4.3 원리·완결률 게이트 포함)는 판정에서 빼고 원인 분석용으로
+  병기한다. defect는 요구 미달(최대 의제 수 < 4축)에서만 선다.
 """
 from __future__ import annotations
 
@@ -60,7 +56,8 @@ def loglog_fit(points: Sequence[SweepPoint]) -> FitResult:
 
     xs, ys = [], []
     for scale in sorted(grouped):
-        med = statistics.median(p.total_bytes for p in grouped[scale])
+        # 보조 관측 c는 프로토콜 상태만 회귀한다 (24 §4 — 기저 포함 시 전 방안 c≈1 수렴)
+        med = statistics.median(p.peak_bytes for p in grouped[scale])
         xs.append(math.log(scale))
         ys.append(math.log(max(med, 1e-9)))   # 0 바이트 방어 — log(0) 회피
 
@@ -228,22 +225,25 @@ def evaluate(
 ) -> dict:
     """두 지표 + 완결률 게이트를 한 번에.
 
-    게이트가 실패하면 탄력성 별점을 0으로 덮고 `defect=True`로 보고한다 (24 §4.4).
-    최대 의제 수는 완결한 실행만 세므로 게이트와 독립이라 덮지 않는다.
+    판정은 최대 의제 수 단일 지표다 (PL 확정 2026-08-13) — defect는 요구 미달
+    (최대 의제 수 < 4축, 별점 0)에서만 선다. 탄력성 c와 완결률 게이트는 보조 관측으로
+    병기하며, 게이트 실패는 c 별점만 0으로 덮는다 (판정에는 영향 없음 — 최대 의제 수는
+    완결 실행만 세므로 게이트가 잡는 왜곡이 정의상 차단된다).
     """
     e = elasticity(points, d)
     m = max_issues(points, memory_limit_bytes)
     gate = completion_gate(points)
 
     e_dict = e.as_dict()
+    e_dict["auxiliary"] = True  # 판정 아님 — 원인 분석용 (24 §4)
     if not gate.ok:
         e_dict["stars"] = 0
         e_dict["stars_overridden_by_gate"] = True
 
     return {
-        "elasticity": e_dict,
-        "max_issues": m.as_dict(),
-        "gate": gate.as_dict(),
-        "defect": not gate.ok,
+        "max_issues": m.as_dict(),      # ← 단일 판정 지표
+        "elasticity": e_dict,           # 보조
+        "gate": gate.as_dict(),         # 보조 (c 전용)
+        "defect": m.stars == 0,
         "d": d,
     }

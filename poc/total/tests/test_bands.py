@@ -64,11 +64,14 @@ class TestStarsAtLeast:
 
     def test_integer_thresholds(self):
         # 최대 축 수처럼 정수 지표에도 쓴다
-        t = [30, 20, 14, 10, 6]
+        t = [12, 9, 7, 5, 4]  # 24 §4.3 — [4,12] 로그 등분 (2026-08-13)
         assert stars_at_least(32, t) == 5
-        assert stars_at_least(30, t) == 5
-        assert stars_at_least(29, t) == 4
-        assert stars_at_least(5, t) == 0
+        assert stars_at_least(12, t) == 5
+        assert stars_at_least(10, t) == 4
+        assert stars_at_least(8, t) == 3
+        assert stars_at_least(6, t) == 2
+        assert stars_at_least(4, t) == 1
+        assert stars_at_least(3, t) == 0
 
     def test_thresholds_must_be_descending(self):
         with pytest.raises(ValueError):

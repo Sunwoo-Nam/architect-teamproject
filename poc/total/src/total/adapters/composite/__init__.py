@@ -340,10 +340,14 @@ def run_sweep_point(scenario: Scenario, plan: str, n_issues: int, **kw) -> Sweep
     if plan not in PLANS:
         raise KeyError(f"알 수 없는 방안: {plan} (등록: {sorted(PLANS)})")
     run = run_one(scenario, plan, **kw)
+    # 기저 1인분 근사 (24 §4 — 판정은 단말 총 점유): 복합 의제의 단말 기저는 조합 표가
+    # 아니라 **축 수준 표현**(축 정의 + 자기 선호 스펙)이다 — 조합 열거 없이 계산 가능.
+    base = deep_size(scenario.axes) + deep_size(scenario.participants) // max(
+        1, scenario.n_participants)
     return SweepPoint(
         scale=max(1, scenario.space_size()),
         peak_bytes=int(run.peak_kib * 1024),
-        base_bytes=0,      # 공통 기저는 전 방안 동일 — 스윕은 프로토콜 몫만 본다
+        base_bytes=base,
         agreed=run.agreement is not None,
         n_issues=n_issues,
     )
