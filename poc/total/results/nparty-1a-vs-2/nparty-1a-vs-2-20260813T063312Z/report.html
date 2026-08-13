@@ -1,0 +1,70 @@
+<!doctype html><meta charset="utf-8"><title>nparty-1a-vs-2-20260813T063312Z</title>
+<style>
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;margin:2rem auto;max-width:64rem;
+padding:0 1rem;line-height:1.6;color:#1a1a1a}
+h1{border-bottom:2px solid #ddd;padding-bottom:.3rem}
+h3{margin-top:2rem;color:#333}
+table{border-collapse:collapse;width:100%;margin:.5rem 0 1.5rem}
+th,td{border:1px solid #ddd;padding:.4rem .6rem;text-align:left}
+th{background:#f5f5f5}
+blockquote{border-left:4px solid #f0ad4e;background:#fffaf0;margin:1rem 0;padding:.5rem 1rem}
+code{background:#f5f5f5;padding:.1rem .3rem;border-radius:3px}
+@media(prefers-color-scheme:dark){body{background:#161616;color:#e8e8e8}
+th{background:#242424}th,td{border-color:#333}code{background:#242424}
+blockquote{background:#2a2418;border-left-color:#a97c2c}}
+</style>
+<h1>nparty-1a-vs-2 — nparty-1a-vs-2-20260813T063312Z</h1>
+<p>생성: 2026-08-13T06:33:12+00:00 · 시드 0 · commit `2844128` · negmas 0.15.7 · Python 3.14.7</p>
+<p>데이터셋: `nparty benchmark` (참여자 3 · 의제 6)</p>
+<p>합성 시간 상수: t_phase 75.0ms(편도) · t_eval 0.0014ms · bw 2,500,000 B/s</p>
+<blockquote>별점 사다리 중 일부는 **잠정**이다 (24 §7.3 등). 별점만 보지 말고 원지표를 함께 읽어야 한다.</blockquote>
+<blockquote>방안 1-A vs 방안 2. 입력은 확정 벤치마크 셋(결정론) — 같은 입력이면 같은 결과.</blockquote>
+<h3>Functional Correctness (24 §1)</h3>
+<table>
+<tr><th>항목</th><th>plan1a</th><th>plan2</th></tr>
+<tr><td>달성률</td><td>0.9142</td><td>0.9679</td></tr>
+<tr><td>달성률 별점</td><td>★★★★☆ (4점)</td><td>★★★★★ (5점)</td></tr>
+<tr><td>무작위 베이스라인 R̄</td><td>0.8759</td><td>0.8759</td></tr>
+<tr><td>개선 비율 s</td><td>0.3086</td><td>0.7411</td></tr>
+<tr><td>s 별점</td><td>★★☆☆☆ (2점)</td><td>★★★★☆ (4점)</td></tr>
+<tr><td>최적안 적중</td><td>64</td><td>129</td></tr>
+<tr><td>FR 위반 케이스</td><td>0</td><td>0</td></tr>
+<tr><td>R̄=1 케이스 (s 판별력 없음)</td><td>32</td><td>32</td></tr>
+<tr><td>그중 유효 후보 밖</td><td>0</td><td>0</td></tr>
+</table>
+<blockquote>개선 비율 s는 **표본 전체의 달성률 평균과 R̄ 평균으로 한 번 환산**한 값이다 (24 §1.4 「집계 수준」) — 세션별 s의 평균이 아니므로 케이스 표(`cases.jsonl`)의 `s` 열을 평균 내면 값이 다르다. s = (달성률 − R̄) ÷ (1 − R̄)로 위 표에서 직접 검산할 수 있다</blockquote>
+<h3>Confidentiality (24 §7)</h3>
+<table>
+<tr><th>항목</th><th>plan1a</th><th>plan2</th></tr>
+<tr><td>노출 배수 m</td><td>0.789</td><td>1.316</td></tr>
+<tr><td>m 별점</td><td>★★★☆☆ (3점)</td><td>★★☆☆☆ (2점)</td></tr>
+<tr><td>최대 단일 관찰자 깊이</td><td>0.5</td><td>0.833</td></tr>
+</table>
+<h3>Time Behaviour (24 §6)</h3>
+<table>
+<tr><th>항목</th><th>plan1a</th><th>plan2</th></tr>
+<tr><td>세션 시간 (ms)</td><td>2,100.764</td><td>2,400.381</td></tr>
+<tr><td>지배 항</td><td>phase</td><td>phase</td></tr>
+<tr><td>통신 항</td><td>2,100</td><td>2,400</td></tr>
+<tr><td>전송 항</td><td>0.835</td><td>0.422</td></tr>
+</table>
+<h3>Resource Utilization-메모리 (24 §2)</h3>
+<table>
+<tr><th>항목</th><th>plan1a</th><th>plan2</th></tr>
+<tr><td>단말 총 점유 (MB)</td><td>0.0198</td><td>0.013</td></tr>
+<tr><td>프로토콜 상태 (MB)</td><td>0.0132</td><td>0.007</td></tr>
+<tr><td>공통 기저 (MB)</td><td>0.0056</td><td>0.0056</td></tr>
+<tr><td>별점</td><td>★★★★★ (5점)</td><td>★★★★★ (5점)</td></tr>
+<tr><td>한도 초과 세션</td><td>0</td><td>0</td></tr>
+</table>
+<h3>Scalability-의제 (24 §4)</h3>
+<table>
+<tr><th>항목</th><th>plan1a</th><th>plan2</th></tr>
+<tr><td>탄력성 c</td><td>0.9764</td><td>1.0259</td></tr>
+<tr><td>c 별점</td><td>★☆☆☆☆ (1점)</td><td>☆☆☆☆☆ (0점)</td></tr>
+<tr><td>최대 의제 수</td><td>10</td><td>10</td></tr>
+<tr><td>최대 의제 수 별점</td><td>★★☆☆☆ (2점)</td><td>★★☆☆☆ (2점)</td></tr>
+<tr><td>완결률 게이트</td><td>예</td><td>예</td></tr>
+</table>
+<blockquote>`plan1a` 최대 의제 수는 **하한**이다 — 스윕이 메모리 한도에 닿지 못해 실제 최대는 더 클 수 있다</blockquote>
+<blockquote>`plan2` 최대 의제 수는 **하한**이다 — 스윕이 메모리 한도에 닿지 못해 실제 최대는 더 클 수 있다</blockquote>
