@@ -10,7 +10,9 @@
 
 ---
 
-## 54.1 QAS 목록 — 14건
+## 54.1 QAS 목록 — 15건
+
+> Confidentiality는 누출 경로별로 3건으로 분리한다: **QAS-15 직접 공개**(협상 중 상대에게 보여지는 후보안·선호의 양), **QAS-04 간접 누출**(패턴 관찰 역추론), **QAS-12 외부 누출**(외부 전송의 PII·원문).
 
 | ID | ISO 25010 특성 — 부특성 | Quality Attribute Scenario | 응답 측정 | VoC 매핑 |
 |---|---|---|---|---|
@@ -28,6 +30,7 @@
 | QAS-12 | Security — **Confidentiality** | 협상 중 외부 전송이 발생하더라도, PII와 선호 원문은 유출되지 않아야 한다 | 유출 0건 | SP-V4, PD-V4 |
 | QAS-13 | Maintainability — **Testability** | 동일 조건·Mock 구성으로 재실행하면 동일 결과가 재현되어야 하며, 품질 문제의 원인(모델/프로토콜)을 분리 판정할 수 있어야 한다 | 재현 성공률, 원인 귀속 판정 가능 여부 | QA-V2, QA-V4, OM-V5, SD-V2 |
 | QAS-14 | Reliability — **Fault Tolerance** | 모델이 형식 위반·비결정 출력을 생성하더라도, 합의 내용의 정확성과 협상 상태는 오염되지 않고 정의된 처리로 완결되어야 한다 | 오염 0건, 처리 완결률 | OM-V4, OM-V5 |
+| QAS-15 | Security — **Confidentiality** | 협상이 진행되는 동안, 참여자의 후보안·선호 정보는 합의 도출에 필요한 최소한만 다른 참여자에게 공개되어야 한다 | 협상 1건당 공개된 선호·후보 정보량(노출 항목 수·노출 배수) | EU-V8, EU-V3 |
 
 ## 54.2 매핑 판단 근거 (논쟁 여지가 있는 항목)
 
@@ -47,7 +50,7 @@
 | Performance Efficiency | 2 | QAS-05, 06 |
 | Flexibility | 2 | QAS-07, 08 |
 | Reliability | 3 | QAS-09, 10, 14 |
-| Security | 2 | QAS-04, 12 |
+| Security | 3 | QAS-04, 12, 15 |
 | Safety | 1 | QAS-03 |
 | Interaction Capability | 1 | QAS-11 |
 | Maintainability | 1 | QAS-13 |
