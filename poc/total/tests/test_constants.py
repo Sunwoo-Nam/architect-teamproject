@@ -27,9 +27,9 @@ class TestSynthTimeConstants:
         # 24 §6.4-d: LTE 클라우드 릴레이 구간 분해 → 75ms (편도)
         assert SYNTH_TIME.t_phase_ms == 75.0
 
-    def test_t_eval_is_3us(self):
+    def test_t_eval_is_measured_1p4us(self):
         # 24 §6.4-b: PoC 실측 1.394µs → 3µs 반올림
-        assert SYNTH_TIME.t_eval_ms == 0.003
+        assert SYNTH_TIME.t_eval_ms == 0.0014  # 실측 1.394µs 채택 — 24 §6.4-b (2026-08-13)
 
     def test_bw_is_20mbps(self):
         # 24 §6.4-c: LTE 20 Mbps

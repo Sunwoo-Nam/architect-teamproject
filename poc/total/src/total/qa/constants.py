@@ -24,7 +24,7 @@ class SynthTimeConstants:
     """
 
     t_phase_ms: float = 75.0            # 24 §6.4-d — LTE 클라우드 릴레이 구간 분해
-    t_eval_ms: float = 0.003            # 24 §6.4-b — PoC 실측 1.394µs → 3µs
+    t_eval_ms: float = 0.0014           # 24 §6.4-b — PoC 실측 1.394µs 채택 (2026-08-13, 마진 제거)
     bw_bytes_per_s: float = 2_500_000.0  # 24 §6.4-c — LTE 20 Mbps
 
     @property

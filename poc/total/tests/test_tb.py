@@ -31,7 +31,7 @@ class TestSynthTime:
     def test_eval_term_is_divided_by_n(self):
         # 24 §6.4-a — eval_calls는 전 참여자 합. 실제로는 N대가 동시에 한다
         t = synth_time(mk(phases=0, bytes=0, eval_calls=300, participants=["a", "b", "c"]))
-        assert t.eval_ms == pytest.approx(300 / 3 * 0.003)
+        assert t.eval_ms == pytest.approx(300 / 3 * 0.0014)
 
     def test_transfer_term_is_not_divided(self):
         t = synth_time(mk(phases=0, eval_calls=0, bytes=2_500_000))
@@ -64,7 +64,7 @@ class TestSynthTime:
 
     def test_single_participant_no_division_error(self):
         t = synth_time(mk(participants=["only"], eval_calls=10, phases=0, bytes=0))
-        assert t.eval_ms == pytest.approx(10 * 0.003)
+        assert t.eval_ms == pytest.approx(10 * 0.0014)  # t_eval 실측 1.4µs (24 §6.4-b, 2026-08-13)
 
     def test_as_dict(self):
         d = synth_time(mk()).as_dict()
@@ -75,11 +75,11 @@ class TestRegression:
     """실측 기준값 재현 — dp2 full-20260812T171034KST의 TB 항별 분해."""
 
     def test_nparty_plan1a_n3(self):
-        # 실측: total 1950.8ms = 통신 1950.0 + 평가 0.100 + 전송 0.70
+        # 기준값 재현 (t_eval 1.4µs 개정 반영, 2026-08-13): 평가 = 100÷3×0.0014ms
         t = synth_time(mk(participants=["P0", "P1", "P2"], phases=26,
                           eval_calls=100, bytes=1750))
         assert t.phase_ms == pytest.approx(1950.0)
-        assert t.eval_ms == pytest.approx(0.1)
+        assert t.eval_ms == pytest.approx(100 / 3 * 0.0014)
         assert t.transfer_ms == pytest.approx(0.7)
         assert t.dominant == "phase"
 
