@@ -97,15 +97,22 @@ def rho(design_ms: float, baseline_ms: float, baseline_capped: bool = False) -> 
 
 
 def aggregate_rho(rhos: Sequence[dict]) -> dict:
-    """케이스별 ρ의 집계 — 중앙값 판정 + 최악 병기."""
+    """케이스별 ρ의 집계 — **P95 판정** (PL 확정 2026-08-13) + 중앙값(전형)·최악 병기.
+
+    시간 성능은 "평소 얼마나 빠른가"가 아니라 "느린 꼬리에서도 보장되는가"로
+    판정한다 — 서비스 SLO가 평균이 아닌 p95/p99 지연으로 정의되는 것과 같은 논리.
+    functional-ext 실측에서 중앙값은 두 방안을 동급(★5/★5)으로 뭉갰지만, P95는
+    방안 2의 소인원 꼬리 리스크(naive 근접)를 드러냈다 (★3 vs ★2). 사다리는 불변.
+    """
     if not rhos:
         raise ValueError("집계할 ρ가 없다")
-    vals = [x["rho"] for x in rhos]
-    med = statistics.median(vals)
+    vals = sorted(x["rho"] for x in rhos)
+    p95 = vals[min(len(vals) - 1, int(0.95 * len(vals)))]
     return {
-        "median_rho": round(med, 4),
+        "p95_rho": round(p95, 4),
+        "stars": BAND_TB_RHO.stars(p95),
+        "median_rho": round(statistics.median(vals), 4),
         "max_rho": round(max(vals), 4),
-        "stars": BAND_TB_RHO.stars(med),
         "defect_cases": sum(1 for x in rhos if x["defect"]),
         "upper_bound_cases": sum(1 for x in rhos if x["rho_is_upper_bound"]),
         "band": BAND_TB_RHO.as_dict(),
