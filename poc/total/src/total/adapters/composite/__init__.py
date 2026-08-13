@@ -311,7 +311,7 @@ def run_session(
         phases=run.phases,
         messages=run.messages,
         bytes=run.bytes,
-        # 효용 평가 호출 수 — `AgentBeliefs.utility()` 실측 카운트 (24 §6.4-a).
+        # 효용 평가 호출 수 — `AgentBeliefs.utility()` 실측 카운트 (24 §4.4-a).
         # 예전에는 `참여자 수 × 후보 수` 공식이었는데 방안에 의존하지 않아 eval 항이
         # 방안을 구분하지 못했다 (seq2·pool의 eval_ms가 똑같이 5.04ms로 나왔다).
         # nparty 쪽은 처음부터 실측이라, 같은 항을 두 시나리오가 다르게 재고 있었다.
@@ -340,10 +340,14 @@ def run_sweep_point(scenario: Scenario, plan: str, n_issues: int, **kw) -> Sweep
     if plan not in PLANS:
         raise KeyError(f"알 수 없는 방안: {plan} (등록: {sorted(PLANS)})")
     run = run_one(scenario, plan, **kw)
+    # 기저 1인분 근사 (24 §5 — 판정은 단말 총 점유): 복합 의제의 단말 기저는 조합 표가
+    # 아니라 **축 수준 표현**(축 정의 + 자기 선호 스펙)이다 — 조합 열거 없이 계산 가능.
+    base = deep_size(scenario.axes) + deep_size(scenario.participants) // max(
+        1, scenario.n_participants)
     return SweepPoint(
         scale=max(1, scenario.space_size()),
         peak_bytes=int(run.peak_kib * 1024),
-        base_bytes=0,      # 공통 기저는 전 방안 동일 — 스윕은 프로토콜 몫만 본다
+        base_bytes=base,
         agreed=run.agreement is not None,
         n_issues=n_issues,
     )

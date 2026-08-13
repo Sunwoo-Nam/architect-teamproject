@@ -21,14 +21,14 @@ from typing import Sequence
 from .constants import SYNTH_TIME
 
 #: raw.json에 올 수 있는 QA 키. 오타로 만든 섹션이 조용히 리포트에서 빠지는 것을 막는다.
-QA_KEYS = ("fc", "cf", "tb", "ru", "sc_issue")
+QA_KEYS = ("fc", "ru", "cf", "tb", "sc_issue")  # 핵심 서열 (24 §0, 2026-08-13)
 
 QA_TITLES = {
     "fc": "Functional Correctness (24 §1)",
-    "cf": "Confidentiality (24 §7)",
-    "tb": "Time Behaviour (24 §6)",
+    "cf": "Confidentiality (24 §3)",
+    "tb": "Time Behaviour (24 §4)",
     "ru": "Resource Utilization-메모리 (24 §2)",
-    "sc_issue": "Scalability-의제 (24 §4)",
+    "sc_issue": "Scalability-의제 (24 §5)",
 }
 
 
@@ -152,22 +152,25 @@ def _table(plans: Sequence[str], rows: Sequence[tuple[str, list]]) -> list[str]:
 def _section(qa: str, data: dict, plans: Sequence[str]) -> list[str]:
     """QA 1종의 표. 지표별로 방안을 가로로 늘어놓는다."""
     keys: list[tuple[str, str]] = {
-        "fc": [("mean_achieved", "달성률"), ("stars_achieved", "달성률 별점"),
+        "fc": [("mean_s", "개선 비율 s (판정)"), ("stars_s", "별점"),
+               ("mean_achieved", "달성률 (수치 병기)"),
                ("mean_baseline", "무작위 베이스라인 R̄"),
-               ("mean_s", "개선 비율 s"), ("stars_s", "s 별점"),
                ("optimal_hit", "최적안 적중"), ("fr_violation_cases", "FR 위반 케이스"),
                ("degenerate_cases", "R̄=1 케이스 (s 판별력 없음)"),
                ("degenerate_missed", "그중 유효 후보 밖")],
         "cf": [("m", "노출 배수 m"), ("stars_m", "m 별점"),
                ("max_single_depth", "최대 단일 관찰자 깊이")],
-        "tb": [("median_total_ms", "세션 시간 (ms)"), ("dominant", "지배 항"),
+        "tb": [("median_rho", "시간 비율 ρ (판정)"), ("stars", "별점"),
+               ("max_rho", "최악 ρ"), ("defect_cases", "ρ>1 결함 케이스"),
+               ("median_total_ms", "세션 시간 (ms)"), ("dominant", "지배 항"),
                ("median_phase_ms", "통신 항"), ("median_transfer_ms", "전송 항")],
         "ru": [("median_total_mb", "단말 총 점유 (MB)"), ("median_peak_mb", "프로토콜 상태 (MB)"),
                ("median_base_mb", "공통 기저 (MB)"), ("stars_median", "별점"),
                ("over_ceiling_sessions", "한도 초과 세션")],
-        "sc_issue": [("c", "탄력성 c"), ("stars_c", "c 별점"),
-                     ("max_issues", "최대 의제 수"), ("stars_max_issues", "최대 의제 수 별점"),
-                     ("gate_ok", "완결률 게이트")],
+        "sc_issue": [("max_issues", "최대 의제 수 (판정)"), ("stars_max_issues", "별점"),
+                     ("censored", "censored (스윕 미도달)"),
+                     ("c", "탄력성 c (보조)"), ("stars_c", "c 별점 (보조)"),
+                     ("gate_ok", "완결률 게이트 (보조)")],
     }[qa]
 
     rows = []
@@ -213,7 +216,7 @@ def _notes(qa: str, data: dict, plans: Sequence[str]) -> list[str]:
                          f"못해 실제 최대는 더 클 수 있다")
         if qa == "sc_issue" and d.get("defect"):
             notes.append(f"`{p}` **완결률 게이트 실패** — 규모가 커질수록 결렬이 늘어 "
-                         f"탄력성이 좋아 보이는 왜곡이다 (24 §4.4). c 별점은 0으로 덮었다")
+                         f"탄력성이 좋아 보이는 왜곡이다 (24 §5.4). c 별점은 0으로 덮었다")
     return list(dict.fromkeys(notes))[:6]      # 순서 유지 중복 제거
 
 
@@ -230,7 +233,7 @@ def render_markdown(meta: RunMeta, raw: dict) -> str:
         f"- 합성 시간 상수: t_phase {m['constants']['t_phase_ms']}ms(편도) · "
         f"t_eval {m['constants']['t_eval_ms']}ms · bw {m['constants']['bw_bytes_per_s']:,.0f} B/s",
         "",
-        "> 별점 사다리 중 일부는 **잠정**이다 (24 §7.3 등). 별점만 보지 말고 원지표를 함께 읽어야 한다.",
+        "> 별점 사다리 중 일부는 **잠정**이다 (24 §3.3 등). 별점만 보지 말고 원지표를 함께 읽어야 한다.",
         "",
     ]
     if m["note"]:

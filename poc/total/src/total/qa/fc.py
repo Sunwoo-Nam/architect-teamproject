@@ -24,7 +24,7 @@ import statistics
 from dataclasses import dataclass, field
 from typing import Sequence
 
-from .constants import BAND_FC_ACHIEVED, BAND_FC_S
+from .constants import BAND_FC_S
 from .contract import NO_AGREEMENT, Case, Outcome, Preference
 
 
@@ -82,7 +82,6 @@ class FcScore:
     baseline: float          # R̄
     s: float                 # (달성률 − R̄) ÷ (1 − R̄)
     stars_s: int
-    stars_achieved: int
     optimal: Outcome
     u_optimal: float
     optimal_is_no_agreement: bool
@@ -96,7 +95,6 @@ class FcScore:
             "baseline": round(self.baseline, 6),
             "s": round(self.s, 6),
             "stars_s": self.stars_s,
-            "stars_achieved": self.stars_achieved,
             "u_optimal": round(self.u_optimal, 6),
             "optimal_is_no_agreement": self.optimal_is_no_agreement,
             "agreed": self.agreed,
@@ -148,7 +146,6 @@ def score(
         baseline=baseline,
         s=s,
         stars_s=BAND_FC_S.stars(s),
-        stars_achieved=BAND_FC_ACHIEVED.stars(achieved),
         optimal=optimal,
         u_optimal=u_star,
         optimal_is_no_agreement=(optimal == NO_AGREEMENT),
@@ -179,7 +176,6 @@ def aggregate(scores: Sequence[FcScore]) -> dict:
         "mean_achieved": round(mean_achieved, 6),
         "mean_baseline": round(mean_baseline, 6),
         "mean_s": round(mean_s, 6),
-        "stars_achieved": BAND_FC_ACHIEVED.stars(mean_achieved),
         "stars_s": BAND_FC_S.stars(mean_s),
         "optimal_hit": sum(1 for x in scores if x.achieved >= 1.0 - 1e-9),
         "fr_violation_cases": sum(1 for x in scores if x.fr_violations),
@@ -190,5 +186,5 @@ def aggregate(scores: Sequence[FcScore]) -> dict:
             1 for x in scores
             if x.baseline >= 1.0 - 1e-12 and x.achieved < 1.0 - 1e-12
         ),
-        "bands": {"s": BAND_FC_S.as_dict(), "achieved": BAND_FC_ACHIEVED.as_dict()},
+        "bands": {"s": BAND_FC_S.as_dict()},  # 별점은 s 단일 (PL 확정 2026-08-13)
     }

@@ -9,7 +9,6 @@ import pytest
 
 from total.qa.constants import (
     BAND_CF_M,
-    BAND_FC_ACHIEVED,
     BAND_FC_S,
     BAND_SC_MAX_ISSUES,
     RU_CEILING_BYTES,
@@ -21,22 +20,22 @@ from total.qa.constants import (
 
 
 class TestSynthTimeConstants:
-    """24 §6.4 — 합성 시간 모델의 세 상수."""
+    """24 §4.4 — 합성 시간 모델의 세 상수."""
 
     def test_t_phase_is_75ms_one_way(self):
-        # 24 §6.4-d: LTE 클라우드 릴레이 구간 분해 → 75ms (편도)
+        # 24 §4.4-d: LTE 클라우드 릴레이 구간 분해 → 75ms (편도)
         assert SYNTH_TIME.t_phase_ms == 75.0
 
     def test_t_eval_is_measured_1p4us(self):
-        # 24 §6.4-b: PoC 실측 1.394µs → 3µs 반올림
-        assert SYNTH_TIME.t_eval_ms == 0.0014  # 실측 1.394µs 채택 — 24 §6.4-b (2026-08-13)
+        # 24 §4.4-b: PoC 실측 1.394µs → 3µs 반올림
+        assert SYNTH_TIME.t_eval_ms == 0.0014  # 실측 1.394µs 채택 — 24 §4.4-b (2026-08-13)
 
     def test_bw_is_20mbps(self):
-        # 24 §6.4-c: LTE 20 Mbps
+        # 24 §4.4-c: LTE 20 Mbps
         assert SYNTH_TIME.bw_bytes_per_s == 2_500_000.0
 
     def test_bandwidth_delay_product(self):
-        # t_phase × bw = BDP. 24 §6.4-c가 방안 우열을 가르는 양으로 지목한 값
+        # t_phase × bw = BDP. 24 §4.4-c가 방안 우열을 가르는 양으로 지목한 값
         assert SYNTH_TIME.bdp_bytes == pytest.approx(0.075 * 2_500_000)
 
     def test_as_dict_for_report(self):
@@ -61,27 +60,18 @@ class TestFcBands:
         assert BAND_FC_S.stars(0.81) == 5
         assert BAND_FC_S.stars(0.0) == 0
 
-    def test_achieved_band_is_absolute(self):
-        assert BAND_FC_ACHIEVED.direction == "at_least"
-        assert BAND_FC_ACHIEVED.thresholds == [0.95, 0.90, 0.85, 0.80, 0.70]
-
-    def test_achieved_band_values(self):
-        assert BAND_FC_ACHIEVED.stars(0.9679) == 5   # dp2 방안 2 실측
-        assert BAND_FC_ACHIEVED.stars(0.9142) == 4   # dp2 방안 1-A 실측
-        assert BAND_FC_ACHIEVED.stars(0.69) == 0
-
-    def test_two_bands_can_disagree(self):
-        # 두 지표를 병행하는 이유 — 절대 달성률은 높은데 베이스라인 대비 개선은 작을 수 있다
-        assert BAND_FC_ACHIEVED.stars(0.9142) == 4
-        assert BAND_FC_S.stars(0.3086) == 2
+    def test_s_is_the_only_fc_band(self):
+        # 별점은 s 단일 (PL 확정 2026-08-13) — 달성률 병행 밴드는 폐기됐다
+        from total.qa import constants
+        assert not hasattr(constants, "BAND_FC_ACHIEVED")
+        assert BAND_FC_S.stars(0.3086) == 2   # dp2 방안 1-A 실측 s
 
     def test_bands_carry_source_note(self):
         assert "24" in BAND_FC_S.note
-        assert BAND_FC_ACHIEVED.note
 
 
 class TestCfBand:
-    """24 §7.3 — 노출 배수 m. 3점 경계가 1:1 등가."""
+    """24 §3.3 — 노출 배수 m. 3점 경계가 1:1 등가."""
 
     def test_ladder(self):
         assert BAND_CF_M.thresholds == [0.25, 0.5, 1.0, 2.0, 4.0]
@@ -95,7 +85,7 @@ class TestCfBand:
         assert BAND_CF_M.stars(1.184) == 2    # dp2 방안 2 실측
 
     def test_note_marks_provisional(self):
-        # 24 §7.3이 "잠정 — PL 조율 예정"이라고 명시한 상태다
+        # 24 §3.3이 "잠정 — PL 조율 예정"이라고 명시한 상태다
         assert "잠정" in BAND_CF_M.note
 
 
@@ -103,7 +93,7 @@ class TestScBands:
     """SC-의제도 지표 2개 — 탄력성 c(구조 특성)와 최대 의제 수(수용 한계)."""
 
     def test_elasticity_band_depends_on_d(self):
-        # 24 §4.3: 하계 1/d. d가 바뀌면 경계가 바뀐다 — 하드코딩 금지
+        # 24 §5.3: 하계 1/d. d가 바뀌면 경계가 바뀐다 — 하드코딩 금지
         b4 = band_sc_elasticity(d=4)
         assert b4.thresholds == pytest.approx([0.40, 0.55, 0.70, 0.85, 1.00])
 
@@ -126,12 +116,16 @@ class TestScBands:
 
     def test_max_issues_band(self):
         assert BAND_SC_MAX_ISSUES.direction == "at_least"
-        assert BAND_SC_MAX_ISSUES.thresholds == [30, 20, 14, 10, 6]
+        assert BAND_SC_MAX_ISSUES.thresholds == [12, 9, 7, 5, 4]  # [4,12] 로그 등분 (2026-08-13)
 
     def test_max_issues_stars(self):
-        assert BAND_SC_MAX_ISSUES.stars(32) == 5   # dpca seq2 실측 (32축까지 확인)
-        assert BAND_SC_MAX_ISSUES.stars(20) == 4   # dpca pool 실측
-        assert BAND_SC_MAX_ISSUES.stars(4) == 0
+        # 24 §5.3 (2026-08-13) — [요구 4, 실사용 최대 12] 로그 등분
+        assert BAND_SC_MAX_ISSUES.stars(12) == 5   # 실사용 최대 커버 = 만점
+        assert BAND_SC_MAX_ISSUES.stars(9) == 4
+        assert BAND_SC_MAX_ISSUES.stars(7) == 3
+        assert BAND_SC_MAX_ISSUES.stars(5) == 2
+        assert BAND_SC_MAX_ISSUES.stars(4) == 1    # 요구(기준 시나리오 4축) 딱 충족
+        assert BAND_SC_MAX_ISSUES.stars(3) == 0    # 요구 미달 — 즉시 결함
 
 
 class TestRuBand:

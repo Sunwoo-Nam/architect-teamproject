@@ -1,4 +1,4 @@
-"""[24 §7] Confidentiality — 노출 깊이·e₂ 앵커·노출 배수 m·정규화 노출률.
+"""[24 §3] Confidentiality — 노출 깊이·e₂ 앵커·노출 배수 m·정규화 노출률.
 
 이 모듈의 존재 이유 중 절반은 **방안별 가시 규칙이 사라졌다**는 것이다.
 기존 dp2 `confidentiality._visible_events()`는 방안 12종의 if-else 체인이었다.
@@ -102,13 +102,13 @@ class TestDepth:
         assert depth([(1, 1, "a"), (1, 2, "a")], 4) == pytest.approx(0.25)
 
     def test_order_does_not_matter(self):
-        # 순서와 무관한 집합 지표다 — 구 B축(순서 복원)은 24 §7.3 개정으로 제거
+        # 순서와 무관한 집합 지표다 — 구 B축(순서 복원)은 24 §3.3 개정으로 제거
         shuffled = [(1, 1, "b"), (1, 2, "a"), (1, 3, "c"), (1, 4, "d")]
         assert depth(shuffled, 4) == pytest.approx(1.0)
 
 
 class TestEstimateTop1:
-    """24 §7.4 고정 공격자 규칙 3개."""
+    """24 §3.4 고정 공격자 규칙 3개."""
 
     def test_rule1_earliest_proposal(self):
         s = sess([sub(1, 2, "P1", "b", ["P0"]), sub(1, 1, "P1", "a", ["P0"])])
@@ -143,7 +143,7 @@ class TestViewpoints:
         assert COORDINATOR_FIRST.pick(s) == "P0"
 
     def test_worst_participant_sees_most(self):
-        # P2가 P1보다 많이 본다 → 보수적으로 P2를 관찰자로 잡는다 (24 §7.5)
+        # P2가 P1보다 많이 본다 → 보수적으로 P2를 관찰자로 잡는다 (24 §3.5)
         s = sess([sub(1, 1, "P0", "a", ["P2"]), sub(1, 2, "P0", "b", ["P2"]),
                   sub(1, 3, "P0", "c", ["P1"])], prefs=(P0, P1, P2))
         assert worst_participant().pick(s) == "P2"

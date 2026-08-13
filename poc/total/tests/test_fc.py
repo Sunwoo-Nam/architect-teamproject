@@ -57,7 +57,6 @@ class TestScore:
         s = score(c, "a")
         assert s.achieved == pytest.approx(1.0)
         assert s.optimal == "a"
-        assert s.stars_achieved == 5
 
     def test_suboptimal_agreement(self):
         c = mk_case([{"a": 1.0, "b": 0.5}, {"a": 1.0, "b": 0.5}], [0.0, 0.0])
@@ -98,7 +97,6 @@ class TestScore:
     def test_two_star_bands_are_independent(self):
         c = mk_case([{"a": 1.0, "b": 0.9}, {"a": 1.0, "b": 0.9}], [0.0, 0.0])
         s = score(c, "b")
-        assert s.stars_achieved == 4      # 달성률 0.9
         assert isinstance(s.stars_s, int)
 
 
@@ -226,7 +224,7 @@ class TestDegenerateBaseline:
     def test_score_is_serialisable(self):
         c = mk_case([{"a": 1.0}], [0.0])
         d = score(c, "a").as_dict()
-        assert set(d) >= {"achieved", "baseline", "s", "stars_s", "stars_achieved",
+        assert set(d) >= {"achieved", "baseline", "s", "stars_s",
                           "agreed", "fr_violations"}
 
 
@@ -248,7 +246,6 @@ class TestAggregate:
 
         c = mk_case([{"a": 1.0, "b": 0.5}, {"a": 1.0, "b": 0.5}], [0.0, 0.0])
         agg = aggregate([score(c, "a")])
-        assert agg["stars_achieved"] == 5
 
     def test_aggregate_counts_violations(self):
         from total.qa.fc import aggregate

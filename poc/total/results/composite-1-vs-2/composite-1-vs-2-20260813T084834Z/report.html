@@ -1,0 +1,74 @@
+<!doctype html><meta charset="utf-8"><title>composite-1-vs-2-20260813T084834Z</title>
+<style>
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;margin:2rem auto;max-width:64rem;
+padding:0 1rem;line-height:1.6;color:#1a1a1a}
+h1{border-bottom:2px solid #ddd;padding-bottom:.3rem}
+h3{margin-top:2rem;color:#333}
+table{border-collapse:collapse;width:100%;margin:.5rem 0 1.5rem}
+th,td{border:1px solid #ddd;padding:.4rem .6rem;text-align:left}
+th{background:#f5f5f5}
+blockquote{border-left:4px solid #f0ad4e;background:#fffaf0;margin:1rem 0;padding:.5rem 1rem}
+code{background:#f5f5f5;padding:.1rem .3rem;border-radius:3px}
+@media(prefers-color-scheme:dark){body{background:#161616;color:#e8e8e8}
+th{background:#242424}th,td{border-color:#333}code{background:#242424}
+blockquote{background:#2a2418;border-left-color:#a97c2c}}
+</style>
+<h1>composite-1-vs-2 — composite-1-vs-2-20260813T084834Z</h1>
+<p>생성: 2026-08-13T08:48:34+00:00 · 시드 1201 · commit `05b9700` · negmas 0.15.7 · Python 3.14.4</p>
+<p>데이터셋: `composite scenarios` (참여자 2 · 의제 6)</p>
+<p>합성 시간 상수: t_phase 75.0ms(편도) · t_eval 0.0014ms · bw 2,500,000 B/s</p>
+<blockquote>별점 사다리 중 일부는 **잠정**이다 (24 §3.3 등). 별점만 보지 말고 원지표를 함께 읽어야 한다.</blockquote>
+<blockquote>1안(seq2) vs 2안(pool). 2인 교대 제안이라 CF 관점은 1개다. 1안은 축값을, 2안은 전체 조합을 교환하므로 조합 공간 기준 노출 깊이는 granularity가 다르다 — adapters/composite 모듈 docstring의 한계 설명 참조.</blockquote>
+<h3>Functional Correctness (24 §1)</h3>
+<table>
+<tr><th>항목</th><th>seq2</th><th>pool</th></tr>
+<tr><td>개선 비율 s (판정)</td><td>0.1005</td><td>0.1189</td></tr>
+<tr><td>별점</td><td>★☆☆☆☆ (1점)</td><td>★☆☆☆☆ (1점)</td></tr>
+<tr><td>달성률 (수치 병기)</td><td>0.7658</td><td>0.7706</td></tr>
+<tr><td>무작위 베이스라인 R̄</td><td>0.7396</td><td>0.7396</td></tr>
+<tr><td>최적안 적중</td><td>0</td><td>1</td></tr>
+<tr><td>FR 위반 케이스</td><td>1</td><td>3</td></tr>
+<tr><td>R̄=1 케이스 (s 판별력 없음)</td><td>0</td><td>0</td></tr>
+<tr><td>그중 유효 후보 밖</td><td>0</td><td>0</td></tr>
+</table>
+<blockquote>개선 비율 s는 **표본 전체의 달성률 평균과 R̄ 평균으로 한 번 환산**한 값이다 (24 §1.4 「집계 수준」) — 세션별 s의 평균이 아니므로 케이스 표(`cases.jsonl`)의 `s` 열을 평균 내면 값이 다르다. s = (달성률 − R̄) ÷ (1 − R̄)로 위 표에서 직접 검산할 수 있다</blockquote>
+<h3>Resource Utilization-메모리 (24 §2)</h3>
+<table>
+<tr><th>항목</th><th>seq2</th><th>pool</th></tr>
+<tr><td>단말 총 점유 (MB)</td><td>1.0937</td><td>1.1052</td></tr>
+<tr><td>프로토콜 상태 (MB)</td><td>0.1043</td><td>0.1231</td></tr>
+<tr><td>공통 기저 (MB)</td><td>0.9956</td><td>0.9956</td></tr>
+<tr><td>별점</td><td>★★★★★ (5점)</td><td>★★★★★ (5점)</td></tr>
+<tr><td>한도 초과 세션</td><td>0</td><td>0</td></tr>
+</table>
+<h3>Confidentiality (24 §3)</h3>
+<table>
+<tr><th>항목</th><th>seq2</th><th>pool</th></tr>
+<tr><td>노출 배수 m</td><td>0.335</td><td>0.682</td></tr>
+<tr><td>m 별점</td><td>★★★★☆ (4점)</td><td>★★★☆☆ (3점)</td></tr>
+<tr><td>최대 단일 관찰자 깊이</td><td>0.009</td><td>0.019</td></tr>
+</table>
+<h3>Time Behaviour (24 §4)</h3>
+<table>
+<tr><th>항목</th><th>seq2</th><th>pool</th></tr>
+<tr><td>시간 비율 ρ (판정)</td><td>0.3468</td><td>0.4539</td></tr>
+<tr><td>별점</td><td>★★★★☆ (4점)</td><td>★★★☆☆ (3점)</td></tr>
+<tr><td>최악 ρ</td><td>1.2885</td><td>1.5237</td></tr>
+<tr><td>ρ>1 결함 케이스</td><td>2</td><td>2</td></tr>
+<tr><td>세션 시간 (ms)</td><td>6,150.862</td><td>7,876.531</td></tr>
+<tr><td>지배 항</td><td>phase</td><td>phase</td></tr>
+<tr><td>통신 항</td><td>6,150</td><td>7,875</td></tr>
+<tr><td>전송 항</td><td>0.318</td><td>1.439</td></tr>
+</table>
+<h3>Scalability-의제 (24 §5)</h3>
+<table>
+<tr><th>항목</th><th>seq2</th><th>pool</th></tr>
+<tr><td>최대 의제 수 (판정)</td><td>10</td><td>10</td></tr>
+<tr><td>별점</td><td>★★★★☆ (4점)</td><td>★★★★☆ (4점)</td></tr>
+<tr><td>censored (스윕 미도달)</td><td>예</td><td>예</td></tr>
+<tr><td>탄력성 c (보조)</td><td>0.1113</td><td>0.0709</td></tr>
+<tr><td>c 별점 (보조)</td><td>★★★★★ (5점)</td><td>★★★★★ (5점)</td></tr>
+<tr><td>완결률 게이트 (보조)</td><td>예</td><td>예</td></tr>
+</table>
+<blockquote>`seq2` 최대 의제 수는 **하한**이다 — 스윕이 메모리 한도에 닿지 못해 실제 최대는 더 클 수 있다</blockquote>
+<blockquote>`pool` 최대 의제 수는 **하한**이다 — 스윕이 메모리 한도에 닿지 못해 실제 최대는 더 클 수 있다</blockquote>

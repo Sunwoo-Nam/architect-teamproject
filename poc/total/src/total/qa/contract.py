@@ -110,10 +110,10 @@ class SessionResult:
     agreement: Outcome | str  # NO_AGREEMENT면 결렬
     rounds: int
     sweeps: int
-    phases: int          # 직렬 통신 단계 — **편도** (24 §6.3)
-    messages: int        # 물리 전송 건수 (24 §9.1)
-    bytes: int           # 페이로드 바이트 (24 §9.2)
-    eval_calls: int      # 효용 평가 호출 수 — 전 참여자 합 (24 §6.4)
+    phases: int          # 직렬 통신 단계 — **편도** (24 §4.3)
+    messages: int        # 물리 전송 건수 (24 §8.1)
+    bytes: int           # 페이로드 바이트 (24 §8.2)
+    eval_calls: int      # 효용 평가 호출 수 — 전 참여자 합 (24 §4.4)
     events: list[ObservationEvent] = field(default_factory=list)
     peak_bytes: int = 0  # 협상 구간 tracemalloc 피크 (runner가 채움)
     base_bytes: int = 0  # 공통 기저 — 효용 표·순위표 (방안 무관, 24 §2.8 단서)
@@ -148,7 +148,7 @@ class SessionResult:
 class Dataset:
     """측정 입력의 **기준 구성**. 참여자 수·의제 수는 코드가 아니라 여기서 온다.
 
-    `n_issues`는 24 §4.3의 `d`이기도 하다 — 탄력성 c의 별점 하계가 1/d이므로
+    `n_issues`는 24 §5.3의 `d`이기도 하다 — 탄력성 c의 별점 하계가 1/d이므로
     데이터셋이 바뀌면 별점 경계도 따라 바뀐다.
 
     스윕(참여자 3-50, 의제 3-10 등)은 이 기준에서 **변형**되는 것이고, 기준 자체는
@@ -175,7 +175,7 @@ class Dataset:
 
     @property
     def d(self) -> int:
-        """24 §4.3의 의제 수 d — 탄력성 c 별점의 하계 1/d."""
+        """24 §5.3의 의제 수 d — 탄력성 c 별점의 하계 1/d."""
         return self.n_issues
 
     @property
@@ -230,7 +230,7 @@ class TableCase:
 class SweepPoint:
     """SC-의제 스윕의 한 점 — 규모 S에서의 피크와 완결 여부.
 
-    `agreed`는 24 §4.4의 완결률 게이트에 쓴다 — S가 커질 때 빨리 결렬해 버려
+    `agreed`는 24 §5.4의 완결률 게이트에 쓴다 — S가 커질 때 빨리 결렬해 버려
     메모리가 적게 나오는 왜곡("많이 실패해서 탄력성이 좋아짐")을 잡기 위함이다.
     """
 

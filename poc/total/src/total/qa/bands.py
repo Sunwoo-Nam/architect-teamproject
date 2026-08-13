@@ -57,7 +57,7 @@ def stars_greater_than(value: float, thresholds: list[float]) -> int:
 def even_bands_between(best: float, worst: float) -> list[float]:
     """두 참조점 사이를 5등분한 오름차순 임계값.
 
-    24 §4.3: 전체 열거(c=1)와 이론 이상값(c=1/d) 사이를 5등분한다.
+    24 §5.3: 전체 열거(c=1)와 이론 이상값(c=1/d) 사이를 5등분한다.
     d가 바뀌면 하계와 폭이 함께 바뀌므로 계산으로 얻어야 한다 — 상수 하드코딩 금지.
     """
     if not worst > best:

@@ -23,7 +23,7 @@ def meta(**kw) -> RunMeta:
 
 
 RAW = {
-    "fc": {"A": {"mean_achieved": 0.91, "stars_achieved": 4, "mean_s": 0.31, "stars_s": 2},
+    "fc": {"A": {"mean_achieved": 0.91, "mean_s": 0.31, "stars_s": 2},
            "B": {"mean_achieved": 0.97, "stars_achieved": 5, "mean_s": 0.74, "stars_s": 4}},
     "tb": {"A": {"median_total_ms": 1950.0, "dominant": "phase"},
            "B": {"median_total_ms": 2212.0, "dominant": "phase"}},
@@ -71,7 +71,7 @@ class TestWriteRun:
 
     def test_raw_json_roundtrip(self, tmp_path):
         out = write_run(tmp_path, meta(), RAW, CASES)
-        assert json.loads((out / "raw.json").read_text())["fc"]["A"]["stars_achieved"] == 4
+        assert json.loads((out / "raw.json").read_text())["fc"]["A"]["stars_s"] == 2
 
     def test_cases_jsonl_is_one_per_line(self, tmp_path):
         out = write_run(tmp_path, meta(), RAW, CASES)
