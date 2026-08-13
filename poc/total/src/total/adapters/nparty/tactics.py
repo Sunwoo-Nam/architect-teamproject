@@ -27,6 +27,7 @@ from __future__ import annotations
 
 from ._vendor.domain import NO_DEAL
 from ._vendor.protocol import Plan2Cumulative
+from ._vendor.protocol_styles import Plan1aSao
 
 
 class _Plan2Tactic(Plan2Cumulative):
@@ -200,6 +201,124 @@ Plan2Commit = _commit_wrap(Plan2Cumulative, "plan2c")
 Plan2Plus = _commit_wrap(Plan2Adaptive, "plan2plus")
 Plan2PlusX = _commit_wrap(Plan2AdaptiveX, "plan2plusx")
 
+# ── 방안 1-A 적용성 (PL 질의 2026-08-14) ─────────────────────────────────────
+# 논리 검증 결과 (protocol_styles.Plan1aSao 실측 구조 기준):
+# · 전달 기억(skip): 부적용 — 1-A의 바퀴 재제안은 "낮아진 threshold로의 재투표 기회"라
+#   기능이 있다 (담당자는 과거 후보를 누적 보유하지 않음 — PL 지시 2026-08-12로 제거).
+#   생략하면 바퀴 2+에서 성립했을 합의를 놓쳐 FC가 훼손된다. 우회(담당자 누적 재상정)는
+#   공유 게시판의 부활 = 방안 1로의 회귀라 1-A 정체성 밖.
+# · 커밋 매칭: 부적용 — 1-A의 성립 판정은 교집합 매칭이 아니라 **투표**다. O/X를 매기려면
+#   후보 내용이 전원에 배포되어야 하므로 봉인 제출이 성립하지 않는다.
+# · 배치(고정/적응): 적용 가능 — 수집·회신에 후보 k개를 싣고 배포 목록을 넓힌다.
+#   판정 규칙(만장일치 + 결선투표) 불변. 아래 Plan1aBatchK 계열.
+
+
+class _Plan1aBatch(Plan1aSao):
+    """방안 1-A + 배치 제출 — 수집·회신 메시지에 후보를 폭(width)만큼 싣는다."""
+
+    @staticmethod
+    def batch_at(round_in_sweep: int) -> int:
+        return 2
+
+    def _take(self, a, sweep, width):
+        out = []
+        while len(out) < width:
+            c = a.peek(sweep)
+            if c is None:
+                break
+            out.append((a.ptr + 1, c))
+            a.ptr += 1
+        return out
+
+    def _collect(self, bb, sweep, injector, coord):
+        self._cur_sweep = sweep
+        self._ris = 1
+        carried: dict[str, list] = {}
+        any_offer = False
+        for i, a in enumerate(self.agents):
+            saved = a.ptr
+            items = self._take(a, sweep, self.batch_at(1))
+            if not items:
+                continue
+            any_offer = True
+            if i != 0:
+                bb.counter.add("collect", 1, [str(c) for _r, c in items])
+                bb.load[coord] = bb.load.get(coord, 0) + 1
+                if injector and injector.lost():
+                    a.ptr = saved  # 유실 — 포인터 복원, 다음 회신에 재시도
+                    continue
+            carried[a.p.pid] = items
+        if any_offer:
+            bb.phase()
+        return carried, any_offer
+
+    def _exchange(self, bb, sweep, round_no, injector, kill_at, events, coord, carried):
+        self._ris = getattr(self, "_ris", 1) + 1
+        width = max(1, self.batch_at(self._ris))
+        candidates = sorted({c for items in carried.values() for _r, c in items}, key=repr)
+        bb.counter.add("offer", self.n - 1, [str(c) for c in candidates])
+        for a in self.agents[1:]:
+            bb.load[a.p.pid] = bb.load.get(a.p.pid, 0) + 1
+        bb.phase()
+        votes: dict[str, dict] = {}
+        nxt_carried: dict[str, list] = {}
+        any_offer = False
+        self._eval_calls += len(candidates) * self.n
+        for i, a in enumerate(self.agents):
+            bundle = {c: a.vote(c, sweep) for c in candidates}
+            saved = a.ptr
+            nxt = self._take(a, sweep, width)
+            if nxt:
+                any_offer = True
+            if i != 0:
+                bb.counter.add("reply", 1, {
+                    "votes": {str(c): v for c, v in bundle.items()},
+                    "next": [str(c) for _r, c in nxt] or None,
+                })
+                bb.load[coord] = bb.load.get(coord, 0) + 1
+                if injector and injector.lost():
+                    a.ptr = saved  # 결합 유실 — O/X·다음 후보 함께 재시도
+                    continue
+            votes[a.p.pid] = bundle
+            if nxt:
+                nxt_carried[a.p.pid] = nxt
+        bb.phase()
+        if self.collect_log:
+            events.append({"t": "batch", "sweep": sweep, "k": round_no,
+                           "submitted": {pid: [(r, str(c)) for r, c in items]
+                                         for pid, items in carried.items()}})
+            events.append({"t": "votes", "sweep": sweep,
+                           "votes": {p: dict(b) for p, b in votes.items()}})
+        unanimous = [c for c in candidates
+                     if len(votes) == self.n and all(votes[p.pid][c] for p in self.profiles)]
+        picked = None
+        if unanimous:
+            tied = sorted(unanimous, key=repr)
+            if len(tied) == 1:
+                picked = (tied[0], False)
+            else:
+                pick, extra = self.tie.pick(tied, self.profiles)
+                bb.tie_break_messages(extra, {"tied": [str(c) for c in tied]})
+                picked = (pick, True)
+        return picked, nxt_carried, any_offer
+
+
+class Plan1aBatch2(_Plan1aBatch):
+    """방안 1-A + 고정 배치 2 (TB 택틱의 1-A 이식)."""
+
+    plan_name = "plan1ab2"
+
+
+class Plan1aAdaptive(_Plan1aBatch):
+    """방안 1-A + 적응 배치 (1,2,4,8 — 방안 2+와 동일 스케줄)."""
+
+    plan_name = "plan1aab"
+
+    @staticmethod
+    def batch_at(round_in_sweep: int) -> int:
+        return min(8, 2 ** (round_in_sweep - 1))
+
+
 #: 어댑터 PLANS에 등록되는 택틱 목록 (label은 62번 문서와 동기)
 TACTIC_SPECS = [
     ("plan2b2", "방안 2 + 고정 배치 2 (TB)", Plan2Batch2),
@@ -210,4 +329,6 @@ TACTIC_SPECS = [
     ("plan2b3", "방안 2 + 고정 배치 3 (탐색)", Plan2Batch3),
     ("plan2abx", "방안 2 + 공격 적응 배치 (탐색)", Plan2AdaptiveX),
     ("plan2plusx", "방안 2+ 공격형 = 공격 배치 + 커밋 (탐색)", Plan2PlusX),
+    ("plan1ab2", "방안 1-A + 고정 배치 2 (적용성 검증)", Plan1aBatch2),
+    ("plan1aab", "방안 1-A + 적응 배치 (적용성 검증)", Plan1aAdaptive),
 ]
