@@ -1,0 +1,364 @@
+{
+ "meta": {
+  "id": "FIN-08ax-plain-02",
+  "name": "현실 모사 — 8축",
+  "conflict_level": "high",
+  "expected": "agreement",
+  "track": "cr",
+  "type": "plain",
+  "seed": 0,
+  "oracle": {
+   "valid": 2346,
+   "u_xstar": 1.4532,
+   "r_bar": 0.784,
+   "corr": -0.13629842210905882,
+   "xstar_slack": 0.2459
+  },
+  "attempts": 1
+ },
+ "axes": [
+  {
+   "name": "date",
+   "generator": "date",
+   "values": [
+    {
+     "name": "mon",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "wed",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "thu",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "sat",
+     "attrs": {
+      "weekend": true
+     }
+    },
+    {
+     "name": "sun",
+     "attrs": {
+      "weekend": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "time",
+   "generator": "time",
+   "values": [
+    {
+     "name": "13:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "17:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "21:00",
+     "attrs": {
+      "late": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "generator": "region",
+   "values": [
+    {
+     "name": "seongsu",
+     "attrs": {}
+    },
+    {
+     "name": "jamsil",
+     "attrs": {}
+    },
+    {
+     "name": "yeongdeungpo",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "movie",
+   "generator": "movie",
+   "values": [
+    {
+     "name": "mv1",
+     "attrs": {}
+    },
+    {
+     "name": "mv2",
+     "attrs": {}
+    },
+    {
+     "name": "mv3",
+     "attrs": {}
+    },
+    {
+     "name": "mv4",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "restaurant",
+   "generator": "restaurant",
+   "values": [
+    {
+     "name": "rest-seongsu-1",
+     "attrs": {
+      "region": "seongsu"
+     }
+    },
+    {
+     "name": "rest-jamsil-1",
+     "attrs": {
+      "region": "jamsil"
+     }
+    },
+    {
+     "name": "rest-yeongdeungpo-1",
+     "attrs": {
+      "region": "yeongdeungpo"
+     }
+    }
+   ]
+  },
+  {
+   "name": "menu",
+   "generator": "menu",
+   "values": [
+    {
+     "name": "italian",
+     "attrs": {}
+    },
+    {
+     "name": "japanese",
+     "attrs": {}
+    },
+    {
+     "name": "korean",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "budget",
+   "generator": "budget",
+   "values": [
+    {
+     "name": "high",
+     "attrs": {}
+    },
+    {
+     "name": "premium",
+     "attrs": {}
+    },
+    {
+     "name": "mid",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "theater",
+   "generator": "theater",
+   "values": [
+    {
+     "name": "thtr-seongsu-1",
+     "attrs": {
+      "region": "seongsu"
+     }
+    },
+    {
+     "name": "thtr-jamsil-1",
+     "attrs": {
+      "region": "jamsil"
+     }
+    },
+    {
+     "name": "thtr-yeongdeungpo-1",
+     "attrs": {
+      "region": "yeongdeungpo"
+     }
+    },
+    {
+     "name": "thtr-seongsu-2",
+     "attrs": {
+      "region": "seongsu"
+     }
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "type": "hard",
+   "rule": "availability",
+   "subject": "movie",
+   "over": "region",
+   "coverage": 0.8
+  },
+  {
+   "type": "hard",
+   "rule": "membership",
+   "subject": "theater",
+   "region_axis": "region"
+  }
+ ],
+ "participants": {
+  "count": 2,
+  "profile_seed": 0,
+  "initial_threshold": [
+   0.38,
+   0.48
+  ],
+  "styles": [
+   "default",
+   "default"
+  ],
+  "constraints": []
+ },
+ "agent_view": {
+  "score_dropout": 0.0
+ },
+ "profiles": [
+  {
+   "weights": {
+    "date": 0.26873976725863574,
+    "time": 0.07146654296906207,
+    "region": 0.04675427017161724,
+    "movie": 0.025994765342045967,
+    "restaurant": 0.10872666831636871,
+    "menu": 0.08212694708777935,
+    "budget": 0.18174131887472444,
+    "theater": 0.21444971997976653
+   },
+   "scores": {
+    "date": {
+     "mon": 0.1101,
+     "wed": 0.5037,
+     "thu": 0.9661,
+     "sat": 0.7672,
+     "sun": 0.6517
+    },
+    "time": {
+     "13:00": 0.3596,
+     "17:00": 0.6847,
+     "21:00": 0.6993
+    },
+    "region": {
+     "seongsu": 0.9281,
+     "jamsil": 0.4447,
+     "yeongdeungpo": 0.6745
+    },
+    "movie": {
+     "mv1": 0.4475,
+     "mv2": 0.1744,
+     "mv3": 0.7767,
+     "mv4": 0.0696
+    },
+    "restaurant": {
+     "rest-seongsu-1": 0.4837,
+     "rest-jamsil-1": 0.2165,
+     "rest-yeongdeungpo-1": 0.0245
+    },
+    "menu": {
+     "italian": 0.4607,
+     "japanese": 0.7519,
+     "korean": 0.9129
+    },
+    "budget": {
+     "high": 0.2158,
+     "premium": 0.5159,
+     "mid": 0.3122
+    },
+    "theater": {
+     "thtr-seongsu-1": 0.6759,
+     "thtr-jamsil-1": 0.629,
+     "thtr-yeongdeungpo-1": 0.5918,
+     "thtr-seongsu-2": 0.5877
+    }
+   },
+   "home_region": "seongsu",
+   "initial_threshold": 0.38
+  },
+  {
+   "weights": {
+    "date": 0.0949307442896827,
+    "time": 0.16618175478216746,
+    "region": 0.09199442536511883,
+    "movie": 0.22026270458723826,
+    "restaurant": 0.1784022842161698,
+    "menu": 0.07214586853511545,
+    "budget": 0.05842648324110542,
+    "theater": 0.11765573498340211
+   },
+   "scores": {
+    "date": {
+     "mon": 0.0,
+     "wed": 1.0,
+     "thu": 0.0402,
+     "sat": 0.4014,
+     "sun": 0.5173
+    },
+    "time": {
+     "13:00": 0.6383,
+     "17:00": 1.0,
+     "21:00": 0.0
+    },
+    "region": {
+     "seongsu": 1.0,
+     "jamsil": 0.6224,
+     "yeongdeungpo": 0.0
+    },
+    "movie": {
+     "mv1": 0.0,
+     "mv2": 1.0,
+     "mv3": 0.4493,
+     "mv4": 0.6356
+    },
+    "restaurant": {
+     "rest-seongsu-1": 0.0,
+     "rest-jamsil-1": 1.0,
+     "rest-yeongdeungpo-1": 0.692
+    },
+    "menu": {
+     "italian": 0.2842,
+     "japanese": 1.0,
+     "korean": 0.0
+    },
+    "budget": {
+     "high": 1.0,
+     "premium": 0.0,
+     "mid": 0.2426
+    },
+    "theater": {
+     "thtr-seongsu-1": 0.3058,
+     "thtr-jamsil-1": 1.0,
+     "thtr-yeongdeungpo-1": 0.0,
+     "thtr-seongsu-2": 0.4015
+    }
+   },
+   "home_region": "yeongdeungpo",
+   "initial_threshold": 0.48
+  }
+ ]
+}

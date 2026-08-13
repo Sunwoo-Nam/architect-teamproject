@@ -1,0 +1,270 @@
+{
+ "meta": {
+  "id": "FIN-05ax-plain-17",
+  "name": "현실 모사 — 5축",
+  "conflict_level": "high",
+  "expected": "agreement",
+  "track": "cr",
+  "type": "plain",
+  "seed": 3,
+  "oracle": {
+   "valid": 14,
+   "u_xstar": 1.2553,
+   "r_bar": 0.8733,
+   "corr": -0.6154939332959278,
+   "xstar_slack": 0.1918
+  },
+  "attempts": 4
+ },
+ "axes": [
+  {
+   "name": "date",
+   "generator": "date",
+   "values": [
+    {
+     "name": "mon",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "tue",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "wed",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "thu",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "sun",
+     "attrs": {
+      "weekend": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "time",
+   "generator": "time",
+   "values": [
+    {
+     "name": "11:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "15:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "19:00",
+     "attrs": {
+      "late": false
+     }
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "generator": "region",
+   "values": [
+    {
+     "name": "hongdae",
+     "attrs": {}
+    },
+    {
+     "name": "yeongdeungpo",
+     "attrs": {}
+    },
+    {
+     "name": "gangnam",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "movie",
+   "generator": "movie",
+   "values": [
+    {
+     "name": "mv1",
+     "attrs": {}
+    },
+    {
+     "name": "mv2",
+     "attrs": {}
+    },
+    {
+     "name": "mv3",
+     "attrs": {}
+    },
+    {
+     "name": "mv4",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "restaurant",
+   "generator": "restaurant",
+   "values": [
+    {
+     "name": "rest-hongdae-1",
+     "attrs": {
+      "region": "hongdae"
+     }
+    },
+    {
+     "name": "rest-yeongdeungpo-1",
+     "attrs": {
+      "region": "yeongdeungpo"
+     }
+    },
+    {
+     "name": "rest-gangnam-1",
+     "attrs": {
+      "region": "gangnam"
+     }
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "type": "hard",
+   "rule": "availability",
+   "subject": "movie",
+   "over": "region",
+   "coverage": 0.69
+  },
+  {
+   "type": "hard",
+   "rule": "membership",
+   "subject": "restaurant",
+   "region_axis": "region"
+  },
+  {
+   "type": "soft",
+   "rule": "conditional_home",
+   "if_axis": "time",
+   "if_values": [
+    "21:00"
+   ],
+   "then_axis": "region",
+   "penalty": 0.2
+  }
+ ],
+ "participants": {
+  "count": 2,
+  "profile_seed": 3,
+  "initial_threshold": [
+   0.39,
+   0.45
+  ],
+  "styles": [
+   "default",
+   "default"
+  ],
+  "constraints": []
+ },
+ "agent_view": {
+  "score_dropout": 0.0
+ },
+ "profiles": [
+  {
+   "weights": {
+    "date": 0.053943274386705514,
+    "time": 0.059265448166994195,
+    "region": 0.7510178583052783,
+    "movie": 0.060477495279176036,
+    "restaurant": 0.07529592386184597
+   },
+   "scores": {
+    "date": {
+     "mon": 0.727,
+     "tue": 0.8002,
+     "wed": 0.7058,
+     "thu": 0.0156,
+     "sun": 0.5509
+    },
+    "time": {
+     "11:00": 0.5658,
+     "15:00": 0.0666,
+     "19:00": 0.13
+    },
+    "region": {
+     "hongdae": 0.2085,
+     "yeongdeungpo": 0.605,
+     "gangnam": 0.0524
+    },
+    "movie": {
+     "mv1": 0.1212,
+     "mv2": 0.8235,
+     "mv3": 0.567,
+     "mv4": 0.3796
+    },
+    "restaurant": {
+     "rest-hongdae-1": 0.0258,
+     "rest-yeongdeungpo-1": 0.5759,
+     "rest-gangnam-1": 0.1383
+    }
+   },
+   "home_region": "yeongdeungpo",
+   "initial_threshold": 0.39
+  },
+  {
+   "weights": {
+    "date": 0.3041996237535471,
+    "time": 0.07726331843372393,
+    "region": 0.15623746301313826,
+    "movie": 0.29207578892134406,
+    "restaurant": 0.17022380587824665
+   },
+   "scores": {
+    "date": {
+     "mon": 0.0,
+     "tue": 1.0,
+     "wed": 0.4301,
+     "thu": 0.1995,
+     "sun": 0.4661
+    },
+    "time": {
+     "11:00": 1.0,
+     "15:00": 0.4101,
+     "19:00": 0.0
+    },
+    "region": {
+     "hongdae": 1.0,
+     "yeongdeungpo": 0.0,
+     "gangnam": 0.9772
+    },
+    "movie": {
+     "mv1": 1.0,
+     "mv2": 0.0,
+     "mv3": 0.8685,
+     "mv4": 0.4876
+    },
+    "restaurant": {
+     "rest-hongdae-1": 0.4688,
+     "rest-yeongdeungpo-1": 0.0,
+     "rest-gangnam-1": 1.0
+    }
+   },
+   "home_region": "yeongdeungpo",
+   "initial_threshold": 0.45
+  }
+ ]
+}

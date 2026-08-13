@@ -1,0 +1,408 @@
+{
+ "meta": {
+  "id": "FIN-07ax-no_deal-02",
+  "name": "결렬 정답 — 7축",
+  "conflict_level": "mid",
+  "expected": "no_agreement",
+  "track": "cr",
+  "type": "no_deal",
+  "seed": 0,
+  "_constraints": [
+   {
+    "participant": 0,
+    "axis": "date",
+    "values": [
+     "mon",
+     "thu"
+    ]
+   },
+   {
+    "participant": 1,
+    "axis": "date",
+    "values": [
+     "fri",
+     "sat",
+     "sun"
+    ]
+   }
+  ],
+  "oracle": {
+   "valid": 0,
+   "u_xstar": 0.89
+  },
+  "attempts": 1
+ },
+ "axes": [
+  {
+   "name": "date",
+   "generator": "date",
+   "values": [
+    {
+     "name": "mon",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "thu",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "fri",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "sat",
+     "attrs": {
+      "weekend": true
+     }
+    },
+    {
+     "name": "sun",
+     "attrs": {
+      "weekend": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "time",
+   "generator": "time",
+   "values": [
+    {
+     "name": "13:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "17:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "19:00",
+     "attrs": {
+      "late": false
+     }
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "generator": "region",
+   "values": [
+    {
+     "name": "seongsu",
+     "attrs": {}
+    },
+    {
+     "name": "hongdae",
+     "attrs": {}
+    },
+    {
+     "name": "jamsil",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "movie",
+   "generator": "movie",
+   "values": [
+    {
+     "name": "mv1",
+     "attrs": {}
+    },
+    {
+     "name": "mv2",
+     "attrs": {}
+    },
+    {
+     "name": "mv3",
+     "attrs": {}
+    },
+    {
+     "name": "mv4",
+     "attrs": {}
+    },
+    {
+     "name": "mv5",
+     "attrs": {}
+    },
+    {
+     "name": "mv6",
+     "attrs": {}
+    },
+    {
+     "name": "mv7",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "restaurant",
+   "generator": "restaurant",
+   "values": [
+    {
+     "name": "rest-seongsu-1",
+     "attrs": {
+      "region": "seongsu"
+     }
+    },
+    {
+     "name": "rest-hongdae-1",
+     "attrs": {
+      "region": "hongdae"
+     }
+    },
+    {
+     "name": "rest-jamsil-1",
+     "attrs": {
+      "region": "jamsil"
+     }
+    },
+    {
+     "name": "rest-seongsu-2",
+     "attrs": {
+      "region": "seongsu"
+     }
+    },
+    {
+     "name": "rest-hongdae-2",
+     "attrs": {
+      "region": "hongdae"
+     }
+    }
+   ]
+  },
+  {
+   "name": "menu",
+   "generator": "menu",
+   "values": [
+    {
+     "name": "mexican",
+     "attrs": {}
+    },
+    {
+     "name": "vegan",
+     "attrs": {}
+    },
+    {
+     "name": "italian",
+     "attrs": {}
+    },
+    {
+     "name": "chinese",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "budget",
+   "generator": "budget",
+   "values": [
+    {
+     "name": "mid",
+     "attrs": {}
+    },
+    {
+     "name": "premium",
+     "attrs": {}
+    },
+    {
+     "name": "high",
+     "attrs": {}
+    },
+    {
+     "name": "low",
+     "attrs": {}
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "type": "hard",
+   "rule": "availability",
+   "subject": "movie",
+   "over": "region",
+   "coverage": 0.61
+  },
+  {
+   "type": "soft",
+   "rule": "conditional_pref",
+   "if_axis": "budget",
+   "if_values": [
+    "low"
+   ],
+   "then_axis": "menu",
+   "preferred": [
+    "korean",
+    "chinese"
+   ],
+   "penalty": 0.15
+  }
+ ],
+ "participants": {
+  "count": 2,
+  "profile_seed": 0,
+  "initial_threshold": [
+   0.47,
+   0.42
+  ],
+  "styles": [
+   "default",
+   "default"
+  ],
+  "constraints": [
+   {
+    "participant": 0,
+    "axis": "date",
+    "values": [
+     "mon",
+     "thu"
+    ]
+   },
+   {
+    "participant": 1,
+    "axis": "date",
+    "values": [
+     "fri",
+     "sat",
+     "sun"
+    ]
+   }
+  ]
+ },
+ "agent_view": {
+  "score_dropout": 0.0
+ },
+ "profiles": [
+  {
+   "weights": {
+    "date": 0.2040277159650396,
+    "time": 0.1978069859119053,
+    "region": 0.03573036655260551,
+    "movie": 0.0399558413175393,
+    "restaurant": 0.31110779601067656,
+    "menu": 0.06399522719693991,
+    "budget": 0.14737606704529385
+   },
+   "scores": {
+    "date": {
+     "mon": 0.8643,
+     "thu": 0.2319,
+     "fri": 0.287,
+     "sat": 0.0846,
+     "sun": 0.5683
+    },
+    "time": {
+     "13:00": 0.1018,
+     "17:00": 0.3298,
+     "19:00": 0.7988
+    },
+    "region": {
+     "seongsu": 0.3451,
+     "hongdae": 0.6252,
+     "jamsil": 0.9635
+    },
+    "movie": {
+     "mv1": 0.3494,
+     "mv2": 0.5497,
+     "mv3": 0.9973,
+     "mv4": 0.3613,
+     "mv5": 0.3308,
+     "mv6": 0.3526,
+     "mv7": 0.8289
+    },
+    "restaurant": {
+     "rest-seongsu-1": 0.857,
+     "rest-hongdae-1": 0.4117,
+     "rest-jamsil-1": 0.6404,
+     "rest-seongsu-2": 0.5454,
+     "rest-hongdae-2": 0.977
+    },
+    "menu": {
+     "mexican": 0.4742,
+     "vegan": 0.4623,
+     "italian": 0.6239,
+     "chinese": 0.1551
+    },
+    "budget": {
+     "mid": 0.5112,
+     "premium": 0.7414,
+     "high": 0.2336,
+     "low": 0.7505
+    }
+   },
+   "home_region": "hongdae",
+   "initial_threshold": 0.47
+  },
+  {
+   "weights": {
+    "date": 0.10473825676226085,
+    "time": 0.20005473536011756,
+    "region": 0.12906538161342504,
+    "movie": 0.1822800500632112,
+    "restaurant": 0.05198215428203612,
+    "menu": 0.16063986169604333,
+    "budget": 0.17123956022290587
+   },
+   "scores": {
+    "date": {
+     "mon": 0.7237,
+     "thu": 0.5093,
+     "fri": 0.0872,
+     "sat": 1.0,
+     "sun": 0.0
+    },
+    "time": {
+     "13:00": 1.0,
+     "17:00": 0.0,
+     "19:00": 0.3315
+    },
+    "region": {
+     "seongsu": 0.0,
+     "hongdae": 1.0,
+     "jamsil": 0.1038
+    },
+    "movie": {
+     "mv1": 0.0,
+     "mv2": 0.7735,
+     "mv3": 0.9089,
+     "mv4": 1.0,
+     "mv5": 0.862,
+     "mv6": 0.7166,
+     "mv7": 0.0762
+    },
+    "restaurant": {
+     "rest-seongsu-1": 0.6467,
+     "rest-hongdae-1": 0.1204,
+     "rest-jamsil-1": 0.5757,
+     "rest-seongsu-2": 1.0,
+     "rest-hongdae-2": 0.0
+    },
+    "menu": {
+     "mexican": 0.0,
+     "vegan": 0.459,
+     "italian": 1.0,
+     "chinese": 0.1774
+    },
+    "budget": {
+     "mid": 0.7521,
+     "premium": 0.0,
+     "high": 0.3253,
+     "low": 1.0
+    }
+   },
+   "home_region": "hongdae",
+   "initial_threshold": 0.42
+  }
+ ]
+}

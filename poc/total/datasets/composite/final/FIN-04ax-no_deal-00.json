@@ -1,0 +1,368 @@
+{
+ "meta": {
+  "id": "FIN-04ax-no_deal-00",
+  "name": "결렬 정답 — 4축",
+  "conflict_level": "mid",
+  "expected": "no_agreement",
+  "track": "cr",
+  "type": "no_deal",
+  "seed": 0,
+  "_constraints": [
+   {
+    "participant": 0,
+    "axis": "date",
+    "values": [
+     "mon",
+     "tue",
+     "wed"
+    ]
+   },
+   {
+    "participant": 1,
+    "axis": "date",
+    "values": [
+     "thu",
+     "fri",
+     "sat",
+     "sun"
+    ]
+   }
+  ],
+  "oracle": {
+   "valid": 0,
+   "u_xstar": 0.86
+  },
+  "attempts": 1
+ },
+ "axes": [
+  {
+   "name": "date",
+   "generator": "date",
+   "values": [
+    {
+     "name": "mon",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "tue",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "wed",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "thu",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "fri",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "sat",
+     "attrs": {
+      "weekend": true
+     }
+    },
+    {
+     "name": "sun",
+     "attrs": {
+      "weekend": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "time",
+   "generator": "time",
+   "values": [
+    {
+     "name": "11:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "13:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "15:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "17:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "19:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "21:00",
+     "attrs": {
+      "late": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "generator": "region",
+   "values": [
+    {
+     "name": "yeongdeungpo",
+     "attrs": {}
+    },
+    {
+     "name": "gangnam",
+     "attrs": {}
+    },
+    {
+     "name": "seongsu",
+     "attrs": {}
+    },
+    {
+     "name": "jamsil",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "movie",
+   "generator": "movie",
+   "values": [
+    {
+     "name": "mv1",
+     "attrs": {}
+    },
+    {
+     "name": "mv2",
+     "attrs": {}
+    },
+    {
+     "name": "mv3",
+     "attrs": {}
+    },
+    {
+     "name": "mv4",
+     "attrs": {}
+    },
+    {
+     "name": "mv5",
+     "attrs": {}
+    },
+    {
+     "name": "mv6",
+     "attrs": {}
+    },
+    {
+     "name": "mv7",
+     "attrs": {}
+    },
+    {
+     "name": "mv8",
+     "attrs": {}
+    },
+    {
+     "name": "mv9",
+     "attrs": {}
+    },
+    {
+     "name": "mv10",
+     "attrs": {}
+    },
+    {
+     "name": "mv11",
+     "attrs": {}
+    },
+    {
+     "name": "mv12",
+     "attrs": {}
+    },
+    {
+     "name": "mv13",
+     "attrs": {}
+    },
+    {
+     "name": "mv14",
+     "attrs": {}
+    },
+    {
+     "name": "mv15",
+     "attrs": {}
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "type": "hard",
+   "rule": "availability",
+   "subject": "movie",
+   "over": "region",
+   "coverage": 0.72
+  }
+ ],
+ "participants": {
+  "count": 2,
+  "profile_seed": 0,
+  "initial_threshold": [
+   0.46,
+   0.4
+  ],
+  "styles": [
+   "default",
+   "default"
+  ],
+  "constraints": [
+   {
+    "participant": 0,
+    "axis": "date",
+    "values": [
+     "mon",
+     "tue",
+     "wed"
+    ]
+   },
+   {
+    "participant": 1,
+    "axis": "date",
+    "values": [
+     "thu",
+     "fri",
+     "sat",
+     "sun"
+    ]
+   }
+  ]
+ },
+ "agent_view": {
+  "score_dropout": 0.0
+ },
+ "profiles": [
+  {
+   "weights": {
+    "date": 0.17676666867744087,
+    "time": 0.18100365321688897,
+    "region": 0.09835437990273564,
+    "movie": 0.5438752982029346
+   },
+   "scores": {
+    "date": {
+     "mon": 0.2889,
+     "tue": 0.4374,
+     "wed": 0.8761,
+     "thu": 0.3499,
+     "fri": 0.6494,
+     "sat": 0.9825,
+     "sun": 0.1313
+    },
+    "time": {
+     "11:00": 0.9838,
+     "13:00": 0.3424,
+     "15:00": 0.5663,
+     "17:00": 0.9,
+     "19:00": 0.0144,
+     "21:00": 0.4029
+    },
+    "region": {
+     "yeongdeungpo": 0.4509,
+     "gangnam": 0.0851,
+     "seongsu": 0.6036,
+     "jamsil": 0.2428
+    },
+    "movie": {
+     "mv1": 0.5837,
+     "mv2": 0.6864,
+     "mv3": 0.1835,
+     "mv4": 0.0191,
+     "mv5": 0.6294,
+     "mv6": 0.7756,
+     "mv7": 0.1344,
+     "mv8": 0.596,
+     "mv9": 0.9774,
+     "mv10": 0.2826,
+     "mv11": 0.5948,
+     "mv12": 0.7443,
+     "mv13": 0.2121,
+     "mv14": 0.3653,
+     "mv15": 0.1324
+    }
+   },
+   "home_region": "seongsu",
+   "initial_threshold": 0.46
+  },
+  {
+   "weights": {
+    "date": 0.2480058684310094,
+    "time": 0.0881640827041165,
+    "region": 0.3403617059728367,
+    "movie": 0.3234683428920374
+   },
+   "scores": {
+    "date": {
+     "mon": 0.2715,
+     "tue": 0.4912,
+     "wed": 1.0,
+     "thu": 0.5538,
+     "fri": 0.0,
+     "sat": 0.52,
+     "sun": 0.4252
+    },
+    "time": {
+     "11:00": 0.8096,
+     "13:00": 1.0,
+     "15:00": 0.9337,
+     "17:00": 0.0,
+     "19:00": 0.0559,
+     "21:00": 0.752
+    },
+    "region": {
+     "yeongdeungpo": 0.87,
+     "gangnam": 0.0,
+     "seongsu": 0.1901,
+     "jamsil": 1.0
+    },
+    "movie": {
+     "mv1": 0.1529,
+     "mv2": 0.4173,
+     "mv3": 0.4325,
+     "mv4": 0.6565,
+     "mv5": 0.9752,
+     "mv6": 0.7948,
+     "mv7": 0.6238,
+     "mv8": 0.0,
+     "mv9": 0.6978,
+     "mv10": 0.4055,
+     "mv11": 0.4451,
+     "mv12": 0.0982,
+     "mv13": 0.2411,
+     "mv14": 0.449,
+     "mv15": 1.0
+    }
+   },
+   "home_region": "seongsu",
+   "initial_threshold": 0.4
+  }
+ ]
+}

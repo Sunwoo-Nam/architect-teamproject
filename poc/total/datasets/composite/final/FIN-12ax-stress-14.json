@@ -1,0 +1,508 @@
+{
+ "meta": {
+  "id": "FIN-12ax-stress-14",
+  "name": "규모 스트레스 — 12축",
+  "conflict_level": "high",
+  "expected": "agreement",
+  "track": "rs",
+  "type": "stress",
+  "seed": 0,
+  "oracle": {
+   "light": true
+  },
+  "attempts": 1
+ },
+ "axes": [
+  {
+   "name": "date",
+   "generator": "date",
+   "values": [
+    {
+     "name": "mon",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "thu",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "fri",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "sun",
+     "attrs": {
+      "weekend": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "time",
+   "generator": "time",
+   "values": [
+    {
+     "name": "11:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "15:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "17:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "21:00",
+     "attrs": {
+      "late": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "generator": "region",
+   "values": [
+    {
+     "name": "seongsu",
+     "attrs": {}
+    },
+    {
+     "name": "yeongdeungpo",
+     "attrs": {}
+    },
+    {
+     "name": "gangnam",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "movie",
+   "generator": "movie",
+   "values": [
+    {
+     "name": "mv1",
+     "attrs": {}
+    },
+    {
+     "name": "mv2",
+     "attrs": {}
+    },
+    {
+     "name": "mv3",
+     "attrs": {}
+    },
+    {
+     "name": "mv4",
+     "attrs": {}
+    },
+    {
+     "name": "mv5",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "restaurant",
+   "generator": "restaurant",
+   "values": [
+    {
+     "name": "rest-seongsu-1",
+     "attrs": {
+      "region": "seongsu"
+     }
+    },
+    {
+     "name": "rest-yeongdeungpo-1",
+     "attrs": {
+      "region": "yeongdeungpo"
+     }
+    },
+    {
+     "name": "rest-gangnam-1",
+     "attrs": {
+      "region": "gangnam"
+     }
+    }
+   ]
+  },
+  {
+   "name": "menu",
+   "generator": "menu",
+   "values": [
+    {
+     "name": "mexican",
+     "attrs": {}
+    },
+    {
+     "name": "chinese",
+     "attrs": {}
+    },
+    {
+     "name": "italian",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "budget",
+   "generator": "budget",
+   "values": [
+    {
+     "name": "high",
+     "attrs": {}
+    },
+    {
+     "name": "low",
+     "attrs": {}
+    },
+    {
+     "name": "mid",
+     "attrs": {}
+    },
+    {
+     "name": "premium",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "theater",
+   "generator": "theater",
+   "values": [
+    {
+     "name": "thtr-seongsu-1",
+     "attrs": {
+      "region": "seongsu"
+     }
+    },
+    {
+     "name": "thtr-yeongdeungpo-1",
+     "attrs": {
+      "region": "yeongdeungpo"
+     }
+    },
+    {
+     "name": "thtr-gangnam-1",
+     "attrs": {
+      "region": "gangnam"
+     }
+    }
+   ]
+  },
+  {
+   "name": "transport",
+   "generator": "transport",
+   "values": [
+    {
+     "name": "subway",
+     "attrs": {}
+    },
+    {
+     "name": "bus",
+     "attrs": {}
+    },
+    {
+     "name": "car",
+     "attrs": {}
+    },
+    {
+     "name": "taxi",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "cafe",
+   "generator": "cafe",
+   "values": [
+    {
+     "name": "cafe-seongsu-1",
+     "attrs": {
+      "region": "seongsu"
+     }
+    },
+    {
+     "name": "cafe-yeongdeungpo-1",
+     "attrs": {
+      "region": "yeongdeungpo"
+     }
+    },
+    {
+     "name": "cafe-gangnam-1",
+     "attrs": {
+      "region": "gangnam"
+     }
+    },
+    {
+     "name": "cafe-seongsu-2",
+     "attrs": {
+      "region": "seongsu"
+     }
+    }
+   ]
+  },
+  {
+   "name": "activity",
+   "generator": "activity",
+   "values": [
+    {
+     "name": "board-game",
+     "attrs": {}
+    },
+    {
+     "name": "escape-room",
+     "attrs": {}
+    },
+    {
+     "name": "bowling",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "dessert",
+   "generator": "dessert",
+   "values": [
+    {
+     "name": "gelato",
+     "attrs": {}
+    },
+    {
+     "name": "cake",
+     "attrs": {}
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "type": "hard",
+   "rule": "availability",
+   "subject": "movie",
+   "over": "region",
+   "coverage": 0.62
+  },
+  {
+   "type": "hard",
+   "rule": "membership",
+   "subject": "restaurant",
+   "region_axis": "region"
+  },
+  {
+   "type": "soft",
+   "rule": "conditional_home",
+   "if_axis": "time",
+   "if_values": [
+    "21:00"
+   ],
+   "then_axis": "region",
+   "penalty": 0.2
+  }
+ ],
+ "participants": {
+  "count": 2,
+  "profile_seed": 0,
+  "initial_threshold": [
+   0.48,
+   0.38
+  ],
+  "styles": [
+   "default",
+   "default"
+  ],
+  "constraints": []
+ },
+ "agent_view": {
+  "score_dropout": 0.0
+ },
+ "profiles": [
+  {
+   "weights": {
+    "date": 0.0861693358395125,
+    "time": 0.014691170972539714,
+    "region": 0.12130130154321285,
+    "movie": 0.08097472698741409,
+    "restaurant": 0.02497868841685467,
+    "menu": 0.1078520957466324,
+    "budget": 0.3281741820780742,
+    "theater": 0.047867594198263134,
+    "transport": 0.06984958461258473,
+    "cafe": 0.025140639249458266,
+    "activity": 0.017768176036162847,
+    "dessert": 0.07523250431929066
+   },
+   "scores": {
+    "date": {
+     "mon": 0.8079,
+     "thu": 0.2195,
+     "fri": 0.1857,
+     "sun": 0.6977
+    },
+    "time": {
+     "11:00": 0.8221,
+     "15:00": 0.7182,
+     "17:00": 0.3519,
+     "21:00": 0.7928
+    },
+    "region": {
+     "seongsu": 0.6798,
+     "yeongdeungpo": 0.8011,
+     "gangnam": 0.6943
+    },
+    "movie": {
+     "mv1": 0.0916,
+     "mv2": 0.4697,
+     "mv3": 0.7062,
+     "mv4": 0.4931,
+     "mv5": 0.8545
+    },
+    "restaurant": {
+     "rest-seongsu-1": 0.6831,
+     "rest-yeongdeungpo-1": 0.3607,
+     "rest-gangnam-1": 0.2958
+    },
+    "menu": {
+     "mexican": 0.9574,
+     "chinese": 0.7675,
+     "italian": 0.9978
+    },
+    "budget": {
+     "high": 0.6277,
+     "low": 0.7029,
+     "mid": 0.8284,
+     "premium": 0.3403
+    },
+    "theater": {
+     "thtr-seongsu-1": 0.1529,
+     "thtr-yeongdeungpo-1": 0.863,
+     "thtr-gangnam-1": 0.5838
+    },
+    "transport": {
+     "subway": 0.9883,
+     "bus": 0.2265,
+     "car": 0.1567,
+     "taxi": 0.1178
+    },
+    "cafe": {
+     "cafe-seongsu-1": 0.6953,
+     "cafe-yeongdeungpo-1": 0.8996,
+     "cafe-gangnam-1": 0.7828,
+     "cafe-seongsu-2": 0.9715
+    },
+    "activity": {
+     "board-game": 0.6517,
+     "escape-room": 0.5011,
+     "bowling": 0.6291
+    },
+    "dessert": {
+     "gelato": 0.5654,
+     "cake": 0.4112
+    }
+   },
+   "home_region": "yeongdeungpo",
+   "initial_threshold": 0.48
+  },
+  {
+   "weights": {
+    "date": 0.046487146742655916,
+    "time": 0.17840465651491116,
+    "region": 0.05266159423826385,
+    "movie": 0.11708550066155252,
+    "restaurant": 0.09915694383457016,
+    "menu": 0.09126760973330486,
+    "budget": 0.23198710920466956,
+    "theater": 0.08509085201323342,
+    "transport": 0.02134338243583411,
+    "cafe": 0.018113185678796308,
+    "activity": 0.01343615197131307,
+    "dessert": 0.04496586697089504
+   },
+   "scores": {
+    "date": {
+     "mon": 1.0,
+     "thu": 0.9172,
+     "fri": 0.0,
+     "sun": 0.9669
+    },
+    "time": {
+     "11:00": 0.3161,
+     "15:00": 0.1043,
+     "17:00": 1.0,
+     "21:00": 0.0
+    },
+    "region": {
+     "seongsu": 1.0,
+     "yeongdeungpo": 0.0,
+     "gangnam": 0.4547
+    },
+    "movie": {
+     "mv1": 0.8285,
+     "mv2": 0.3742,
+     "mv3": 1.0,
+     "mv4": 0.7153,
+     "mv5": 0.0
+    },
+    "restaurant": {
+     "rest-seongsu-1": 0.997,
+     "rest-yeongdeungpo-1": 1.0,
+     "rest-gangnam-1": 0.0
+    },
+    "menu": {
+     "mexican": 1.0,
+     "chinese": 0.0305,
+     "italian": 0.0
+    },
+    "budget": {
+     "high": 0.3772,
+     "low": 0.0,
+     "mid": 0.3588,
+     "premium": 1.0
+    },
+    "theater": {
+     "thtr-seongsu-1": 0.5289,
+     "thtr-yeongdeungpo-1": 1.0,
+     "thtr-gangnam-1": 0.0
+    },
+    "transport": {
+     "subway": 0.0,
+     "bus": 0.5697,
+     "car": 1.0,
+     "taxi": 0.9021
+    },
+    "cafe": {
+     "cafe-seongsu-1": 0.2327,
+     "cafe-yeongdeungpo-1": 0.0,
+     "cafe-gangnam-1": 0.6728,
+     "cafe-seongsu-2": 1.0
+    },
+    "activity": {
+     "board-game": 0.0,
+     "escape-room": 0.6946,
+     "bowling": 1.0
+    },
+    "dessert": {
+     "gelato": 0.0,
+     "cake": 1.0
+    }
+   },
+   "home_region": "gangnam",
+   "initial_threshold": 0.38
+  }
+ ]
+}

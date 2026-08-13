@@ -1,0 +1,452 @@
+{
+ "meta": {
+  "id": "FIN-08ax-no_deal-00",
+  "name": "결렬 정답 — 8축",
+  "conflict_level": "mid",
+  "expected": "no_agreement",
+  "track": "cr",
+  "type": "no_deal",
+  "seed": 0,
+  "_constraints": [
+   {
+    "participant": 0,
+    "axis": "date",
+    "values": [
+     "mon",
+     "thu"
+    ]
+   },
+   {
+    "participant": 1,
+    "axis": "date",
+    "values": [
+     "fri",
+     "sat",
+     "sun"
+    ]
+   }
+  ],
+  "oracle": {
+   "valid": 0,
+   "u_xstar": 0.84
+  },
+  "attempts": 1
+ },
+ "axes": [
+  {
+   "name": "date",
+   "generator": "date",
+   "values": [
+    {
+     "name": "mon",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "thu",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "fri",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "sat",
+     "attrs": {
+      "weekend": true
+     }
+    },
+    {
+     "name": "sun",
+     "attrs": {
+      "weekend": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "time",
+   "generator": "time",
+   "values": [
+    {
+     "name": "11:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "13:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "17:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "19:00",
+     "attrs": {
+      "late": false
+     }
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "generator": "region",
+   "values": [
+    {
+     "name": "gangnam",
+     "attrs": {}
+    },
+    {
+     "name": "hongdae",
+     "attrs": {}
+    },
+    {
+     "name": "yeongdeungpo",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "movie",
+   "generator": "movie",
+   "values": [
+    {
+     "name": "mv1",
+     "attrs": {}
+    },
+    {
+     "name": "mv2",
+     "attrs": {}
+    },
+    {
+     "name": "mv3",
+     "attrs": {}
+    },
+    {
+     "name": "mv4",
+     "attrs": {}
+    },
+    {
+     "name": "mv5",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "restaurant",
+   "generator": "restaurant",
+   "values": [
+    {
+     "name": "rest-gangnam-1",
+     "attrs": {
+      "region": "gangnam"
+     }
+    },
+    {
+     "name": "rest-hongdae-1",
+     "attrs": {
+      "region": "hongdae"
+     }
+    },
+    {
+     "name": "rest-yeongdeungpo-1",
+     "attrs": {
+      "region": "yeongdeungpo"
+     }
+    },
+    {
+     "name": "rest-gangnam-2",
+     "attrs": {
+      "region": "gangnam"
+     }
+    },
+    {
+     "name": "rest-hongdae-2",
+     "attrs": {
+      "region": "hongdae"
+     }
+    }
+   ]
+  },
+  {
+   "name": "menu",
+   "generator": "menu",
+   "values": [
+    {
+     "name": "italian",
+     "attrs": {}
+    },
+    {
+     "name": "chinese",
+     "attrs": {}
+    },
+    {
+     "name": "vegan",
+     "attrs": {}
+    },
+    {
+     "name": "mexican",
+     "attrs": {}
+    },
+    {
+     "name": "japanese",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "budget",
+   "generator": "budget",
+   "values": [
+    {
+     "name": "high",
+     "attrs": {}
+    },
+    {
+     "name": "low",
+     "attrs": {}
+    },
+    {
+     "name": "premium",
+     "attrs": {}
+    },
+    {
+     "name": "mid",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "theater",
+   "generator": "theater",
+   "values": [
+    {
+     "name": "thtr-gangnam-1",
+     "attrs": {
+      "region": "gangnam"
+     }
+    },
+    {
+     "name": "thtr-hongdae-1",
+     "attrs": {
+      "region": "hongdae"
+     }
+    },
+    {
+     "name": "thtr-yeongdeungpo-1",
+     "attrs": {
+      "region": "yeongdeungpo"
+     }
+    },
+    {
+     "name": "thtr-gangnam-2",
+     "attrs": {
+      "region": "gangnam"
+     }
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "type": "hard",
+   "rule": "availability",
+   "subject": "movie",
+   "over": "region",
+   "coverage": 0.64
+  },
+  {
+   "type": "hard",
+   "rule": "membership",
+   "subject": "restaurant",
+   "region_axis": "region"
+  },
+  {
+   "type": "hard",
+   "rule": "membership",
+   "subject": "theater",
+   "region_axis": "region"
+  }
+ ],
+ "participants": {
+  "count": 2,
+  "profile_seed": 0,
+  "initial_threshold": [
+   0.46,
+   0.38
+  ],
+  "styles": [
+   "default",
+   "default"
+  ],
+  "constraints": [
+   {
+    "participant": 0,
+    "axis": "date",
+    "values": [
+     "mon",
+     "thu"
+    ]
+   },
+   {
+    "participant": 1,
+    "axis": "date",
+    "values": [
+     "fri",
+     "sat",
+     "sun"
+    ]
+   }
+  ]
+ },
+ "agent_view": {
+  "score_dropout": 0.0
+ },
+ "profiles": [
+  {
+   "weights": {
+    "date": 0.16244775436779196,
+    "time": 0.15493748010734315,
+    "region": 0.11087542891436925,
+    "movie": 0.10357814919522262,
+    "restaurant": 0.25539614930152676,
+    "menu": 0.04610053132428786,
+    "budget": 0.13679815787713623,
+    "theater": 0.029866348912322094
+   },
+   "scores": {
+    "date": {
+     "mon": 0.6135,
+     "thu": 0.1725,
+     "fri": 0.2834,
+     "sat": 0.3223,
+     "sun": 0.4384
+    },
+    "time": {
+     "11:00": 0.3517,
+     "13:00": 0.2421,
+     "17:00": 0.3113,
+     "19:00": 0.939
+    },
+    "region": {
+     "gangnam": 0.2818,
+     "hongdae": 0.3796,
+     "yeongdeungpo": 0.1622
+    },
+    "movie": {
+     "mv1": 0.5189,
+     "mv2": 0.5939,
+     "mv3": 0.4438,
+     "mv4": 0.3054,
+     "mv5": 0.6676
+    },
+    "restaurant": {
+     "rest-gangnam-1": 0.0242,
+     "rest-hongdae-1": 0.4128,
+     "rest-yeongdeungpo-1": 0.664,
+     "rest-gangnam-2": 0.7269,
+     "rest-hongdae-2": 0.9062
+    },
+    "menu": {
+     "italian": 0.8172,
+     "chinese": 0.9405,
+     "vegan": 0.7377,
+     "mexican": 0.0138,
+     "japanese": 0.2057
+    },
+    "budget": {
+     "high": 0.5803,
+     "low": 0.6356,
+     "premium": 0.9281,
+     "mid": 0.2213
+    },
+    "theater": {
+     "thtr-gangnam-1": 0.0505,
+     "thtr-hongdae-1": 0.4423,
+     "thtr-yeongdeungpo-1": 0.7901,
+     "thtr-gangnam-2": 0.0978
+    }
+   },
+   "home_region": "hongdae",
+   "initial_threshold": 0.46
+  },
+  {
+   "weights": {
+    "date": 0.016333288538539298,
+    "time": 0.1258928029942788,
+    "region": 0.15823550368653946,
+    "movie": 0.14456581182337638,
+    "restaurant": 0.1992841826909057,
+    "menu": 0.25446652780931145,
+    "budget": 0.06453480299167257,
+    "theater": 0.03668707946537639
+   },
+   "scores": {
+    "date": {
+     "mon": 0.8319,
+     "thu": 0.0,
+     "fri": 0.1129,
+     "sat": 1.0,
+     "sun": 0.9689
+    },
+    "time": {
+     "11:00": 0.5599,
+     "13:00": 0.0,
+     "17:00": 1.0,
+     "19:00": 0.3986
+    },
+    "region": {
+     "gangnam": 0.7664,
+     "hongdae": 1.0,
+     "yeongdeungpo": 0.0
+    },
+    "movie": {
+     "mv1": 0.0,
+     "mv2": 0.0085,
+     "mv3": 0.8484,
+     "mv4": 1.0,
+     "mv5": 0.1306
+    },
+    "restaurant": {
+     "rest-gangnam-1": 0.8711,
+     "rest-hongdae-1": 1.0,
+     "rest-yeongdeungpo-1": 0.7961,
+     "rest-gangnam-2": 0.0,
+     "rest-hongdae-2": 0.3279
+    },
+    "menu": {
+     "italian": 0.4536,
+     "chinese": 0.6765,
+     "vegan": 0.2762,
+     "mexican": 0.0,
+     "japanese": 1.0
+    },
+    "budget": {
+     "high": 0.0952,
+     "low": 1.0,
+     "premium": 0.033,
+     "mid": 0.0
+    },
+    "theater": {
+     "thtr-gangnam-1": 0.2678,
+     "thtr-hongdae-1": 1.0,
+     "thtr-yeongdeungpo-1": 0.0,
+     "thtr-gangnam-2": 0.7744
+    }
+   },
+   "home_region": "yeongdeungpo",
+   "initial_threshold": 0.38
+  }
+ ]
+}

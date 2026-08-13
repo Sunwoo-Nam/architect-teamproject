@@ -1,0 +1,407 @@
+{
+ "meta": {
+  "id": "FIN-08ax-no_deal-01",
+  "name": "결렬 정답 — 8축",
+  "conflict_level": "mid",
+  "expected": "no_agreement",
+  "track": "cr",
+  "type": "no_deal",
+  "seed": 0,
+  "oracle": {
+   "valid": 0,
+   "u_xstar": 1.42
+  },
+  "attempts": 1
+ },
+ "axes": [
+  {
+   "name": "date",
+   "generator": "date",
+   "values": [
+    {
+     "name": "tue",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "wed",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "fri",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "sat",
+     "attrs": {
+      "weekend": true
+     }
+    },
+    {
+     "name": "sun",
+     "attrs": {
+      "weekend": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "time",
+   "generator": "time",
+   "values": [
+    {
+     "name": "15:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "17:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "21:00",
+     "attrs": {
+      "late": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "generator": "region",
+   "values": [
+    {
+     "name": "seongsu",
+     "attrs": {}
+    },
+    {
+     "name": "gangnam",
+     "attrs": {}
+    },
+    {
+     "name": "hongdae",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "movie",
+   "generator": "movie",
+   "values": [
+    {
+     "name": "mv1",
+     "attrs": {}
+    },
+    {
+     "name": "mv2",
+     "attrs": {}
+    },
+    {
+     "name": "mv3",
+     "attrs": {}
+    },
+    {
+     "name": "mv4",
+     "attrs": {}
+    },
+    {
+     "name": "mv5",
+     "attrs": {}
+    },
+    {
+     "name": "mv6",
+     "attrs": {}
+    },
+    {
+     "name": "mv7",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "restaurant",
+   "generator": "restaurant",
+   "values": [
+    {
+     "name": "rest-seongsu-1",
+     "attrs": {
+      "region": "seongsu"
+     }
+    },
+    {
+     "name": "rest-gangnam-1",
+     "attrs": {
+      "region": "gangnam"
+     }
+    },
+    {
+     "name": "rest-hongdae-1",
+     "attrs": {
+      "region": "hongdae"
+     }
+    },
+    {
+     "name": "rest-seongsu-2",
+     "attrs": {
+      "region": "seongsu"
+     }
+    },
+    {
+     "name": "rest-gangnam-2",
+     "attrs": {
+      "region": "gangnam"
+     }
+    }
+   ]
+  },
+  {
+   "name": "menu",
+   "generator": "menu",
+   "values": [
+    {
+     "name": "mexican",
+     "attrs": {}
+    },
+    {
+     "name": "italian",
+     "attrs": {}
+    },
+    {
+     "name": "chinese",
+     "attrs": {}
+    },
+    {
+     "name": "korean",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "budget",
+   "generator": "budget",
+   "values": [
+    {
+     "name": "premium",
+     "attrs": {}
+    },
+    {
+     "name": "mid",
+     "attrs": {}
+    },
+    {
+     "name": "high",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "theater",
+   "generator": "theater",
+   "values": [
+    {
+     "name": "thtr-seongsu-1",
+     "attrs": {
+      "region": "seongsu"
+     }
+    },
+    {
+     "name": "thtr-gangnam-1",
+     "attrs": {
+      "region": "gangnam"
+     }
+    },
+    {
+     "name": "thtr-hongdae-1",
+     "attrs": {
+      "region": "hongdae"
+     }
+    },
+    {
+     "name": "thtr-seongsu-2",
+     "attrs": {
+      "region": "seongsu"
+     }
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "type": "hard",
+   "rule": "availability",
+   "subject": "movie",
+   "over": "region",
+   "coverage": 0.62
+  },
+  {
+   "type": "hard",
+   "rule": "membership",
+   "subject": "restaurant",
+   "region_axis": "region"
+  },
+  {
+   "type": "hard",
+   "rule": "membership",
+   "subject": "theater",
+   "region_axis": "region"
+  }
+ ],
+ "participants": {
+  "count": 2,
+  "profile_seed": 0,
+  "initial_threshold": [
+   0.74,
+   0.68
+  ],
+  "styles": [
+   "default",
+   "default"
+  ],
+  "constraints": []
+ },
+ "agent_view": {
+  "score_dropout": 0.0
+ },
+ "profiles": [
+  {
+   "weights": {
+    "date": 0.0750822213646945,
+    "time": 0.01623283582290805,
+    "region": 0.17302675476164492,
+    "movie": 0.04663733026318875,
+    "restaurant": 0.18490922345008814,
+    "menu": 0.19623881082038303,
+    "budget": 0.1339408758608968,
+    "theater": 0.17393194765619582
+   },
+   "scores": {
+    "date": {
+     "tue": 0.4849,
+     "wed": 0.6051,
+     "fri": 0.2005,
+     "sat": 0.4621,
+     "sun": 0.0668
+    },
+    "time": {
+     "15:00": 0.718,
+     "17:00": 0.9515,
+     "21:00": 0.8716
+    },
+    "region": {
+     "seongsu": 0.2755,
+     "gangnam": 0.4466,
+     "hongdae": 0.5393
+    },
+    "movie": {
+     "mv1": 0.6724,
+     "mv2": 0.1038,
+     "mv3": 0.8098,
+     "mv4": 0.183,
+     "mv5": 0.4117,
+     "mv6": 0.5938,
+     "mv7": 0.3619
+    },
+    "restaurant": {
+     "rest-seongsu-1": 0.18,
+     "rest-gangnam-1": 0.6554,
+     "rest-hongdae-1": 0.3326,
+     "rest-seongsu-2": 0.6466,
+     "rest-gangnam-2": 0.5024
+    },
+    "menu": {
+     "mexican": 0.576,
+     "italian": 0.9257,
+     "chinese": 0.988,
+     "korean": 0.1038
+    },
+    "budget": {
+     "premium": 0.6844,
+     "mid": 0.0282,
+     "high": 0.3044
+    },
+    "theater": {
+     "thtr-seongsu-1": 0.2344,
+     "thtr-gangnam-1": 0.0525,
+     "thtr-hongdae-1": 0.3187,
+     "thtr-seongsu-2": 0.9024
+    }
+   },
+   "home_region": "hongdae",
+   "initial_threshold": 0.74
+  },
+  {
+   "weights": {
+    "date": 0.1898470221430796,
+    "time": 0.023648612809913174,
+    "region": 0.12146404103237904,
+    "movie": 0.17793819111554895,
+    "restaurant": 0.269006878478341,
+    "menu": 0.0682188094352667,
+    "budget": 0.11579871247826484,
+    "theater": 0.034077732507206714
+   },
+   "scores": {
+    "date": {
+     "tue": 0.0,
+     "wed": 0.3039,
+     "fri": 1.0,
+     "sat": 0.5743,
+     "sun": 0.536
+    },
+    "time": {
+     "15:00": 1.0,
+     "17:00": 0.1327,
+     "21:00": 0.0
+    },
+    "region": {
+     "seongsu": 1.0,
+     "gangnam": 0.0,
+     "hongdae": 0.2919
+    },
+    "movie": {
+     "mv1": 0.2231,
+     "mv2": 0.1853,
+     "mv3": 0.4981,
+     "mv4": 0.0,
+     "mv5": 0.3024,
+     "mv6": 0.9525,
+     "mv7": 1.0
+    },
+    "restaurant": {
+     "rest-seongsu-1": 1.0,
+     "rest-gangnam-1": 0.8846,
+     "rest-hongdae-1": 0.1816,
+     "rest-seongsu-2": 0.7398,
+     "rest-gangnam-2": 0.0
+    },
+    "menu": {
+     "mexican": 1.0,
+     "italian": 0.454,
+     "chinese": 0.0,
+     "korean": 0.9366
+    },
+    "budget": {
+     "premium": 0.8049,
+     "mid": 0.0,
+     "high": 1.0
+    },
+    "theater": {
+     "thtr-seongsu-1": 1.0,
+     "thtr-gangnam-1": 0.0,
+     "thtr-hongdae-1": 0.127,
+     "thtr-seongsu-2": 0.8045
+    }
+   },
+   "home_region": "gangnam",
+   "initial_threshold": 0.68
+  }
+ ]
+}

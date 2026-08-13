@@ -1,0 +1,318 @@
+{
+ "meta": {
+  "id": "FIN-06ax-plain-30",
+  "name": "현실 모사 — 6축",
+  "conflict_level": "mid",
+  "expected": "agreement",
+  "track": "cr",
+  "type": "plain",
+  "seed": 0,
+  "oracle": {
+   "valid": 825,
+   "u_xstar": 1.5399,
+   "r_bar": 0.7492,
+   "corr": -0.10318341664452828,
+   "xstar_slack": 0.2913
+  },
+  "attempts": 1
+ },
+ "axes": [
+  {
+   "name": "date",
+   "generator": "date",
+   "values": [
+    {
+     "name": "tue",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "thu",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "fri",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "sat",
+     "attrs": {
+      "weekend": true
+     }
+    },
+    {
+     "name": "sun",
+     "attrs": {
+      "weekend": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "time",
+   "generator": "time",
+   "values": [
+    {
+     "name": "11:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "15:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "19:00",
+     "attrs": {
+      "late": false
+     }
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "generator": "region",
+   "values": [
+    {
+     "name": "hongdae",
+     "attrs": {}
+    },
+    {
+     "name": "yeongdeungpo",
+     "attrs": {}
+    },
+    {
+     "name": "jamsil",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "movie",
+   "generator": "movie",
+   "values": [
+    {
+     "name": "mv1",
+     "attrs": {}
+    },
+    {
+     "name": "mv2",
+     "attrs": {}
+    },
+    {
+     "name": "mv3",
+     "attrs": {}
+    },
+    {
+     "name": "mv4",
+     "attrs": {}
+    },
+    {
+     "name": "mv5",
+     "attrs": {}
+    },
+    {
+     "name": "mv6",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "restaurant",
+   "generator": "restaurant",
+   "values": [
+    {
+     "name": "rest-hongdae-1",
+     "attrs": {
+      "region": "hongdae"
+     }
+    },
+    {
+     "name": "rest-yeongdeungpo-1",
+     "attrs": {
+      "region": "yeongdeungpo"
+     }
+    },
+    {
+     "name": "rest-jamsil-1",
+     "attrs": {
+      "region": "jamsil"
+     }
+    },
+    {
+     "name": "rest-hongdae-2",
+     "attrs": {
+      "region": "hongdae"
+     }
+    },
+    {
+     "name": "rest-yeongdeungpo-2",
+     "attrs": {
+      "region": "yeongdeungpo"
+     }
+    }
+   ]
+  },
+  {
+   "name": "menu",
+   "generator": "menu",
+   "values": [
+    {
+     "name": "chinese",
+     "attrs": {}
+    },
+    {
+     "name": "mexican",
+     "attrs": {}
+    },
+    {
+     "name": "italian",
+     "attrs": {}
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "type": "hard",
+   "rule": "availability",
+   "subject": "movie",
+   "over": "region",
+   "coverage": 0.84
+  },
+  {
+   "type": "hard",
+   "rule": "membership",
+   "subject": "restaurant",
+   "region_axis": "region"
+  }
+ ],
+ "participants": {
+  "count": 2,
+  "profile_seed": 0,
+  "initial_threshold": [
+   0.38,
+   0.37
+  ],
+  "styles": [
+   "default",
+   "default"
+  ],
+  "constraints": []
+ },
+ "agent_view": {
+  "score_dropout": 0.0
+ },
+ "profiles": [
+  {
+   "weights": {
+    "date": 0.36443712913607573,
+    "time": 0.04119917478385602,
+    "region": 0.22378829468649236,
+    "movie": 0.024693736355709584,
+    "restaurant": 0.0921394243504488,
+    "menu": 0.25374224068741746
+   },
+   "scores": {
+    "date": {
+     "tue": 0.7474,
+     "thu": 0.6211,
+     "fri": 0.0742,
+     "sat": 0.3581,
+     "sun": 0.3297
+    },
+    "time": {
+     "11:00": 0.2976,
+     "15:00": 0.0568,
+     "19:00": 0.3774
+    },
+    "region": {
+     "hongdae": 0.6266,
+     "yeongdeungpo": 0.5648,
+     "jamsil": 0.9937
+    },
+    "movie": {
+     "mv1": 0.951,
+     "mv2": 0.7161,
+     "mv3": 0.3253,
+     "mv4": 0.2821,
+     "mv5": 0.6616,
+     "mv6": 0.532
+    },
+    "restaurant": {
+     "rest-hongdae-1": 0.3583,
+     "rest-yeongdeungpo-1": 0.2229,
+     "rest-jamsil-1": 0.6504,
+     "rest-hongdae-2": 0.585,
+     "rest-yeongdeungpo-2": 0.9191
+    },
+    "menu": {
+     "chinese": 0.7101,
+     "mexican": 0.9949,
+     "italian": 0.5749
+    }
+   },
+   "home_region": "jamsil",
+   "initial_threshold": 0.38
+  },
+  {
+   "weights": {
+    "date": 0.20829799690387976,
+    "time": 0.056902023687404296,
+    "region": 0.028376881180813093,
+    "movie": 0.040484666021313266,
+    "restaurant": 0.3381909104342165,
+    "menu": 0.32774752177237304
+   },
+   "scores": {
+    "date": {
+     "tue": 0.0,
+     "thu": 0.5509,
+     "fri": 0.7991,
+     "sat": 0.1622,
+     "sun": 1.0
+    },
+    "time": {
+     "11:00": 0.8339,
+     "15:00": 1.0,
+     "19:00": 0.0
+    },
+    "region": {
+     "hongdae": 0.0,
+     "yeongdeungpo": 1.0,
+     "jamsil": 0.9585
+    },
+    "movie": {
+     "mv1": 0.5788,
+     "mv2": 0.5784,
+     "mv3": 0.4525,
+     "mv4": 1.0,
+     "mv5": 0.3803,
+     "mv6": 0.0
+    },
+    "restaurant": {
+     "rest-hongdae-1": 1.0,
+     "rest-yeongdeungpo-1": 0.7192,
+     "rest-jamsil-1": 0.0,
+     "rest-hongdae-2": 0.474,
+     "rest-yeongdeungpo-2": 0.395
+    },
+    "menu": {
+     "chinese": 0.0117,
+     "mexican": 1.0,
+     "italian": 0.0
+    }
+   },
+   "home_region": "hongdae",
+   "initial_threshold": 0.37
+  }
+ ]
+}
