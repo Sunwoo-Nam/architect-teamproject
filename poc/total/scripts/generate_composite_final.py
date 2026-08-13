@@ -14,9 +14,9 @@
 
 | 유형 | 함정 대상 | 장치 |
 |---|---|---|
-| path_trap | 1안(seq) | 앞 축의 인기값이 뒤 축의 좋은 값을 하드 제약으로 봉쇄 — 축별 확정의 경로 의존 |
-| pool_trap | 2안(pool) | 한계효용 상위(=top-k) 값 조합에 soft 감점 — 압축이 좋은 조합을 놓침 |
-| both_trap | 둘 다 | 위 두 장치를 서로 다른 축에 동시 배치 (공정성 — 표본이 한쪽 편이 아님) |
+| hard_path | 경로 의존 검증 | 앞 축의 인기값이 뒤 축의 좋은 값을 하드 제약으로 봉쇄 — 축별 확정의 경로 의존 |
+| soft_synergy | 조합 시너지 검증 | 한계효용 상위(=top-k) 값 조합에 soft 감점 — 압축이 좋은 조합을 놓침 |
+| mixed | 복합 | 위 두 장치를 서로 다른 축에 동시 배치 (공정성 — 표본이 한쪽 편이 아님) |
 | plain | 없음 | 현실 모사 무작위 판 — 함정 없는 기준선 |
 | no_deal | 없음 | 결렬이 정답 (참여자 하드 제약 서로소 / 높은 바닥선) — 억지 합의 검증 |
 | stress (RS) | RU | 축 수 12~20 — 실물화·총점유의 규모 성장 (FC는 오라클 불가 명시) |
@@ -227,7 +227,7 @@ def plant_pool_trap(axes, profiles, deps, rng):
         deps.append({"type": "soft", "rule": "conditional_pref",
                      "if_axis": t["name"], "if_values": [d1, d2],
                      "then_axis": (t2 if t is t1 else t1)["name"],
-                     "preferred": [], "penalty": 0.34})
+                     "preferred": [], "penalty": 0.24})
     return {"trap": "pool", "axes": planted, "boost": [t1["name"], t2["name"]]}
 
 
@@ -248,7 +248,7 @@ def plant_path_trap(axes, profiles, deps, rng):
 
     l_names = [v["name"] for v in late["values"]]
     goods = l_names[:2]
-    l_map = {n: 0.38 for n in l_names}
+    l_map = {n: 0.48 for n in l_names}
     for g in goods:
         l_map[g] = 0.90
     _set_scores(profiles, late["name"], l_map)
@@ -334,10 +334,81 @@ def _oracle_check(fix, expected, trap_info=None):
                   "r_bar": round(rep.r_bar, 4), "corr": rep.utility_corr}
 
 
+
+def _trap_margins(fix):
+    """함정 불변식 검산 (전수 열거 — 함정 케이스는 S ≤ 30k로 통제).
+
+    통과 조건:
+    (1) x*가 함정을 회피한다 (soft_synergy: 함정 축이 미끼가 아님 / hard_path: 앞 축 ≠ 유인값)
+    (2) 미끼 최상 조합이 **정착 가능** — 참여자별 효용 ≥ 자기 바닥선 + 0.03
+        (아니면 함정이 "품질 손실"이 아니라 "교착 폭주"를 만든다 — 파일럿 v1의 교훈)
+    (3) 미끼 최상 총효용 ≤ U(x*) − 0.12 (함정이 실제로 나쁨 — 변별 여지)
+    """
+    import itertools
+    tmp = OUT / "__tmp__.json"
+    tmp.write_text(json.dumps(fix, ensure_ascii=False))
+    try:
+        sc = load_fixture(tmp)
+    finally:
+        tmp.unlink(missing_ok=True)
+    from total.adapters.composite._vendor.common.profiles import build_truth_profiles, truth_utility
+    from total.adapters.composite._vendor.common.rules import (
+        build_hard_rules, build_participant_hard, build_soft_rules)
+    truths = build_truth_profiles(sc)
+    hard = build_hard_rules(sc) + build_participant_hard(sc)
+    soft = build_soft_rules(sc, [t.home_region for t in truths])
+    thr = [t.initial_threshold for t in truths]
+    planted = fix["meta"]["planted"]
+
+    def decoy_hit(outcome):
+        hits = []
+        infos = [planted] if planted["trap"] != "both" else [planted["path"], planted["pool"]]
+        for info in infos:
+            if info["trap"] == "pool":
+                for ax, d in info["axes"].items():
+                    if outcome[ax].name in d["decoys"]:
+                        hits.append(True)
+            else:
+                (e_ax, e_d), = info["early"].items()
+                if outcome[e_ax].name == e_d["lure"]:
+                    hits.append(True)
+        return bool(hits)
+
+    axis_names = sc.axis_names()
+    best_clean, best_decoy = None, None
+    for combo in itertools.product(*[ax.values for ax in sc.axes]):
+        o = dict(zip(axis_names, combo))
+        if not all(r(o) for r in hard):
+            continue
+        us = [truth_utility(truths[i], i, o, soft) for i in range(2)]
+        if any(u < thr[i] for i, u in enumerate(us)):
+            continue
+        total = sum(us)
+        entry = (total, min(us[i] - thr[i] for i in range(2)))
+        if decoy_hit(o):
+            if best_decoy is None or total > best_decoy[0]:
+                best_decoy = entry
+        else:
+            if best_clean is None or total > best_clean[0]:
+                best_clean = entry
+    if best_clean is None:
+        return False, "함정 회피 유효 조합 없음"
+    if best_decoy is None:
+        return False, "미끼 유효 조합 없음 — 함정이 정착 불가(교착 유발)"
+    if best_decoy[1] < 0.03:
+        return False, f"미끼 바닥선 여유 {best_decoy[1]:.3f} < 0.03"
+    gap = best_clean[0] - best_decoy[0]
+    if gap < 0.12:
+        return False, f"함정 격차 {gap:.3f} < 0.12"
+    return True, {"decoy_gap": round(gap, 4), "decoy_slack": round(best_decoy[1], 4)}
+
+
 def gen_case(track, n, kind, idx, seed):
     rng = random.Random(f"{BASE_SEED}-{track}-{n}-{kind}-{idx}-{seed}")
     conflict, rho = CONFLICTS[idx % 3] if kind in ("plain", "stress") else ("mid", 0.0)
     cap = ORACLE_LIMIT if track == "cr" else 10**30
+    if kind in ("hard_path", "soft_synergy", "mixed"):
+        cap = min(cap, 30_000)     # 함정 마진 검산(전수)의 케이스당 비용 통제
     axes = build_axes(n, rng, cap=cap)
     thr = [round(rng.uniform(0.36, 0.48), 2) for _ in range(2)]
     expected = "agreement"
@@ -359,17 +430,17 @@ def gen_case(track, n, kind, idx, seed):
             thr = [round(rng.uniform(0.66, 0.74), 2) for _ in range(2)]
             profiles = make_profiles(axes, rng, -0.6, thr)
         deps = realistic_deps(axes, rng)
-    elif kind == "pool_trap":
+    elif kind == "soft_synergy":
         profiles = make_profiles(axes, rng, rho, thr)
         trap_info = plant_pool_trap(axes, profiles, deps, rng)
         profiles = _reboost(axes, profiles, rng, trap_info["boost"])
         deps += realistic_deps(axes, rng, planted_axes=set(trap_info["boost"]))
-    elif kind == "path_trap":
+    elif kind == "hard_path":
         profiles = make_profiles(axes, rng, rho, thr)
         trap_info = plant_path_trap(axes, profiles, deps, rng)
         profiles = _reboost(axes, profiles, rng, trap_info["boost"])
         deps += realistic_deps(axes, rng, planted_axes=set(trap_info["boost"]))
-    elif kind == "both_trap":
+    elif kind == "mixed":
         profiles = make_profiles(axes, rng, rho, thr)
         trap_info = plant_path_trap(axes, profiles, deps, rng)
         used = set(trap_info["boost"])
@@ -388,7 +459,7 @@ def gen_case(track, n, kind, idx, seed):
         deps = realistic_deps(axes, rng)
 
     case_id = f"FIN-{n:02d}ax-{kind}-{idx:02d}"
-    label = {"path_trap": "경로 함정", "pool_trap": "압축 함정", "both_trap": "이중 함정",
+    label = {"hard_path": "경로 함정", "soft_synergy": "압축 함정", "mixed": "이중 함정",
              "plain": "현실 모사", "no_deal": "결렬 정답", "stress": "규모 스트레스"}[kind]
     if trap_info:
         extra["planted"] = trap_info
@@ -419,9 +490,12 @@ def cr_plan(per_level):
     for n in range(4, 13):
         both_here = both_n if n >= 6 else 0
         plain_here = plain_n + (both_n - both_here)
-        plan += [(n, "path_trap")] * path_n + [(n, "pool_trap")] * pool_n
-        plan += [(n, "both_trap")] * both_here + [(n, "plain")] * plain_here
+        plan += [(n, "hard_path")] * path_n + [(n, "soft_synergy")] * pool_n
+        plan += [(n, "mixed")] * both_here + [(n, "plain")] * plain_here
         plan += [(n, "no_deal")] * nd_n
+    # 총합 보정 — 500건 정각을 위해 n=6·8·10·12에 plain 1건씩 추가
+    if path_n == 8:
+        plan += [(n, "plain") for n in (6, 8, 10, 12)]
     return plan
 
 
@@ -437,7 +511,7 @@ def main():
     args = ap.parse_args()
 
     OUT.mkdir(parents=True, exist_ok=True)
-    per_level = (1, 1, 1, 2, 1) if args.pilot else (10, 10, 4, 15, 5)
+    per_level = (1, 1, 1, 2, 1) if args.pilot else (8, 8, 3, 20, 5)
     rs_per = 2 if args.pilot else 20
     plan = [("cr", n, kind) for n, kind in cr_plan(per_level)]
     plan += [("rs", n, kind) for n, kind in rs_plan(rs_per)]
@@ -464,6 +538,12 @@ def main():
                 ok, summary = _oracle_check(
                     fix, fix["meta"]["expected"],
                     trap_info=fix["meta"].get("planted"))
+                if ok and fix["meta"].get("planted"):
+                    ok, trap_summary = _trap_margins(fix)
+                    if ok:
+                        summary = {**summary, **trap_summary}
+                    else:
+                        summary = trap_summary
             if ok:
                 fix["meta"]["oracle"] = summary
                 fix["meta"]["attempts"] = attempt + 1

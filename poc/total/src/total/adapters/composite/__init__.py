@@ -197,6 +197,7 @@ class CompositeCase:
     enumeration_limit: int = 200_000
     _prefs: list[CompositePreference] | None = field(default=None, init=False, repr=False)
     _space: list[Outcome] | None = field(default=None, init=False, repr=False)
+    _feasible_cached: object = field(default=None, init=False, repr=False)
 
     @property
     def n_issues(self) -> int:
@@ -258,6 +259,17 @@ class CompositeCase:
             return all(r(mapping) for r in rules)
 
         return ok
+
+    def is_feasible(self, outcome: Outcome) -> bool:
+        """FC 유효 후보의 하드 필터 (24 §1.2) — `fc.valid_candidates`가 읽는다.
+
+        이 필터가 없으면 실행 불가능한 조합이 x*(분모)에 들어가, 결렬이 정답인
+        케이스에서 정확히 결렬해도 달성률 < 1이 된다 (2026-08-13 발견·수정 —
+        S08 계열의 기존 수치가 이 결함을 포함한다).
+        """
+        if self._feasible_cached is None:
+            self._feasible_cached = self._feasibility_predicate()
+        return self._feasible_cached(outcome)
 
     def hard_violations(self, outcome: Outcome | str) -> list[str]:
         """도메인 규칙 위반 — 계약에 없어 측정기가 볼 수 없으므로 어댑터가 검사한다."""
