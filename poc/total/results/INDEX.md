@@ -3,6 +3,7 @@
 | 실행 | 실험 | 생성 | commit | 데이터셋 | 리포트 |
 |---|---|---|---|---|---|
 | `nparty-1a-vs-2-raw-20260813T015721Z` | nparty-1a-vs-2-raw | 2026-08-13T01:57:21+00:00 | `bfa7940` | nparty benchmark | [md](nparty-1a-vs-2-raw/nparty-1a-vs-2-raw-20260813T015721Z/report.md) · [html](nparty-1a-vs-2-raw/nparty-1a-vs-2-raw-20260813T015721Z/report.html) |
+| `nparty-1a-vs-2-20260813T035549Z` | nparty-1a-vs-2 | 2026-08-13T03:55:49+00:00 | `9cca184` | nparty benchmark | [md](nparty-1a-vs-2/nparty-1a-vs-2-20260813T035549Z/report.md) · [html](nparty-1a-vs-2/nparty-1a-vs-2-20260813T035549Z/report.html) |
 | `nparty-1a-vs-2-20260812T123001Z` | nparty-1a-vs-2 | 2026-08-12T12:30:01+00:00 | `6013bc4` | nparty benchmark | [md](nparty-1a-vs-2/nparty-1a-vs-2-20260812T123001Z/report.md) · [html](nparty-1a-vs-2/nparty-1a-vs-2-20260812T123001Z/report.html) |
 | `composite-1-vs-2-20260813T032516Z` | composite-1-vs-2 | 2026-08-13T03:25:16+00:00 | `a1f4cc9` | composite scenarios | [md](composite-1-vs-2/composite-1-vs-2-20260813T032516Z/report.md) · [html](composite-1-vs-2/composite-1-vs-2-20260813T032516Z/report.html) |
 | `composite-1-vs-2-20260813T025755Z` | composite-1-vs-2 | 2026-08-13T02:57:55+00:00 | `2c6f2d4` | composite scenarios | [md](composite-1-vs-2/composite-1-vs-2-20260813T025755Z/report.md) · [html](composite-1-vs-2/composite-1-vs-2-20260813T025755Z/report.html) |
