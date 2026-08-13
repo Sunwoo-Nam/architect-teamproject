@@ -27,10 +27,13 @@
     .venv/bin/python scripts/generate_issue_space.py --track a      # 8단계 × 10건 = 80건
     .venv/bin/python scripts/generate_issue_space.py --per-config 2 # 축소 (단계당 2건)
     .venv/bin/python scripts/generate_issue_space.py --steps 1 4 8  # 조합 64·1,728·62,208만
+    .venv/bin/python scripts/generate_issue_space.py --nested \\
+        --participants 3 5 10                                      # 참여자 수 비교용 (_build_all_nested 참고)
 """
 from __future__ import annotations
 
 import argparse
+import copy
 import itertools
 import json
 import math
@@ -258,9 +261,14 @@ def analyse(issues: list[dict], participants: list[dict]) -> tuple[int, float, f
 
 def build_case(case_id: str, sizes: tuple[int, ...], n_part: int,
                rng: random.Random, shift: float, target_ratio: float = FEASIBLE_RATIO_TARGET,
-               track: str = 'a') -> dict:
+               track: str = 'a', participants: list[dict] | None = None) -> dict:
     issues = build_issues(sizes)
-    participants = [build_participant(f"P{j}", issues, rng, shift) for j in range(n_part)]
+    # participants 를 받으면 그것을 쓴다 (--nested 가 미리 만들어 앞에서부터 잘라 넘긴다).
+    # 받지 않으면 여기서 새로 뽑는다 — 기본 동작은 이전과 같고 난수 소비 순서도 그대로다.
+    if participants is None:
+        participants = [build_participant(f"P{j}", issues, rng, shift) for j in range(n_part)]
+    elif len(participants) != n_part:
+        raise SystemExit(f"{case_id}: 참여자 {n_part}명을 받아야 하는데 {len(participants)}명을 받았다")
     combos = 1
     for issue in issues:
         combos *= len(issue["values"])
@@ -440,9 +448,50 @@ def _build_all(steps: tuple[int, ...], participant_counts: tuple[int, ...],
     return cases
 
 
+def _build_all_nested(steps: tuple[int, ...], participant_counts: tuple[int, ...],
+                      per_config: int, rng: random.Random, start: int, shift: float,
+                      target_ratio: float, track: str) -> list[dict]:
+    """참여자 수를 겹쳐서 만든다 — 작은 N의 참여자가 큰 N의 앞 N명과 같아진다.
+
+    `_build_all`은 (단계, 참여자 수, 케이스 번호)마다 참여자를 새로 뽑는다. 그래서 N=3
+    케이스의 참여자와 N=5 케이스의 참여자는 가중치·점수·기준값이 모두 다른 별개의 표본이다.
+    참여자 수만 다른 표를 만들려는 목적에서는 N별 차이에 '참여자가 늘어난 효과'와
+    '다른 문제를 뽑은 효과'가 함께 들어간다. 실제로 조합 62,208에서 실행 시간이
+    N=10 12.3분 → N=15 10.6분으로 N이 커졌는데 줄어드는 결과가 관측됐다.
+
+    그래서 (단계, 케이스 번호)마다 참여자를 max(N)명 한 번만 뽑고, 각 N은 그 목록의 앞
+    N명을 잘라 쓴다. `generate_scalability.py`가 family 하나에서 참여자 50명분을 만들어
+    앞에서부터 잘라 N 수준 파일을 내는 것과 같은 구성이다.
+
+    수락 기준값(`initial_threshold`)만은 N마다 다시 푼다. 참여자가 늘면 전원이 수락 가능한
+    조합이 줄어드므로, 앞 N명에 대해 `solve_thresholds`를 다시 호출해야 실후보 비율이 N에
+    상관없이 목표값에 맞는다 — 기준값을 그대로 물려주면 N이 클수록 실후보가 0으로 가서
+    N별 난이도가 달라진다. 의제 구성은 단계가 같으면 이미 동일하므로 손댈 것이 없다.
+    """
+    max_n = max(participant_counts)
+    cases = []
+    for step in steps:
+        sizes = ISSUE_LEVELS[step - 1]
+        combos = 1
+        for k in sizes:
+            combos *= k
+        issues = build_issues(sizes)
+        for i in range(per_config):
+            pool = [build_participant(f"P{j}", issues, rng, shift) for j in range(max_n)]
+            for n_part in participant_counts:
+                case_id = _case_id(n_part, combos, start + i, track)
+                # solve_thresholds 가 initial_threshold 를 채우고 _offset 을 지우므로,
+                # 원본을 남겨 두려면 N마다 복사본을 넘겨야 한다.
+                members = copy.deepcopy(pool[:n_part])
+                cases.append(build_case(case_id, sizes, n_part, rng, shift,
+                                        target_ratio, track, participants=members))
+    return cases
+
+
 def generate(steps: tuple[int, ...], participant_counts: tuple[int, ...], per_config: int,
              seed: int, start: int, out_dir: Path, max_retry: int = 4,
-             target_ratio: float = FEASIBLE_RATIO_TARGET, track: str = 'a') -> tuple[list[Path], float]:
+             target_ratio: float = FEASIBLE_RATIO_TARGET, track: str = 'a',
+             nested: bool = False) -> tuple[list[Path], float]:
     """케이스를 만들고 결렬 비율을 확인한 뒤 파일로 쓴다.
 
     전 케이스가 결렬(공통 실후보 0개)로만 채워지면 표본이 쓸모없다. 결렬이 절반을 넘으면
@@ -450,10 +499,11 @@ def generate(steps: tuple[int, ...], participant_counts: tuple[int, ...], per_co
     표본 전체를 같은 규칙으로 다시 만든다(선택 편향 방지).
     """
     shift = 0.0
+    build = _build_all_nested if nested else _build_all
     cases: list[dict] = []
     for attempt in range(max_retry + 1):
         rng = random.Random(seed + attempt)
-        cases = _build_all(steps, participant_counts, per_config, rng, start, shift, target_ratio, track)
+        cases = build(steps, participant_counts, per_config, rng, start, shift, target_ratio, track)
         zero = sum(1 for c in cases if c["meta"]["expected_no_deal"])
         print(f"  시도 {attempt + 1}: 기준값 보정 {shift:+.2f} → 결렬 {zero}/{len(cases)}건 "
               f"({zero / len(cases):.1%})")
@@ -505,6 +555,9 @@ def main() -> None:
     ap.add_argument("--start", type=int, default=1, help="case_id 일련번호 시작값")
     ap.add_argument("--track", choices=sorted(TRACK_RATIOS), default="a",
                     help="a=정확도 판별용(실후보 0.5%%) · b=단말 부담 판별용(5%%)")
+    ap.add_argument("--nested", action="store_true",
+                    help="같은 (단계, 케이스 번호)에서 작은 N의 참여자가 큰 N의 앞 N명과 같아지도록 만든다 "
+                         "(참여자 수만 다른 비교표를 만들 때). 생략하면 N마다 참여자를 새로 뽑는다")
     ap.add_argument("--out", type=Path, default=None,
                     help="생략 시 트랙에 맞는 폴더 (issue-space / issue-space-b)")
     args = ap.parse_args()
@@ -513,6 +566,9 @@ def main() -> None:
     target_ratio = TRACK_RATIOS[args.track]
     out_dir = args.out or (OUT_DIR if args.track == "a" else OUT_DIR.with_name(f"issue-space-{args.track}"))
     print(f"  트랙 {args.track.upper()} — 전원 수락 가능한 조합 목표 비율 {target_ratio:.1%}")
+    if args.nested:
+        print(f"  겹침(nested) 방식 — 참여자를 케이스 번호마다 {max(args.participants)}명 뽑고 "
+              "앞 N명을 잘라 쓴다 (수락 기준값만 N마다 다시 푼다)")
     for s in steps:
         if not 1 <= s <= len(ISSUE_LEVELS):
             raise SystemExit(f"--steps 는 1..{len(ISSUE_LEVELS)} 범위여야 한다 (받은 값: {s})")
@@ -530,7 +586,8 @@ def main() -> None:
     t0 = time.perf_counter()
     written, shift = generate(steps, tuple(args.participants), args.per_config,
                               args.seed, args.start, out_dir,
-                              target_ratio=target_ratio, track=args.track)
+                              target_ratio=target_ratio, track=args.track,
+                              nested=args.nested)
     elapsed = time.perf_counter() - t0
 
     total_kb = sum(p.stat().st_size for p in written) / 1024
