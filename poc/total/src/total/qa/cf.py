@@ -332,29 +332,34 @@ def exposure_multiple(
     runs: Sequence[tuple[SessionResult, Case]],
     anchor: E2Anchor,
 ) -> ExposureMultiple:
-    """피해자별 노출 배수 m과 최대 단일 관찰자 깊이. 모수 = 합의 완료 세션 (24 §3.5)."""
+    """피해자별 노출 배수 m과 최대 단일 관찰자 깊이. 모수 = 합의 완료 세션 (24 §3.5).
+
+    **대표값은 평균이다** (PL 확정 2026-08-13): 후보 수가 작은 도메인에서는 깊이가
+    1/후보수 격자값만 가지므로 중앙값이 격자에 스냅되어 N별 추이가 보이지 않는다
+    (functional-ext 실측 — 중앙값은 75.0%에 고정, 평균은 81→66%로 연속 변화).
+    """
     multiples, single = exposure_values(runs, anchor)
     if not single:
         raise ValueError("합의 완료 세션이 없어 CF 모수가 비었다 — 합의율 0인 표본은 "
                          "판정 불가로 보고하라 (결렬 노출은 모수 제외, PL 확정 2026-08-13)")
 
-    med_single = statistics.median(single)
-    secret = 1.0 - med_single  # 중앙값의 단조 변환이라 median(1−e)와 동일
+    mean_single = statistics.fmean(single)
+    secret = 1.0 - mean_single  # 평균의 선형 변환이라 mean(1−e)와 동일
     if anchor.degenerate:
         # 앵커가 0에 가까우면 배수가 의미를 잃는다. 판정(잔여 비밀률)은 앵커와 무관하게
         # 유효하므로 그대로 내고, 보조 m만 None으로 비운다 — "안 쟀다"와 "0이다"는 다르다.
         return ExposureMultiple(
             secret=secret, stars_secret=BAND_CF_SECRET.stars(secret),
             m=None, stars_m=None,
-            max_single_depth=med_single, victims=len(multiples),
+            max_single_depth=mean_single, victims=len(multiples),
             note="e₂ 앵커가 0에 가까워 보조 배수 m이 성립하지 않는다 — 참조 2인 협상에서 "
                  "귀속 노출이 관측되지 않았다는 뜻. 판정(잔여 비밀률)은 앵커 무관 유효",
         )
-    med = statistics.median(multiples)
+    mean_m = statistics.fmean(multiples)
     return ExposureMultiple(
         secret=secret, stars_secret=BAND_CF_SECRET.stars(secret),
-        m=med, stars_m=BAND_CF_M.stars(med),
-        max_single_depth=med_single, victims=len(multiples),
+        m=mean_m, stars_m=BAND_CF_M.stars(mean_m),
+        max_single_depth=mean_single, victims=len(multiples),
     )
 
 
