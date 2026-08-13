@@ -91,7 +91,7 @@ def main() -> int:
 
     anchor = e2_anchor(functional)
     print(f"e₂ 앵커 (참조 {E2_REFERENCE_PLAN}, {anchor.samples}표본): "
-          f"A={anchor.depth_a:.4f} B={anchor.depth_b:.4f}")
+          f"깊이={anchor.depth:.4f}")
 
     plans: list[PlanRuns] = []
     for name in ("plan1a", "plan2"):

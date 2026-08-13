@@ -1,4 +1,4 @@
-"""[24 §7] Confidentiality — 노출 깊이 2축·e₂ 앵커·노출 배수 m·정규화 노출률.
+"""[24 §7] Confidentiality — 노출 깊이·e₂ 앵커·노출 배수 m·정규화 노출률.
 
 이 모듈의 존재 이유 중 절반은 **방안별 가시 규칙이 사라졌다**는 것이다.
 기존 dp2 `confidentiality._visible_events()`는 방안 12종의 if-else 체인이었다.
@@ -10,9 +10,9 @@ import pytest
 
 from total.qa.cf import (
     COORDINATOR_FIRST,
+    E2Anchor,
     Viewpoint,
-    depth_a,
-    depth_b,
+    depth,
     e2_anchor,
     estimate_top1,
     evaluate,
@@ -81,50 +81,30 @@ class TestObservedSubs:
         assert len(got) == 1 and got[0][0] == 1
 
 
-class TestDepthA:
-    """A축 — 귀속 노출된 고유 후보 수 ÷ 유효 후보 수 (구조의 책임)."""
+class TestDepth:
+    """노출 깊이 e — 귀속 노출된 고유 후보 수 ÷ 유효 후보 수 (순위표 노출 비율)."""
 
     def test_all_exposed(self):
         subs = [(1, i, o) for i, o in enumerate("abcd", 1)]
-        assert depth_a(subs, 4) == pytest.approx(1.0)
+        assert depth(subs, 4) == pytest.approx(1.0)
 
     def test_half_exposed(self):
-        assert depth_a([(1, 1, "a"), (1, 2, "b")], 4) == pytest.approx(0.5)
+        assert depth([(1, 1, "a"), (1, 2, "b")], 4) == pytest.approx(0.5)
 
     def test_nothing_exposed(self):
-        assert depth_a([], 4) == 0.0
+        assert depth([], 4) == 0.0
 
     def test_capped_at_one(self):
         subs = [(1, i, o) for i, o in enumerate("abcdef", 1)]
-        assert depth_a(subs, 4) == pytest.approx(1.0)
+        assert depth(subs, 4) == pytest.approx(1.0)
 
     def test_duplicates_counted_once(self):
-        assert depth_a([(1, 1, "a"), (1, 2, "a")], 4) == pytest.approx(0.25)
+        assert depth([(1, 1, "a"), (1, 2, "a")], 4) == pytest.approx(0.25)
 
-
-class TestDepthB:
-    """B축 — 공격자가 순서까지 복원한 최대 접두 ÷ 유효 후보 수 (공격자의 능력)."""
-
-    def test_full_prefix(self):
-        subs = [(1, i, o) for i, o in enumerate("abcd", 1)]
-        assert depth_b(subs, P1.ranked(), 4) == pytest.approx(1.0)
-
-    def test_partial_prefix(self):
-        # a, b는 맞고 세 번째가 어긋나면 깊이 2
-        subs = [(1, 1, "a"), (1, 2, "b"), (1, 3, "d")]
-        assert depth_b(subs, P1.ranked(), 4) == pytest.approx(0.5)
-
-    def test_first_wrong_is_zero(self):
-        assert depth_b([(1, 1, "c")], P1.ranked(), 4) == 0.0
-
-    def test_empty_is_zero(self):
-        assert depth_b([], P1.ranked(), 4) == 0.0
-
-    def test_order_matters_not_membership(self):
-        # 다 봤어도 순서가 틀리면 복원 깊이는 짧다
-        subs = [(1, 1, "b"), (1, 2, "a"), (1, 3, "c"), (1, 4, "d")]
-        assert depth_b(subs, P1.ranked(), 4) == 0.0
-        assert depth_a(subs, 4) == pytest.approx(1.0)   # A는 만점
+    def test_order_does_not_matter(self):
+        # 순서와 무관한 집합 지표다 — 구 B축(순서 복원)은 24 §7.3 개정으로 제거
+        shuffled = [(1, 1, "b"), (1, 2, "a"), (1, 3, "c"), (1, 4, "d")]
+        assert depth(shuffled, 4) == pytest.approx(1.0)
 
 
 class TestEstimateTop1:
@@ -216,14 +196,14 @@ class TestE2Anchor:
     def test_measures_counterpart_depth(self):
         s = sess([sub(1, i, "P1", o, ["P0"]) for i, o in enumerate("abcd", 1)])
         a = e2_anchor([(s, case())])
-        assert a.depth_a == pytest.approx(1.0)
-        assert a.depth_b == pytest.approx(1.0)
+        assert a.depth == pytest.approx(1.0)
 
     def test_never_zero(self):
         # m의 분모라 0이면 안 된다
         s = sess([sub(1, 1, "P1", "a", [])])
         a = e2_anchor([(s, case())])
-        assert a.depth_a > 0 and a.depth_b > 0
+        assert a.depth > 0
+        assert a.degenerate   # 다만 퇴화 신호는 남긴다 — 조용히 넘기지 않는다
 
     def test_requires_two_participants(self):
         s = sess([], prefs=(P0,))
@@ -233,7 +213,7 @@ class TestE2Anchor:
     def test_median_over_samples(self):
         runs = [(sess([sub(1, i, "P1", o, ["P0"]) for i, o in enumerate("ab", 1)]), case())
                 for _ in range(3)]
-        assert e2_anchor(runs).depth_a == pytest.approx(0.5)
+        assert e2_anchor(runs).depth == pytest.approx(0.5)
 
 
 def bilateral(prefs=(P0, P1)):
@@ -253,7 +233,7 @@ class TestExposureMultiple:
         s = bilateral()
         anchor = e2_anchor([(s, case())])
         r = exposure_multiple([(s, case())], anchor)
-        assert r.m_a == pytest.approx(1.0)
+        assert r.m == pytest.approx(1.0)
 
     def test_more_observers_raise_m(self):
         # 전원이 서로 보면 관찰자가 늘어 m이 커진다
@@ -263,31 +243,37 @@ class TestExposureMultiple:
               for p in (P0, P1, P2) for i, o in enumerate(p.ranked(), 1)]
         s3 = sess(ev, prefs=(P0, P1, P2))
         r = exposure_multiple([(s3, case((P0, P1, P2)))], anchor)
-        assert r.m_a > 1.0
+        assert r.m > 1.0
 
     def test_no_exposure_is_zero(self):
         anchor = e2_anchor([(bilateral(), case())])
         silent = sess([sub(1, 1, "P1", "a", []), sub(1, 1, "P0", "a", [])])
-        assert exposure_multiple([(silent, case())], anchor).m_a == pytest.approx(0.0)
+        assert exposure_multiple([(silent, case())], anchor).m == pytest.approx(0.0)
 
     def test_max_single_depth_tracks_concentration(self):
         # 담당자만 전량을 본다 → 최대 단일 깊이는 1이지만 m은 1:1 수준에 머문다
         anchor = e2_anchor([(bilateral(), case())])
         s3 = bilateral(prefs=(P0, P1, P2))
         r = exposure_multiple([(s3, case((P0, P1, P2)))], anchor)
-        assert r.max_single_depth_a == pytest.approx(1.0)
+        assert r.max_single_depth == pytest.approx(1.0)
 
     def test_concentration_does_not_inflate_m_much(self):
         # 담당자 집중형은 관찰자가 1명뿐이라 m이 1:1 근처에 남는다 — 방안 1-A/2의 구조
         anchor = e2_anchor([(bilateral(), case())])
         r = exposure_multiple([(bilateral(prefs=(P0, P1, P2)), case((P0, P1, P2)))], anchor)
-        assert r.m_a <= 1.5
+        assert r.m <= 1.5
 
     def test_stars_from_band(self):
         s = bilateral()
         anchor = e2_anchor([(s, case())])
         r = exposure_multiple([(s, case())], anchor)
-        assert r.stars_m_a == 3     # m=1 → 1:1 등가 → 3점
+        assert r.stars_m == 3     # m=1 → 1:1 등가 → 3점
+
+    def test_degenerate_anchor_reports_none_with_reason(self):
+        # 앵커가 퇴화하면 큰 수 대신 None + 사유 — "안 쟀다"와 "0이다"는 다르다
+        r = exposure_multiple([(bilateral(), case())], E2Anchor(depth=1e-9, samples=1))
+        assert r.m is None and r.stars_m is None
+        assert r.note
 
 
 class TestEvaluate:
@@ -306,7 +292,7 @@ class TestEvaluate:
         anchor = e2_anchor([(s, case())])
         out = evaluate([(s, case())], anchor, viewpoints=[COORDINATOR_FIRST])
         m = out["multiple"]
-        assert {"m_A", "m_B", "max_single_depth_A"} <= set(m)
+        assert {"m", "stars_m", "max_single_depth"} <= set(m)
         vp = out["viewpoints"]["coordinator"]
         assert {"accuracy", "gain_pp", "exposure_rate"} <= set(vp)
 

@@ -150,11 +150,11 @@ def render_html(raw: dict) -> str:
         "상수 잠정 — 절대값 아님, 상대 비교용"))
     if "multiple" in cf[P[0]]:
         rows.append(row(
-            '§7 CF 판정 — 1:1 대비 노출 배수 m (A축/B축) <span class="badge core">핵심 5위·경계 잠정</span>',
-            [f"{cf[p]['multiple']['m_A']:.2f} / {cf[p]['multiple']['m_B']:.2f}" for p in P],
-            [cf[p]["multiple"]["stars_m_A"] for p in P],
-            f"m=1이 1:1 등가(3점 경계) · e₂ A {cf['config']['e2']['A']:.2f}/B {cf['config']['e2']['B']:.2f}"
-            " · 최대 단일 관찰자 깊이 " + "/".join(f"{cf[p]['multiple']['max_single_depth_A']:.2f}" for p in P)))
+            '§7 CF 판정 — 1:1 대비 노출 배수 m <span class="badge core">핵심 5위·경계 잠정</span>',
+            [f"{cf[p]['multiple']['m']:.2f}" for p in P],
+            [cf[p]["multiple"]["stars_m"] for p in P],
+            f"m=1이 1:1 등가(3점 경계) · e₂ {cf['config']['e2']['depth']:.2f}"
+            " · 최대 단일 관찰자 깊이 " + "/".join(f"{cf[p]['multiple']['max_single_depth']:.2f}" for p in P)))
     rows.append(row(
         '§7 CF — 노출률 N=3(정밀)/10/50 · 참여자|담당자 <span class="badge aux">보조(구지표)</span>',
         [(f"참 {cf[p]['participant']['exposure_rate']:.2f}/"
@@ -298,11 +298,11 @@ def render_html(raw: dict) -> str:
     if "by_n" in cf[P[0]] and "multiple" in cf[P[0]]["by_n"][sorted(cf[P[0]]["by_n"], key=int)[0]]:
         cf_ns0 = sorted(cf[P[0]]["by_n"], key=int)
         details.append(sec(
-            "§7 CF 판정 — 노출 배수 m (A축, N별)", "핵심 5위·경계 잠정", "core",
+            "§7 CF 판정 — 노출 배수 m (N별)", "핵심 5위·경계 잠정", "core",
             "m = Σ관찰자 노출 깊이 ÷ e₂(1:1 실측 앵커) · m=1 = 1:1 등가 (3점 경계)",
             tbl(["방안"] + [f"N={n}" for n in cf_ns0],
                 [[PLAN_LABELS.get(p, p)] + [
-                    f"{cf[p]['by_n'][n]['multiple']['m_A']:.2f} · {_stars(cf[p]['by_n'][n]['multiple']['stars_m_A'])}"
+                    f"{cf[p]['by_n'][n]['multiple']['m']:.2f} · {_stars(cf[p]['by_n'][n]['multiple']['stars_m'])}"
                     for n in cf_ns0]
                  for p in P])))
     if "by_n" in cf[P[0]]:

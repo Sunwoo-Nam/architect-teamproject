@@ -198,29 +198,26 @@ class TestBeliefVersusTruth:
     """dpca 고유 속성 — 에이전트가 자기 선호를 부분적으로만 안다.
 
     시나리오의 `agent_view`(예: S01은 `score_dropout: 0.3`)가 에이전트의 자기 뷰를
-    흐린다. 에이전트는 그 흐린 뷰의 순서대로 제안하므로, 공격자가 관찰 순서로
-    **진실 순위**의 접두를 정확히 복원하는 일은 거의 일어나지 않는다.
-
-    B축이 0으로 나오는 것은 버그가 아니라 이 도메인 속성의 반영이다. A축(어떤 후보가
-    드러났는가)은 정상 작동하며 방안 간 변별도 된다.
+    흐린다. 그래도 노출 깊이(순위표 노출 비율 — 어떤 후보가 귀속으로 드러났는가)는
+    정상 작동하며 방안 간 변별도 된다.
     """
 
     def test_agent_view_is_lossy(self, s01):
         assert s01.agent_view.get("score_dropout", 0) > 0
 
-    def test_a_axis_still_discriminates(self, s01, s01_case):
-        from total.qa.cf import depth_a, observed_subs, valid_ranked
+    def test_depth_discriminates_plans(self, s01, s01_case):
+        from total.qa.cf import depth, observed_subs, valid_ranked
 
         depths = {}
         for plan in ("full", "pool", "seq2"):
             session, case = run_session(s01, plan, case=s01_case)
             victim = case.preferences[1]
             d = len(valid_ranked(case, victim))
-            depths[plan] = depth_a(observed_subs(session, "P0", "P1"), d)
+            depths[plan] = depth(observed_subs(session, "P0", "P1"), d)
         assert depths["full"] > depths["pool"] > depths["seq2"]
 
     def test_ranked_excludes_hard_infeasible(self, s01_case):
-        # 제안 불가 조합이 순위표에 있으면 접두 대조가 첫 항목부터 어긋난다
+        # 제안 불가 조합이 순위표에 있으면 유효 후보(깊이의 분모)가 부풀어 과소평가된다
         p = s01_case.preferences[0]
         assert len(p.ranked()) < len(list(s01_case.candidates()))
         assert all(s01_case.hard_violations(o) == [] for o in p.ranked()[:20])

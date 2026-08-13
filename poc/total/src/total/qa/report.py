@@ -158,9 +158,8 @@ def _section(qa: str, data: dict, plans: Sequence[str]) -> list[str]:
                ("optimal_hit", "최적안 적중"), ("fr_violation_cases", "FR 위반 케이스"),
                ("degenerate_cases", "R̄=1 케이스 (s 판별력 없음)"),
                ("degenerate_missed", "그중 유효 후보 밖")],
-        "cf": [("m_A", "노출 배수 m (A축)"), ("stars_m_A", "m_A 별점"),
-               ("m_B", "노출 배수 m (B축)"), ("stars_m_B", "m_B 별점"),
-               ("max_single_depth_A", "최대 단일 관찰자 깊이")],
+        "cf": [("m", "노출 배수 m"), ("stars_m", "m 별점"),
+               ("max_single_depth", "최대 단일 관찰자 깊이")],
         "tb": [("median_total_ms", "세션 시간 (ms)"), ("dominant", "지배 항"),
                ("median_phase_ms", "통신 항"), ("median_transfer_ms", "전송 항")],
         "ru": [("median_total_mb", "단말 총 점유 (MB)"), ("median_peak_mb", "프로토콜 상태 (MB)"),
@@ -207,8 +206,8 @@ def _notes(qa: str, data: dict, plans: Sequence[str]) -> list[str]:
                          f"합의했다** — 무작위조차 만점을 받는 판에서 놓친 것이므로 24 §1.4에 "
                          f"따라 해당 케이스의 s는 0점(즉시 결함)이다. 달성률 원값과 FR 위반 "
                          f"플래그를 함께 확인할 것")
-        if qa == "cf" and d.get("m_B") is None and d.get("b_note"):
-            notes.append(f"`{p}` B축: {d['b_note']}")
+        if qa == "cf" and d.get("m") is None and d.get("note"):
+            notes.append(f"`{p}` m: {d['note']}")
         if qa == "sc_issue" and d.get("censored"):
             notes.append(f"`{p}` 최대 의제 수는 **하한**이다 — 스윕이 메모리 한도에 닿지 "
                          f"못해 실제 최대는 더 클 수 있다")

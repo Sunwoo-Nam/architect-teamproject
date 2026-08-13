@@ -97,19 +97,21 @@ visible = [e for e in session.events if observer in e.audience]
 
 | 실험 | 기준 | 재현 확인 |
 |---|---|---|
-| nparty | `dp2-nparty/results/full-20260812T171034KST` | FC 8개 값 · CF m_A · 노출률 · 최대 단일 깊이 |
+| nparty | `dp2-nparty/results/full-20260812T171034KST` | FC 8개 값 · CF 노출 배수 m · 노출률 · 최대 단일 깊이 |
 | composite | `dp-composite-agenda/results/fc_benchmark.jsonl` | FC 달성률·s · phase · message |
 
 **의도적으로 바꾼 것**은 각 테스트의 `TestIntentionalChanges`에 사유와 함께 명시한다
-(CF B축의 바퀴 범위, dpca 별점 밴드 → 24 정본 교체, TB의 wall-clock → 합성 모델).
+(CF B축 제거 — 24 §7.3 개정 2026-08-13, dpca 별점 밴드 → 24 정본 교체,
+TB의 wall-clock → 합성 모델).
 
 ## 알려진 한계 (정직하게)
 
 - **RU 별점은 작은 규모에서 포화한다.** 24 §2.8이 인정하는 바로, 논리 크기와 실기기
   RSS는 단위가 다르다. 절대 MB를 항상 병기한다.
-- **composite의 CF B축은 0으로 나온다.** dpca는 `agent_view`로 에이전트가 자기 선호를
-  부분적으로만 알아(예: S01 `score_dropout: 0.3`), 관찰 순서로 **진실** 순위의 접두를
-  복원하는 일이 거의 없다. 버그가 아니라 도메인 속성이며, A축은 정상 변별한다.
+- **composite에서는 관찰 순서로 진실 선호의 순서를 복원할 수 없다.** dpca는 `agent_view`로
+  에이전트가 자기 선호를 부분적으로만 안다(예: S01 `score_dropout: 0.3`). 구 B축(접두 복원
+  깊이)이 늘 0이었던 이유이고, 24 §7.3 개정(2026-08-13)에서 B축을 제거한 근거 중 하나다 —
+  노출 깊이(순위표 노출 비율)는 정상 변별한다.
 - **1안(seq)은 축값을, 2안(pool)은 전체 조합을 교환한다.** 조합 공간 기준 노출 깊이는
   granularity가 다르다 — 축 단위 노출은 이 지표가 잡지 못한다 (별도 지표 필요, 범위 밖).
 - **CF 별점 사다리는 잠정**이다 (24 §7.3, PL 조율 예정).

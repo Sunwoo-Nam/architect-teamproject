@@ -136,7 +136,7 @@ class TestEventVisibility:
         assert [e for e in s.events if e.kind == "vote"] == []
 
     def test_event_rounds_match_submission_rank(self):
-        # "라운드 k = 순위 k" — B축 접두 복원이 성립하는 근거
+        # "라운드 k = 순위 k" — 51 §2의 제출 규칙이 이벤트에 그대로 반영되는지
         s, _ = run_session(profiles(), "plan2")
         first = [e for e in s.events if e.kind == "submit" and e.round == 1]
         for e in first:

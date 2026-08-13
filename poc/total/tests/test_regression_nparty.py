@@ -118,7 +118,7 @@ class TestFcRegression:
 
 
 class TestCfRegression:
-    """CF — A축 노출 배수와 관점별 노출률."""
+    """CF — 노출 배수 m과 관점별 노출률."""
 
     @pytest.fixture(scope="class")
     @staticmethod
@@ -145,16 +145,16 @@ class TestCfRegression:
                 runs, anchor, viewpoints=[cf.COORDINATOR_FIRST, cf.worst_participant()])
         return out
 
-    def test_e2_anchor_a_axis(self, anchor):
-        assert anchor.depth_a == pytest.approx(0.6333, abs=1e-3)
+    def test_e2_anchor_depth(self, anchor):
+        assert anchor.depth == pytest.approx(0.6333, abs=1e-3)
 
     @pytest.mark.parametrize("plan,expected", [("plan1a", 0.677), ("plan2", 1.184)])
-    def test_exposure_multiple_a(self, evaluated, plan, expected):
-        assert evaluated[plan]["multiple"]["m_A"] == pytest.approx(expected, abs=1e-3)
+    def test_exposure_multiple(self, evaluated, plan, expected):
+        assert evaluated[plan]["multiple"]["m"] == pytest.approx(expected, abs=1e-3)
 
     @pytest.mark.parametrize("plan,expected", [("plan1a", 0.429), ("plan2", 0.75)])
     def test_max_single_depth(self, evaluated, plan, expected):
-        assert evaluated[plan]["multiple"]["max_single_depth_A"] == pytest.approx(
+        assert evaluated[plan]["multiple"]["max_single_depth"] == pytest.approx(
             expected, abs=1e-3)
 
     @pytest.mark.parametrize("plan", ["plan1a", "plan2"])
@@ -167,33 +167,28 @@ class TestCfRegression:
 
     def test_plan1a_leaks_less(self, evaluated):
         # 실측 결론 — 노출 배수는 방안 1-A가 이긴다
-        assert evaluated["plan1a"]["multiple"]["m_A"] < evaluated["plan2"]["multiple"]["m_A"]
+        assert evaluated["plan1a"]["multiple"]["m"] < evaluated["plan2"]["multiple"]["m"]
 
     def test_stars_reflect_one_to_one_boundary(self, evaluated):
-        assert evaluated["plan1a"]["multiple"]["stars_m_A"] == 3   # m ≤ 1 → 1:1 이하
-        assert evaluated["plan2"]["multiple"]["stars_m_A"] == 2    # m > 1 → 1:1 초과
+        assert evaluated["plan1a"]["multiple"]["stars_m"] == 3   # m ≤ 1 → 1:1 이하
+        assert evaluated["plan2"]["multiple"]["stars_m"] == 2    # m > 1 → 1:1 초과
 
 
 class TestIntentionalChanges:
     """정의를 **의도적으로** 바꾼 항목 — 기존 수치와 다른 것이 정상이다."""
 
-    def test_depth_b_now_spans_all_sweeps(self):
-        """B축(접두 복원 깊이)이 바퀴 1 제한에서 전 바퀴로 넓어졌다.
+    def test_depth_b_removed_by_handbook_revision(self):
+        """B축(접두 복원 깊이)은 24 §7.3 개정(2026-08-13, PL 지시)으로 제거됐다.
 
-        기존 dp2 `cf_depth.depth_b`는 바퀴 1의 라운드 번호를 순위로 읽어(`라운드 k = 순위 k`)
-        해당 프로토콜에만 통하는 강한 가정을 썼다. 24 §7.4 규칙 ①은 "가장 이른
-        **(바퀴, 라운드)**"라고 명시하므로 전 바퀴를 보는 것이 정의에 맞고, 라운드 번호가
-        순위와 무관한 도메인(dpca 축별 순차)에도 적용된다.
-
-        결과: 이 프로토콜에서는 참여자가 순위 순서대로 제출하므로 B가 A와 거의 같아진다.
-        B의 변별력은 관찰 순서가 순위 순서와 다른 구조에서 나온다 — 그 자체가 옳은 결과다.
+        근거: "라운드 = 순위" 제출 규칙(51 §2) 아래에서는 귀속 관찰이 존재하면 순서도
+        자동으로 노출되어 B가 A와 항상 일치하고(별도 정보 없음), 복합 의제 도메인에서는
+        참조 프로토콜에서조차 순서 복원이 일어나지 않아 분모가 퇴화한다. 남은 깊이는
+        **순위표 노출 비율 하나**이고, 순서와 무관한 집합 지표다.
         """
-        from total.qa.cf import depth_a, depth_b
+        from total import qa
 
-        ranked = ["a", "b", "c", "d"]
-        in_order = [(1, 1, "a"), (2, 1, "b")]          # 바퀴를 넘어 순위 순서 유지
-        assert depth_b(in_order, ranked, 4) == pytest.approx(0.5)
+        assert not hasattr(qa.cf, "depth_b")
 
-        shuffled = [(1, 1, "b"), (1, 2, "a")]           # 순서가 어긋나면 B만 떨어진다
-        assert depth_a(shuffled, 4) == pytest.approx(0.5)
-        assert depth_b(shuffled, ranked, 4) == 0.0
+        shuffled = [(1, 1, "b"), (1, 2, "a")]           # 순서가 달라도 깊이는 같다
+        in_order = [(1, 1, "a"), (1, 2, "b")]
+        assert qa.cf.depth(shuffled, 4) == qa.cf.depth(in_order, 4) == pytest.approx(0.5)

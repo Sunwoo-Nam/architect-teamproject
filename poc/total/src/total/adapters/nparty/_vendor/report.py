@@ -302,15 +302,14 @@ def render_markdown(raw: dict) -> str:
     A(f"조건: 표본 {cf_n}건 · 후보 {cfc['candidates']} · frequency 공격자(고정 규칙) · {cfc.get('input', '개발용 무작위')}")
     A("")
     if "multiple" in cf[P[0]]:
-        A(f"**판정 — 1:1 대비 노출 배수 m** (e₂: A {cf['config']['e2']['A']:.2f} / B {cf['config']['e2']['B']:.2f},"
+        A(f"**판정 — 1:1 대비 노출 배수 m** (e₂ {cf['config']['e2']['depth']:.2f},"
           " N=2 실측 앵커 · 별점 사다리 잠정 · m=1 = 1:1 등가):")
         A("")
-        A("| 방안 | m (A 순위표 노출) | 별점 | m (B 접두 복원) | 별점 | 최대 단일 관찰자 깊이 |")
-        A("|---|---|---|---|---|---|")
+        A("| 방안 | 노출 배수 m | 별점 | 최대 단일 관찰자 깊이 |")
+        A("|---|---|---|---|")
         for p in P:
             d = cf[p]["multiple"]
-            A(f"| {p} | {d['m_A']:.2f} | {_stars(d['stars_m_A'])} | {d['m_B']:.2f}"
-              f" | {_stars(d['stars_m_B'])} | {d['max_single_depth_A']:.2f} |")
+            A(f"| {p} | {d['m']:.2f} | {_stars(d['stars_m'])} | {d['max_single_depth']:.2f} |")
         A("")
     A("| 방안 | 관점 | 정확도 | 이득 | 노출률 | 별점 |")
     A("|---|---|---|---|---|---|")

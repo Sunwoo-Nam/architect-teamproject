@@ -1,8 +1,10 @@
 r"""[24 §7] Confidentiality — 역추론 방지.
 
-> **정의**: N명이 협상해도 내 선호가 새는 총량이 "1:1 협상 한 번에서 상대에게 알려지는
-> 만큼"을 넘지 않는가. 2인 협상에서 상대가 내 제안 이력을 아는 것은 **협상의 정의이지
-> 실패가 아니다** — 그래서 1:1을 기준선으로 삼고 다자 구조가 만드는 과잉 노출만 잰다.
+> **정의 (2026-08-13 개정, PL 확정)**: 제안한 설계가 **일반적인 2인(1:1) 협상보다
+> 얼마나 더 내 선호를 노출하는가.** 2인 협상에서 상대가 내 제안 이력을 아는 것은
+> **협상의 정의이지 실패가 아니다** — 그래서 참조 2인 협상을 기준선으로 삼고 설계가
+> 만드는 과잉 노출만 잰다. 다자 도메인에서는 관찰자가 N−1명이라 생기는 과잉을,
+> 2인 고정 도메인에서는 "무엇을 통째로 주고받는가"라는 설계 선택의 과잉을 같은 자로 잰다.
 
 지표는 3층이다:
 
@@ -10,12 +12,12 @@ r"""[24 §7] Confidentiality — 역추론 방지.
 2. **병기** — 최대 단일 관찰자 깊이(집중도) · 정규화 노출률(1순위, 하위 호환)
 3. **원재료** — 역추론 정확도 (2의 계산 입력)
 
-깊이 e는 성격이 다른 2축으로 각각 낸다:
+깊이 e = **순위표 노출 비율**: 귀속 노출된 고유 후보 수 ÷ 유효 후보 수. 공격자와
+무관한 정보론적 상한이다 — 공개된 것 이상은 어떤 공격자도 알 수 없다.
 
-| 축 | 뜻 | 무엇의 책임 |
-|---|---|---|
-| **A 순위표 노출 비율** | 귀속 노출된 고유 후보 수 ÷ 유효 후보 수 | **구조** (공격자 무관, 정보론적 상한) |
-| **B 접두 복원 깊이** | 공격자가 순서까지 복원한 최대 접두 ÷ 유효 후보 수 | **공격자 능력** (실제 성과) |
+> 구 B축(접두 복원 깊이 — 공격자가 순서까지 복원한 최대 접두)은 2026-08-13 개정으로
+> 제거했다 (24 §7.3 개정 기록). "라운드 = 순위" 제출 규칙(51 §2) 아래에서는 B가 A와
+> 항상 일치하고, 복합 의제 도메인에서는 분모가 퇴화해 어느 쪽에서도 별도 정보가 없다.
 
 **기존 구현 대비 가장 큰 변화**: dp2 `confidentiality._visible_events()`는 방안 12종의
 if-else 체인으로 "이 방안에서 누가 무엇을 보는가"를 측정기가 알고 있었다. 방안이 늘
@@ -25,6 +27,7 @@ if-else 체인으로 "이 방안에서 누가 무엇을 보는가"를 측정기�
 **e₂ 앵커는 도메인별로 따로 잰다.** 후보 공간·유효 후보 수가 도메인마다 달라 남의 e₂를
 쓰면 분모가 맞지 않는다. 분모가 측정 대상이 아니라 **참조 프로토콜**이므로, 2인 고정
 도메인에서도 m이 상수가 되지 않고 "이 설계가 평범한 양자 협상보다 더 새는가"를 잰다.
+참조를 바꾸면 m 전체가 바뀌므로 실험이 명시하고 봉인한다 (24 §7.5).
 
 **별점 사다리는 잠정이다** (24 §7.3, PL 조율 예정). 그래서 별점만 내지 않고
 m·깊이·노출률 원지표를 항상 함께 보고한다.
@@ -82,9 +85,9 @@ def worst_participant(coordinator_index: int = 0) -> Viewpoint:
 def valid_ranked(case: Case, victim: Preference) -> list[Outcome]:
     """피해자의 **유효 후보만** 담은 순위표.
 
-    깊이의 기준을 전체 공간으로 잡으면 안 된다 — 피해자가 애초에 제안하지 않을
-    (바닥선 미달·실현 불가) 후보가 순위표 앞자리를 차지하면, 관찰 순서와 대조할 때
-    첫 항목부터 어긋나 B축이 늘 0이 된다. 분모(d_v)와 대조 대상을 같은 집합으로 맞춘다.
+    깊이의 분모를 전체 공간으로 잡으면 안 된다 — 피해자가 애초에 제안하지 않을
+    (바닥선 미달·실현 불가) 후보가 분모를 부풀려 깊이가 과소평가된다.
+    분모(d_v)는 피해자가 실제로 드러낼 수 있는 집합의 크기여야 한다.
     """
     ranked = victim.ranked()
     valid = {o for o in case.candidates() if victim.utility(o) >= victim.initial_threshold}
@@ -119,28 +122,11 @@ def observed_subs(session: SessionResult, observer: str, victim: str) -> list[Su
     return out
 
 
-def depth_a(subs: Sequence[Sub], d_v: int) -> float:
-    """A축 — 귀속 노출된 고유 후보 수 ÷ 유효 후보 수."""
+def depth(subs: Sequence[Sub], d_v: int) -> float:
+    """노출 깊이 e — 귀속 노출된 고유 후보 수 ÷ 유효 후보 수 (순위표 노출 비율)."""
     if d_v <= 0:
         return 0.0
     return min(1.0, len({o for _s, _r, o in subs}) / d_v)
-
-
-def depth_b(subs: Sequence[Sub], victim_ranked: Sequence[Outcome], d_v: int) -> float:
-    """B축 — 관찰 순서를 선호 순서로 읽었을 때 맞아떨어지는 최대 접두 ÷ 유효 후보 수.
-
-    24 §7.4 규칙 ①("이른 제안일수록 상위 선호")의 직접 귀결이다. 관찰 순서와 실제
-    순위표를 앞에서부터 대조해, 처음 어긋나는 곳에서 멈춘다.
-    """
-    if d_v <= 0:
-        return 0.0
-    depth = 0
-    for i, (_s, _r, outcome) in enumerate(subs):
-        if i < len(victim_ranked) and outcome == victim_ranked[i]:
-            depth = i + 1
-        else:
-            break
-    return min(1.0, depth / d_v)
 
 
 # --------------------------------------------------------------------------------------
@@ -247,22 +233,20 @@ def inference_gain(
 
 @dataclass(frozen=True)
 class E2Anchor:
-    depth_a: float
-    depth_b: float
+    depth: float
     samples: int
 
     @property
     def degenerate(self) -> bool:
         """앵커가 사실상 0 — m의 분모가 무의미하다는 신호. 조용히 넘기면 안 된다."""
-        return self.depth_a <= 1e-6 or self.depth_b <= 1e-6
+        return self.depth <= 1e-6
 
     def as_dict(self) -> dict:
         return {
-            "A": round(self.depth_a, 6),
-            "B": round(self.depth_b, 6),
+            "depth": round(self.depth, 6),
             "samples": self.samples,
             "degenerate": self.degenerate,
-            "note": "1:1 기준 노출량 — 참조 양자 프로토콜에서 상대 1인이 도달하는 깊이. "
+            "note": "1:1 기준 노출량 — 참조 2인 협상에서 상대 1인이 도달하는 깊이. "
                     "m의 분모이며 도메인별로 따로 측정한다",
         }
 
@@ -274,44 +258,37 @@ def e2_anchor(runs: Sequence[tuple[SessionResult, Case]]) -> E2Anchor:
     """
     if not runs:
         raise ValueError("앵커를 잴 세션이 없다")
-    a_vals, b_vals = [], []
+    vals = []
     for session, case in runs:
         if session.n < 2:
             raise ValueError(f"e₂ 앵커는 2인 이상 세션이 필요하다: n={session.n}")
         observer, victim_pid = session.participants[0], session.participants[1]
         by_pid = {p.pid: p for p in case.preferences}
         victim = by_pid[victim_pid]
-        ranked = valid_ranked(case, victim)
-        d = max(1, len(ranked))
+        d = valid_count(case, victim)
         subs = observed_subs(session, observer, victim_pid)
-        a_vals.append(depth_a(subs, d))
-        b_vals.append(depth_b(subs, ranked, d))
+        vals.append(depth(subs, d))
     return E2Anchor(
-        depth_a=max(1e-9, statistics.median(a_vals)),
-        depth_b=max(1e-9, statistics.median(b_vals)),
-        samples=len(a_vals),
+        depth=max(1e-9, statistics.median(vals)),
+        samples=len(vals),
     )
 
 
 @dataclass(frozen=True)
 class ExposureMultiple:
-    m_a: float
-    m_b: float | None          # 앵커가 퇴화하면 None — 가짜 수를 내지 않는다
-    stars_m_a: int
-    stars_m_b: int | None
-    max_single_depth_a: float
+    m: float | None            # 앵커가 퇴화하면 None — 가짜 수를 내지 않는다
+    stars_m: int | None
+    max_single_depth: float
     victims: int
-    b_note: str = ""
+    note: str = ""
 
     def as_dict(self) -> dict:
         return {
-            "m_A": round(self.m_a, 3),
-            "m_B": None if self.m_b is None else round(self.m_b, 3),
-            "stars_m_A": self.stars_m_a,
-            "stars_m_B": self.stars_m_b,
-            "max_single_depth_A": round(self.max_single_depth_a, 3),
+            "m": None if self.m is None else round(self.m, 3),
+            "stars_m": self.stars_m,
+            "max_single_depth": round(self.max_single_depth, 3),
             "victims": self.victims,
-            "b_note": self.b_note,
+            "note": self.note,
             "band": BAND_CF_M.as_dict(),
         }
 
@@ -320,47 +297,40 @@ def exposure_multiple(
     runs: Sequence[tuple[SessionResult, Case]],
     anchor: E2Anchor,
 ) -> ExposureMultiple:
-    """피해자별 노출 배수 m(2축)과 최대 단일 관찰자 깊이."""
+    """피해자별 노출 배수 m과 최대 단일 관찰자 깊이."""
     if not runs:
         raise ValueError("측정할 세션이 없다")
-    m_a, m_b, single_a = [], [], []
+    multiples, single = [], []
     for session, case in runs:
         by_pid = {p.pid: p for p in case.preferences}
         for victim_pid in session.participants:
             victim = by_pid.get(victim_pid)
             if victim is None:
                 continue
-            ranked = valid_ranked(case, victim)
-            d = max(1, len(ranked))
-            sum_a = sum_b = best_a = 0.0
+            d = valid_count(case, victim)
+            total = best = 0.0
             for observer in session.participants:
                 if observer == victim_pid:
                     continue
-                subs = observed_subs(session, observer, victim_pid)
-                ea = depth_a(subs, d)
-                sum_a += ea
-                sum_b += depth_b(subs, ranked, d)
-                best_a = max(best_a, ea)
-            m_a.append(sum_a / anchor.depth_a)
-            m_b.append(sum_b / anchor.depth_b)
-            single_a.append(best_a)
+                e = depth(observed_subs(session, observer, victim_pid), d)
+                total += e
+                best = max(best, e)
+            multiples.append(total / anchor.depth)
+            single.append(best)
 
-    med_a = statistics.median(m_a)
     if anchor.degenerate:
         # 앵커가 0에 가까우면 비율이 의미를 잃는다. 큰 수를 내놓으면 오독을 부르므로
         # None으로 비우고 사유를 남긴다 — "안 쟀다"와 "0이다"는 다르다.
         return ExposureMultiple(
-            m_a=med_a, m_b=None, stars_m_a=BAND_CF_M.stars(med_a), stars_m_b=None,
-            max_single_depth_a=statistics.median(single_a), victims=len(m_a),
-            b_note="e₂ 앵커의 B축이 0에 가까워 배수가 성립하지 않는다 — 참조 프로토콜에서도 "
-                   "접두 복원이 일어나지 않는다는 뜻이다 (예: 에이전트가 자기 선호를 "
-                   "부분적으로만 아는 도메인)",
+            m=None, stars_m=None,
+            max_single_depth=statistics.median(single), victims=len(multiples),
+            note="e₂ 앵커가 0에 가까워 배수가 성립하지 않는다 — 참조 2인 협상에서 "
+                 "귀속 노출이 관측되지 않았다는 뜻이므로 원지표(깊이)로 직접 비교할 것",
         )
-    med_b = statistics.median(m_b)
+    med = statistics.median(multiples)
     return ExposureMultiple(
-        m_a=med_a, m_b=med_b,
-        stars_m_a=BAND_CF_M.stars(med_a), stars_m_b=BAND_CF_M.stars(med_b),
-        max_single_depth_a=statistics.median(single_a), victims=len(m_a),
+        m=med, stars_m=BAND_CF_M.stars(med),
+        max_single_depth=statistics.median(single), victims=len(multiples),
     )
 
 

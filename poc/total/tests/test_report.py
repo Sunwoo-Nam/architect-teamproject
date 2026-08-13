@@ -182,7 +182,7 @@ class TestCellRendering:
 class TestSectionNotes:
     def test_degenerate_cf_anchor_explained(self):
         md = render_markdown(meta(plans=["A"]), {
-            "cf": {"A": {"m_A": 0.3, "m_B": None, "b_note": "앵커 퇴화"}}})
+            "cf": {"A": {"m": None, "max_single_depth": 0.3, "note": "앵커 퇴화"}}})
         assert "앵커 퇴화" in md
 
     def test_censored_max_issues_flagged(self):
