@@ -41,6 +41,13 @@ from total.qa.constants import RU_CEILING_BYTES, SYNTH_TIME, band_ru_usage  # no
 FINAL_DIR = ROOT / "datasets" / "composite" / "final"
 PLAN_NAMES = ("seq2", "pool")
 ORACLE_LIMIT = 150_000
+#: 세션 협상 상한 (라운드) — 측정 캠페인 파라미터 (2026-08-13, FIN 정본).
+#: 하네스 기본 200은 임의값이었다: 75ms 페이즈 기준 200라운드 ≈ 순수 프로토콜만 30초로
+#: 모바일 약속 잡기 세션의 현실 상한을 넘는다. 60라운드(≈9초)를 서비스 데드라인으로
+#: 선언한다. 설계 양쪽에 동일 적용(negotiator의 boulware 양보가 n_steps에 비례해
+#: 압축된다). naive 기준선은 자기 스케줄(5바퀴 전역 순위 소진)이 정의라 그대로 둔다 —
+#: 기준선을 자르면 T_naive가 비용이 아니라 상한이 되어 ρ의 뜻이 무너진다.
+SESSION_CAP = 60
 
 
 def _git_commit():
@@ -112,7 +119,7 @@ def main() -> int:
            "meta": {
                "dataset": "composite final (FIN)", "cases": len(scenarios),
                "commit": _git_commit(), "python": platform.python_version(),
-               "constants": SYNTH_TIME.as_dict(),
+               "constants": SYNTH_TIME.as_dict(), "session_cap": SESSION_CAP,
                "ru_band": band_ru_usage().as_dict(),
                "judgement": "FC=달성률 · RU=사용률 r P95 로그 사다리(2026-08-13 개정) · TB=ρ P95",
            }}
@@ -133,7 +140,7 @@ def main() -> int:
                 "planted": meta.get("planted", {}).get("trap"),
             }
             if oracle:
-                session, case = run_session(sc, plan)
+                session, case = run_session(sc, plan, n_steps=SESSION_CAP)
                 score = fc.score(case, session.agreement,
                                  extra_violations=case.hard_violations(session.agreement))
                 mem = ru.measure(session)
@@ -156,7 +163,7 @@ def main() -> int:
                     "over_ceiling": mem.over_ceiling,
                 })
             else:
-                session, _ = run_session(sc, plan, light=True)
+                session, _ = run_session(sc, plan, light=True, n_steps=SESSION_CAP)
                 mem = ru.measure(session)
                 tt = _tb_from_counters(sc, session)
                 rho = (tb.rho(tt["total_ms"], b["T_ms"], b.get("capped", False))
