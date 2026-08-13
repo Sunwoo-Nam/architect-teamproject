@@ -211,6 +211,20 @@ class TestSectionNotes:
         md = render_markdown(meta(plans=["A"]), {"fc": {"A": {"mean_achieved": 0.91}}})
         assert "세션별 s의 평균이 아니" not in md
 
+    def test_degenerate_miss_is_flagged(self):
+        md = render_markdown(meta(plans=["A"]), {
+            "fc": {"A": {"mean_achieved": 0.9, "degenerate_cases": 32,
+                         "degenerate_missed": 3}}})
+        assert "R̄=1 케이스 3건에서 유효 후보 밖" in md
+
+    def test_degenerate_cases_without_miss_get_no_warning(self):
+        # R̄=1 케이스가 있어도 전부 맞췄으면 경고할 것이 없다 (nparty의 현재 상태)
+        md = render_markdown(meta(plans=["A"]), {
+            "fc": {"A": {"mean_achieved": 0.9, "degenerate_cases": 32,
+                         "degenerate_missed": 0}}})
+        assert "유효 후보 밖으로" not in md
+        assert "32" in md          # 건수 자체는 표에 보여야 한다
+
     def test_no_note_when_clean(self):
         md = render_markdown(meta(plans=["A"]), {
             "sc_issue": {"A": {"c": 0.1, "max_issues": 10, "censored": False}}})

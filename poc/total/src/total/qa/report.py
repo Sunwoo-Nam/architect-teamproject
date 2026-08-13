@@ -155,7 +155,9 @@ def _section(qa: str, data: dict, plans: Sequence[str]) -> list[str]:
         "fc": [("mean_achieved", "달성률"), ("stars_achieved", "달성률 별점"),
                ("mean_baseline", "무작위 베이스라인 R̄"),
                ("mean_s", "개선 비율 s"), ("stars_s", "s 별점"),
-               ("optimal_hit", "최적안 적중"), ("fr_violation_cases", "FR 위반 케이스")],
+               ("optimal_hit", "최적안 적중"), ("fr_violation_cases", "FR 위반 케이스"),
+               ("degenerate_cases", "R̄=1 케이스 (s 판별력 없음)"),
+               ("degenerate_missed", "그중 유효 후보 밖")],
         "cf": [("m_A", "노출 배수 m (A축)"), ("stars_m_A", "m_A 별점"),
                ("m_B", "노출 배수 m (B축)"), ("stars_m_B", "m_B 별점"),
                ("max_single_depth_A", "최대 단일 관찰자 깊이")],
@@ -200,6 +202,11 @@ def _notes(qa: str, data: dict, plans: Sequence[str]) -> list[str]:
                      "s = (달성률 − R̄) ÷ (1 − R̄)로 위 표에서 직접 검산할 수 있다")
     for p in plans:
         d = data.get(p) or {}
+        if qa == "fc" and d.get("degenerate_missed"):
+            notes.append(f"`{p}` **R̄=1 케이스 {d['degenerate_missed']}건에서 유효 후보 밖으로 "
+                         f"합의했다** — 무작위조차 만점을 받는 판에서 놓친 것이므로 24 §1.4에 "
+                         f"따라 해당 케이스의 s는 0점(즉시 결함)이다. 달성률 원값과 FR 위반 "
+                         f"플래그를 함께 확인할 것")
         if qa == "cf" and d.get("m_B") is None and d.get("b_note"):
             notes.append(f"`{p}` B축: {d['b_note']}")
         if qa == "sc_issue" and d.get("censored"):

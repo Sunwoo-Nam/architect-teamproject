@@ -10,6 +10,10 @@
 
 대조 항목: 유효 후보 집합·총효용·달성률·기준선(R̄)·s·최적해.
 결렬(NO_DEAL/NO_AGREEMENT) 표현이 서로 다르므로 그 부분만 이름을 맞춰 비교한다.
+
+**의도된 차이가 딱 한 곳 있다** — R̄ = 1인데 유효 후보 밖으로 간 경우의 s (24 §1.4,
+2026-08-13 개정). `is_known_s_divergence()`가 그 조건을 이름 붙여 판별하고,
+`TestKnownSDivergence`가 차이 자체를 값으로 못박는다. 그 외의 불일치는 전부 이식 버그다.
 """
 from __future__ import annotations
 
@@ -55,6 +59,23 @@ def _norm(outcome, qa_no_deal, vendor_no_deal):
     return "__NO_DEAL__" if outcome in (qa_no_deal, vendor_no_deal) else outcome
 
 
+def is_known_s_divergence(q) -> bool:
+    """**의도된 정의 차이** 한 곳 — R̄ = 1인데 유효 후보 밖으로 간 경우 (24 §1.4).
+
+    24 §1.4는 2026-08-13에 R̄ = 1 규칙을 도달 결과에 따라 둘로 쪼갰다: 유효 후보에
+    도달했으면 `s = 1`(0/0 관례), **도달하지 못했으면 분자가 음수 고정이라 극한이 −∞로
+    확정되므로 `s = 0`(0점)**. 개정 전에는 무조건 `s = 1`이라 "결렬이 정답인 시나리오에서
+    억지 합의를 만든" 프로토콜이 판정 지표에서 만점을 받았다.
+
+    `qa/fc.py`는 개정된 규칙을, `_vendor/measures/fc.py`는 **개정 전 규칙을 그대로** 쓴다
+    — 벤더링본의 목적은 dp2 발표 수치의 재현이라 값을 바꾸면 그 목적이 깨지기 때문이다.
+    따라서 이 한 분기는 갈리는 것이 **정상**이고, 그래서 여기 이름을 붙여 둔다.
+
+    이 함수가 True를 내는 것은 정의 차이일 때뿐이다. 나머지는 전부 이식 버그로 본다.
+    """
+    return q.baseline >= 1.0 - TOL and q.achieved < 1.0 - TOL
+
+
 def _to_qa_outcome(outcome):
     """벤더링 결과를 qa 채점기에 넘길 수 있는 표현으로 바꾼다.
 
@@ -81,9 +102,17 @@ def test_two_fc_implementations_agree(case, plan_cls):
         f"{case.case_id}/{plan_cls.plan_name}: 기준선 R̄가 갈린다 "
         f"(벤더링 {v.baseline!r} · qa {q.baseline!r})"
     )
-    assert v.s == pytest.approx(q.s, abs=TOL), (
-        f"{case.case_id}/{plan_cls.plan_name}: s가 갈린다 (벤더링 {v.s!r} · qa {q.s!r})"
-    )
+    if is_known_s_divergence(q):
+        # 아래 TestKnownSDivergence가 이 분기를 따로 못박는다. 여기서 그냥 비교하면
+        # "구현이 어긋났다"와 "의도된 정의 차이"가 뒤섞인다
+        assert v.s == pytest.approx(1.0, abs=TOL) and q.s == pytest.approx(0.0, abs=TOL), (
+            f"{case.case_id}/{plan_cls.plan_name}: 알려진 차이의 값이 예상과 다르다 "
+            f"(벤더링 {v.s!r} · qa {q.s!r})"
+        )
+    else:
+        assert v.s == pytest.approx(q.s, abs=TOL), (
+            f"{case.case_id}/{plan_cls.plan_name}: s가 갈린다 (벤더링 {v.s!r} · qa {q.s!r})"
+        )
     assert _norm(v.optimal, qa_fc.NO_AGREEMENT, vendor_fc.NO_DEAL) == _norm(
         q.optimal, qa_fc.NO_AGREEMENT, vendor_fc.NO_DEAL
     ), f"{case.case_id}/{plan_cls.plan_name}: 최적해 x*가 갈린다"
@@ -108,3 +137,46 @@ def test_total_utility_agrees(case):
         assert vendor_fc.total_utility(cand, case.profiles) == pytest.approx(
             qa_fc.total_utility(cand, case.profiles), abs=TOL
         ), f"{case.case_id}/{cand!r}: 총효용이 갈린다"
+
+
+class TestKnownSDivergence:
+    """알려진 정의 차이 1건을 **양쪽 다** 못박는다 (24 §1.4, 2026-08-13 개정).
+
+    위 `test_two_fc_implementations_agree`가 이 분기를 예외 처리하므로, 그 예외가
+    "언젠가 아무도 모르게 사라지는" 것을 막으려면 차이 자체에 테스트가 있어야 한다.
+    개정 전 규칙(벤더링)이 억지 합의에 만점을 준다는 사실도 여기 남는다.
+    """
+
+    #: 유효 후보가 결렬뿐이고, "b"는 바닥선 밑이라 유효 후보 밖
+    PROFILES = (Profile("P0", {"a": 0.1, "b": 0.5}, 0.9),)
+    CANDIDATES = ("a", "b")
+
+    def qa_case(self):
+        return NpartyCase("degenerate", list(self.PROFILES))
+
+    def test_setup_is_actually_degenerate(self):
+        q = qa_fc.score(self.qa_case(), qa_fc.NO_AGREEMENT)
+        assert q.baseline == pytest.approx(1.0, abs=TOL)
+        assert qa_fc.valid_candidates(self.qa_case()) == [qa_fc.NO_AGREEMENT]
+
+    def test_both_agree_when_the_valid_candidate_is_reached(self):
+        # 차이는 "못 맞췄을 때"에만 난다 — 맞췄으면 두 구현이 같아야 한다
+        v = vendor_fc.score(vendor_fc.NO_DEAL, self.CANDIDATES, list(self.PROFILES))
+        q = qa_fc.score(self.qa_case(), qa_fc.NO_AGREEMENT)
+        assert v.s == pytest.approx(q.s, abs=TOL) == pytest.approx(1.0, abs=TOL)
+
+    def test_they_diverge_when_it_is_missed(self):
+        v = vendor_fc.score("b", self.CANDIDATES, list(self.PROFILES))
+        q = qa_fc.score(self.qa_case(), "b")
+        assert v.ratio == pytest.approx(q.achieved, abs=TOL), "달성률까지 갈리면 이식 버그다"
+        assert v.s == pytest.approx(1.0, abs=TOL), "벤더링은 개정 전 규칙(무조건 만점)"
+        assert q.s == pytest.approx(0.0, abs=TOL), "qa는 개정 규칙(극한 −∞ → 0점)"
+
+    def test_the_helper_recognises_exactly_this_case(self):
+        assert is_known_s_divergence(qa_fc.score(self.qa_case(), "b"))
+        assert not is_known_s_divergence(qa_fc.score(self.qa_case(), qa_fc.NO_AGREEMENT))
+
+    def test_helper_does_not_fire_on_ordinary_cases(self):
+        # R̄ < 1인 평범한 케이스는 예외 처리 대상이 아니다 — 예외가 번지면 대조가 무의미해진다
+        ordinary = NpartyCase("ordinary", [Profile("P0", {"a": 1.0, "b": 0.5}, 0.0)])
+        assert not is_known_s_divergence(qa_fc.score(ordinary, "b"))

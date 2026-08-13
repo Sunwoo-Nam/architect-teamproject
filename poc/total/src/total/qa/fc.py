@@ -53,9 +53,20 @@ def valid_candidates(case: Case) -> list[Outcome]:
 def improvement_ratio(achieved: float, baseline: float) -> float:
     """s = (달성률 − R̄) ÷ (1 − R̄) — 24 §1.4.
 
-    R̄ = 1이면 분모가 0이라 s가 정의되지 않는다. 24 §1.4는 이때 **s = 1로 정의**한다
-    — 무작위와 구분할 개선 여지 자체가 없으므로 유효 후보에 도달하기만 하면 만점이다.
-    다만 유효 후보 밖으로 갔다면(달성률 < 1) 채운 여지가 없으므로 0이다.
+    **R̄ = 1은 두 경우로 갈린다** (24 §1.4, 2026-08-13 개정):
+
+    - **달성률 = 1** (유효 후보에 도달) → 0/0 **부정형**이라 관례가 필요하다. 무작위와
+      구분할 개선 여지 자체가 없는 시나리오이므로 **s = 1**.
+    - **달성률 < 1** (유효 후보 밖) → 부정형이 **아니다.** R̄ ≤ 1이 항상 성립하므로
+      (각 유효 후보 달성률 ≤ 1의 평균) 분모는 **양수 쪽에서** 0으로 가고 분자는 음수로
+      고정이라 **극한이 −∞로 확정**된다. 24 밴드의 `s ≤ 0 → 0점` 구간이므로 **0.0**.
+
+    R̄ = 1의 뜻은 "잴 수 없다"가 아니라 **"무작위조차 만점"** 이다 — 결렬 후보가 §1.3에
+    따라 항상 후보 집합에 있어 무작위 선택 전략은 여기서도 정의되고, 선택지가 1개면
+    결정론이 될 뿐 반드시 만점을 얻는다. 그 판에서 못 맞췄으면 무작위보다 나쁜 것이다.
+
+    개정 전 규칙은 달성률과 무관하게 s = 1이었고 `_vendor/measures/fc.py`에 그대로 남아
+    있다 (발표 수치 재현이 목적이라 값을 바꾸지 않는다 — `test_fc_crosscheck.py` 참조).
 
     세션 1건에도, 표본 전체 평균에도 **같은 함수**를 쓴다 — 두 곳에서 규칙이
     갈리는 것이 이 파일에서 실제로 났던 결함이다 (`00-설계안.md` §13-4).
@@ -172,5 +183,12 @@ def aggregate(scores: Sequence[FcScore]) -> dict:
         "stars_s": BAND_FC_S.stars(mean_s),
         "optimal_hit": sum(1 for x in scores if x.achieved >= 1.0 - 1e-9),
         "fr_violation_cases": sum(1 for x in scores if x.fr_violations),
+        # R̄=1 케이스에서는 s가 1 아니면 0뿐이라 판별력이 없다. 24 §1.4가 "달성률 원값으로
+        # 확인하라"고 한 구간이므로, 몇 건인지 보이지 않으면 그 확인 자체를 할 수 없다
+        "degenerate_cases": sum(1 for x in scores if x.baseline >= 1.0 - 1e-12),
+        "degenerate_missed": sum(
+            1 for x in scores
+            if x.baseline >= 1.0 - 1e-12 and x.achieved < 1.0 - 1e-12
+        ),
         "bands": {"s": BAND_FC_S.as_dict(), "achieved": BAND_FC_ACHIEVED.as_dict()},
     }

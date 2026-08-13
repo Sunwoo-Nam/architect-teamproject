@@ -140,6 +140,84 @@ class TestEdgeCases:
         assert s.baseline == pytest.approx(1.0)
         assert s.s == pytest.approx(1.0)
 
+
+class TestDegenerateBaseline:
+    """[24 §1.4] R̄ = 1은 **도달 결과에 따라 두 경우로 갈린다** (2026-08-13 개정).
+
+    | 도달 결과 | 분자 | 분모 | s |
+    |---|---|---|---|
+    | 유효 후보에 도달 (달성률 = 1) | 0 | 0 | 0/0 부정형 → **관례로 s = 1** |
+    | 유효 후보 밖 (달성률 < 1) | 음수 고정 | 0⁺ | **극한 −∞ 확정 → s = 0점** |
+
+    R̄ ≤ 1이 항상 성립하므로(각 유효 후보 달성률 ≤ 1의 평균) 분모는 양수 쪽에서 0으로
+    간다. 둘째 줄은 부정형이 아니라 값이 확정된 경우라 관례를 끼워 넣을 자리가 없다.
+
+    **R̄ = 1은 "잴 수 없다"가 아니라 "무작위조차 만점"이다.** 결렬 후보는 §1.3에 따라
+    항상 후보 집합에 있으므로 무작위 선택 전략은 여기서도 정의된다 — 선택지가 1개라
+    결정론이 될 뿐이고 반드시 만점을 얻는다. 그 판에서 못 맞췄으면 무작위보다 나쁘다.
+
+    개정 전 규칙(무조건 s = 1)은 `_vendor/measures/fc.py`에 남아 있다 —
+    발표 수치 재현이 목적이라 값을 바꾸지 않는다. 차이는 `test_fc_crosscheck.py`에
+    알려진 차이로 등록돼 있다.
+    """
+
+    #: 유효 후보 = 결렬(1.0)뿐. "b"는 바닥선 0.9 미달이라 유효 후보 밖
+    NO_DEAL_ONLY = ([{"a": 0.1, "b": 0.5}], [0.9])
+    #: 유효 후보 a(1.0)·b(1.0)·결렬(1.0) 전원 동점 → R̄ = 1 (후보가 여럿이어도 마찬가지)
+    ALL_TIED = ([{"a": 0.5, "b": 0.5}], [0.5])
+
+    def test_no_deal_only_baseline_is_one(self):
+        c = mk_case(*self.NO_DEAL_ONLY)
+        assert valid_candidates(c) == [NO_AGREEMENT]
+        assert score(c, NO_AGREEMENT).baseline == pytest.approx(1.0)
+
+    def test_reaching_the_only_valid_candidate_is_full_marks(self):
+        s = score(mk_case(*self.NO_DEAL_ONLY), NO_AGREEMENT)
+        assert s.s == pytest.approx(1.0) and s.stars_s == 5
+
+    def test_missing_it_is_zero_not_full_marks(self):
+        # 개정 전 규칙이라면 여기서 s = 1.0(★5)이 나왔다 — 억지 합의에 만점
+        s = score(mk_case(*self.NO_DEAL_ONLY), "b")
+        assert s.achieved < 1.0
+        assert s.s == pytest.approx(0.0)
+        assert s.stars_s == 0                      # 밴드가 strict > 라 0.0은 0점
+
+    def test_missing_it_also_raises_the_fr_flag(self):
+        # 점수와 FR 플래그는 별개 경로다 — 둘 다 켜지는지 확인 (24 §1.7)
+        s = score(mk_case(*self.NO_DEAL_ONLY), "b")
+        assert s.fr_violations and "바닥선" in s.fr_violations[0]
+
+    def test_unknown_outcome_is_also_zero(self):
+        # 후보 공간에 없는 결과 → 효용 0 → 달성률 0 → 유효 후보 밖과 같은 취급
+        assert score(mk_case(*self.NO_DEAL_ONLY), "ghost").s == pytest.approx(0.0)
+
+    def test_all_tied_reaching_any_valid_candidate_is_full_marks(self):
+        c = mk_case(*self.ALL_TIED)
+        assert len(valid_candidates(c)) == 3
+        for r in ("a", "b", NO_AGREEMENT):
+            got = score(c, r)
+            assert got.baseline == pytest.approx(1.0)
+            assert got.s == pytest.approx(1.0), f"{r}에서 만점이 아니다"
+
+    def test_achievement_above_one_is_still_full_marks(self):
+        # 바닥선 합보다 총효용이 큰 결과 — 달성률 > 1이라도 만점 이상은 없다
+        c = mk_case([{"a": 0.9}, {"a": 0.2}], [0.5, 0.5])
+        s = score(c, "a")
+        assert s.achieved > 1.0
+        assert s.baseline == pytest.approx(1.0) and s.s == pytest.approx(1.0)
+
+    def test_limit_direction_denominator_approaches_zero_from_above(self):
+        """R̄가 1로 다가갈수록 s가 −∞로 발산하는지 — 개정의 근거가 되는 극한."""
+        prev = None
+        for gap in (1e-2, 1e-3, 1e-4):
+            # 유효 후보 a(1.0)·결렬(1−gap) → R̄ = 1 − gap/2, 달성률 0.5로 고정
+            c = mk_case([{"a": 1.0, "b": 0.5}], [1.0 - gap])
+            s = score(c, "b").s
+            assert s < 0, "무작위보다 나쁜데 s가 음수가 아니다"
+            if prev is not None:
+                assert s < prev, "R̄가 1에 가까워질수록 s가 더 작아져야 한다"
+            prev = s
+
     def test_unknown_agreement_outcome_is_zero_utility(self):
         c = mk_case([{"a": 1.0}], [0.0])
         s = score(c, "ghost")
