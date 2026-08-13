@@ -114,7 +114,7 @@ def main() -> int:
                "commit": _git_commit(), "python": platform.python_version(),
                "constants": SYNTH_TIME.as_dict(),
                "ru_band": band_ru_usage().as_dict(),
-               "judgement": "FC=달성률 · RU=사용률 r 로그 사다리(2026-08-13 개정) · TB=ρ P95",
+               "judgement": "FC=달성률 · RU=사용률 r P95 로그 사다리(2026-08-13 개정) · TB=ρ P95",
            }}
     case_rows = []
 
@@ -194,8 +194,8 @@ def main() -> int:
         f_ = raw["plans"][plan]
         print(f"  {plan}: FC={f_['fc']['mean_achieved'] if f_['fc'] else None} "
               f"★{f_['fc']['stars_achieved'] if f_['fc'] else '-'} · "
-              f"RU r중앙 {f_['ru']['median_r_total']} ★{f_['ru']['stars_median']} "
-              f"(max ★{f_['ru']['stars_max']}) · "
+              f"RU rP95 {f_['ru']['p95_r_total']} ★{f_['ru']['stars_p95']} "
+              f"(중앙 ★{f_['ru']['stars_median']} · max ★{f_['ru']['stars_max']}) · "
               f"TB ρP95 {f_['tb'].get('p95_rho')} ★{f_['tb'].get('stars')} [{sec}s]")
 
     raw["wall_seconds"] = round(time.perf_counter() - wall0, 1)

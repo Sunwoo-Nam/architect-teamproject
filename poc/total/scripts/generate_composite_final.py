@@ -27,6 +27,23 @@
 때까지 시드를 교체한다(케이스당 상한 40). **방안을 실행해 결과로 선별하지는 않는다** —
 그건 표본 조작이다. 함정의 실효는 측정 리포트가 사후 보고한다.
 
+## v6 구성 원리 (파일럿 v1~v5 실측의 종합)
+
+- **함정은 8축 이상에만** 둔다: 7축 이하에서는 두 방안의 라운드 수가 비슷해
+  (v5 실측 seq2 14~45 vs pool 14~38) 함정이 FC만 가르고 TB는 못 가른다. 8축부터
+  seq2의 백트랙 폭이 커진다 (43~165 vs 14~40).
+- **함정 총량은 ρ 모집단의 4%로 통제**한다: naive 기준선은 함정 판에서 오히려
+  빠르므로 (전역 순위가 봉쇄 조합을 그냥 비켜 감 + 함정 축 점수 동조화로 양측 상위
+  후보가 일치) 함정은 **어느 방안이든** ρ>1 이 구조적이다. 판정이 P95이므로 함정
+  비중이 5%를 넘으면 pool까지 ★0으로 끌려간다 (v5 실측 — 별점 동률의 원인).
+- **plain은 mid-conflict 중심**(ρ_corr ∈ {0.15, 0, −0.25})으로 좁힌다: 상관 0.6은
+  naive가 1~3제안에 즉시 합의해 어떤 협상 설계도 ρ>1 (v5 low-conflict 누출 6/10),
+  상관 −0.5는 라운드 폭주로 반대쪽 꼬리를 만든다 (v5 high-conflict 라운드 중앙 87).
+  mid가 FC 변별도 최대였다 (v5: seq2 0.899 vs pool 0.958).
+- **no_deal은 S ≥ 2,500**: naive는 결렬 증명에 전수 소진이 필요해 S에 비례해 느려
+  진다 — S=500에서는 pool의 결렬 인지(라운드 상한)가 naive와 비슷해져 ρ≈1.02로
+  누출됐다 (v5). S≥1,680부터 ρ≤0.72로 급락.
+
 ## 재현
 
     .venv/bin/python scripts/generate_composite_final.py            # 500건 전체
@@ -128,10 +145,15 @@ AXIS_CATALOG = [
 ]
 
 
-def build_axes(n, rng, cap=ORACLE_LIMIT):
-    """앞 n개 축을 실체화하고 조합 수를 cap 이하로 맞춘다 (큰 축부터 축소)."""
+def build_axes(n, rng, cap=ORACLE_LIMIT, floor=0):
+    """앞 n개 축을 실체화하고 조합 수를 [floor, cap] 구간에 맞춘다.
+
+    cap 초과 시 큰 축부터 축소. floor 미달 시(no_deal의 naive 소진 시간 확보용 —
+    헤더 「v6 구성 원리」) 작은 축부터 값을 늘린다. region은 소속 축(식당·극장·카페)의
+    이름 연결이 깨지므로 확장하지 않고, 어휘가 소진된 축(생성기가 min 클램프)은 건너뛴다.
+    """
     region_names = None
-    axes = []
+    axes, specs = [], []
     for name, gen, needs_region, (lo, hi) in AXIS_CATALOG[:n]:
         count = rng.randint(lo, hi)
         if needs_region:
@@ -141,9 +163,28 @@ def build_axes(n, rng, cap=ORACLE_LIMIT):
         if name == "region":
             region_names = [v["name"] for v in values]
         axes.append({"name": name, "generator": name, "values": values})
+        specs.append((name, gen, needs_region))
     while math.prod(len(a["values"]) for a in axes) > cap:
         big = max((a for a in axes if len(a["values"]) > 2), key=lambda a: len(a["values"]))
         big["values"] = big["values"][:-1]
+    while floor and math.prod(len(a["values"]) for a in axes) < floor:
+        grew = False
+        for (name, gen, needs_region), a in sorted(
+                zip(specs, axes), key=lambda t: len(t[1]["values"])):
+            if name == "region":
+                continue
+            prod_rest = math.prod(len(x["values"]) for x in axes) // len(a["values"])
+            if prod_rest * (len(a["values"]) + 1) > cap:
+                continue
+            cnt = len(a["values"]) + 1
+            vals = (gen(cnt, rng, region_names or _REGIONS[:3]) if needs_region
+                    else gen(cnt, rng))
+            if len(vals) > len(a["values"]):
+                a["values"] = vals
+                grew = True
+                break
+        if not grew:
+            break
     return axes
 
 
@@ -295,6 +336,11 @@ def realistic_deps(axes, rng, planted_axes=()):
 # ---------------------------------------------------------------------------------------
 
 CONFLICTS = [("low", 0.6), ("mid", 0.0), ("high", -0.5)]
+#: CR plain 전용 (v6) — mid 중심. 상관 0.6(naive 즉시 합의)·−0.5(라운드 폭주)는
+#: 양쪽 다 ρ 꼬리를 오염시켜 제외 — 헤더 「v6 구성 원리」와 v5 실측 근거
+PLAIN_CONFLICTS = [("mid", 0.0), ("low", 0.15), ("high", -0.25)]
+#: no_deal 최소 조합 수 — naive의 결렬 증명(전수 소진)이 실질 시간이 되는 규모
+NO_DEAL_S_FLOOR = 2_500
 
 
 def _fixture(case_id, name, axes, deps, profiles, expected, conflict, extra_meta):
@@ -415,7 +461,7 @@ def _trap_margins(fix, min_gap=0.12):
 
 
 def _plain_slack(fix):
-    """plain 폭주 방지 — 최선 유효 조합의 참여자별 바닥선 여유 ≥ 0.12.
+    """plain 폭주 방지 — 최선 유효 조합의 참여자별 바닥선 여유 ≥ 0.15 (v6: 0.12→0.15).
 
     여유가 얇으면 수락이 축 세션 막판(양보선 바닥)에서만 일어나 라운드가 상한까지
     차오른다 (파일럿 v3-v4 실측 — TB 꼬리 오염의 주범). 함정 없는 판은 "편안한
@@ -449,18 +495,24 @@ def _plain_slack(fix):
             best = entry
     if best is None:
         return False, "유효 조합 없음"
-    if best[1] < 0.12:
-        return False, f"정답 바닥선 여유 {best[1]:.3f} < 0.12 (막판 수락 → 라운드 폭주)"
+    if best[1] < 0.15:
+        return False, f"정답 바닥선 여유 {best[1]:.3f} < 0.15 (막판 수락 → 라운드 폭주)"
     return True, {"xstar_slack": round(best[1], 4)}
 
 
 def gen_case(track, n, kind, idx, seed):
     rng = random.Random(f"{BASE_SEED}-{track}-{n}-{kind}-{idx}-{seed}")
-    conflict, rho = CONFLICTS[idx % 3] if kind in ("plain", "stress") else ("mid", 0.0)
+    if kind == "plain" and track == "cr":
+        conflict, rho = PLAIN_CONFLICTS[idx % 3]
+    elif kind in ("plain", "stress"):
+        conflict, rho = CONFLICTS[idx % 3]
+    else:
+        conflict, rho = "mid", 0.0
     cap = ORACLE_LIMIT if track == "cr" else 10**30
     if kind in ("hard_path", "soft_synergy", "mixed"):
         cap = min(cap, 30_000)     # 함정 마진 검산(전수)의 케이스당 비용 통제
-    axes = build_axes(n, rng, cap=cap)
+    axes = build_axes(n, rng, cap=cap,
+                      floor=NO_DEAL_S_FLOOR if kind == "no_deal" else 0)
     thr = [round(rng.uniform(0.36, 0.48), 2) for _ in range(2)]
     expected = "agreement"
     extra = {"track": track, "type": kind, "seed": seed}
@@ -488,8 +540,10 @@ def gen_case(track, n, kind, idx, seed):
         deps += realistic_deps(axes, rng, planted_axes=set(trap_info["boost"]))
     elif kind == "hard_path":
         profiles = make_profiles(axes, rng, rho, thr)
+        # pool_miss 25% (v6: 40%→25%) — miss 변형은 pool도 심화(deepening)로 라운드가
+        # 늘어 ρ 예산을 잠식한다. 공정성 표식으로는 수준당 1건이면 충분
         trap_info = plant_path_trap(axes, profiles, deps, rng,
-                                    pool_miss=(idx % 10) < 4)
+                                    pool_miss=(idx % 4) == 0)
         profiles = _reboost(axes, profiles, rng, trap_info["boost"])
         deps += realistic_deps(axes, rng, planted_axes=set(trap_info["boost"]))
     elif kind == "mixed":
@@ -535,19 +589,23 @@ def _reboost(axes, profiles, rng, boost_axes):
 # 메인 — 트랙 구성과 생성 루프
 # ---------------------------------------------------------------------------------------
 
-def cr_plan(per_level):
-    """CR 트랙 — n 수준마다 유형 배분. per_level = (path, pool, both, plain, no_deal)."""
-    path_n, pool_n, both_n, plain_n, nd_n = per_level
+def cr_plan(pilot=False):
+    """CR 트랙 (v6) — 함정은 8축 이상에만, plain은 mid 중심.
+
+    | n | hard_path | plain | no_deal | 계 |
+    |---|---|---|---|---|
+    | 4~7 | 0 | 40 | 5 | 45×4 = 180 |
+    | 8~12 | 4 | 35 | 5 | 44×5 = 220 |
+
+    합계 400 (함정 20 = 전체 500의 4% — ρ P95 예산, 헤더 「v6 구성 원리」).
+    """
     plan = []
     for n in range(4, 13):
-        both_here = both_n if n >= 6 else 0
-        plain_here = plain_n + (both_n - both_here)
-        plan += [(n, "hard_path")] * path_n + [(n, "soft_synergy")] * pool_n
-        plan += [(n, "mixed")] * both_here + [(n, "plain")] * plain_here
-        plan += [(n, "no_deal")] * nd_n
-    # 총합 보정 — 500건 정각을 위해 n=6·8·10·12에 plain 1건씩 추가
-    if path_n == 8:
-        plan += [(n, "plain") for n in (6, 8, 10, 12)]
+        path_here = (1 if pilot else 4) if n >= 8 else 0
+        plain_here = 4 if pilot else (35 if n >= 8 else 40)
+        nd_here = 1 if pilot else 5
+        plan += [(n, "hard_path")] * path_here + [(n, "plain")] * plain_here
+        plan += [(n, "no_deal")] * nd_here
     return plan
 
 
@@ -563,9 +621,8 @@ def main():
     args = ap.parse_args()
 
     OUT.mkdir(parents=True, exist_ok=True)
-    per_level = (2, 0, 0, 3, 1) if args.pilot else (10, 0, 0, 29, 5)
     rs_per = 2 if args.pilot else 20
-    plan = [("cr", n, kind) for n, kind in cr_plan(per_level)]
+    plan = [("cr", n, kind) for n, kind in cr_plan(pilot=args.pilot)]
     plan += [("rs", n, kind) for n, kind in rs_plan(rs_per)]
     if args.only:
         plan = [p for p in plan if p[2] == args.only]

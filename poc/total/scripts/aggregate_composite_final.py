@@ -64,6 +64,9 @@ def summarize(rows):
         "rho_defects": sum(r.get("rho_defect") or 0 for r in rows),
         "r_med": round(statistics.median(rts), 8) if rts else None,
         "ru_stars_med": ru_stars(statistics.median(rts)) if rts else None,
+        # RU 판정 = r P95 (2026-08-13 개정, 24 §2.8) — 중앙(전형)·최대(최악) 병기
+        "r_p95": round(p95(rts), 8) if rts else None,
+        "ru_stars_p95": ru_stars(p95(rts)) if rts else None,
         "r_max": round(max(rts), 6) if rts else None,
         "ru_stars_max": ru_stars(max(rts)) if rts else None,
         "over_ceiling": sum(1 for r in rows if r.get("over_ceiling")),
@@ -146,7 +149,7 @@ def main():
         json.dumps(bd, ensure_ascii=False, indent=1))
 
     L = [f"# composite final 재집계 — {run_dir.name}", "",
-         "판정: FC=달성률 평균 · RU=사용률 r (로그 사다리, 중앙+최악) · TB=ρ P95. "
+         "판정: FC=달성률 평균 · RU=사용률 r P95 (로그 사다리, 중앙·최악 병기) · TB=ρ P95. "
          "원본: cases.jsonl (케이스×방안 1행).", "", "## 종합"]
     L += md_table(
         ["지표"] + list(PLANS),
@@ -159,7 +162,8 @@ def main():
              ("TB ρ P95 (판정)", "rho_p95", "rho_stars"),
              ("TB ρ 중앙", "rho_med", None),
              ("ρ>1 결함", "rho_defects", None),
-             ("RU r 중앙 (판정)", "r_med", "ru_stars_med"),
+             ("RU r P95 (판정)", "r_p95", "ru_stars_p95"),
+             ("RU r 중앙", "r_med", "ru_stars_med"),
              ("RU r 최악", "r_max", "ru_stars_max"),
              ("한도 초과 케이스", "over_ceiling", None),
              ("실물화 중앙 MB", "mat_med_mb", None),
@@ -179,11 +183,11 @@ def main():
         for k, per in bd[dim].items():
             body.append([k] + sum(([fmt(per[p], "fc_mean", "fc_stars"),
                                     fmt(per[p], "rho_p95", "rho_stars"),
-                                    fmt(per[p], "r_med", "ru_stars_med"),
+                                    fmt(per[p], "r_p95", "ru_stars_p95"),
                                     fmt(per[p], "r_max", "ru_stars_max")]
                                    for p in PLANS), []))
-        L += md_table([head, "seq2 FC", "seq2 ρP95", "seq2 r중앙", "seq2 r최악",
-                       "pool FC", "pool ρP95", "pool r중앙", "pool r최악"], body)
+        L += md_table([head, "seq2 FC", "seq2 ρP95", "seq2 rP95", "seq2 r최악",
+                       "pool FC", "pool ρP95", "pool rP95", "pool r최악"], body)
         L.append("")
 
     L += ["## 함정 실효 (planted별 FC 승패)", ""]
