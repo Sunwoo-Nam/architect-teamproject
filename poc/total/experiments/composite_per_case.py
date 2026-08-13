@@ -95,9 +95,20 @@ def run_one(name: str, sc: Scenario, plan_names: list[str], limit: int,
         pr.add(session, case, case.hard_violations(session.agreement))
         plans.append(pr)
 
-    raw, rows = measure(plans, e2=anchor, d=len(sc.axes),
-                        viewpoints=[cf.worst_participant()],
-                        tb_baselines=tb_baselines)
+    cf_note = ""
+    try:
+        raw, rows = measure(plans, e2=anchor, d=len(sc.axes),
+                            viewpoints=[cf.worst_participant()],
+                            tb_baselines=tb_baselines)
+    except ValueError as err:
+        if "합의 완료 세션" not in str(err):
+            raise
+        # 합의율 0 표본(S08처럼 결렬이 정답) — 24 §3 규정: CF는 "판정 불가"로 보고.
+        # 결렬 노출은 모수에서 빠지므로 CF만 비우고 나머지 QA는 그대로 측정한다.
+        raw, rows = measure(plans, e2=None, d=len(sc.axes),
+                            viewpoints=[cf.worst_participant()],
+                            tb_baselines=tb_baselines)
+        cf_note = "합의 완료 세션 0건 — CF 판정 불가 (결렬 노출은 모수 제외, 24 §3)"
 
     dataset = Dataset(
         name=f"composite {name}",
@@ -116,14 +127,15 @@ def run_one(name: str, sc: Scenario, plan_names: list[str], limit: int,
         plans=plan_names,
         note=f"개별 케이스 측정 ({name}). e₂ 앵커는 이 케이스의 "
              f"{E2_REFERENCE_PLAN}(전수 교환) 실행 1건 — 케이스별 참조라 표본 1개다. "
-             "SC-의제 스윕은 케이스 단위에서 정의되지 않아 비운다.",
+             "SC-의제 스윕은 케이스 단위에서 정의되지 않아 비운다."
+             + (f" [{cf_note}]" if cf_note else ""),
     )
     out = write_run(results_root, meta, raw, rows)
     print(f"  {name}: 저장 {out.name}")
 
     row = {"name": name, "space": sc.space_size(),
            "label": sc.meta.get("conflict_level", "?"),
-           "expected": sc.meta.get("expected", "?")}
+           "expected": sc.meta.get("expected", "?"), "cf_note": cf_note}
     for p in plan_names:
         fc_, cf_, tb_, ru_ = (raw.get(k, {}).get(p, {}) for k in ("fc", "cf", "tb", "ru"))
         row[p] = {
@@ -156,6 +168,9 @@ def summary_md(rows: list[dict], skipped: list[tuple[str, str]],
                      f"| {fmt(d['rho'], 3)} | {d['stars_rho']} "
                      f"| {fmt(d['total_mb'])} |")
         L.append("")
+    notes = [(r["name"], r["cf_note"]) for r in rows if r.get("cf_note")]
+    if notes:
+        L += ["## 비고", ""] + [f"- **{n}**: {why}" for n, why in notes] + [""]
     if skipped:
         L += ["## 제외 (측정하지 않음 — 0이 아니다)", ""]
         L += [f"- **{n}**: {why}" for n, why in skipped]
