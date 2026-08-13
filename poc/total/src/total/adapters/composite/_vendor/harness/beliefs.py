@@ -31,8 +31,28 @@ class AgentBeliefs:
     shared_hard: list[HardRule]
     own_hard: list[HardRule]
     soft: list[SoftRule]
+    #: [이식 시 신설] 효용 평가 호출 수 — 24 §6.4-a의 eval 항 입력.
+    #: 원본 dpca에는 계측이 없어 어댑터가 `참여자 수 × 후보 수` 공식으로 추정했는데,
+    #: 그 값은 방안에 의존하지 않아 방안을 구분하지 못했다. nparty 쪽은 처음부터
+    #: 실측 카운트라, 같은 항의 입력을 두 시나리오가 다른 방법으로 만들고 있었다.
+    evals: int = 0
+
+    def note_eval(self) -> None:
+        """효용 평가 1회 계상.
+
+        `utility()`를 거치지 않고 `weights`·`scores`를 직접 읽어 효용값을 만드는
+        곳이 있다 (1안 `sequential.py`의 `_optimistic`·`_score`). 그쪽도 평가는
+        평가이므로 같은 계수기로 세야 한다 — `utility()` 호출만 세면 1안이
+        실제보다 세 자릿수 적게 잡힌다 (S01에서 2회 대 수천 회).
+
+        **알려진 보수성**: 1안의 축 단위 평가는 전체 조합 1건 평가보다 싸다.
+        합성 시간 모델은 `t_eval` 상수 하나를 모든 호출에 똑같이 곱하므로,
+        1안의 eval 항은 **상한**으로 봐야 한다 (24 §6.4-a의 단일 상수 가정).
+        """
+        self.evals += 1
 
     def utility(self, outcome: Outcome) -> float:
+        self.evals += 1
         base = sum(self.weights[a] * self.scores[a][v.name] for a, v in outcome.items())
         penalty = sum(rule(self.idx, outcome) for rule in self.soft)
         return max(0.0, base - penalty)
