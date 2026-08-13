@@ -8,6 +8,8 @@ r"""[24 §1] Functional Correctness — Total Utility 달성률.
 - **R̄** = 유효 후보를 무작위로 고르는 전략의 평균 달성률.
   표본 추출이 아니라 **기대값을 정확 계산**한다 (유효 후보 달성률의 산술 평균)
 - **개선 비율 s** = (달성률 − R̄) ÷ (1 − R̄)
+- **집계 수준** — 표본 전체의 **달성률 평균과 R̄ 평균을 먼저** 구한 뒤 s로 **한 번** 환산한다.
+  세션별 s를 평균 내지 **않는다** (24 §1.4 「집계 수준」)
 
 **지표를 2개 병행한다** (사용자 지시 2026-08-12): `s`(베이스라인 정규화, 24 정본)와
 `달성률`(절대 수준). 둘은 어긋날 수 있다 — 후보 공간이 전부 좋으면 절대 달성률은
@@ -46,6 +48,21 @@ def valid_candidates(case: Case) -> list[Outcome]:
     ]
     valid.append(NO_AGREEMENT)
     return valid
+
+
+def improvement_ratio(achieved: float, baseline: float) -> float:
+    """s = (달성률 − R̄) ÷ (1 − R̄) — 24 §1.4.
+
+    R̄ = 1이면 분모가 0이라 s가 정의되지 않는다. 24 §1.4는 이때 **s = 1로 정의**한다
+    — 무작위와 구분할 개선 여지 자체가 없으므로 유효 후보에 도달하기만 하면 만점이다.
+    다만 유효 후보 밖으로 갔다면(달성률 < 1) 채운 여지가 없으므로 0이다.
+
+    세션 1건에도, 표본 전체 평균에도 **같은 함수**를 쓴다 — 두 곳에서 규칙이
+    갈리는 것이 이 파일에서 실제로 났던 결함이다 (`00-설계안.md` §13-4).
+    """
+    if baseline >= 1.0 - 1e-12:
+        return 1.0 if achieved >= 1.0 - 1e-12 else 0.0
+    return (achieved - baseline) / (1.0 - baseline)
 
 
 @dataclass(frozen=True)
@@ -103,11 +120,7 @@ def score(
     else:
         baseline = 0.0
 
-    if baseline >= 1.0 - 1e-12:
-        # 유효 후보가 전부 x*와 동률 — 고를 것이 없으니 도달했으면 만점
-        s = 1.0 if achieved >= 1.0 - 1e-12 else 0.0
-    else:
-        s = (achieved - baseline) / (1.0 - baseline)
+    s = improvement_ratio(achieved, baseline)
 
     violations: list[str] = []
     if agreement != NO_AGREEMENT:
@@ -135,15 +148,25 @@ def score(
 
 
 def aggregate(scores: Sequence[FcScore]) -> dict:
-    """케이스 여러 건의 집계. 별점은 평균값에 밴드를 다시 적용해 낸다."""
+    """케이스 여러 건의 집계. 별점은 평균값에 밴드를 다시 적용해 낸다.
+
+    **s는 세션별로 구해 평균 내지 않는다** (24 §1.4 「집계 수준」, §1.5 절차 6):
+    표본 전체의 달성률 평균과 R̄ 평균을 먼저 구한 뒤 **한 번** 환산한다. 세션별 s는
+    개선 여지(분모 1−R̄)가 0에 가까운 쉬운 세션에서 크게 요동치므로, 그것을 평균 내면
+    쉬운 세션의 잡음이 표본 대표값을 지배한다.
+
+    `mean_baseline`을 함께 낸다 — 없으면 리포트에서 s를 재검산할 수 없다.
+    """
     if not scores:
         raise ValueError("집계할 점수가 없다")
     mean_achieved = statistics.fmean(x.achieved for x in scores)
-    mean_s = statistics.fmean(x.s for x in scores)
+    mean_baseline = statistics.fmean(x.baseline for x in scores)
+    mean_s = improvement_ratio(mean_achieved, mean_baseline)
     return {
         "cases": len(scores),
         "agreed": sum(1 for x in scores if x.agreed),
         "mean_achieved": round(mean_achieved, 6),
+        "mean_baseline": round(mean_baseline, 6),
         "mean_s": round(mean_s, 6),
         "stars_achieved": BAND_FC_ACHIEVED.stars(mean_achieved),
         "stars_s": BAND_FC_S.stars(mean_s),

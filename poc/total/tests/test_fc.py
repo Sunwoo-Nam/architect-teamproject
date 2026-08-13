@@ -184,3 +184,99 @@ class TestAggregate:
 
         with pytest.raises(ValueError):
             aggregate([])
+
+
+class TestAggregateSRule:
+    """[24 §1.4 「집계 수준」] s는 **세션별로 구해 평균 내지 않는다.**
+
+    > 표본 전체의 달성률 평균과 R̄ 평균을 먼저 구한 뒤 한 번 환산한다.
+    > 세션별 s는 개선 여지(분모)가 0에 가까운 쉬운 세션에서 크게 요동치므로,
+    > 평균 수준에서 환산해야 표본 전체의 개선 정도를 안정적으로 나타낸다.
+
+    두 방식은 분모가 세션마다 다르므로 수학적으로 다른 값이다. 아래 픽스처는
+    쉬운 세션(R̄=0.98)과 어려운 세션(R̄=0.50)을 섞어 그 차이를 드러낸다.
+    """
+
+    #: 쉬운 세션 — 유효 후보 a(1.0)·b(0.98)·결렬(0.96) → R̄ = 0.98 (개선 여지 0.02)
+    EASY = ([{"a": 1.0, "b": 0.98}], [0.96])
+    #: 어려운 세션 — 유효 후보 a(1.0)·b(0.5)·결렬(0.0) → R̄ = 0.50 (개선 여지 0.50)
+    HARD = ([{"a": 1.0, "b": 0.5}], [0.0])
+
+    def mixed(self):
+        easy = score(mk_case(*self.EASY, "easy"), "b")   # 달성률 0.98, 세션 s = 0.0
+        hard = score(mk_case(*self.HARD, "hard"), "a")   # 달성률 1.00, 세션 s = 1.0
+        return easy, hard
+
+    def test_fixture_sanity(self):
+        easy, hard = self.mixed()
+        assert (easy.baseline, easy.achieved, easy.s) == pytest.approx((0.98, 0.98, 0.0))
+        assert (hard.baseline, hard.achieved, hard.s) == pytest.approx((0.50, 1.00, 1.0))
+
+    def test_mean_baseline_is_reported(self):
+        # R̄ 평균이 결과에 없으면 s를 재검산할 수 없다 — 추적성 요건
+        from total.qa.fc import aggregate
+
+        agg = aggregate(list(self.mixed()))
+        assert agg["mean_baseline"] == pytest.approx(0.74)
+
+    def test_s_is_converted_once_from_pooled_means(self):
+        from total.qa.fc import aggregate
+
+        agg = aggregate(list(self.mixed()))
+        expected = (0.99 - 0.74) / (1.0 - 0.74)          # = 0.961538...
+        assert agg["mean_achieved"] == pytest.approx(0.99)
+        assert agg["mean_s"] == pytest.approx(expected)
+
+    def test_s_is_not_the_session_average(self):
+        from total.qa.fc import aggregate
+
+        easy, hard = self.mixed()
+        session_average = (easy.s + hard.s) / 2          # = 0.5 — 24가 금지한 방식
+        assert aggregate([easy, hard])["mean_s"] != pytest.approx(session_average)
+
+    def test_stars_follow_the_pooled_s(self):
+        from total.qa.fc import aggregate
+
+        # 세션 평균 0.5면 ★3, 규정대로 환산하면 0.96이라 ★5 — 등급이 갈린다
+        assert aggregate(list(self.mixed()))["stars_s"] == 5
+
+    def test_order_does_not_matter(self):
+        from total.qa.fc import aggregate
+
+        easy, hard = self.mixed()
+        assert aggregate([easy, hard])["mean_s"] == pytest.approx(
+            aggregate([hard, easy])["mean_s"])
+
+    def test_single_case_matches_its_own_s(self):
+        # 케이스가 1건이면 두 방식이 일치해야 한다 (기존 결과와의 연속성)
+        from total.qa.fc import aggregate
+
+        one = score(mk_case(*self.HARD, "hard"), "b")
+        assert aggregate([one])["mean_s"] == pytest.approx(one.s)
+
+    def test_pooled_baseline_of_one_gives_full_marks_when_optimal(self):
+        # 표본 전체가 R̄=1 (개선 여지 없음) — 도달했으면 만점
+        from total.qa.fc import aggregate
+
+        c = mk_case([{"a": 1.0}], [1.0])                 # 유효 후보 a(1.0)·결렬(1.0)
+        agg = aggregate([score(c, "a"), score(c, "a")])
+        assert agg["mean_baseline"] == pytest.approx(1.0)
+        assert agg["mean_s"] == pytest.approx(1.0)
+
+    def test_pooled_baseline_of_one_gives_zero_when_missed(self):
+        # R̄=1인데 유효 후보 밖(바닥선 미달)으로 합의 — 개선 여지가 없는데 놓쳤다
+        from total.qa.fc import aggregate
+
+        c = mk_case([{"a": 1.0, "b": 0.5}], [1.0])       # 유효 후보 a(1.0)·결렬(1.0)
+        agg = aggregate([score(c, "b"), score(c, "b")])
+        assert agg["mean_baseline"] == pytest.approx(1.0)
+        assert agg["mean_s"] == pytest.approx(0.0)
+
+    def test_pooled_s_can_be_negative(self):
+        # 무작위만도 못하면 표본 수준에서도 음수 → 0점·즉시 결함
+        from total.qa.fc import aggregate
+
+        c = mk_case(*self.HARD, "hard")
+        agg = aggregate([score(c, NO_AGREEMENT), score(c, NO_AGREEMENT)])
+        assert agg["mean_s"] == pytest.approx((0.0 - 0.5) / (1.0 - 0.5))
+        assert agg["stars_s"] == 0

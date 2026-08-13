@@ -153,6 +153,7 @@ def _section(qa: str, data: dict, plans: Sequence[str]) -> list[str]:
     """QA 1종의 표. 지표별로 방안을 가로로 늘어놓는다."""
     keys: list[tuple[str, str]] = {
         "fc": [("mean_achieved", "달성률"), ("stars_achieved", "달성률 별점"),
+               ("mean_baseline", "무작위 베이스라인 R̄"),
                ("mean_s", "개선 비율 s"), ("stars_s", "s 별점"),
                ("optimal_hit", "최적안 적중"), ("fr_violation_cases", "FR 위반 케이스")],
         "cf": [("m_A", "노출 배수 m (A축)"), ("stars_m_A", "m_A 별점"),
@@ -191,6 +192,12 @@ def _section(qa: str, data: dict, plans: Sequence[str]) -> list[str]:
 def _notes(qa: str, data: dict, plans: Sequence[str]) -> list[str]:
     """수치만으로는 오독되는 지점을 표 아래에 붙인다."""
     notes: list[str] = []
+    if qa == "fc" and any((data.get(p) or {}).get("mean_baseline") is not None
+                          for p in plans):
+        notes.append("개선 비율 s는 **표본 전체의 달성률 평균과 R̄ 평균으로 한 번 환산**한 "
+                     "값이다 (24 §1.4 「집계 수준」) — 세션별 s의 평균이 아니므로 "
+                     "케이스 표(`cases.jsonl`)의 `s` 열을 평균 내면 값이 다르다. "
+                     "s = (달성률 − R̄) ÷ (1 − R̄)로 위 표에서 직접 검산할 수 있다")
     for p in plans:
         d = data.get(p) or {}
         if qa == "cf" and d.get("m_B") is None and d.get("b_note"):

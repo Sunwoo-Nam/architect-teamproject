@@ -195,6 +195,22 @@ class TestSectionNotes:
             "sc_issue": {"A": {"c": 0.1, "defect": True, "gate_ok": False}}})
         assert "게이트 실패" in md
 
+    def test_fc_baseline_row_is_rendered(self):
+        # R̄가 없으면 s를 재검산할 수 없다 — 표에 반드시 나와야 한다
+        md = render_markdown(meta(plans=["A"]), {
+            "fc": {"A": {"mean_achieved": 0.91, "mean_baseline": 0.88, "mean_s": 0.25}}})
+        assert "R̄" in md and "0.88" in md
+
+    def test_fc_pooled_conversion_explained(self):
+        md = render_markdown(meta(plans=["A"]), {
+            "fc": {"A": {"mean_achieved": 0.91, "mean_baseline": 0.88, "mean_s": 0.25}}})
+        assert "세션별 s의 평균이 아니" in md
+
+    def test_no_fc_note_without_baseline(self):
+        # 구 결과(R̄ 미기록)에는 검산 안내를 붙이지 않는다
+        md = render_markdown(meta(plans=["A"]), {"fc": {"A": {"mean_achieved": 0.91}}})
+        assert "세션별 s의 평균이 아니" not in md
+
     def test_no_note_when_clean(self):
         md = render_markdown(meta(plans=["A"]), {
             "sc_issue": {"A": {"c": 0.1, "max_issues": 10, "censored": False}}})

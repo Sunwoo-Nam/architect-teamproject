@@ -85,6 +85,31 @@ class TestFcRegression:
         b = statistics.fmean(s.achieved for _n, s in fc_scores["plan2"])
         assert b > a
 
+    @pytest.mark.parametrize("plan,base,s,stars", [
+        ("plan1a", 0.8759, 0.3086, 2),
+        ("plan2",  0.8759, 0.7411, 4),
+    ])
+    def test_pooled_s_matches_dp2(self, fc_scores, plan, base, s, stars):
+        """개선 비율 s의 집계 — dp2 원본 `raw.json`의 발표값과 일치해야 한다.
+
+        dp2 `campaign.py:73`·`full_campaign.py:349`는 처음부터 24 §1.4대로
+        달성률 평균과 R̄ 평균을 먼저 낸 뒤 한 번 환산했다. 이식 초판이 세션별 s를
+        평균 내면서 plan1a ★3·plan2 ★5로 한 칸씩 부풀었다 (§13-R7).
+
+        R̄가 두 방안에서 같은 것은 정상이다 — R̄는 후보 공간에만 의존하고
+        어떤 프로토콜을 돌렸는지와 무관하다.
+        """
+        agg = fc.aggregate([sc for _n, sc in fc_scores[plan]])
+        assert agg["mean_baseline"] == pytest.approx(base, abs=TOL)
+        assert agg["mean_s"] == pytest.approx(s, abs=TOL)
+        assert agg["stars_s"] == stars
+
+    def test_baseline_is_plan_independent(self, fc_scores):
+        # 같은 케이스 표본을 돌렸으므로 R̄는 방안과 무관하게 같아야 한다
+        a = fc.aggregate([s for _n, s in fc_scores["plan1a"]])["mean_baseline"]
+        b = fc.aggregate([s for _n, s in fc_scores["plan2"]])["mean_baseline"]
+        assert a == pytest.approx(b, abs=TOL)
+
     def test_plan1a_degrades_with_n(self, fc_scores):
         # 요약표에 가려져 있던 열화 — 3인 → 7인에서 방안 1-A만 떨어진다
         by = {n: statistics.fmean(s.achieved for m, s in fc_scores["plan1a"] if m == n)
