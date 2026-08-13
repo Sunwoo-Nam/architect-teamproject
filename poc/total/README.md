@@ -10,14 +10,30 @@
 ## 빠른 시작
 
 ```bash
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python -m pytest                       # 테스트 (측정 라이브러리 커버리지 98%)
+python3.14 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/python -m pytest                           # 테스트 (측정 라이브러리 커버리지 98%)
 
-.venv/bin/python experiments/nparty_1a_vs_2.py   # 방안 1-A vs 방안 2
-.venv/bin/python experiments/composite_1_vs_2.py # 1안 vs 2안
+.venv/bin/python experiments/nparty_1a_vs_2.py       # 방안 1-A vs 2 — QA 별점
+.venv/bin/python experiments/nparty_1a_vs_2_raw.py   # 방안 1-A vs 2 — 원지표 §1~§11
+.venv/bin/python experiments/composite_1_vs_2.py     # 1안 vs 2안 — QA 별점
 ```
 
+**파이썬은 3.14로 고정한다.** 총효용 합산 순서가 1 ULP만 달라져도 x* 선택이 뒤집히는
+사례가 실제로 있었다 — `python3`가 환경에 따라 다른 버전으로 잡히면 수치가 재현되지 않는다.
+
+**nparty 실험은 2종이고 각각 따로 실행한다.** 같은 두 방안을 재지만 자료의 수준이 다르다.
+
+| 실험 | 내용 | 측정기 | 소요 |
+|---|---|---|---|
+| `nparty-1a-vs-2` | QA 별점 — 항목별 등급 판정 | `total/qa/` | 수 분 |
+| `nparty-1a-vs-2-raw` | 원지표 — 달성률·라운드·phase·메모리·시간 실측값 | `_vendor/measures/` | 약 40분 |
+
+한 번 실행으로 둘 다 나오지 않는다. 실험 이름이 다르므로 `results/<실험명>/` 아래
+별도 폴더에 쌓이고 리포트 파일도 섞이지 않는다.
+
 빠른 확인은 `--cases 20` / `--scenarios 4 --sweep-axes 4,6,8` 로 규모를 줄인다.
+`nparty_1a_vs_2_raw.py`는 `--skip-n-sweep`(§11 생략, 30분 절약) ·
+`--issue-space-cases N`(§10 축소) 으로 줄인다.
 결과는 [`results/INDEX.md`](results/INDEX.md)에 실행별로 쌓인다.
 
 ## 다루는 QA
@@ -45,10 +61,11 @@ src/total/
     report.py          meta·raw.json·cases.jsonl·md/html·INDEX
   campaign.py          실험 공통 — 방안별 세션 묶음 → QA 5종 집계
   adapters/
-    nparty/            dp2 도메인 → 계약  (+ _vendor/ 프로토콜 원본)
+    nparty/            dp2 도메인 → 계약  (+ _vendor/ 프로토콜·측정기·리포트 원본)
     composite/         dpca 도메인 → 계약 (+ _vendor/ 전략 원본)
-datasets/              벤치마크 데이터 (nparty 537건 · composite 25건)
-experiments/           실험 2종 (독립 실행)
+datasets/              벤치마크 데이터 (nparty 1,112건 · composite 25건)
+scripts/               nparty 케이스 생성기 3종 (재생성용)
+experiments/           실험 3종 (독립 실행) — nparty 별점 · nparty 원지표 · composite 별점
 results/<실험>/<run_id>/
 ```
 
