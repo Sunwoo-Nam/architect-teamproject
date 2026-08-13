@@ -118,7 +118,8 @@ class TestFcRegression:
 
 
 class TestCfRegression:
-    """CF — 잔여 비밀률(판정)·노출 배수 m(보조). 분모 = 전체 후보, 모수 = 합의 세션."""
+    """CF — 잔여 비밀률(판정)·노출 배수 m(보조). 분모 = 전체 후보, 모수 = 합의 세션,
+    대표값 = 평균 (PL 확정 2026-08-13 — 격자 스냅 회피)."""
 
     @pytest.fixture(scope="class")
     @staticmethod
@@ -149,11 +150,11 @@ class TestCfRegression:
         # 분모 = 전체 후보 (2026-08-13 재개정) — 2인 세션에서 상대가 12개 중 3개를 봄
         assert anchor.depth == pytest.approx(0.25, abs=1e-3)
 
-    @pytest.mark.parametrize("plan,expected", [("plan1a", 0.667), ("plan2", 1.0)])
+    @pytest.mark.parametrize("plan,expected", [("plan1a", 0.7611), ("plan2", 1.1319)])
     def test_exposure_multiple(self, evaluated, plan, expected):
         assert evaluated[plan]["multiple"]["m"] == pytest.approx(expected, abs=1e-3)
 
-    @pytest.mark.parametrize("plan,expected", [("plan1a", 0.167), ("plan2", 0.25)])
+    @pytest.mark.parametrize("plan,expected", [("plan1a", 0.1903), ("plan2", 0.283)])
     def test_max_single_depth(self, evaluated, plan, expected):
         assert evaluated[plan]["multiple"]["max_single_depth"] == pytest.approx(
             expected, abs=1e-3)
@@ -171,7 +172,7 @@ class TestCfRegression:
         assert evaluated["plan1a"]["multiple"]["m"] < evaluated["plan2"]["multiple"]["m"]
 
     def test_secret_verdict_discriminates(self, evaluated):
-        # 판정 = 잔여 비밀률 (2026-08-13 재개정) — functional 3인 표본에서 1-A가 한 등급 위
+        # 판정 = 잔여 비밀률 (2026-08-13 재개정, 평균 대표값) — functional 3인 표본에서 한 등급 차
         assert evaluated["plan1a"]["multiple"]["stars_secret"] == 5
         assert evaluated["plan2"]["multiple"]["stars_secret"] == 4
         assert evaluated["plan1a"]["multiple"]["secret"] > evaluated["plan2"]["multiple"]["secret"]

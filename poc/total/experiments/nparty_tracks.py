@@ -136,7 +136,7 @@ def measure_track(name, cases):
         mean_base = statistics.mean(s.baseline for s in scores)
         s_val = fc.split_rule(mean_ach, mean_base) if hasattr(fc, "split_rule") else \
             (mean_ach - mean_base) / (1 - mean_base)
-        med_m = statistics.median(m_vals)
+        med_m = statistics.fmean(m_vals)  # CF 대표값 = 평균 (PL 확정 2026-08-13)
         med_rho = statistics.median(r["rho"] for r in rhos)
         out[plan] = {
             "sec": round(sec, 1),
@@ -145,12 +145,12 @@ def measure_track(name, cases):
                    "mean_baseline": round(mean_base, 4),
                    "s": round(s_val, 4), "stars_s": BAND_FC_S.stars(s_val),
                    "below_random_defect": s_val <= 0},
-            "cf": {"secret": round(1.0 - statistics.median(single_vals), 3),
+            "cf": {"secret": round(1.0 - statistics.fmean(single_vals), 3),
                    "stars_secret": cf.BAND_CF_SECRET.stars(
-                       1.0 - statistics.median(single_vals)),
+                       1.0 - statistics.fmean(single_vals)),
                    "agree_rate": round(agree_rate, 4),  # 모수=합의 세션 — 병기 의무 (24 §3.5)
                    "m": round(med_m, 3), "stars_m": cf.BAND_CF_M.stars(med_m),
-                   "max_single_depth": round(statistics.median(single_vals), 3)},
+                   "max_single_depth": round(statistics.fmean(single_vals), 3)},
             "tb": {"median_rho": round(med_rho, 4), "stars": BAND_TB_RHO.stars(med_rho),
                    "max_rho": round(max(r["rho"] for r in rhos), 4),
                    "defect_cases": sum(1 for r in rhos if r["defect"])},
@@ -203,7 +203,7 @@ def main() -> int:
         mean_base = statistics.mean(d["base"])
         s_val = fc.split_rule(mean_ach, mean_base) if hasattr(fc, "split_rule") else \
             (mean_ach - mean_base) / (1 - mean_base)
-        med_m = statistics.median(d["m"])
+        med_m = statistics.fmean(d["m"])
         med_rho = statistics.median(d["rho"])
         raw["combined"][p] = {
             "cases": len(d["ach"]),
@@ -212,11 +212,11 @@ def main() -> int:
                    "mean_baseline": round(mean_base, 4),
                    "s": round(s_val, 4), "stars_s": BAND_FC_S.stars(s_val),
                    "below_random_defect": s_val <= 0},
-            "cf": {"secret": round(1.0 - statistics.median(d["single"]), 3),
+            "cf": {"secret": round(1.0 - statistics.fmean(d["single"]), 3),
                    "stars_secret": cf.BAND_CF_SECRET.stars(
-                       1.0 - statistics.median(d["single"])),
+                       1.0 - statistics.fmean(d["single"])),
                    "m": round(med_m, 3), "stars_m": cf.BAND_CF_M.stars(med_m),
-                   "max_single_depth": round(statistics.median(d["single"]), 3)},
+                   "max_single_depth": round(statistics.fmean(d["single"]), 3)},
             "tb": {"median_rho": round(med_rho, 4), "stars": BAND_TB_RHO.stars(med_rho),
                    "max_rho": round(max(d["rho"]), 4),
                    "defect_cases": "n/a(케이스별 판정은 트랙 표 참조)"},
