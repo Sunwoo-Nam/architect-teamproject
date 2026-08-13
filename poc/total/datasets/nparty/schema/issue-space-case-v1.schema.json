@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DP2 N-party Issue-Space Case v1",
+  "description": "의제 조합 벤치마크 케이스 — 조합을 펼치지 않고 의제별 점수만 저장한다. 후보(조합)의 utility는 실행 시 계산한다: utility(조합) = Σ_j weights[의제_j] × scores[의제_j][값_j]. 조합 수가 10만이어도 파일은 수 KB다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "issues",
+    "participants",
+    "meta"
+  ],
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+      "description": "Benchmark Set 전체에서 유일한 케이스 식별자. 파일명(확장자 제외)과 일치해야 한다."
+    },
+    "issues": {
+      "type": "array",
+      "minItems": 1,
+      "description": "정해야 할 항목들. 순서가 곧 후보 튜플의 자리 순서다.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "values"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "description": "의제 식별자. 케이스 안에서 유일해야 한다."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "사람이 읽는 이름 (날짜, 시간, 영화관, 영화 등)"
+          },
+          "values": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "description": "그 의제의 선택지 목록",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "participants": {
+      "type": "array",
+      "minItems": 3,
+      "description": "참여자별 봉인 프로파일",
+      "items": {
+        "$ref": "#/$defs/participant"
+      }
+    },
+    "meta": {
+      "$ref": "#/$defs/meta"
+    }
+  },
+  "$defs": {
+    "participant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pid",
+        "initial_threshold",
+        "weights",
+        "scores"
+      ],
+      "properties": {
+        "pid": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "description": "케이스 안에서 유일한 참여자 식별자"
+        },
+        "initial_threshold": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "고정 수락 바닥선이자 결렬 시 utility"
+        },
+        "weights": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "의제별 가중치. 키는 issues[].id 집합과 정확히 일치하고, 값의 합은 1이어야 한다.",
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          }
+        },
+        "scores": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "의제별 선택지 점수. 키는 issues[].id 와 일치하고, 각 의제의 하위 키는 그 의제의 values 와 정확히 일치해야 한다.",
+          "additionalProperties": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            }
+          }
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "track",
+        "scenario_type",
+        "combination_count",
+        "issue_sizes",
+        "common_feasible_count",
+        "expected_no_deal",
+        "description"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "issue-space-case.v1"
+        },
+        "track": {
+          "type": "string",
+          "enum": [
+            "issue_space"
+          ]
+        },
+        "scenario_type": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "combination_count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "의제별 선택지 개수의 곱. 로더가 검산한다."
+        },
+        "issue_sizes": {
+          "type": "array",
+          "minItems": 1,
+          "description": "의제별 선택지 개수 (issues 순서대로). 로더가 검산한다.",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "common_feasible_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "모든 참여자의 utility가 자기 initial_threshold 이상인 조합의 수. 목표값으로 맞추는 것이 아니라 생성 결과를 기록한 것이며, 로더가 검산한다."
+        },
+        "expected_no_deal": {
+          "type": "boolean",
+          "description": "common_feasible_count == 0 인지. 표본 구성 확인과 데이터 오류 검출용."
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

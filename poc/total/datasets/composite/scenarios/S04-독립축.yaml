@@ -1,0 +1,19 @@
+meta:
+  id: S04
+  name: 독립 축 — 의존성 없는 순수 조합 폭발 (c 대조군)
+  conflict_level: mid
+  conflict_rho: 0.0
+  expected: agreement
+axes:
+  - {name: date, generator: date_slots, base_count: 7}
+  - {name: time, generator: time_slots, base_count: 6}
+  - {name: region, generator: regions, base_count: 5}
+  - {name: movie, generator: movies, base_count: 8}
+dependencies: []
+participants:
+  count: 2
+  profile_seed: 1204
+  initial_threshold: [0.4, 0.4]   # 위임 바닥선 = 결렬 시 각자의 utility (24.2)
+  styles: [default, default]
+agent_view: {weights: quantized3, score_dropout: 0.3, constraints: pass_hard}
+judge: {expected: agreement}   # FC 채점은 24 정본(달성률 U(r)/U(x*)) — oracle이 x*·R̄ 산출

@@ -1,0 +1,32 @@
+meta:
+  id: S11
+  name: 축 수 스윕 — 하루 약속 풀 플랜 (n = 4/6/8/10, 축당 값 5 균일)
+  conflict_level: mid
+  conflict_rho: 0.0
+  expected: agreement
+  axis_sweep: [4, 6, 8, 10]     # 실행 계획이 앞 n개 축만 사용 (프리픽스 안전)
+axes:
+  - {name: date, generator: date_slots, base_count: 5}
+  - {name: time, generator: time_slots, base_count: 5}
+  - {name: region, generator: regions, base_count: 5}
+  - {name: movie, generator: movies, base_count: 5}
+  - {name: theater, generator: theaters, base_count: 5}
+  - {name: restaurant, generator: restaurants, base_count: 5}
+  - {name: menu, generator: menus, base_count: 5}
+  - {name: cafe, generator: cafes, base_count: 5}
+  - {name: budget, generator: budget_bands, base_count: 5}
+  - {name: transport, generator: transports, base_count: 5}
+dependencies:
+  - {type: hard, rule: availability, subject: movie, over: region, coverage: 0.75}
+  - {type: hard, rule: membership, subject: theater, region_axis: region}
+  - {type: hard, rule: membership, subject: restaurant, region_axis: region}
+  - {type: soft, rule: same_region, a: region, b: cafe, penalty: 0.15}
+  - {type: soft, rule: conditional_pref, if_axis: budget, if_values: [low], then_axis: menu, preferred: [korean, chinese], penalty: 0.15}
+  - {type: soft, rule: conditional_home, if_axis: transport, if_values: [walk], then_axis: region, penalty: 0.2}
+participants:
+  count: 2
+  profile_seed: 1212
+  initial_threshold: [0.4, 0.4]   # 위임 바닥선 = 결렬 시 각자의 utility (24.2)
+  styles: [default, default]
+agent_view: {weights: quantized3, score_dropout: 0.3, constraints: pass_hard}
+judge: {expected: agreement}   # FC 채점은 24 정본(달성률 U(r)/U(x*)) — oracle이 x*·R̄ 산출

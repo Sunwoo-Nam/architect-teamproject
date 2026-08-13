@@ -1,0 +1,21 @@
+meta:
+  id: S05
+  name: 부드러운 의존 — 2안 재채점 근사 vs 1안 순서 처리
+  conflict_level: mid
+  conflict_rho: 0.0
+  expected: agreement
+axes:
+  - {name: date, generator: date_slots, base_count: 7}
+  - {name: time, generator: time_slots, base_count: 6}
+  - {name: region, generator: regions, base_count: 5}
+  - {name: movie, generator: movies, base_count: 8}
+dependencies:
+  - {type: soft, rule: conditional_home, if_axis: time, if_values: ["21:00"], then_axis: region, penalty: 0.3}
+  - {type: soft, rule: conditional_pref, if_axis: date, if_values: [mon, tue, wed, thu, fri], then_axis: time, preferred: ["19:00", "21:00"], penalty: 0.2}
+participants:
+  count: 2
+  profile_seed: 1206
+  initial_threshold: [0.4, 0.4]   # 위임 바닥선 = 결렬 시 각자의 utility (24.2)
+  styles: [default, default]
+agent_view: {weights: quantized3, score_dropout: 0.3, constraints: pass_hard}
+judge: {expected: agreement}   # FC 채점은 24 정본(달성률 U(r)/U(x*)) — oracle이 x*·R̄ 산출
