@@ -308,8 +308,11 @@ def run_session(
         phases=run.phases,
         messages=run.messages,
         bytes=run.bytes,
-        # 효용 평가 호출 수 — 순위표 구축(참여자마다 전 후보 1회)이 공통 하한이다
-        eval_calls=len(pids) * len(case._space_list()),
+        # 효용 평가 호출 수 — `AgentBeliefs.utility()` 실측 카운트 (24 §6.4-a).
+        # 예전에는 `참여자 수 × 후보 수` 공식이었는데 방안에 의존하지 않아 eval 항이
+        # 방안을 구분하지 못했다 (seq2·pool의 eval_ms가 똑같이 5.04ms로 나왔다).
+        # nparty 쪽은 처음부터 실측이라, 같은 항을 두 시나리오가 다르게 재고 있었다.
+        eval_calls=run.eval_calls,
         events=_events(run, pids, [a.name for a in scenario.axes]),
         peak_bytes=peak,
         base_bytes=base,

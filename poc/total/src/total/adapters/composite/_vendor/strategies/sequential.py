@@ -77,6 +77,7 @@ class AxisNegotiator(SAONegotiator):
 
     def _optimistic(self, value: Value) -> float:
         """합의 prefix + v + 남은 축은 최선값이라는 낙관 가정의 효용 상한."""
+        self.beliefs.note_eval()      # [이식 시 신설] 전체 축을 도는 효용 평가 (24 §6.4-a)
         total = 0.0
         for ax in self.scenario.axes:
             weight = self.beliefs.weights[ax.name]
@@ -89,6 +90,7 @@ class AxisNegotiator(SAONegotiator):
         return total  # soft 감점은 낙관 가정상 0으로 둔다 (상한이므로)
 
     def _score(self, value: Value) -> float:
+        self.beliefs.note_eval()      # [이식 시 신설] 축 단위 평가 — 계상은 하되 상한임에 유의
         base = self.beliefs.scores[self.axis.name][value.name]
         if not self.soft_aware:
             return base

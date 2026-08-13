@@ -245,3 +245,67 @@ class TestSweepIntegrity:
         point = run_sweep_point(sc, "pool", len(sc.axes))
         assert point.scale == sc.space_size()
         assert point.peak_bytes > 0
+
+
+class TestEvalCallsAreCounted:
+    """`eval_calls`는 **실측 카운트**여야 한다 — 공식 추정이면 방안을 구분하지 못한다.
+
+    이식 초판은 `len(pids) * len(space)`라는 공식을 썼다. `plan` 인자가 없으므로
+    방안이 무엇이든 같은 값이 나왔고, 실제로 seq2와 pool의 `median_eval_ms`가
+    똑같이 5.04ms로 찍혔다. 반면 nparty 쪽(`_vendor/protocol.py`)은 순위표 구축
+    + 방안별 재평가를 실제로 센다. **같은 QA 항의 입력을 두 시나리오가 다른
+    방법으로 만들고 있었다** — 24 §6.4-a의 eval 항이 요구하는 것은 호출 수다.
+
+    이제 `AgentBeliefs.utility()` 호출을 직접 센다. 두 도메인 모두 "효용 함수가
+    실제로 몇 번 불렸나"로 통일된다.
+    """
+
+    def test_eval_calls_positive(self, s01, s01_case):
+        s, _ = run_session(s01, "pool", case=s01_case)
+        assert s.eval_calls > 0
+
+    def test_eval_calls_differ_by_plan(self, s01, s01_case):
+        # 핵심 회귀 — 공식으로 되돌아가면 두 값이 같아진다
+        seq = run_session(s01, "seq2", case=s01_case)[0].eval_calls
+        pool = run_session(s01, "pool", case=s01_case)[0].eval_calls
+        assert seq != pool, (
+            f"방안이 달라도 eval_calls가 같다 — 공식 추정으로 되돌아갔다 "
+            f"(seq2 {seq} · pool {pool})"
+        )
+
+    def test_eval_calls_is_not_the_old_formula(self, s01, s01_case):
+        old = len(s01_case.pids) * len(s01_case._space_list())
+        got = {p: run_session(s01, p, case=s01_case)[0].eval_calls
+               for p in ("seq2", "pool")}
+        assert not all(v == old for v in got.values()), f"옛 공식값 {old}과 같다: {got}"
+
+    def test_eval_calls_reproducible(self, s01, s01_case):
+        # 계수기가 세션 간에 새지 않는지 — 전역 카운터면 두 번째가 더 크게 나온다
+        a = run_session(s01, "pool", case=s01_case)[0].eval_calls
+        b = run_session(s01, "pool", case=s01_case)[0].eval_calls
+        assert a == b, f"세션마다 값이 달라진다 ({a} → {b}) — 계수기가 누적되고 있다"
+
+    def test_compression_plans_evaluate_less_than_full_enumeration(self, s01, s01_case):
+        # 후보군을 압축하는 방안이 전수 열거보다 적게 평가해야 한다 — 그게 설계 의도다
+        full = run_session(s01, "full", case=s01_case)[0].eval_calls
+        pool = run_session(s01, "pool", case=s01_case)[0].eval_calls
+        assert pool < full, f"압축 방안이 전수 열거보다 많이 평가한다 (pool {pool} · full {full})"
+
+    def test_sequential_evaluations_are_not_bypassed(self):
+        """1안은 `utility()`를 거치지 않고 `weights`·`scores`를 직접 읽는다.
+
+        `utility()` 호출만 세면 1안이 세 자릿수 적게 잡힌다 — S01에서 2회로
+        나왔었다. `_optimistic`·`_score`도 같은 계수기로 세야 한다.
+        """
+        from total.adapters.composite._vendor.harness.beliefs import AgentBeliefs
+        import inspect
+        src = inspect.getsource(AgentBeliefs)
+        assert "def note_eval" in src, "우회 경로용 계수 진입점이 사라졌다"
+
+        sc = load("S01")
+        case = CompositeCase(sc.id, sc)
+        seq = run_session(sc, "seq2", case=case)[0].eval_calls
+        assert seq > 100, (
+            f"1안 eval_calls가 {seq}회 — 축 단위 평가가 계수에서 빠졌다 "
+            f"(_optimistic·_score의 note_eval() 호출을 확인할 것)"
+        )
