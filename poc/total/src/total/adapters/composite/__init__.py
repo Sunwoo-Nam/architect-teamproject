@@ -239,11 +239,14 @@ class CompositeCase:
 
 
 def base_bytes(case: CompositeCase) -> int:
-    """공통 기저 — 후보 공간과 각자의 순위표. 방안과 무관한 하한 (24 §2.8 단서)."""
+    """공통 기저 — **1인분**: 후보 공간 사본 + 자기 순위표 (24 §2.8, PL 확정 2026-08-13).
+    실배포에서 각 단말은 공간의 자기 사본을 가지므로 단말 단위 기저는 공간 + 자기 순위표다.
+    선호는 균등 규모라 첫 참여자로 대표한다. (피크는 2인 교대 실행의 프로세스 값 —
+    단말 기준의 보수 상한으로 명시하고 유지한다.)"""
     space = case._space_list()
     total = deep_size(space)
-    for p in case.preferences:
-        total += deep_size(p.ranked())
+    if case.preferences:
+        total += deep_size(case.preferences[0].ranked())
     return total
 
 

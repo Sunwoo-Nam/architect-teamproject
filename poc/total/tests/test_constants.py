@@ -138,8 +138,8 @@ class TestRuBand:
     """RU는 절대 MB를 한도로 나눈 사용률 r로 판정한다 (24 §2.8)."""
 
     def test_ceiling_is_documented(self):
-        # ART 힙 상한 256MB — 24 §2.8의 "협상 몫 한도" 자리
-        assert RU_CEILING_BYTES == 256 * 1024 * 1024
+        # 협상 몫 한도 = 256MB × 75%(GC 여유) − 64MB(앱 기본, 잠정) = 128MB — 24 §2.8 (2026-08-13)
+        assert RU_CEILING_BYTES == 128 * 1024 * 1024
 
     def test_step_is_handbook_15pp(self):
         assert RU_STEP == 0.15
