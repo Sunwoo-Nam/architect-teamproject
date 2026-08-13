@@ -1,0 +1,43 @@
+<mxfile host="app.diagrams.net" modified="2026-08-12T00:00:00.000Z" agent="Codex" version="24.7.17">
+  <diagram id="failure-impact" name="06 장애 영향·미결정사항">
+    <mxGraphModel dx="1500" dy="950" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/><mxCell id="1" parent="0"/>
+        <mxCell id="title" value="방안 1-A vs 방안 2 — 장애 영향·미결정사항" style="text;html=1;fontSize=20;fontStyle=1;align=left;" vertex="1" parent="1"><mxGeometry x="40" y="20" width="1050" height="34" as="geometry"/></mxCell>
+        <mxCell id="sub" value="원문은 담당 단말의 장애·복구를 범위 밖으로 둔다. 따라서 아래의 복구 항목은 해결책이 아니라 외부 설계에서 확정할 공백이다." style="text;html=1;fontSize=12;fontColor=#555555;" vertex="1" parent="1"><mxGeometry x="40" y="55" width="1370" height="24" as="geometry"/></mxCell>
+        <mxCell id="lg1" value="확정된 영향" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1"><mxGeometry x="40" y="88" width="135" height="26" as="geometry"/></mxCell>
+        <mxCell id="lg2" value="외부 설계 대상" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;dashed=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="185" y="88" width="145" height="26" as="geometry"/></mxCell>
+
+        <mxCell id="common" value="공통 장애 집중점 · P0 담당자" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=15;" vertex="1" parent="1"><mxGeometry x="570" y="135" width="360" height="48" as="geometry"/></mxCell>
+        <mxCell id="p0fail" value="P0 이탈 / 프로세스 종료 / 로컬 상태 소실" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=13;" vertex="1" parent="1"><mxGeometry x="570" y="215" width="360" height="58" as="geometry"/></mxCell>
+        <mxCell id="stop" value="라운드 제어·성립 판정·종료 선언 중단&#10;두 방안 모두 단일 조정·판정 주체에 의존" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=12;" vertex="1" parent="1"><mxGeometry x="530" y="310" width="440" height="70" as="geometry"/></mxCell>
+        <mxCell id="ecommon1" style="html=1;endArrow=block;strokeColor=#9673a6;strokeWidth=2;" edge="1" parent="1" source="common" target="p0fail"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ecommon2" style="html=1;endArrow=block;strokeColor=#b85450;strokeWidth=2;" edge="1" parent="1" source="p0fail" target="stop"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="headL" value="방안 1-A · 결합 reply 유실" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=14;" vertex="1" parent="1"><mxGeometry x="40" y="420" width="680" height="40" as="geometry"/></mxCell>
+        <mxCell id="msgL" value="reply(i,k)&#10;= O/X(i,Ck) + nextProposal(i,k+1)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff5f5;strokeColor=#b85450;fontFamily=Courier New;fontSize=12;" vertex="1" parent="1"><mxGeometry x="75" y="500" width="260" height="80" as="geometry"/></mxCell>
+        <mxCell id="lossL" value="1건 유실" style="shape=mxgraph.basic.octagon2;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=13;" vertex="1" parent="1"><mxGeometry x="390" y="510" width="115" height="60" as="geometry"/></mxCell>
+        <mxCell id="impactL" value="동시 영향&#10;• 현재 후보의 O/X 누락&#10;• 다음 라운드 후보 누락&#10;• 전원 O 판정과 다음 배포 둘 다 진행 불가능" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=12;fontSize=11;" vertex="1" parent="1"><mxGeometry x="535" y="480" width="170" height="130" as="geometry"/></mxCell>
+        <mxCell id="edgeL1" style="html=1;endArrow=block;strokeColor=#b85450;" edge="1" parent="1" source="msgL" target="lossL"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="edgeL2" style="html=1;endArrow=block;strokeColor=#b85450;" edge="1" parent="1" source="lossL" target="impactL"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="netL" value="offer 유실 / 참여자 일시 이탈&#10;해당 참여자는 후보를 평가할 수 없어 reply를 만들 수 없음" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1"><mxGeometry x="75" y="640" width="630" height="70" as="geometry"/></mxCell>
+
+        <mxCell id="headR" value="방안 2 · 후보 submit 유실" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" vertex="1" parent="1"><mxGeometry x="780" y="420" width="680" height="40" as="geometry"/></mxCell>
+        <mxCell id="msgR" value="submit(i,k)&#10;= proposal(i,k)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f4f8ff;strokeColor=#6c8ebf;fontFamily=Courier New;fontSize=12;" vertex="1" parent="1"><mxGeometry x="815" y="500" width="260" height="80" as="geometry"/></mxCell>
+        <mxCell id="lossR" value="1건 유실" style="shape=mxgraph.basic.octagon2;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;" vertex="1" parent="1"><mxGeometry x="1130" y="510" width="115" height="60" as="geometry"/></mxCell>
+        <mxCell id="impactR" value="직접 영향&#10;• 해당 참여자의 라운드 k 후보 누락&#10;• 누적 교집합 성립이 지연·누락될 수 있음&#10;• 별도 O/X 데이터는 없음" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=12;fontSize=11;" vertex="1" parent="1"><mxGeometry x="1275" y="480" width="170" height="130" as="geometry"/></mxCell>
+        <mxCell id="edgeR1" style="html=1;endArrow=block;strokeColor=#6c8ebf;" edge="1" parent="1" source="msgR" target="lossR"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="edgeR2" style="html=1;endArrow=block;strokeColor=#6c8ebf;" edge="1" parent="1" source="lossR" target="impactR"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="netR" value="submit 유실 / 참여자 일시 이탈&#10;P0의 해당 참여자 누적 집합이 라운드 진행을 따라가지 못함" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1"><mxGeometry x="815" y="640" width="630" height="70" as="geometry"/></mxCell>
+
+        <mxCell id="openTitle" value="외부 설계에서 확정할 사항 — 현재 프로토콜 스펙은 답을 정하지 않음" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;dashed=1;fontStyle=1;fontSize=13;" vertex="1" parent="1"><mxGeometry x="180" y="750" width="1140" height="42" as="geometry"/></mxCell>
+        <mxCell id="open1" value="Timeout / 라운드 마감&#10;누구의 메시지까지 기다릴가?" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#d6b656;dashed=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="105" y="820" width="220" height="65" as="geometry"/></mxCell>
+        <mxCell id="open2" value="Retry / 멱등성&#10;재전송과 중복 제출을 어떻게 구분할가?" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#d6b656;dashed=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="345" y="820" width="220" height="65" as="geometry"/></mxCell>
+        <mxCell id="open3" value="State persistence&#10;P0 재시작 후 현재/누적 상태를 복구할가?" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#d6b656;dashed=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="585" y="820" width="220" height="65" as="geometry"/></mxCell>
+        <mxCell id="open4" value="P0 succession&#10;담당자 이탈 시 누가 상태와 판정권을 승계할가?" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#d6b656;dashed=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="825" y="820" width="220" height="65" as="geometry"/></mxCell>
+        <mxCell id="open5" value="Final-result acknowledgement&#10;종료 통지 유실 시 전원의 결과를 어떻게 일치시킬가?" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#d6b656;dashed=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="1065" y="820" width="330" height="65" as="geometry"/></mxCell>
+        <mxCell id="bottom" value="장애 관점 결론  │  두 방안 모두 P0가 공통 중단점이다. 메시지 1건 유실 시 1-A는 결합된 두 의미를, 2는 후보 하나를 잃는다." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=13;" vertex="1" parent="1"><mxGeometry x="180" y="900" width="1140" height="42" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
