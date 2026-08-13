@@ -231,7 +231,7 @@ def plant_pool_trap(axes, profiles, deps, rng):
     return {"trap": "pool", "axes": planted, "boost": [t1["name"], t2["name"]]}
 
 
-def plant_path_trap(axes, profiles, deps, rng):
+def plant_path_trap(axes, profiles, deps, rng, pool_miss=False):
     """1안(seq) 함정 — 앞 축 인기값이 뒤 축의 좋은 값을 하드 봉쇄 (경로 의존).
 
     앞 축 e: 미끼 a(0.95) vs 대안 m(0.68). 뒤 축 L의 좋은 값 g1·g2(0.90)는
@@ -244,11 +244,15 @@ def plant_path_trap(axes, profiles, deps, rng):
     a_val, m_val = e_names[0], e_names[1]
     e_map = {n: 0.30 for n in e_names}
     e_map[a_val], e_map[m_val] = 0.95, 0.74
+    d2_val = None
+    if pool_miss and len(e_names) >= 3:
+        d2_val = e_names[2]
+        e_map[d2_val], e_map[m_val] = 0.88, 0.70   # m을 한계효용 3위로 — pool k=2 밖
     _set_scores(profiles, early["name"], e_map)
 
     l_names = [v["name"] for v in late["values"]]
     goods = l_names[:2]
-    l_map = {n: 0.56 for n in l_names}
+    l_map = {n: 0.52 for n in l_names}
     for g in goods:
         l_map[g] = 0.90
     _set_scores(profiles, late["name"], l_map)
@@ -256,7 +260,9 @@ def plant_path_trap(axes, profiles, deps, rng):
         deps.append({"type": "hard", "rule": "availability_explicit",
                      "subject": late["name"], "subject_value": g,
                      "allowed": {early["name"]: [m_val]}})
-    return {"trap": "path", "early": {early["name"]: {"lure": a_val, "alt": m_val}},
+    return {"trap": "path", "variant": "pool_miss" if d2_val else "basic",
+            "early": {early["name"]: {"lure": a_val, "alt": m_val,
+                                      **({"lure2": d2_val} if d2_val else {})}},
             "late": {late["name"]: {"goods": goods}},
             "boost": [early["name"], late["name"]]}
 
@@ -370,7 +376,7 @@ def _trap_margins(fix, min_gap=0.12):
                         hits.append(True)
             else:
                 (e_ax, e_d), = info["early"].items()
-                if outcome[e_ax].name == e_d["lure"]:
+                if outcome[e_ax].name in (e_d["lure"], e_d.get("lure2")):
                     hits.append(True)
         return bool(hits)
 
@@ -400,7 +406,52 @@ def _trap_margins(fix, min_gap=0.12):
     gap = best_clean[0] - best_decoy[0]
     if gap < min_gap:
         return False, f"함정 격차 {gap:.3f} < {min_gap}"
+    if gap > 0.30:
+        return False, f"함정 격차 {gap:.3f} > 0.30 — 과도 (별점 격차 과대의 원인)"
+    if best_clean[1] < 0.12:
+        return False, f"정답 바닥선 여유 {best_clean[1]:.3f} < 0.12 (정답 쪽 막판 수락 방지)"
     return True, {"decoy_gap": round(gap, 4), "decoy_slack": round(best_decoy[1], 4)}
+
+
+
+def _plain_slack(fix):
+    """plain 폭주 방지 — 최선 유효 조합의 참여자별 바닥선 여유 ≥ 0.12.
+
+    여유가 얇으면 수락이 축 세션 막판(양보선 바닥)에서만 일어나 라운드가 상한까지
+    차오른다 (파일럿 v3-v4 실측 — TB 꼬리 오염의 주범). 함정 없는 판은 "편안한
+    정답이 존재하는 현실 판"으로 통제한다.
+    """
+    import itertools
+    tmp = OUT / "__tmp__.json"
+    tmp.write_text(json.dumps(fix, ensure_ascii=False))
+    try:
+        sc = load_fixture(tmp)
+    finally:
+        tmp.unlink(missing_ok=True)
+    from total.adapters.composite._vendor.common.profiles import build_truth_profiles, truth_utility
+    from total.adapters.composite._vendor.common.rules import (
+        build_hard_rules, build_participant_hard, build_soft_rules)
+    truths = build_truth_profiles(sc)
+    hard = build_hard_rules(sc) + build_participant_hard(sc)
+    soft = build_soft_rules(sc, [t.home_region for t in truths])
+    thr = [t.initial_threshold for t in truths]
+    axis_names = sc.axis_names()
+    best = None
+    for combo in itertools.product(*[ax.values for ax in sc.axes]):
+        o = dict(zip(axis_names, combo))
+        if not all(r(o) for r in hard):
+            continue
+        us = [truth_utility(truths[i], i, o, soft) for i in range(2)]
+        if any(u < thr[i] for i, u in enumerate(us)):
+            continue
+        entry = (sum(us), min(us[i] - thr[i] for i in range(2)))
+        if best is None or entry[0] > best[0]:
+            best = entry
+    if best is None:
+        return False, "유효 조합 없음"
+    if best[1] < 0.12:
+        return False, f"정답 바닥선 여유 {best[1]:.3f} < 0.12 (막판 수락 → 라운드 폭주)"
+    return True, {"xstar_slack": round(best[1], 4)}
 
 
 def gen_case(track, n, kind, idx, seed):
@@ -437,7 +488,8 @@ def gen_case(track, n, kind, idx, seed):
         deps += realistic_deps(axes, rng, planted_axes=set(trap_info["boost"]))
     elif kind == "hard_path":
         profiles = make_profiles(axes, rng, rho, thr)
-        trap_info = plant_path_trap(axes, profiles, deps, rng)
+        trap_info = plant_path_trap(axes, profiles, deps, rng,
+                                    pool_miss=(idx % 10) < 4)
         profiles = _reboost(axes, profiles, rng, trap_info["boost"])
         deps += realistic_deps(axes, rng, planted_axes=set(trap_info["boost"]))
     elif kind == "mixed":
@@ -511,7 +563,7 @@ def main():
     args = ap.parse_args()
 
     OUT.mkdir(parents=True, exist_ok=True)
-    per_level = (1, 1, 1, 2, 1) if args.pilot else (8, 8, 3, 20, 5)
+    per_level = (2, 0, 0, 3, 1) if args.pilot else (10, 0, 0, 29, 5)
     rs_per = 2 if args.pilot else 20
     plan = [("cr", n, kind) for n, kind in cr_plan(per_level)]
     plan += [("rs", n, kind) for n, kind in rs_plan(rs_per)]
@@ -538,10 +590,16 @@ def main():
                 ok, summary = _oracle_check(
                     fix, fix["meta"]["expected"],
                     trap_info=fix["meta"].get("planted"))
+                if ok and track == "cr" and kind == "plain":
+                    ok, slack_summary = _plain_slack(fix)
+                    if ok:
+                        summary = {**summary, **slack_summary}
+                    else:
+                        summary = slack_summary
                 if ok and fix["meta"].get("planted"):
                     # mixed는 회피 대상이 3개(유인값+미끼 2)라 격차가 구조적으로 좁다
                     ok, trap_summary = _trap_margins(
-                        fix, min_gap=0.08 if kind == "mixed" else 0.12)
+                        fix, min_gap=0.08 if kind == "mixed" else 0.15)
                     if ok:
                         summary = {**summary, **trap_summary}
                     else:
