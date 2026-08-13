@@ -1,24 +1,63 @@
 # 다자 합의 프로토콜 Benchmark Set
 
-이 폴더는 `poc/dp2-nparty`의 두 프로토콜 방안이 공통으로 사용하는 정적 협상 사례를 보관한다.
+이 폴더는 nparty 실험(방안 1-A vs 방안 2)의 두 프로토콜 방안이 공통으로 사용하는 정적 협상 사례를 보관한다.
 두 방안은 동일한 후보 목록과 동일한 참여자 프로파일로 실행되어야 한다.
 
 정적 파일 계약과 로더가 준비되어 있고, 케이스는 [`01-테스트-케이스-확장-계획.md`](01-테스트-케이스-확장-계획.md) §10의 단계에 따라 확장 중이다.
 
+## 케이스 현황
+
+원본은 `poc/dp2-nparty/data/benchmark/cases/`였고, 2026-08-13에 전량을 이 폴더로 옮겼다(바이트 단위 동일).
+
+| 폴더 | 건수 | 스키마 | 내용 |
+|---|---:|---|---|
+| `fixtures/conformance/` | 12 | `benchmark-case.v1` | 프로토콜 불변조건·경계값 — 통계 표본에서 제외 |
+| `cases/functional/` | 160 | `benchmark-case.v1` | Total Utility 달성률 비교 (3인 100 · 5인 30 · 7인 30) |
+| `cases/scalability/participants/` | 300 | `benchmark-case.v1` | 참여자 수 family (30 family × N 10수준) |
+| `cases/issue-space/` | 80 | `issue-space-case.v1` | 의제 조합 트랙 A — 전원 수락 가능 조합 목표 비율 0.5% |
+| `cases/issue-space-b/` | 80 | `issue-space-case.v1` | 의제 조합 트랙 B — 같은 목표 비율 5% |
+| `cases/issue-space-n/` | 480 | `issue-space-case.v1` | 참여자 수(N)별 의제 조합 — 작은 N의 참여자가 큰 N의 앞 N명과 같음 |
+| **합계** | **1,112** | | `cases/` 1,100건 + `fixtures/` 12건 |
+
+## 재생성
+
+생성기는 [`../../scripts/`](../../scripts/)에 있다. 모두 시드 고정이라 같은 인자로 다시 돌리면 바이트 단위로 같은 파일이 나온다.
+아래 명령은 `poc/total`에서 실행하며, 출력 폴더 기본값이 이 폴더를 가리키므로 `--out` 없이 쓰면 제자리에 덮어쓴다.
+
+```bash
+# functional 160건 — 참여자 수마다 시드가 다르다 (표본을 독립적으로 뽑기 위함)
+.venv/bin/python scripts/generate_functional.py --participants 3 --per-type 20 --seed 20260811
+.venv/bin/python scripts/generate_functional.py --participants 5 --per-type 6  --seed 20260812
+.venv/bin/python scripts/generate_functional.py --participants 7 --per-type 6  --seed 20260813
+
+# scalability 300건 (k 1·2·3 × 10 family × N 10수준)
+.venv/bin/python scripts/generate_scalability.py
+
+# issue-space 80건 / issue-space-b 80건
+.venv/bin/python scripts/generate_issue_space.py --track a
+.venv/bin/python scripts/generate_issue_space.py --track b
+
+# issue-space-n 480건 (S 3단계 × 참여자 8수준 × 20건)
+# --nested 는 트랙 A의 기본 출력 폴더(issue-space)를 쓰므로 --out 을 반드시 준다
+.venv/bin/python scripts/generate_issue_space.py --track a --nested \
+    --steps 5 6 8 --participants 3 5 10 15 20 30 40 50 --per-config 20 \
+    --out datasets/nparty/cases/issue-space-n
+```
+
 ## 읽고 검증하기
 
 ```bash
-.venv/bin/python -m pytest tests/test_benchmark_data.py tests/test_benchmark_conformance.py
+.venv/bin/python -m pytest tests/test_regression_nparty.py
 ```
 
 ```python
-from dp2_nparty.benchmark import JsonBenchmarkLoader
+from total.adapters.nparty._vendor.benchmark import JsonBenchmarkLoader
 
 for case in JsonBenchmarkLoader(track="conformance").cases():
     print(case.case_id, case.feasible())
 ```
 
-`JsonBenchmarkLoader`는 `fixtures/`와 `cases/` 아래의 모든 `*.json`을 읽어 `BenchmarkCase`로 돌려준다. 순회 순서는 `case_id` 사전순으로 고정된다 — 실행 순서가 결과에 영향을 주지 않아야 재현이 성립하기 때문이다. 계약을 어긴 파일이 있으면 조용히 건너뛰지 않고 `BenchmarkValidationError`로 실패한다.
+`JsonBenchmarkLoader`는 `fixtures/`와 `cases/` 아래의 `benchmark-case.v1` 파일을 읽어 `BenchmarkCase`로 돌려준다. 스키마가 다른 `issue-space*` 폴더는 로더의 `FOREIGN_SCHEMA_DIRS` 목록으로 제외되고, `IssueSpaceLoader`가 따로 읽는다 — 폴더를 새로 늘리면 그 목록에도 등록해야 한다. 순회 순서는 `case_id` 사전순으로 고정된다 — 실행 순서가 결과에 영향을 주지 않아야 재현이 성립하기 때문이다. 계약을 어긴 파일이 있으면 조용히 건너뛰지 않고 `BenchmarkValidationError`로 실패한다.
 
 ## 책임 경계
 
@@ -37,7 +76,7 @@ Benchmark Set이 제공하지 않는 값:
 - 특정 프로토콜 방안의 예상 합의 결과
 - 유효 후보, 최적 후보, 결렬 utility, Total Utility 달성률
 
-마지막 항목들은 `src/dp2_nparty/measures/fc.py`가 케이스 입력으로부터 계산한다.
+마지막 항목들은 `src/total/qa/fc.py`가 케이스 입력으로부터 계산한다.
 
 ## 파일 형식
 
@@ -47,21 +86,26 @@ Benchmark Set이 제공하지 않는 값:
 - `NO_DEAL`은 측정기가 별도로 추가하는 예약 결과이므로 후보나 utility map에 넣지 않는다.
 - 직접 작성한 정적 케이스에는 seed가 필요하지 않다.
 
+아래 규격은 `benchmark-case.v1`(후보를 평면 목록으로 펼쳐 저장) 전용이다. `issue-space*` 폴더는 후보를 펼치지 않고 의제별 점수만 저장하는 `issue-space-case.v1`을 쓰며, 그 근거와 필드 구성은 [`../../scripts/generate_issue_space.py`](../../scripts/generate_issue_space.py) 서두 주석에 있다.
+
 저장 구조:
 
 ```text
 fixtures/
   conformance/   프로토콜 불변조건과 경계값 확인 — pass/fail 검증 전용
 cases/
-  functional/    Total Utility 달성률 비교 표본
-  scalability/   참여자 수 증가 비교 family
+  functional/               Total Utility 달성률 비교 표본
+  scalability/participants/ 참여자 수 증가 비교 family
+  issue-space/              의제 조합 트랙 A (issue-space-case.v1)
+  issue-space-b/            의제 조합 트랙 B (issue-space-case.v1)
+  issue-space-n/            참여자 수별 의제 조합 (issue-space-case.v1)
 ```
 
 `fixtures/`와 `cases/`를 나누는 이유는 용도가 다르기 때문이다. `fixtures/`의 경계 사례는 평가 통계에 넣지 않는다 — 극단적으로 구성된 사례가 달성률 평균이나 확장 지수 회귀를 왜곡하지 않도록 표본에서 분리한다. `cases/`만 통계 표본이다.
 
 ## 케이스와 코드의 대응
 
-JSON 최상위 필드는 `src/dp2_nparty/benchmark.py`의 `BenchmarkCase`에 직접 대응한다.
+JSON 최상위 필드는 `src/total/adapters/nparty/_vendor/benchmark.py`의 `BenchmarkCase`에 직접 대응한다.
 
 | JSON 필드 | 코드 | 의미 |
 |---|---|---|
@@ -153,6 +197,7 @@ JSON Schema만으로 검사할 수 없어 로더 또는 별도 검증기가 확�
 ## 표본 구성 요구
 
 - Functional Correctness 표본에는 initial threshold 이상인 실후보가 없는 결렬 사례를 일정 비율 포함한다.
-- 참여자 수 Scalability 표본은 `N ∈ {3, 4, 5, 6, 8, 10}`을 사용한다.
+- 참여자 수 Scalability 표본은 `N ∈ {3, 4, 5, 6, 8, 10, 15, 20, 30, 50}`을 사용한다 (`scripts/generate_scalability.py`의 `N_LEVELS`). 15 이상은 만장일치로 합의가 성립할 수 없는 구조 검증 구간이며, 그 사실을 결과 해석에 명시한다.
+- `cases/issue-space-n/`의 참여자 수 수준은 `N ∈ {3, 5, 10, 15, 20, 30, 40, 50}`으로 위와 다르다. 의제 조합 스키마는 후보를 펼치지 않으므로 후보 수를 N에 맞춰 늘릴 필요가 없어 별도 수준을 쓴다.
 - 같은 Scalability family는 N과 무관하게 공통 feasible 후보 수를 고정하여 난이도 교락을 통제한다.
 - 두 프로토콜 방안은 같은 `case_id`의 후보와 프로파일을 변경 없이 사용한다.

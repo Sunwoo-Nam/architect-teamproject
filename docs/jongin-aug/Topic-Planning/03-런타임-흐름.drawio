@@ -1,0 +1,133 @@
+<mxfile host="app.diagrams.net" agent="claude-code" version="24.7.17">
+  <diagram id="topic-planning-runtime" name="Topic Planning 런타임 흐름">
+    <mxGraphModel dx="1150" dy="1260" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1150" pageHeight="1260" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===== 반복 구간 배경 ===== -->
+        <mxCell id="loopbox" value="토픽 루프   —   남은 토픽이 없을 때까지" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FBFCFE;strokeColor=#6C8EBF;verticalAlign=top;align=left;spacingLeft=14;spacingTop=8;fontSize=14;fontStyle=1;fontColor=#333333;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="615" width="800" height="400" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 준비 구간 ===== -->
+        <mxCell id="n1" value="IDS로부터 Negotiation Request 수신&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;주제 · 참여자 · 기한 · 위임 정책 · 하드 제약&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="40" width="440" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" value="Topic Decomposer — 주제를 토픽 후보로 분해 (입도는 시스템이 결정)&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;&amp;quot;6박 7일 쿄토 여행&amp;quot; → 1일 오전·점심 / 1일 오후·저녁 / 2일 …&lt;br&gt;입도 기준: 토픽의 의제 조합이 하위 세션의 max_candidates 안에 들어올 것&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="120" width="440" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" value="Decomposition Announcer — 분해안 통보&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;발의자가 확정한 분해안을 통보한다. 상대는 역제안하지 않는다&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="210" width="440" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="d1" value="상대가&lt;br&gt;ACK 했는가" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="295" width="220" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" value="Topic → Issue Builder  +  Value Domain Resolver&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;토픽마다 의제 집합을 만들고, 실제 값 후보를 도구 조회로 채운다&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="425" width="440" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" value="Topic Dependency Graph  +  Global Budget Allocator&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;토픽 실행 순서를 정하고, 총예산 · 총시간을 토픽별 상한으로 배분한다&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="515" width="440" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 루프 내부 ===== -->
+        <mxCell id="l1" value="Topic Session Orchestrator — 다음 토픽 세션 개시&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;앞 토픽의 확정값과 남은 자원을 이번 토픽의 제약으로 전파&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="655" width="440" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="l2" value="Topic Negotiation Session — 복합 의제 협상 실행 (하위 계층)&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;세션 내 N인 진행은 다자 합의 프로토콜이 담당&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEEEEE;strokeColor=#999999;fontSize=12;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="180" y="740" width="440" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="d2" value="합의가&lt;br&gt;성립했는가" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="825" width="220" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="bt" value="Backtrack Controller&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;되돌아갈 토픽 선택&lt;br&gt;되돌림 횟수 상한 관리&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="680" y="830" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="l3" value="Plan State Store — 이번 토픽 합의를 잠정(tentative) 기록&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;전체 계획이 확정되기 전에는 외부 commit 하지 않는다&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="950" width="440" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="usr" value="사용자&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;결정 요청&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#999999;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="950" y="955" width="150" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 마무리 ===== -->
+        <mxCell id="n6" value="Plan Assembler — 전 토픽 잠정 합의 조립 · 전역 정합성 검증&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;예산 총합 · 이동 연속성 · 시간 겹침&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="1060" width="440" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="n7" value="일괄 commit → Tool Calling (FR-MAF-09)&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;예약 · 캘린더 등록 등 후속 실행&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEEEEE;strokeColor=#999999;fontSize=12;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="180" y="1145" width="440" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 흐름 ===== -->
+        <mxCell id="f1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="n1" target="n2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="f2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="n2" target="n3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="f3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="n3" target="d1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="f4" value="ACK" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="d1" target="n4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="f5" value="REJECT — 입도를 바꿔 재분해&lt;br&gt;해석_불가 · 참여_불가 · 제약_충돌" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;strokeColor=#B85450;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;verticalAlign=bottom;" edge="1" parent="1" source="d1" target="n2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="110" y="340" /><mxPoint x="110" y="152" /></Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="n4" target="n5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="f7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="n5" target="l1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="f8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="l1" target="l2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="f9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="l2" target="d2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="f10" value="예" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="d2" target="l3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="f11" value="아니오 — 결렬 · 실행 가능한 값 없음" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;strokeColor=#B85450;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;verticalAlign=bottom;" edge="1" parent="1" source="d2" target="bt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="f12" value="앞 토픽으로 되돌림" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;strokeColor=#B85450;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="bt" target="l1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="780" y="682" /></Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f13" value="상한 초과" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;strokeColor=#B85450;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="bt" target="usr">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="780" y="983" /></Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f14" value="남은 토픽 있음" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;strokeColor=#666666;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="l3" target="l1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="140" y="977" /><mxPoint x="140" y="682" /></Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f15" value="남은 토픽 없음" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="l3" target="n6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="f16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="n6" target="n7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 주석 ===== -->
+        <mxCell id="c1" value="여기까지가 준비 구간.&lt;br&gt;세션을 열기 전에 양측의 토픽 경계가 일치해 있어야 한다.&lt;br&gt;발의자 확정이므로 상대는 역제안하지 않지만,&lt;br&gt;REJECT 경로는 남긴다 — 없으면 결렬이 정의되지 않는다." style="text;html=1;align=left;verticalAlign=top;fontSize=11;fontStyle=2;fontColor=#3C6EB4;" vertex="1" parent="1">
+          <mxGeometry x="650" y="195" width="430" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="c2" value="루프 내부의 세 모듈(Orchestrator · Backtrack ·&lt;br&gt;State Store)은 하위 계층의 &amp;quot;순차 진행 + 제약 전파 +&lt;br&gt;백트랙&amp;quot; 구조와 동일하다. 적용 단위만 토픽으로 올라간다." style="text;html=1;align=left;verticalAlign=top;fontSize=11;fontStyle=2;fontColor=#3C6EB4;" vertex="1" parent="1">
+          <mxGeometry x="640" y="640" width="420" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="c3" value="Plan Assembler에서 정합성 검증에 실패하면&lt;br&gt;해당 토픽으로 다시 되돌아가야 한다.&lt;br&gt;그 경로는 아직 정하지 않았다." style="text;html=1;align=left;verticalAlign=top;fontSize=11;fontStyle=2;fontColor=#B85450;" vertex="1" parent="1">
+          <mxGeometry x="660" y="1060" width="420" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

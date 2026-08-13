@@ -24,6 +24,97 @@ def _dur(s) -> str:
     return f"{s:.1f}초" if s < 60 else f"{s / 60:.1f}분"
 
 
+# ── §11 셀 포맷 ────────────────────────────────────────────────────────────
+# 미측정 셀(키 없음)과 순위 산출 불가 셀(값 null)을 모두 —로 떨어뜨린다.
+_DASH = "—"
+
+
+def _n_guard(fn):
+    """셀 dict에 키가 없거나 값이 null이면 — 를 돌려준다 (KeyError를 내지 않는다)."""
+    def g(v):
+        try:
+            return fn(v)
+        except (KeyError, TypeError, ZeroDivisionError):
+            return _DASH
+    return g
+
+
+def _n_count(x) -> str:
+    """정수면 소수점 없이, 아니면 소수 첫째 자리까지 — 천 단위 쉼표."""
+    return f"{x:,.0f}" if float(x).is_integer() else f"{x:,.1f}"
+
+
+def _n_hit(v) -> str:
+    """최적해 적중률 — `7/20 (35%)`."""
+    hits, cases = v["optimal_hits"], v["cases"]
+    rate = v.get("optimal_hit_rate")
+    if rate is None:
+        rate = hits / cases
+    return f"{hits}/{cases} ({rate * 100:.0f}%)"
+
+
+def _n_rank(v) -> str:
+    """선택 순위 중앙값 / 유효 후보 수 — `3 / 26`. 순위가 null이면 셀 전체가 —."""
+    r = v["median_choice_rank"]
+    if r is None:
+        return _DASH
+    c = v.get("median_valid_count")
+    return f"{_n_count(r)} / {_DASH if c is None else _n_count(c)}"
+
+
+# (제목, 셀 포맷) 6개 — 행은 방안 × 조합 수, 열은 참여자 수 N.
+_N_TABLES = (
+    ("최적해 적중률", _n_guard(_n_hit)),
+    ("선택 순위 중앙값 (1=최적)", _n_guard(_n_rank)),
+    ("달성률 (x\\* 대비)", _n_guard(lambda v: f"{v['mean_ratio']:.3f}")),
+    ("협상 1건 시간 (중앙값)", _n_guard(lambda v: _dur(v["median_time_s"]))),
+    ("라운드 / phase", _n_guard(
+        lambda v: f"{v['median_rounds']:,.0f} / {v['median_phases']:,.0f}")),
+    ("단말 총 점유 메모리 (중앙값)", _n_guard(lambda v: _mem(v["median_device_bytes"]))),
+)
+
+
+def _n_unranked(isn: dict, plans: list, labels: dict) -> list:
+    """ranked_cases < cases 인 칸의 목록 — 순위를 매기지 못한 케이스가 있었던 칸."""
+    nc = isn["config"]
+    out = []
+    for p in plans:
+        for S in nc["combos"]:
+            by_n = isn.get(p, {}).get(str(S), {})
+            for n in nc["participants"]:
+                v = by_n.get(str(n))
+                if not isinstance(v, dict):
+                    continue
+                cases, ranked = v.get("cases"), v.get("ranked_cases")
+                if cases is None or ranked is None or ranked >= cases:
+                    continue
+                out.append(f"{labels.get(p, p)} · S={S:,} · N={n} {cases - ranked}건")
+    return out
+
+
+def _n_unranked_note(items: list) -> str:
+    return (
+        "표 1·2 — 순위를 매기지 못한 케이스(결렬)가 있는 칸: "
+        + " · ".join(items)
+        + ". 표 1의 분모는 셀당 전체 건수(cases)이고, 표 2의 중앙값은 순위를 매긴 "
+          "케이스(ranked_cases)만으로 계산한 값이다."
+    )
+
+
+# §11 머리말에 붙는 두 문단 — s 제외 사유와 선택 순위의 정의.
+_N_INTRO_S = (
+    "정규화 정확도 s = (달성률 − 기준선) ÷ (1 − 기준선)는 표에서 제외했다. "
+    "기준선이 칸마다 달라 분모 (1 − 기준선)이 0.036~0.111로 3배 차이나므로 칸끼리 비교할 수 없다. "
+    "조합 5,184 · N=10은 달성률 0.9664에 s 0.379이고, 조합 576 · N=3은 달성률 0.9698에 s 0.245다 — "
+    "달성률이 더 높은 칸의 s가 더 낮게 나온다. s는 같은 칸 안에서 방안끼리 비교할 때만 쓸 수 있다. "
+    "값 자체는 raw.json에 그대로 남아 있다."
+)
+_N_INTRO_RANK = (
+    "선택 순위는 유효 후보를 총효용 내림차순으로 정렬했을 때 협상 결과가 몇 번째인지를 뜻한다 — "
+    "1이 최적해다. 유효 후보 수를 함께 싣는 이유는 순위 3이 3/5인지 3/320인지에 따라 뜻이 다르기 때문이다."
+)
+
+
 def render_markdown(raw: dict) -> str:
     m = raw["meta"]
     P = [p for p in PLAN_NAMES if p in raw["fc"]]  # 부분 실행(--plans) 대응
@@ -318,17 +409,16 @@ def render_markdown(raw: dict) -> str:
         A(nc["note"])
         knc = nc.get("constants", {})
         if knc:
-            A(f"합성 시간 상수: 통신 {knc.get('t_rtt_ms', 0):.0f}ms/phase ·"
+            A(f"합성 시간 상수: 통신 {phase_latency_ms(knc):.0f}ms/phase ·"
               f" 평가 {knc.get('t_eval_ms', 0)*1000:.0f}µs/건 ÷N 병렬 보정 ·"
               f" 대역 {knc.get('bw_bytes_per_s', 0)/1000:.0f}kB/s. **상수는 잠정 — 방안 간 상대 비교용이다.**")
         A("")
-        for title, fmt in (
-            ("정확도 (s)", lambda v: f"{v['s']:.3f}"),
-            ("달성률 (x\\* 대비)", lambda v: f"{v['mean_ratio']:.3f}"),
-            ("협상 1건 시간 (중앙값)", lambda v: _dur(v["median_time_s"])),
-            ("라운드 / phase", lambda v: f"{v['median_rounds']:,.0f} / {v['median_phases']:,.0f}"),
-            ("단말 총 점유 메모리 (중앙값)", lambda v: _mem(v["median_device_bytes"])),
-        ):
+        A(_N_INTRO_S)
+        A("")
+        A(_N_INTRO_RANK)
+        A("")
+        unranked = _n_unranked(isn, NP, {})
+        for idx, (title, fmt) in enumerate(_N_TABLES):
             A(f"**{title}**")
             A("")
             A("| 방안 · 조합 수 | " + " | ".join(f"N={n}" for n in ns) + " |")
@@ -337,8 +427,11 @@ def render_markdown(raw: dict) -> str:
                 for S in nc["combos"]:
                     by_n = isn[p].get(str(S), {})  # 미측정 셀은 키가 없다
                     A(f"| {p} · S={S:,} | " + " | ".join(
-                        fmt(by_n[n]) if n in by_n else "—" for n in ns) + " |")
+                        fmt(by_n[n]) if n in by_n else _DASH for n in ns) + " |")
             A("")
+            if idx == 1 and unranked:  # 표 2 아래에 표 1·2 공통 각주
+                A("> " + _n_unranked_note(unranked))
+                A("")
 
     if "an_kit" in raw:
         A("## [§8] Analysability — 진단 실험 킷")

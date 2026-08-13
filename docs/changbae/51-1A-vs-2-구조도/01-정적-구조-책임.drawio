@@ -1,0 +1,50 @@
+<mxfile host="app.diagrams.net" modified="2026-08-12T00:00:00.000Z" agent="Codex" version="24.7.17">
+  <diagram id="static-architecture" name="01 정적 구조·책임">
+    <mxGraphModel dx="1500" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="방안 1-A vs 방안 2 — 정적 구조·책임 비교" style="text;html=1;fontSize=20;fontStyle=1;align=left;verticalAlign=middle;" vertex="1" parent="1"><mxGeometry x="40" y="20" width="900" height="34" as="geometry"/></mxCell>
+        <mxCell id="sub" value="두 방안 모두 P0 중심 Star 토폴로지이며, 핵심 차이는 P0 내부의 상태 모델과 판정 알고리즘이다." style="text;html=1;fontSize=12;fontColor=#555555;align=left;" vertex="1" parent="1"><mxGeometry x="40" y="55" width="1200" height="24" as="geometry"/></mxCell>
+        <mxCell id="legend1" value="방안 1-A 고유" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1"><mxGeometry x="40" y="88" width="130" height="26" as="geometry"/></mxCell>
+        <mxCell id="legend2" value="방안 2 고유" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1"><mxGeometry x="180" y="88" width="130" height="26" as="geometry"/></mxCell>
+        <mxCell id="legend3" value="공통 책임" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="320" y="88" width="120" height="26" as="geometry"/></mxCell>
+        <mxCell id="divider" style="edgeStyle=none;html=1;endArrow=none;dashed=1;strokeColor=#999999;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="750" y="130" as="sourcePoint"/><mxPoint x="750" y="795" as="targetPoint"/></mxGeometry></mxCell>
+
+        <mxCell id="headL" value="방안 1-A · 순차 SAO 투표형" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=15;" vertex="1" parent="1"><mxGeometry x="40" y="130" width="680" height="40" as="geometry"/></mxCell>
+        <mxCell id="p0L" value="P0 담당자 단말" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;spacingTop=10;fillColor=#fff5f5;strokeColor=#b85450;fontStyle=1;fontSize=14;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="190" y="205" width="380" height="395" as="geometry"/></mxCell>
+        <mxCell id="roundL" value="Round / Sweep Controller&#10;라운드 마감·바퀴 제어" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="220" y="260" width="150" height="58" as="geometry"/></mxCell>
+        <mxCell id="anonL" value="Anonymous Offer Distributor&#10;제안자 귀속 제거 후 배포" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1"><mxGeometry x="390" y="260" width="150" height="58" as="geometry"/></mxCell>
+        <mxCell id="stateL" value="Current Round State&#10;현재 후보 목록 + O/X 행렬" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1"><mxGeometry x="220" y="345" width="150" height="72" as="geometry"/></mxCell>
+        <mxCell id="voteL" value="Unanimity Evaluator&#10;∃c ∈ Ck : 전원 O ?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1"><mxGeometry x="395" y="338" width="140" height="86" as="geometry"/></mxCell>
+        <mxCell id="tieL" value="TieBreaker plug-in&#10;순위 정보 없음 → 결선투표" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1"><mxGeometry x="220" y="450" width="320" height="55" as="geometry"/></mxCell>
+        <mxCell id="notifyL" value="성립 시에만 종료 통지" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="305" y="530" width="150" height="42" as="geometry"/></mxCell>
+        <mxCell id="pl1" value="P1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="40" y="275" width="70" height="50" as="geometry"/></mxCell>
+        <mxCell id="pl2" value="P2" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="40" y="370" width="70" height="50" as="geometry"/></mxCell>
+        <mxCell id="pln" value="P(N-1)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="40" y="465" width="70" height="50" as="geometry"/></mxCell>
+        <mxCell id="eL1" value="사설 SAO 채널·offer / reply" style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=block;startFill=1;endArrow=block;endFill=1;strokeColor=#b85450;fontColor=#b85450;fontSize=10;" edge="1" parent="1" source="pl1" target="p0L"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="eL2" style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=block;startFill=1;endArrow=block;endFill=1;strokeColor=#b85450;" edge="1" parent="1" source="pl2" target="p0L"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="eL3" style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=block;startFill=1;endArrow=block;endFill=1;strokeColor=#b85450;" edge="1" parent="1" source="pln" target="p0L"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="noteL" value="핵심 상태: 라운드 단위로 교체&#10;판정 근거: 명시적 수락 신호 O/X" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff5f5;strokeColor=#b85450;fontStyle=1;fontSize=12;align=left;spacingLeft=12;" vertex="1" parent="1"><mxGeometry x="40" y="635" width="680" height="75" as="geometry"/></mxCell>
+
+        <mxCell id="headR" value="방안 2 · 누적 공통제안형" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=15;" vertex="1" parent="1"><mxGeometry x="780" y="130" width="680" height="40" as="geometry"/></mxCell>
+        <mxCell id="p0R" value="P0 담당자 단말" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;spacingTop=10;fillColor=#f4f8ff;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="930" y="205" width="380" height="395" as="geometry"/></mxCell>
+        <mxCell id="roundR" value="Round / Sweep Controller&#10;라운드 마감·바퀴 제어" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="960" y="260" width="150" height="58" as="geometry"/></mxCell>
+        <mxCell id="recvR" value="Proposal Receiver&#10;후보 1개 제출 수신" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1"><mxGeometry x="1130" y="260" width="150" height="58" as="geometry"/></mxCell>
+        <mxCell id="stateR" value="Blackboard State (P0 내부)&#10;Si(k): 참여자별 누적 제안 + 제출 라운드" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1"><mxGeometry x="960" y="342" width="320" height="78" as="geometry"/></mxCell>
+        <mxCell id="interR" value="Intersection Evaluator&#10;S1(k) ∩ … ∩ SN(k) ≠ ∅ ?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1"><mxGeometry x="965" y="438" width="145" height="82" as="geometry"/></mxCell>
+        <mxCell id="tieR" value="TieBreaker plug-in&#10;순위 합 → 표준편차 → 결선투표" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1"><mxGeometry x="1130" y="450" width="150" height="58" as="geometry"/></mxCell>
+        <mxCell id="notifyR" value="성립 시 종료 통지" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="1045" y="530" width="150" height="42" as="geometry"/></mxCell>
+        <mxCell id="pr1" value="P1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="1350" y="275" width="70" height="50" as="geometry"/></mxCell>
+        <mxCell id="pr2" value="P2" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="1350" y="370" width="70" height="50" as="geometry"/></mxCell>
+        <mxCell id="prn" value="P(N-1)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="1350" y="465" width="70" height="50" as="geometry"/></mxCell>
+        <mxCell id="eR1" value="사설 채널·후보 제출만" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;fontColor=#6c8ebf;fontSize=10;" edge="1" parent="1" source="pr1" target="p0R"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="eR2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="pr2" target="p0R"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="eR3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="prn" target="p0R"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="noteR" value="핵심 상태: 라운드가 지나도 누적&#10;판정 근거: 모든 참여자가 같은 후보를 직접 제안" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f4f8ff;strokeColor=#6c8ebf;fontStyle=1;fontSize=12;align=left;spacingLeft=12;" vertex="1" parent="1"><mxGeometry x="780" y="635" width="680" height="75" as="geometry"/></mxCell>
+
+        <mxCell id="bottom" value="Architect 포인트  │  외부 배치 모양은 유사하다. 1-A는 현재 후보의 수락 신호를 집계하고, 2는 누적 제안 집합의 교집합을 계산한다." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=13;align=center;" vertex="1" parent="1"><mxGeometry x="180" y="755" width="1140" height="60" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
