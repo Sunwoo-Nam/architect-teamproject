@@ -132,15 +132,18 @@ def measure(
 
 
 def aggregate(measures: Sequence[RuMeasure]) -> dict:
-    """세션 여러 건의 집계.
+    """세션 여러 건의 집계 — **표본 판정 = r P95** (2026-08-13 개정, 24 §2.8).
 
-    중앙값과 **최댓값을 함께** 낸다 — OS는 평균이 아니라 "한 순간의 최악"으로 죽이므로
-    (24 §2.6) 최댓값이 위험을 말해 준다.
+    중앙값(전형)과 최댓값(최악)을 병기한다 — OS는 평균이 아니라 "한 순간의 최악"으로
+    죽이므로(24 §2.6) 최댓값이 위험을 말해 주지만, 표본 대표값이 이상치 1건에 정해지면
+    안 되므로 판정은 p95다 (TB의 ρ P95와 같은 SLO 논리).
     """
     if not measures:
         raise ValueError("집계할 측정이 없다")
     med_total = statistics.median(m.total_bytes for m in measures)
     max_total = max(m.total_bytes for m in measures)
+    totals = sorted(m.total_bytes for m in measures)
+    p95_total = totals[min(len(totals) - 1, int(0.95 * len(totals)))]
     ceiling = measures[0].ceiling_bytes
     return {
         "sessions": len(measures),
@@ -152,13 +155,20 @@ def aggregate(measures: Sequence[RuMeasure]) -> dict:
             if any(m.materialized_bytes for m in measures) else None),
         "median_total_mb": round(med_total / MB, 4),
         "max_total_mb": round(max_total / MB, 4),
+        "p95_total_mb": round(p95_total / MB, 4),
         "ceiling_bytes": ceiling,
         "median_r_total": round(med_total / ceiling, 6),
         "max_r_total": round(max_total / ceiling, 6),
+        # **표본 판정 = P95** (2026-08-13 개정, 24 §2.8) — 메모리 한도 관리도 TB처럼
+        # 꼬리 지표다: OS는 "한 순간의 최악"으로 죽이지만(§2.6) 최댓값 하나로 판정하면
+        # 이상치 1건이 표본 대표값을 정하고, 중앙값은 소형 케이스에서 포화해 뭉갠다.
+        # p95는 "케이스 95%에서 보장되는 여유"로, TB의 ρ P95와 같은 SLO 논리다
+        "p95_r_total": round(p95_total / ceiling, 6),
+        "stars_p95": band_ru_usage().stars(p95_total / ceiling),
         "stars_median": band_ru_usage().stars(med_total / ceiling),
         "stars_max": band_ru_usage().stars(max_total / ceiling),
         "over_ceiling_sessions": sum(1 for m in measures if m.over_ceiling),
         "band": band_ru_usage().as_dict(),
         "note": "별점은 단말 총 점유(공통 기저 + 프로토콜 상태) 기준 (24 §2.8 단서). "
-                "작은 규모에서는 포화하므로 절대 MB를 함께 읽어야 한다",
+                "표본 판정은 r P95 — 중앙값(전형)·최댓값(최악)을 병기해 읽는다",
     }

@@ -37,10 +37,11 @@ from ...qa.contract import (
     SweepPoint,
 )
 from ...qa.ru import deep_size
+from ._vendor.common.generators import Value
 from ._vendor.common.oracle import analyze
-from ._vendor.common.profiles import build_truth_profiles, truth_utility
+from ._vendor.common.profiles import TruthProfile, build_truth_profiles, truth_utility
 from ._vendor.common.rules import build_hard_rules, build_participant_hard, build_soft_rules
-from ._vendor.common.scenario import Scenario, load_scenario
+from ._vendor.common.scenario import Axis, Scenario, load_scenario
 from ._vendor.harness.runner import RunResult, run_one
 
 DATASETS = Path(__file__).resolve().parents[4] / "datasets" / "composite"
@@ -81,6 +82,44 @@ def load(name_or_path: str | Path, **kw) -> Scenario:
             raise FileNotFoundError(f"시나리오를 찾을 수 없다: {name_or_path}")
         p = matches[0]
     return load_scenario(p, **kw)
+
+
+def load_fixture(path: str | Path) -> Scenario:
+    """fixture JSON → `Scenario`. yaml 시나리오와 달리 **값이 실체화**되어 있다.
+
+    선택적으로 `"profiles"` 절을 지원한다 — 참여자별 weights·scores·home_region·
+    initial_threshold를 명시 고정(frozen)해 시드 생성을 우회한다. 함정(변별 장치)을
+    구조가 아니라 효용 수준에서 정밀하게 심어야 하는 정본 데이터셋(final 트랙)용이다.
+    `build_truth_profiles()`가 `frozen_profiles`를 읽는다.
+    """
+    import json as _json
+
+    raw = _json.loads(Path(path).read_text(encoding="utf-8"))
+    axes = [
+        Axis(a["name"], a.get("generator", ""),
+             [Value(v["name"], dict(v.get("attrs", {}))) for v in a["values"]])
+        for a in raw["axes"]
+    ]
+    sc = Scenario(
+        meta=raw["meta"],
+        axes=axes,
+        dependencies=raw.get("dependencies", []),
+        participants=raw["participants"],
+        agent_view=raw.get("agent_view", {}),
+        judge=raw.get("judge", {"expected": raw["meta"].get("expected", "agreement")}),
+    )
+    profs = raw.get("profiles")
+    if profs:
+        sc.frozen_profiles = [
+            TruthProfile(
+                weights=dict(p["weights"]),
+                scores={ax: dict(vals) for ax, vals in p["scores"].items()},
+                home_region=p.get("home_region", "gangnam"),
+                initial_threshold=float(p["initial_threshold"]),
+            )
+            for p in profs
+        ]
+    return sc
 
 
 class CompositePreference:
@@ -158,6 +197,7 @@ class CompositeCase:
     enumeration_limit: int = 200_000
     _prefs: list[CompositePreference] | None = field(default=None, init=False, repr=False)
     _space: list[Outcome] | None = field(default=None, init=False, repr=False)
+    _feasible_cached: object = field(default=None, init=False, repr=False)
 
     @property
     def n_issues(self) -> int:
@@ -219,6 +259,17 @@ class CompositeCase:
             return all(r(mapping) for r in rules)
 
         return ok
+
+    def is_feasible(self, outcome: Outcome) -> bool:
+        """FC 유효 후보의 하드 필터 (24 §1.2) — `fc.valid_candidates`가 읽는다.
+
+        이 필터가 없으면 실행 불가능한 조합이 x*(분모)에 들어가, 결렬이 정답인
+        케이스에서 정확히 결렬해도 달성률 < 1이 된다 (2026-08-13 발견·수정 —
+        S08 계열의 기존 수치가 이 결함을 포함한다).
+        """
+        if self._feasible_cached is None:
+            self._feasible_cached = self._feasibility_predicate()
+        return self._feasible_cached(outcome)
 
     def hard_violations(self, outcome: Outcome | str) -> list[str]:
         """도메인 규칙 위반 — 계약에 없어 측정기가 볼 수 없으므로 어댑터가 검사한다."""

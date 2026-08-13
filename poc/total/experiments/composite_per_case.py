@@ -36,11 +36,11 @@ from total.adapters.composite import (  # noqa: E402
     PLANS,
     CompositeCase,
     load,
+    load_fixture,
     run_session,
     scenario_paths,
 )
-from total.adapters.composite._vendor.common.generators import Value  # noqa: E402
-from total.adapters.composite._vendor.common.scenario import Axis, Scenario  # noqa: E402
+from total.adapters.composite._vendor.common.scenario import Scenario  # noqa: E402,F401
 from total.adapters.composite.baseline import baseline_t  # noqa: E402
 from total.campaign import QA_COMPOSITE, PlanRuns, measure  # noqa: E402
 from total.qa.contract import Dataset  # noqa: E402
@@ -49,29 +49,6 @@ from total.qa.report import RunMeta, now_stamp, write_run  # noqa: E402
 EXPERIMENT = "composite-per-case"
 DEFAULT_PLANS = ("seq2", "pool")
 FIXTURES = DATASETS / "fixtures"
-
-
-def load_fixture(path: Path) -> Scenario:
-    """fixture JSON → `Scenario`.
-
-    시나리오 yaml은 축을 (generator, count)로 정의하지만 fixture는 **값이 실체화**되어
-    있다 (`make_fixtures.py`가 생성). 값을 그대로 복원하므로 생성기를 다시 돌리지 않고,
-    fixture가 만들어질 때의 공간이 정확히 재현된다.
-    """
-    raw = json.loads(path.read_text(encoding="utf-8"))
-    axes = [
-        Axis(a["name"], a.get("generator", ""),
-             [Value(v["name"], dict(v.get("attrs", {}))) for v in a["values"]])
-        for a in raw["axes"]
-    ]
-    return Scenario(
-        meta=raw["meta"],
-        axes=axes,
-        dependencies=raw.get("dependencies", []),
-        participants=raw["participants"],
-        agent_view=raw.get("agent_view", {}),
-        judge=raw.get("judge", {"expected": raw["meta"].get("expected", "agreement")}),
-    )
 
 
 def targets_all() -> list[tuple[str, Scenario]]:

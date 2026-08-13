@@ -41,11 +41,20 @@ def total_utility(outcome: Outcome, preferences: Sequence[Preference]) -> float:
 
 
 def valid_candidates(case: Case) -> list[Outcome]:
-    """유효 후보 (결렬 포함). 순서는 결정론적이어야 한다 — R̄가 순서에 무관하도록."""
+    """유효 후보 (결렬 포함). 순서는 결정론적이어야 한다 — R̄가 순서에 무관하도록.
+
+    24 §1.2: 유효 후보 = **하드 제약(의존성 + 참여자) 통과** ∧ 전원 바닥선 이상.
+    하드 판정은 도메인 지식이라 케이스가 `is_feasible`을 제공하면 그것으로 거른다
+    (없으면 전 후보 실행 가능 — nparty처럼 명시 목록 도메인). 이 필터가 빠지면
+    실행 불가능한 조합이 x*(분모)를 차지해, 결렬이 정답인 케이스에서 정확히
+    결렬해도 달성률 < 1이 되는 결함이 생긴다 (2026-08-13 실측으로 발견·수정).
+    """
     prefs = case.preferences
+    feasible = getattr(case, "is_feasible", None)
     valid = [
         o for o in case.candidates()
-        if all(p.utility(o) >= p.initial_threshold - 1e-12 for p in prefs)
+        if (feasible is None or feasible(o))
+        and all(p.utility(o) >= p.initial_threshold - 1e-12 for p in prefs)
     ]
     valid.append(NO_AGREEMENT)
     return valid

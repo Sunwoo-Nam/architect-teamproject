@@ -142,20 +142,25 @@ class TestRuBand:
         assert RU_STEP == 0.15
 
     def test_band_from_ceiling(self):
+        # 로그(데케이드) 사다리 — 2026-08-13 개정: 지수 성장 도메인에서 선형 등분은
+        # 상·하 포화 (실측: 4~16축 전부 ★5 → 20축 ★0 절벽). 1칸 = 10배 여유
         b = band_ru_usage()
-        assert b.thresholds == pytest.approx([0.15, 0.30, 0.45, 0.60, 0.75])
+        assert b.thresholds == pytest.approx([1e-4, 1e-3, 1e-2, 1e-1, 1.0])
         assert b.direction == "at_most"
 
     def test_usage_stars(self):
         b = band_ru_usage()
-        assert b.stars(0.03) == 5     # dpca pool 16축 8.23MB / 256MB
-        assert b.stars(0.53) == 2     # dpca pool 20축 136MB / 256MB
-        assert b.stars(2.2) == 0      # dpca pool 22축 563MB / 256MB — 한도 초과
+        assert b.stars(0.03) == 2     # dpca pool 16축 — 3% (구 선형에선 ★5로 포화)
+        assert b.stars(0.53) == 1     # dpca pool 20축 — 53%: 한도 접근이 별점에 보인다
+        assert b.stars(2.2) == 0      # dpca pool 22축 — 한도 초과
+        assert b.stars(0.002) == 3    # seq 계열 실측 구간
 
     def test_custom_ceiling_changes_nothing_in_band(self):
         # 밴드는 비율이므로 한도가 바뀌어도 경계는 같다 — 바뀌는 것은 r의 분모
         assert band_ru_usage().thresholds == band_ru_usage(step=0.15).thresholds
 
-    def test_custom_step_splits_full_ceiling(self):
-        b = band_ru_usage(step=0.2)
+    def test_linear_band_kept_for_reference(self):
+        from total.qa.constants import band_ru_usage_linear
+
+        b = band_ru_usage_linear(step=0.2)
         assert b.thresholds == pytest.approx([0.2, 0.4, 0.6, 0.8, 1.0])

@@ -43,6 +43,12 @@ PLANS: dict[str, PlanSpec] = {
     "plan2": PlanSpec("plan2", "방안 2 누적 공통제안형", Plan2Cumulative),
 }
 
+# 방안 2 보완 택틱 (62번 문서 — PL 지시 2026-08-13). 순환 회피를 위해 지연 등록.
+from .tactics import TACTIC_SPECS  # noqa: E402
+
+for _name, _label, _cls in TACTIC_SPECS:
+    PLANS[_name] = PlanSpec(_name, _label, _cls)
+
 
 class NpartyPreference:
     """원본 `Profile`을 계약 `Preference`로 감싼다.
