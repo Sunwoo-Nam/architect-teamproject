@@ -82,6 +82,7 @@ def measure_track(name, cases):
     out = {"cases": len(cases), "e2_depth": round(anchor.depth, 4),
            "sec_e2": round(t_e2, 1), "sec_baseline": round(t_base, 1)}
     pooled = {}
+    case_rows = []  # 세분화 raw — 케이스×방안 1행 (재집계·부분 취합용, PL 지시 2026-08-13)
     for plan in PLANS:
         t0 = time.perf_counter()
         runs, scores, rhos = [], [], []
@@ -91,8 +92,27 @@ def measure_track(name, cases):
             runs.append((session, case))
             scores.append(fc.score(case, session.agreement))
             t = tb.synth_time(session)
-            rhos.append(tb.rho(t.total_ms, baselines[bc.case_id]["T_ms"],
-                               baselines[bc.case_id].get("capped", False)))
+            b = baselines[bc.case_id]
+            rhos.append(tb.rho(t.total_ms, b["T_ms"], b.get("capped", False)))
+            mv, sv = cf.exposure_values([(session, case)], anchor)
+            case_rows.append({
+                "case_id": bc.case_id, "plan": plan,
+                "n_participants": len(bc.profiles), "n_candidates": len(bc.candidates),
+                "agreed": session.agreed,
+                "achieved": round(scores[-1].achieved, 6),
+                "baseline_R": round(scores[-1].baseline, 6),
+                "s": round(scores[-1].s, 6),
+                "degenerate": scores[-1].baseline >= 1.0 - 1e-12,
+                "m_victims": [round(x, 4) for x in mv],
+                "m_median": round(__import__("statistics").median(mv), 4),
+                "max_single_depth": round(max(sv), 4),
+                "rho": rhos[-1]["rho"], "rho_defect": rhos[-1]["defect"],
+                "T_ms": round(t.total_ms, 3), "T_phase_ms": round(t.phase_ms, 3),
+                "T_baseline_ms": b["T_ms"], "baseline_k": b["proposals_k*"],
+                "rounds": session.rounds, "sweeps": session.sweeps,
+                "phases": session.phases, "messages": session.messages,
+                "bytes": session.bytes,
+            })
         m_vals, single_vals = cf.exposure_values(runs, anchor)
         sec = time.perf_counter() - t0
         mean_ach = statistics.mean(s.achieved for s in scores)
@@ -115,7 +135,7 @@ def measure_track(name, cases):
             "ach": [s.achieved for s in scores], "base": [s.baseline for s in scores],
             "m": m_vals, "single": single_vals, "rho": [r["rho"] for r in rhos],
         }
-    return out, pooled
+    return out, pooled, case_rows
 
 
 def main() -> int:
@@ -126,11 +146,13 @@ def main() -> int:
     tracks = load_tracks(args.limit)
     wall0 = time.perf_counter()
     raw = {"tracks": {}, "combined": {}}
+    all_rows: list[dict] = []
     pool_all = {p: {"ach": [], "base": [], "m": [], "single": [], "rho": []} for p in PLANS}
     for name, cases in tracks.items():
         print(f"== {name}: {len(cases)}건 ==")
-        out, pooled = measure_track(name, cases)
+        out, pooled, case_rows = measure_track(name, cases)
         raw["tracks"][name] = out
+        all_rows.extend({**r, "track": name} for r in case_rows)
         for p in PLANS:
             for k in pool_all[p]:
                 pool_all[p][k].extend(pooled[p][k])
@@ -167,6 +189,9 @@ def main() -> int:
     out_dir = ROOT / "results" / "nparty-tracks" / f"nparty-tracks-{stamp}"
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "raw.json").write_text(json.dumps(raw, ensure_ascii=False, indent=1))
+    with open(out_dir / "cases.jsonl", "w") as f:  # 케이스×방안 세분화 raw
+        for r in all_rows:
+            f.write(json.dumps(r, ensure_ascii=False) + "\n")
     print(f"\n총 소요 {raw['wall_seconds']}초 → 저장: {out_dir}")
     return 0
 
