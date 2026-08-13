@@ -116,8 +116,8 @@ class TestRealDataRegression:
 
     @pytest.mark.parametrize("peak_mb,expected_stars", [
         (0.18, 5),     # seq2 16축
-        (8.23, 5),     # pool 16축
-        (136.43, 2),   # pool 20축 — 53%
+        (8.23, 5),     # pool 16축 — 6.4%
+        (136.43, 0),   # pool 20축 — 107%: 협상 몫 한도(128MB, 2026-08-13 유도)에서 즉시 결함
         (563.44, 0),   # pool 22축 — 한도 초과
     ])
     def test_dpca_scaling_points(self, peak_mb, expected_stars):

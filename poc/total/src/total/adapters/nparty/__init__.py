@@ -27,6 +27,7 @@ from ...qa.ru import deep_size, measure_peak
 from ._vendor.domain import NO_DEAL, Profile
 from ._vendor.protocol import Plan2Cumulative
 from ._vendor.protocol_styles import Plan1aSao
+from ._vendor.measures.ru_person import holder_sizes
 
 
 @dataclass(frozen=True)
@@ -96,14 +97,14 @@ class NpartyCase:
 
 
 def base_bytes(profiles: Sequence[Profile]) -> int:
-    """공통 기저 — 각자의 효용 표와 순위표. **방안과 무관한 하한**이다 (24 §2.8 단서).
+    """공통 기저 — **1인분** (자기 효용 표 + 순위표). 단말 단위 판정이므로 전원 합이 아니라
+    최대 부하 단말이 자기 단말에 드는 몫만 센다 (24 §2.8, PL 확정 2026-08-13).
+    프로파일은 균등 생성이라 첫 참여자로 대표한다.
 
     프로토콜 상태만 재면 "조합이 늘어도 메모리가 안 는다"는 틀린 그림이 나온다.
     """
-    total = 0
-    for p in profiles:
-        total += deep_size(p.utilities) + deep_size(p.ranked())
-    return total
+    p = profiles[0]
+    return deep_size(p.utilities) + deep_size(p.ranked())
 
 
 def _events(vendor_session, pids: Sequence[str]) -> list[ObservationEvent]:
@@ -164,7 +165,12 @@ def run_session(
         p.ranked()          # 공통 기저를 협상 구간 밖에서 구축
     base = base_bytes(profs)
 
-    vendor, peak = measure_peak(lambda: spec.cls(profs, **plan_kwargs).run())
+    plan_obj = spec.cls(profs, **plan_kwargs)
+    vendor, process_peak = measure_peak(plan_obj.run)
+    # 최대 부하 단말의 프로토콜 상태 (24 §2.8 — 단말 단위 판정, PL 확정 2026-08-13).
+    # 프로세스 피크는 전 참여자 합이라 참고로만 남긴다. 세션 종료 상태 근사 —
+    # 누적 구조(교집합·계수)는 단조 증가라 정확, 라운드 국소 구조는 근사.
+    peak = max(holder_sizes(plan_obj))
 
     pids = [p.pid for p in profs]
     agreement = NO_AGREEMENT if vendor.outcome == NO_DEAL else vendor.outcome
@@ -181,7 +187,8 @@ def run_session(
         events=_events(vendor, pids),
         peak_bytes=peak,
         base_bytes=base,
-        extra={"profiles": profs, "tie_break_used": vendor.tie_break_used},
+        extra={"profiles": profs, "tie_break_used": vendor.tie_break_used,
+               "process_peak_bytes": process_peak},
     )
     case = NpartyCase(case_id="adhoc", profiles=profs)
     return session, case

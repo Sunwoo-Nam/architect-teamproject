@@ -109,11 +109,18 @@ BAND_SC_MAX_ISSUES = Band(
 # Resource Utilization-메모리 — 24 §2.8
 # --------------------------------------------------------------------------------------
 
-#: 협상 몫 한도. ART 힙 상한(`ActivityManager.getMemoryClass()`)의 전형값 256MB를 쓴다.
-#: 24 §2.8이 요구하는 "런타임에 협상 기능이 쓸 수 있는 가용 메모리"의 자리이며,
-#: 넘으면 `OutOfMemoryError`로 확실히 죽는 하드 리밋이라 결정론적이다.
-#: ENV-B 실측이 오면 교체한다 — 실험에서 override 가능.
-RU_CEILING_BYTES = 256 * 1024 * 1024
+#: ART 힙 상한(`ActivityManager.getMemoryClass()`) — 플래그십 전형값. 단말별 상이(128-512MB),
+#: `largeHeap` 시 더 큼. LLM 가중치·추론 버퍼는 네이티브 메모리라 이 한도 **밖**이다.
+ART_HEAP_CLASS_BYTES = 256 * 1024 * 1024
+#: GC 여유 — ART 힙 목표 사용률(~75%) 위로 상주하면 GC 압박·jank. 문서화된 튜닝 특성.
+GC_HEADROOM = 0.25
+#: 협상 외 기능(UI·프레임워크·캐시·에이전트 런타임)의 자바 힙 점유 — **순수 잠정치**.
+#: ENV-B에서 "협상 시작 직전 힙 사용량" 실측으로 교체한다 (PL 지시 2026-08-13).
+APP_BASELINE_BYTES = 64 * 1024 * 1024
+
+#: 협상 몫 한도 = 힙 상한 × (1 − GC 여유) − 앱 기본 점유 = 128MB (24 §2.8, 2026-08-13 유도).
+#: 협상 혼자 앱 힙을 다 쓸 수 없다는 PL 지적의 반영 — 실험에서 override 가능.
+RU_CEILING_BYTES = int(ART_HEAP_CLASS_BYTES * (1 - GC_HEADROOM)) - APP_BASELINE_BYTES
 
 #: 한도 대비 사용률의 등분 폭. 24 §2.8은 15%p로 5구간을 잡고 초과분(>75%)을 0점으로 둔다
 #: — 동시 부하·관측 오차를 감안한 여유다. step=0.2면 한도 전체를 5등분한 것이 된다.

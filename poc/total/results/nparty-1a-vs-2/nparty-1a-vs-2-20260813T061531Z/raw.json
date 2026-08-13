@@ -1,0 +1,338 @@
+{
+  "fc": {
+    "plan1a": {
+      "cases": 160,
+      "agreed": 128,
+      "mean_achieved": 0.914192,
+      "mean_baseline": 0.87589,
+      "mean_s": 0.308613,
+      "stars_achieved": 4,
+      "stars_s": 2,
+      "optimal_hit": 64,
+      "fr_violation_cases": 0,
+      "degenerate_cases": 32,
+      "degenerate_missed": 0,
+      "bands": {
+        "s": {
+          "name": "FC 개선 비율 s",
+          "thresholds": [
+            0.8,
+            0.6,
+            0.4,
+            0.2,
+            0.0
+          ],
+          "direction": "greater_than",
+          "note": "24 §1.4 — s = (달성률 − R̄) ÷ (1 − R̄). 무작위 베이스라인 대비 개선. 경계 제외(strict >)"
+        },
+        "achieved": {
+          "name": "FC 달성률",
+          "thresholds": [
+            0.95,
+            0.9,
+            0.85,
+            0.8,
+            0.7
+          ],
+          "direction": "at_least",
+          "note": "절대 달성률 U(r)÷U(x*) 밴드. 24는 s를 정본으로 두나, 베이스라인에 무관한 절대 수준도 함께 보기 위해 병행한다 (사용자 지시 2026-08-12)"
+        }
+      }
+    },
+    "plan2": {
+      "cases": 160,
+      "agreed": 128,
+      "mean_achieved": 0.967871,
+      "mean_baseline": 0.87589,
+      "mean_s": 0.741121,
+      "stars_achieved": 5,
+      "stars_s": 4,
+      "optimal_hit": 129,
+      "fr_violation_cases": 0,
+      "degenerate_cases": 32,
+      "degenerate_missed": 0,
+      "bands": {
+        "s": {
+          "name": "FC 개선 비율 s",
+          "thresholds": [
+            0.8,
+            0.6,
+            0.4,
+            0.2,
+            0.0
+          ],
+          "direction": "greater_than",
+          "note": "24 §1.4 — s = (달성률 − R̄) ÷ (1 − R̄). 무작위 베이스라인 대비 개선. 경계 제외(strict >)"
+        },
+        "achieved": {
+          "name": "FC 달성률",
+          "thresholds": [
+            0.95,
+            0.9,
+            0.85,
+            0.8,
+            0.7
+          ],
+          "direction": "at_least",
+          "note": "절대 달성률 U(r)÷U(x*) 밴드. 24는 s를 정본으로 두나, 베이스라인에 무관한 절대 수준도 함께 보기 위해 병행한다 (사용자 지시 2026-08-12)"
+        }
+      }
+    }
+  },
+  "tb": {
+    "plan1a": {
+      "sessions": 160,
+      "median_total_ms": 2100.764,
+      "median_phase_ms": 2100.0,
+      "median_eval_ms": 0.056,
+      "median_transfer_ms": 0.835,
+      "dominant": "phase",
+      "constants": {
+        "t_phase_ms": 75.0,
+        "t_eval_ms": 0.0014,
+        "bw_bytes_per_s": 2500000.0,
+        "bdp_bytes": 187500.0,
+        "note": "24 §6.4 — t_phase는 편도. LTE 클라우드 릴레이 기준"
+      }
+    },
+    "plan2": {
+      "sessions": 160,
+      "median_total_ms": 2400.381,
+      "median_phase_ms": 2400.0,
+      "median_eval_ms": 0.0168,
+      "median_transfer_ms": 0.422,
+      "dominant": "phase",
+      "constants": {
+        "t_phase_ms": 75.0,
+        "t_eval_ms": 0.0014,
+        "bw_bytes_per_s": 2500000.0,
+        "bdp_bytes": 187500.0,
+        "note": "24 §6.4 — t_phase는 편도. LTE 클라우드 릴레이 기준"
+      }
+    }
+  },
+  "ru": {
+    "plan1a": {
+      "sessions": 160,
+      "median_peak_mb": 0.0004,
+      "median_base_mb": 0.0019,
+      "median_total_mb": 0.0023,
+      "max_total_mb": 0.0027,
+      "ceiling_bytes": 134217728,
+      "median_r_total": 1.8e-05,
+      "max_r_total": 2.1e-05,
+      "stars_median": 5,
+      "stars_max": 5,
+      "over_ceiling_sessions": 0,
+      "band": {
+        "name": "RU 사용률 r",
+        "thresholds": [
+          0.15,
+          0.3,
+          0.44999999999999996,
+          0.6,
+          0.75
+        ],
+        "direction": "at_most",
+        "note": "24 §2.8 — r = 피크 ÷ 한도, 15%p 등분. 한도 초과는 0점"
+      },
+      "note": "별점은 단말 총 점유(공통 기저 + 프로토콜 상태) 기준 (24 §2.8 단서). 작은 규모에서는 포화하므로 절대 MB를 함께 읽어야 한다"
+    },
+    "plan2": {
+      "sessions": 160,
+      "median_peak_mb": 0.0028,
+      "median_base_mb": 0.0019,
+      "median_total_mb": 0.0046,
+      "max_total_mb": 0.0078,
+      "ceiling_bytes": 134217728,
+      "median_r_total": 3.6e-05,
+      "max_r_total": 6.1e-05,
+      "stars_median": 5,
+      "stars_max": 5,
+      "over_ceiling_sessions": 0,
+      "band": {
+        "name": "RU 사용률 r",
+        "thresholds": [
+          0.15,
+          0.3,
+          0.44999999999999996,
+          0.6,
+          0.75
+        ],
+        "direction": "at_most",
+        "note": "24 §2.8 — r = 피크 ÷ 한도, 15%p 등분. 한도 초과는 0점"
+      },
+      "note": "별점은 단말 총 점유(공통 기저 + 프로토콜 상태) 기준 (24 §2.8 단서). 작은 규모에서는 포화하므로 절대 MB를 함께 읽어야 한다"
+    }
+  },
+  "cf": {
+    "plan1a": {
+      "m_A": 0.789,
+      "m_B": 0.789,
+      "stars_m_A": 3,
+      "stars_m_B": 3,
+      "max_single_depth_A": 0.5,
+      "victims": 660,
+      "b_note": "",
+      "band": {
+        "name": "CF 노출 배수 m",
+        "thresholds": [
+          0.25,
+          0.5,
+          1.0,
+          2.0,
+          4.0
+        ],
+        "direction": "at_most",
+        "note": "24 §7.3 — 3점 경계(m=1)가 1:1 협상 등가. **잠정 사다리**(PL 조율 예정)이므로 별점만 보지 말고 m·깊이·노출률 원지표를 함께 읽어야 한다"
+      },
+      "coordinator_accuracy": 1.0,
+      "coordinator_random_baseline": 0.0833,
+      "coordinator_gain_pp": 91.67,
+      "coordinator_exposure_rate": 1.0,
+      "coordinator_stars": 0,
+      "coordinator_samples": 500,
+      "participant_accuracy": 0.0833,
+      "participant_random_baseline": 0.0833,
+      "participant_gain_pp": 0.0,
+      "participant_exposure_rate": 0.0,
+      "participant_stars": 5,
+      "participant_samples": 500,
+      "e2": {
+        "A": 0.633333,
+        "B": 0.633333,
+        "samples": 30,
+        "degenerate": false,
+        "note": "1:1 기준 노출량 — 참조 양자 프로토콜에서 상대 1인이 도달하는 깊이. m의 분모이며 도메인별로 따로 측정한다"
+      },
+      "attacker": "frequency 고정 규칙 3개 (24 §7.4) — 변경 시 전 측정 재실행"
+    },
+    "plan2": {
+      "m_A": 1.316,
+      "m_B": 1.316,
+      "stars_m_A": 2,
+      "stars_m_B": 2,
+      "max_single_depth_A": 0.833,
+      "victims": 660,
+      "b_note": "",
+      "band": {
+        "name": "CF 노출 배수 m",
+        "thresholds": [
+          0.25,
+          0.5,
+          1.0,
+          2.0,
+          4.0
+        ],
+        "direction": "at_most",
+        "note": "24 §7.3 — 3점 경계(m=1)가 1:1 협상 등가. **잠정 사다리**(PL 조율 예정)이므로 별점만 보지 말고 m·깊이·노출률 원지표를 함께 읽어야 한다"
+      },
+      "coordinator_accuracy": 1.0,
+      "coordinator_random_baseline": 0.0833,
+      "coordinator_gain_pp": 91.67,
+      "coordinator_exposure_rate": 1.0,
+      "coordinator_stars": 0,
+      "coordinator_samples": 500,
+      "participant_accuracy": 0.0833,
+      "participant_random_baseline": 0.0833,
+      "participant_gain_pp": 0.0,
+      "participant_exposure_rate": 0.0,
+      "participant_stars": 5,
+      "participant_samples": 500,
+      "e2": {
+        "A": 0.633333,
+        "B": 0.633333,
+        "samples": 30,
+        "degenerate": false,
+        "note": "1:1 기준 노출량 — 참조 양자 프로토콜에서 상대 1인이 도달하는 깊이. m의 분모이며 도메인별로 따로 측정한다"
+      },
+      "attacker": "frequency 고정 규칙 3개 (24 §7.4) — 변경 시 전 측정 재실행"
+    }
+  },
+  "sc_issue": {
+    "plan1a": {
+      "c": 1.0349,
+      "ci_low": 1.0147,
+      "ci_high": 1.0551,
+      "r2": 0.9996,
+      "stars_c": 0,
+      "ci_spans_three_grades": false,
+      "max_issues": 10,
+      "stars_max_issues": 2,
+      "censored": true,
+      "gate_ok": true,
+      "gate_rate_small": 1.0,
+      "gate_rate_large": 1.0,
+      "defect": false,
+      "d": 6,
+      "bands": {
+        "c": {
+          "name": "SC-의제 탄력성 c (d=6)",
+          "thresholds": [
+            0.33333333333333337,
+            0.5,
+            0.6666666666666666,
+            0.8333333333333334,
+            1.0000000000000002
+          ],
+          "direction": "at_most",
+          "note": "24 §4.3 — 이론 이상 1/d=0.167 와 전체 열거 1.0 사이 5등분"
+        },
+        "max_issues": {
+          "name": "SC-의제 최대 의제 수",
+          "thresholds": [
+            30,
+            20,
+            14,
+            10,
+            6
+          ],
+          "direction": "at_least",
+          "note": "메모리 한도 안에서 처리 가능한 최대 의제(축) 수. 탄력성 c가 구조 특성이라면 이쪽은 수용 한계 — 두 지표를 병행한다 (사용자 지시 2026-08-12)"
+        }
+      }
+    },
+    "plan2": {
+      "c": 1.0008,
+      "ci_low": 0.9545,
+      "ci_high": 1.0471,
+      "r2": 0.9979,
+      "stars_c": 0,
+      "ci_spans_three_grades": false,
+      "max_issues": 10,
+      "stars_max_issues": 2,
+      "censored": true,
+      "gate_ok": true,
+      "gate_rate_small": 1.0,
+      "gate_rate_large": 1.0,
+      "defect": false,
+      "d": 6,
+      "bands": {
+        "c": {
+          "name": "SC-의제 탄력성 c (d=6)",
+          "thresholds": [
+            0.33333333333333337,
+            0.5,
+            0.6666666666666666,
+            0.8333333333333334,
+            1.0000000000000002
+          ],
+          "direction": "at_most",
+          "note": "24 §4.3 — 이론 이상 1/d=0.167 와 전체 열거 1.0 사이 5등분"
+        },
+        "max_issues": {
+          "name": "SC-의제 최대 의제 수",
+          "thresholds": [
+            30,
+            20,
+            14,
+            10,
+            6
+          ],
+          "direction": "at_least",
+          "note": "메모리 한도 안에서 처리 가능한 최대 의제(축) 수. 탄력성 c가 구조 특성이라면 이쪽은 수용 한계 — 두 지표를 병행한다 (사용자 지시 2026-08-12)"
+        }
+      }
+    }
+  }
+}
