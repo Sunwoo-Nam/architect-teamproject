@@ -120,7 +120,12 @@ def main() -> int:
     # 기준 시나리오를 중앙값으로 잡고, 실제 쓴 값을 결과에 기록한다 (raw.sc_issue.d).
     issue_counts = sorted(p.n_issues for pr in plans for p in pr.sweep)
     d = statistics.median_low(issue_counts) if issue_counts else 4
-    raw, rows = measure(plans, e2=anchor, d=d,
+    from total.adapters.nparty.baseline import baseline_t as _tb_base
+
+    # TB 판정 ρ의 분모 — naive SAOP-RR baseline (24 §4.3, 결정론·케이스별 1회)
+    tb_baselines = {bc.case_id: _tb_base(bc.profiles, bc.candidates) for bc in functional}
+
+    raw, rows = measure(plans, e2=anchor, d=d, tb_baselines=tb_baselines,
                         viewpoints=[cf.COORDINATOR_FIRST, cf.worst_participant()])
 
     base = sweep_cases[len(sweep_cases) // 2] if sweep_cases else None

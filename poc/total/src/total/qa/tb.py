@@ -21,7 +21,7 @@ import statistics
 from dataclasses import dataclass
 from typing import Sequence
 
-from .constants import SYNTH_TIME, SynthTimeConstants
+from .constants import BAND_TB_RHO, SYNTH_TIME, SynthTimeConstants
 from .contract import SessionResult
 
 
@@ -76,4 +76,37 @@ def aggregate(
         "median_transfer_ms": round(med_transfer, 3),
         "dominant": max(parts, key=lambda k: parts[k]),
         "constants": constants.as_dict(),
+    }
+
+
+def rho(design_ms: float, baseline_ms: float, baseline_capped: bool = False) -> dict:
+    """판정 지표 ρ = T(설계) ÷ T(naive baseline) — 24 §4.3 (PL 확정 2026-08-13).
+
+    baseline_capped=True면 분모가 하한이라 ρ는 **상한** — 별점은 보수 방향으로 유효하다.
+    """
+    if baseline_ms <= 0:
+        raise ValueError(f"baseline_ms는 양수여야 한다: {baseline_ms}")
+    r = design_ms / baseline_ms
+    return {
+        "rho": round(r, 4),
+        "rho_is_upper_bound": bool(baseline_capped),
+        "stars": BAND_TB_RHO.stars(r),
+        "defect": r > 1.0,   # naive만도 못함 — 즉시 결함
+        "band": BAND_TB_RHO.as_dict(),
+    }
+
+
+def aggregate_rho(rhos: Sequence[dict]) -> dict:
+    """케이스별 ρ의 집계 — 중앙값 판정 + 최악 병기."""
+    if not rhos:
+        raise ValueError("집계할 ρ가 없다")
+    vals = [x["rho"] for x in rhos]
+    med = statistics.median(vals)
+    return {
+        "median_rho": round(med, 4),
+        "max_rho": round(max(vals), 4),
+        "stars": BAND_TB_RHO.stars(med),
+        "defect_cases": sum(1 for x in rhos if x["defect"]),
+        "upper_bound_cases": sum(1 for x in rhos if x["rho_is_upper_bound"]),
+        "band": BAND_TB_RHO.as_dict(),
     }
