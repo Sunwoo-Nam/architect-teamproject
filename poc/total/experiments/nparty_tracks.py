@@ -31,7 +31,7 @@ from total.adapters.nparty.baseline import baseline_t  # noqa: E402
 from total.qa import cf, fc, tb  # noqa: E402
 from total.qa.constants import BAND_FC_ACHIEVED, BAND_FC_S, BAND_TB_RHO  # noqa: E402
 
-PLANS = ("plan1a", "plan2")
+PLANS = ("plan1a", "plan2")  # 기본 — --plans로 확장 (택틱 비교: 62번 문서)
 E2_REFERENCE_PLAN = "plan2"
 E2_SAMPLES = 30
 
@@ -81,7 +81,7 @@ def load_tracks(limit):
     return tracks
 
 
-def measure_track(name, cases):
+def measure_track(name, cases, plans=PLANS):
     t0 = time.perf_counter()
     anchor = _e2(cases)
     t_e2 = time.perf_counter() - t0
@@ -96,7 +96,7 @@ def measure_track(name, cases):
            "sec_e2": round(t_e2, 1), "sec_baseline": round(t_base, 1)}
     pooled = {}
     case_rows = []  # 세분화 raw — 케이스×방안 1행 (재집계·부분 취합용, PL 지시 2026-08-13)
-    for plan in PLANS:
+    for plan in plans:
         t0 = time.perf_counter()
         runs, scores, rhos = [], [], []
         for bc in cases:
@@ -180,8 +180,11 @@ def main() -> int:
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--tracks", default=None,
                     help="쉼표 구분 트랙 선택 (예: main). 생략 시 전체")
+    ap.add_argument("--plans", default=None,
+                    help="쉼표 구분 방안 선택 (예: plan2,plan2ab,plan2plus). 생략 시 기본 2종")
     args = ap.parse_args()
 
+    plans = tuple(x.strip() for x in args.plans.split(",")) if args.plans else PLANS
     tracks = load_tracks(args.limit)
     if args.tracks:
         want = {x.strip() for x in args.tracks.split(",")}
@@ -209,16 +212,16 @@ def main() -> int:
         },
     }}
     all_rows: list[dict] = []
-    pool_all = {p: {"ach": [], "base": [], "m": [], "single": [], "rho": []} for p in PLANS}
+    pool_all = {p: {"ach": [], "base": [], "m": [], "single": [], "rho": []} for p in plans}
     for name, cases in tracks.items():
         print(f"== {name}: {len(cases)}건 ==")
-        out, pooled, case_rows = measure_track(name, cases)
+        out, pooled, case_rows = measure_track(name, cases, plans)
         raw["tracks"][name] = out
         all_rows.extend({**r, "track": name} for r in case_rows)
-        for p in PLANS:
+        for p in plans:
             for k in pool_all[p]:
                 pool_all[p][k].extend(pooled[p][k])
-        for p in PLANS:
+        for p in plans:
             d = out[p]
             print(f"  {p}: FC 달성률={d['fc']['mean_achieved']} ★{d['fc']['stars_achieved']}"
                   f"(s={d['fc']['s']}) | "
@@ -228,7 +231,7 @@ def main() -> int:
                   f"(중앙 {d['tb']['median_rho']}) "
                   f"[{d['sec']}s]")
 
-    for p in PLANS:
+    for p in plans:
         d = pool_all[p]
         mean_ach = statistics.mean(d["ach"])
         mean_base = statistics.mean(d["base"])
