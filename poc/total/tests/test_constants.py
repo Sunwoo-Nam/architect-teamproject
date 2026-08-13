@@ -9,7 +9,6 @@ import pytest
 
 from total.qa.constants import (
     BAND_CF_M,
-    BAND_FC_ACHIEVED,
     BAND_FC_S,
     BAND_SC_MAX_ISSUES,
     RU_CEILING_BYTES,
@@ -61,23 +60,14 @@ class TestFcBands:
         assert BAND_FC_S.stars(0.81) == 5
         assert BAND_FC_S.stars(0.0) == 0
 
-    def test_achieved_band_is_absolute(self):
-        assert BAND_FC_ACHIEVED.direction == "at_least"
-        assert BAND_FC_ACHIEVED.thresholds == [0.95, 0.90, 0.85, 0.80, 0.70]
-
-    def test_achieved_band_values(self):
-        assert BAND_FC_ACHIEVED.stars(0.9679) == 5   # dp2 방안 2 실측
-        assert BAND_FC_ACHIEVED.stars(0.9142) == 4   # dp2 방안 1-A 실측
-        assert BAND_FC_ACHIEVED.stars(0.69) == 0
-
-    def test_two_bands_can_disagree(self):
-        # 두 지표를 병행하는 이유 — 절대 달성률은 높은데 베이스라인 대비 개선은 작을 수 있다
-        assert BAND_FC_ACHIEVED.stars(0.9142) == 4
-        assert BAND_FC_S.stars(0.3086) == 2
+    def test_s_is_the_only_fc_band(self):
+        # 별점은 s 단일 (PL 확정 2026-08-13) — 달성률 병행 밴드는 폐기됐다
+        from total.qa import constants
+        assert not hasattr(constants, "BAND_FC_ACHIEVED")
+        assert BAND_FC_S.stars(0.3086) == 2   # dp2 방안 1-A 실측 s
 
     def test_bands_carry_source_note(self):
         assert "24" in BAND_FC_S.note
-        assert BAND_FC_ACHIEVED.note
 
 
 class TestCfBand:

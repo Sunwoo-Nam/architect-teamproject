@@ -21,7 +21,7 @@ from typing import Sequence
 from .constants import SYNTH_TIME
 
 #: raw.json에 올 수 있는 QA 키. 오타로 만든 섹션이 조용히 리포트에서 빠지는 것을 막는다.
-QA_KEYS = ("fc", "cf", "tb", "ru", "sc_issue")
+QA_KEYS = ("fc", "ru", "cf", "tb", "sc_issue")  # 핵심 서열 (24 §0, 2026-08-13)
 
 QA_TITLES = {
     "fc": "Functional Correctness (24 §1)",
@@ -152,9 +152,9 @@ def _table(plans: Sequence[str], rows: Sequence[tuple[str, list]]) -> list[str]:
 def _section(qa: str, data: dict, plans: Sequence[str]) -> list[str]:
     """QA 1종의 표. 지표별로 방안을 가로로 늘어놓는다."""
     keys: list[tuple[str, str]] = {
-        "fc": [("mean_achieved", "달성률"), ("stars_achieved", "달성률 별점"),
+        "fc": [("mean_s", "개선 비율 s (판정)"), ("stars_s", "별점"),
+               ("mean_achieved", "달성률 (수치 병기)"),
                ("mean_baseline", "무작위 베이스라인 R̄"),
-               ("mean_s", "개선 비율 s"), ("stars_s", "s 별점"),
                ("optimal_hit", "최적안 적중"), ("fr_violation_cases", "FR 위반 케이스"),
                ("degenerate_cases", "R̄=1 케이스 (s 판별력 없음)"),
                ("degenerate_missed", "그중 유효 후보 밖")],

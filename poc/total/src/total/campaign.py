@@ -78,7 +78,6 @@ def measure(
                 "agreed": session.agreed,
                 "achieved": round(score.achieved, 6),
                 "s": round(score.s, 6),
-                "stars_achieved": score.stars_achieved,
                 "stars_s": score.stars_s,
                 "fr_violations": score.fr_violations,
                 "rounds": session.rounds,

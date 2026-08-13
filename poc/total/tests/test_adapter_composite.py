@@ -175,9 +175,8 @@ class TestIntentionalChanges:
         """
         session, case = run_session(s01, "full", case=s01_case)
         score = fc.score(case, session.agreement)
-        assert score.stars_achieved == 5      # 달성률 0.9698 → ≥.95
         assert score.stars_s == 5             # s 0.9068 → >0.8
-        assert isinstance(score.stars_s, int) and isinstance(score.stars_achieved, int)
+        assert isinstance(score.stars_s, int)
 
     def test_time_uses_synth_model_not_wall_clock(self, s01, s01_case):
         """dpca는 `wall_ms` 절대 초 밴드로 시간 별점을 냈다.
