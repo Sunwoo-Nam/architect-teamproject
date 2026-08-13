@@ -125,6 +125,7 @@ def run_one(name: str, sc: Scenario, plan_names: list[str], limit: int,
             "achieved": fc_.get("mean_achieved"), "stars_achieved": fc_.get("stars_achieved"),
             "s": fc_.get("mean_s"), "fr": fc_.get("fr_violation_cases"),
             "total_mb": ru_.get("median_total_mb"), "stars_ru": ru_.get("stars_median"),
+            "materialized_mb": ru_.get("median_materialized_mb"),
             "over_ceiling": ru_.get("over_ceiling_sessions"),
             "rho": tb_.get("median_rho"), "stars_rho": tb_.get("stars"),
         }
@@ -140,14 +141,15 @@ def summary_md(rows: list[dict], skipped: list[tuple[str, str]],
     for p in plan_names:
         L += [f"## {p}", "",
               "| 케이스 | 조합 | 성격 | 달성률 | 달성★ | s(보조) | FR위반 "
-              "| 총점유MB | RU★ | 한도초과 | ρ | ρ★ |",
-              "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+              "| 총점유MB | 실물화MB | RU★ | 한도초과 | ρ | ρ★ |",
+              "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
         for r in rows:
             d = r[p]
             fmt = lambda v, n=4: "—" if v is None else (f"{v:.{n}f}" if isinstance(v, float) else str(v))
             L.append(f"| {r['name']} | {r['space']:,} | {r['label']}/{r['expected']} "
                      f"| {fmt(d['achieved'])} | {d['stars_achieved']} | {fmt(d['s'])} | {d['fr']} "
-                     f"| {fmt(d['total_mb'])} | {d['stars_ru']} | {d['over_ceiling']} "
+                     f"| {fmt(d['total_mb'])} | {fmt(d['materialized_mb'])} "
+                     f"| {d['stars_ru']} | {d['over_ceiling']} "
                      f"| {fmt(d['rho'], 3)} | {d['stars_rho']} |")
         L.append("")
     if skipped:

@@ -76,6 +76,8 @@ class RuMeasure:
     r_peak: float        # 프로토콜 상태만 ÷ 한도 — 참고
     stars: int
     over_ceiling: bool
+    #: 실물화 후보 구조 (RU B안) — peak에 포함된 내역의 병기. 0이면 계측 없음
+    materialized_bytes: int = 0
 
     @property
     def total_bytes(self) -> int:
@@ -123,6 +125,7 @@ def measure(
         ceiling_bytes=ceiling_bytes,
         r_total=r_total,
         r_peak=session.peak_bytes / ceiling_bytes,
+        materialized_bytes=session.materialized_bytes,
         stars=band_ru_usage().stars(r_total),
         over_ceiling=total > ceiling_bytes,
     )
@@ -143,6 +146,10 @@ def aggregate(measures: Sequence[RuMeasure]) -> dict:
         "sessions": len(measures),
         "median_peak_mb": round(statistics.median(m.peak_bytes for m in measures) / MB, 4),
         "median_base_mb": round(statistics.median(m.base_bytes for m in measures) / MB, 4),
+        # 실물화 후보 구조 (RU B안) — 계측이 없는 도메인(nparty)은 None으로 비운다
+        "median_materialized_mb": (
+            round(statistics.median(m.materialized_bytes for m in measures) / MB, 4)
+            if any(m.materialized_bytes for m in measures) else None),
         "median_total_mb": round(med_total / MB, 4),
         "max_total_mb": round(max_total / MB, 4),
         "ceiling_bytes": ceiling,

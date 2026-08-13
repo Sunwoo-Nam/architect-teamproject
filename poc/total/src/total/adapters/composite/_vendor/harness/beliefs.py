@@ -36,6 +36,11 @@ class AgentBeliefs:
     #: 그 값은 방안에 의존하지 않아 방안을 구분하지 못했다. nparty 쪽은 처음부터
     #: 실측 카운트라, 같은 항의 입력을 두 시나리오가 다른 방법으로 만들고 있었다.
     evals: int = 0
+    #: [이식 시 신설] 이 에이전트가 협상 중 실물화한 후보 구조의 최대 크기(바이트).
+    #: RU B안(PL 확정 2026-08-13) — "방안이 실제로 만든 후보군"이 방안 간 RU 변별의
+    #: 실체다: full=전수 목록, pool=압축 풀(kⁿ 필터), seq=축별 후보 목록.
+    #: 전체 조합 공간 사본은 채점 오라클 소관이라 단말 점유에 넣지 않는다.
+    materialized: int = 0
 
     def note_eval(self) -> None:
         """효용 평가 1회 계상.
@@ -50,6 +55,15 @@ class AgentBeliefs:
         1안의 eval 항은 **상한**으로 봐야 한다 (24 §6.4-a의 단일 상수 가정).
         """
         self.evals += 1
+
+    def note_materialized(self, n_bytes: int) -> None:
+        """[이식 시 신설] 실물화 후보 구조 크기 계상 — 보유 최대치(max)로 기록.
+
+        합산이 아니라 max인 이유: seq는 축 세션이 닫히면 그 축의 후보 목록을 더 들고
+        있지 않고, pool은 deepening 시 풀을 다시 만든다 — 단말이 "한 순간에" 드는
+        양이 RU의 질문이다 (24 §2.6 순간 피크 원칙과 동일).
+        """
+        self.materialized = max(self.materialized, n_bytes)
 
     def utility(self, outcome: Outcome) -> float:
         self.evals += 1

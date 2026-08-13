@@ -114,9 +114,28 @@ class TestRunSession:
             assert len(e.audience) == 1     # 2인 교대 제안
 
     def test_base_bytes_plan_independent(self, s01, s01_case):
+        # 정적 기저(축 정의 + 선호 표현)만 방안 무관 — 전체 공간 사본은 기저가 아니다 (RU B안)
         a, _ = run_session(s01, "seq2", case=s01_case)
         b, _ = run_session(s01, "pool", case=s01_case)
         assert a.base_bytes == b.base_bytes
+
+    def test_base_excludes_oracle_space(self, s01, s01_case):
+        # RU B안 (PL 확정 2026-08-13): 전체 조합 공간을 만드는 것은 채점 오라클이지
+        # 프로토콜이 아니다 — 기저에 물리면 방안 간 RU 변별이 구조적으로 0이 된다
+        from total.adapters.composite import oracle_space_bytes
+
+        s, _ = run_session(s01, "pool", case=s01_case)
+        assert s.base_bytes < oracle_space_bytes(s01_case) / 5
+        assert s.extra["oracle_space_mb"] > 0       # 참고 기록은 남긴다
+
+    def test_materialized_differs_by_plan(self, s01, s01_case):
+        # "방안이 실제로 만든 후보군" — full(전수) > pool(압축 풀) > seq2(축값 목록)
+        sizes = {}
+        for plan in ("full", "pool", "seq2"):
+            s, _ = run_session(s01, plan, case=s01_case)
+            sizes[plan] = s.materialized_bytes
+            assert s.materialized_bytes > 0, plan
+        assert sizes["full"] > sizes["pool"] > sizes["seq2"]
 
     def test_peak_comes_from_vendor_runner(self, s01, s01_case):
         # 밖에서 tracemalloc을 겹쳐 감싸면 내부 stop()이 추적을 꺼 0이 된다

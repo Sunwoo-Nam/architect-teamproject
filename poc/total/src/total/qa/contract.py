@@ -116,7 +116,10 @@ class SessionResult:
     eval_calls: int      # 효용 평가 호출 수 — 전 참여자 합 (24 §4.4)
     events: list[ObservationEvent] = field(default_factory=list)
     peak_bytes: int = 0  # 협상 구간 tracemalloc 피크 (runner가 채움)
-    base_bytes: int = 0  # 공통 기저 — 효용 표·순위표 (방안 무관, 24 §2.8 단서)
+    base_bytes: int = 0  # 공통 기저 — 협상 전 보유분 (nparty: 효용표·순위표 / composite: 축 정의+선호 표현)
+    #: 방안이 협상 중 실물화한 후보 구조의 최대 크기 — RU B안 (PL 확정 2026-08-13).
+    #: peak_bytes 안에 포함되는 부분의 내역이므로 총점유에 다시 더하지 않는다 (병기 전용)
+    materialized_bytes: int = 0
     extra: dict = field(default_factory=dict)
 
     def __post_init__(self) -> None:

@@ -238,11 +238,13 @@ class CompositeCase:
         return [] if all(r(mapping) for r in rules) else ["하드 제약 위반 합의"]
 
 
-def base_bytes(case: CompositeCase) -> int:
-    """공통 기저 — **1인분**: 후보 공간 사본 + 자기 순위표 (24 §2.8, PL 확정 2026-08-13).
-    실배포에서 각 단말은 공간의 자기 사본을 가지므로 단말 단위 기저는 공간 + 자기 순위표다.
-    선호는 균등 규모라 첫 참여자로 대표한다. (피크는 2인 교대 실행의 프로세스 값 —
-    단말 기준의 보수 상한으로 명시하고 유지한다.)"""
+def oracle_space_bytes(case: CompositeCase) -> int:
+    """채점 오라클이 든 전체 후보 공간 + 순위표 1인분 — **단말 점유가 아니다** (참고 지표).
+
+    구 `base_bytes` — RU B안 개정(PL 확정 2026-08-13) 전에는 이것을 공통 기저로
+    총점유에 물렸다. 그러나 1안(축값)·2안(압축 풀)은 전체 공간을 만들지 않는 것이
+    설계의 요점이고, 이 공간을 실제로 물화하는 것은 FC 채점 인프라(oracle)다 —
+    단말 기저에 넣으면 방안 간 RU 변별이 구조적으로 0이 된다. extra에 참고로 남긴다."""
     space = case._space_list()
     total = deep_size(space)
     if case.preferences:
@@ -292,11 +294,19 @@ def run_session(
     if plan not in PLANS:
         raise KeyError(f"알 수 없는 방안: {plan} (등록: {sorted(PLANS)})")
     case = case or CompositeCase(scenario.id, scenario)
-    case.preferences          # 공통 기저를 협상 구간 밖에서 구축
-    base = base_bytes(case)
+    case.preferences          # 채점 오라클(x*·순위표)을 협상 구간 밖에서 구축
+
+    # 기저 = 축 정의 + 자기 선호 표현 1인분 (24 §2.8 — RU B안, PL 확정 2026-08-13).
+    # 전체 조합 공간 사본을 기저로 물리지 않는다: 1안(축값)·2안(압축 풀)은 전체 공간을
+    # 만들지 않는 것이 설계의 요점이고, 공간을 실제로 만드는 것은 채점 오라클이다.
+    # 방안이 실제로 만든 후보 구조는 전략 계측(materialized)이 잰다 — 스윕 경로
+    # (`run_sweep_point`)와 같은 기저 공식이라 두 경로의 수치가 정합한다.
+    base = deep_size(scenario.axes) + deep_size(scenario.participants) // max(
+        1, scenario.n_participants)
 
     # 피크는 원본 러너가 협상 구간에서 이미 tracemalloc으로 잰다. 밖에서 한 번 더
     # 감싸면 내부 stop()이 추적을 꺼 버려 0이 나온다 — 원본 값을 그대로 쓴다.
+    # 실물화 후보 구조는 협상 구간 안에서 만들어지므로 피크에 포함된다 (이중 계상 없음).
     run = run_one(scenario, plan, **kw)
     peak = int(run.peak_kib * 1024)
 
@@ -319,11 +329,14 @@ def run_session(
         events=_events(run, pids, [a.name for a in scenario.axes]),
         peak_bytes=peak,
         base_bytes=base,
+        materialized_bytes=run.materialized_bytes,
         extra={
             "wall_ms": run.wall_ms,          # 참고 관측 — 실행 머신 의존이라 판정 제외
             "proposals": run.proposals,
             "exchanged_items": len(run.observations),
             "scenario_id": scenario.id,
+            # 채점 오라클이 든 전체 공간 사본 — 단말 점유가 아니라 측정 인프라 비용 (참고)
+            "oracle_space_mb": round(oracle_space_bytes(case) / (1024 * 1024), 4),
             **run.extra,
         },
     )

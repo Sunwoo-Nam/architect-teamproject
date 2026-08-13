@@ -167,6 +167,7 @@ def _section(qa: str, data: dict, plans: Sequence[str]) -> list[str]:
                ("median_total_ms", "세션 시간 (ms)"), ("dominant", "지배 항"),
                ("median_phase_ms", "통신 항"), ("median_transfer_ms", "전송 항")],
         "ru": [("median_total_mb", "단말 총 점유 (MB)"), ("median_peak_mb", "프로토콜 상태 (MB)"),
+               ("median_materialized_mb", "실물화 후보 구조 (MB)"),
                ("median_base_mb", "공통 기저 (MB)"), ("stars_median", "별점"),
                ("over_ceiling_sessions", "한도 초과 세션")],
         "sc_issue": [("max_issues", "최대 의제 수 (판정)"), ("stars_max_issues", "별점"),

@@ -37,6 +37,8 @@ class RunResult:
     wall_ms: float
     bytes: int = 0       # [이식 시 신설] 페이로드 바이트 (24 §9.2)
     eval_calls: int = 0  # [이식 시 신설] 효용 평가 호출 수 — 전 참여자 합 (24 §6.4-a)
+    #: [이식 시 신설] 실물화 후보 구조의 최대 크기 — 최대 부하 단말 기준 (RU B안, 24 §2.8)
+    materialized_bytes: int = 0
     observations: list = field(default_factory=list)  # [이식 시 신설] CF 측정용 관찰 기록
     extra: dict = field(default_factory=dict)
     log: EventLog | None = None
@@ -116,6 +118,8 @@ def run_one(scenario: Scenario, strategy: str, n_steps: int = 200, with_log: boo
         # 전 참여자의 효용 평가 호출 합. beliefs는 이 실행에서 새로 만든 객체라
         # 세션 간에 누적되지 않는다 (전역 카운터였다면 두 번째 실행이 더 크게 나온다)
         eval_calls=sum(b.evals for b in beliefs),
+        # 최대 부하 단말 기준 (24 §2.8) — 합이 아니라 max: RU는 "가장 무거운 단말"을 판정한다
+        materialized_bytes=max((b.materialized for b in beliefs), default=0),
         observations=list(comms.observations),
         peak_kib=peak / 1024,
         wall_ms=wall_ms,

@@ -68,6 +68,10 @@ class AxisNegotiator(SAONegotiator):
         self.mine.sort(key=lambda v: -self._score(v))
         self._by_name = {v.name: v for v in values}
         self._offered: set[str] = set()
+        # [이식 시 신설] RU B안 — 축 세션이 실물화하는 후보 구조(축값 목록)의 크기 계상.
+        # 축 세션이 닫히면 이 목록은 버려지므로 보유 최대치(max)로 기록된다.
+        from total.qa.ru import deep_size
+        beliefs.note_materialized(deep_size(self.mine) + deep_size(self._by_name))
 
     def _own_ok(self, value: Value) -> bool:
         partial: Outcome = {**self.agreed, self.axis.name: value}

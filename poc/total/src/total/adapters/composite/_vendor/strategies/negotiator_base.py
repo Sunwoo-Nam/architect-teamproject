@@ -54,6 +54,9 @@ class CandidateNegotiator(SAONegotiator):
     def _ensure(self) -> list[tuple[float, tuple]]:
         if self._candidates is None:
             self._candidates = self._build_candidates()
+            # [이식 시 신설] RU B안 — 실물화 후보 구조의 크기 계상 (full=전수, pool=압축 풀)
+            from total.qa.ru import deep_size
+            self.beliefs.note_materialized(deep_size(self._candidates))
             self._log(
                 "candidates_built",
                 pool_size=len(self._candidates),
