@@ -18,10 +18,10 @@
 | QAS-02 | Functional Suitability — **Functional Correctness** | 정상·장애 어떤 상황에서 협상이 종결되더라도, 확정 당사자 전원은 동일한 합의 레코드를 보유해야 한다 | 레코드 불일치 0건 | EU-V6, SD-V3 |
 | QAS-03 | Safety — **Operational Constraint** | 위임 범위 밖의 안이 제안되었을 때, 시스템은 자동 수락을 차단하고 사용자 승인을 요청해야 한다 | 범위 초과 자동 수락 0건 | SP-V1, EU-V2 |
 | QAS-04 | Security — **Confidentiality** | 참여자·중계자가 협상 트래픽을 관찰하더라도, 타인의 선호를 역추론할 수 있는 정보 이득이 제한되어야 한다 | 역추론 이득 (공격자 모델 기준) | SP-V5, EU-V3 |
-| QAS-05 | Performance Efficiency — **Time Behaviour** | N명·의제 M개의 협상이 개시되면, 정해진 시간 내에 종결까지 완료되어야 한다 | 개시→종결 완료 시간 (통신 지연 포함 — 방법은 측정 정의에 위임) | EU-V1 |
+| QAS-05 | Performance Efficiency — **Time Behaviour** | N명·의제 M개의 협상이 개시되면, 정해진 시간 내에 종결까지 완료되어야 한다 | 개시→종결 완료 시간 (통신 지연 포함 — 방법은 측정 정의에 위임) | EU-V1, EU-V7 |
 | QAS-06 | Performance Efficiency — **Resource Utilization** | 협상 1건을 수행하는 동안, 단말 자원 점유는 정해진 상한과 OS 정책 이내여야 한다 | 피크 메모리·CPU 상한 내, 발열·배터리 정책 통과 | HW-V2, HW-V3, OM-V2 |
 | QAS-07 | Flexibility — **Scalability** | 참여자 수가 3→10→50으로 증가하더라도, 메시지·메모리 증가가 허용 추세 내에 있고 완결률이 유지되어야 한다 | 확장 지수, 완결률 유지 | HW-V4 |
-| QAS-08 | Flexibility — **Scalability** | 의제·후보 수 증가로 조합이 급증하더라도, 자원 상한 내에서 협상을 완주해야 한다 | 최대 지원 의제 수 (상한 내) | SD-V6 ⭐ (채택 미결 — [`52`](52-Stakeholder-재편-VoC.md) §52.4) |
+| QAS-08 | Flexibility — **Scalability** | 의제·후보 수 증가로 조합이 급증하더라도, 자원 상한 내에서 협상을 완주해야 한다 | 최대 지원 의제 수 (상한 내) | SD-V6 |
 | QAS-09 | Reliability — **Recoverability** | 프로세스 종료·네트워크 단절이 발생했을 때, 협상 세션은 정해진 시간 내에 유효한 상태로 복구·재개되어야 한다 | 복구 시간·복구율 | OP-V1, HW-V1 |
 | QAS-10 | Reliability — **Fault Tolerance** | 참여자 1명의 무응답·이탈 또는 외부 서비스 장애가 발생하더라도, 잔여 협상은 장애 전파 없이 정의된 결말로 완결되어야 한다 | 전파 없는 완결률 | OP-V2, OP-V5, SA-V3, SD-V4 |
 | QAS-11 | Interaction Capability — **Operability** | 사용자가 진행 중 협상에 개입(중단·조건 변경)하면, 정해진 시간 내에 협상에 반영되어야 한다 | 개입 반영 지연 시간 | EU-V4 |
@@ -53,7 +53,7 @@
 | Maintainability | 1 | QAS-13 |
 | Compatibility | 0 | A2A 상호운용은 과제 부여 제약 — [`../06-Constraints.md`](../06-Constraints.md) 소관 |
 
-9개 특성 중 8개 커버. 시간(Time Behaviour) 관련 VoC 근거가 EU-V1 하나로 얇은 점은 [`52`](52-Stakeholder-재편-VoC.md) §52.4의 EU-V7 추가 검토로 연결된다.
+9개 특성 중 8개 커버. QAS-05(Time Behaviour)와 QAS-08(의제 Scalability)의 VoC 근거는 EU-V7·SD-V6 채택(2026-08-13, [`52`](52-Stakeholder-재편-VoC.md) §52.4)으로 확보되었다.
 
 ---
 
