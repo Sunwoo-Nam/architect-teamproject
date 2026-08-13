@@ -137,7 +137,9 @@ def measure_track(name, cases):
         s_val = fc.split_rule(mean_ach, mean_base) if hasattr(fc, "split_rule") else \
             (mean_ach - mean_base) / (1 - mean_base)
         med_m = statistics.fmean(m_vals)  # CF 대표값 = 평균 (PL 확정 2026-08-13)
-        med_rho = statistics.median(r["rho"] for r in rhos)
+        rho_sorted = sorted(r["rho"] for r in rhos)
+        p95_rho = rho_sorted[min(len(rho_sorted) - 1, int(0.95 * len(rho_sorted)))]
+        med_rho = statistics.median(rho_sorted)
         out[plan] = {
             "sec": round(sec, 1),
             "fc": {"mean_achieved": round(mean_ach, 4),
@@ -151,7 +153,8 @@ def measure_track(name, cases):
                    "agree_rate": round(agree_rate, 4),  # 모수=합의 세션 — 병기 의무 (24 §3.5)
                    "m": round(med_m, 3), "stars_m": cf.BAND_CF_M.stars(med_m),
                    "max_single_depth": round(statistics.fmean(single_vals), 3)},
-            "tb": {"median_rho": round(med_rho, 4), "stars": BAND_TB_RHO.stars(med_rho),
+            "tb": {"p95_rho": round(p95_rho, 4), "stars": BAND_TB_RHO.stars(p95_rho),
+                   "median_rho": round(med_rho, 4),  # 전형 성능 (병기)
                    "max_rho": round(max(r["rho"] for r in rhos), 4),
                    "defect_cases": sum(1 for r in rhos if r["defect"])},
         }
@@ -194,7 +197,8 @@ def main() -> int:
                   f"(s={d['fc']['s']}) | "
                   f"CF 잔여비밀={d['cf']['secret']} ★{d['cf']['stars_secret']}"
                   f"(m={d['cf']['m']}) | "
-                  f"TB ρ={d['tb']['median_rho']} ★{d['tb']['stars']} "
+                  f"TB ρP95={d['tb']['p95_rho']} ★{d['tb']['stars']}"
+                  f"(중앙 {d['tb']['median_rho']}) "
                   f"[{d['sec']}s]")
 
     for p in PLANS:
@@ -204,7 +208,9 @@ def main() -> int:
         s_val = fc.split_rule(mean_ach, mean_base) if hasattr(fc, "split_rule") else \
             (mean_ach - mean_base) / (1 - mean_base)
         med_m = statistics.fmean(d["m"])
-        med_rho = statistics.median(d["rho"])
+        rho_sorted = sorted(d["rho"])
+        p95_rho = rho_sorted[min(len(rho_sorted) - 1, int(0.95 * len(rho_sorted)))]
+        med_rho = statistics.median(rho_sorted)
         raw["combined"][p] = {
             "cases": len(d["ach"]),
             "fc": {"mean_achieved": round(mean_ach, 4),
@@ -217,7 +223,8 @@ def main() -> int:
                        1.0 - statistics.fmean(d["single"])),
                    "m": round(med_m, 3), "stars_m": cf.BAND_CF_M.stars(med_m),
                    "max_single_depth": round(statistics.fmean(d["single"]), 3)},
-            "tb": {"median_rho": round(med_rho, 4), "stars": BAND_TB_RHO.stars(med_rho),
+            "tb": {"p95_rho": round(p95_rho, 4), "stars": BAND_TB_RHO.stars(p95_rho),
+                   "median_rho": round(med_rho, 4),
                    "max_rho": round(max(d["rho"]), 4),
                    "defect_cases": "n/a(케이스별 판정은 트랙 표 참조)"},
         }

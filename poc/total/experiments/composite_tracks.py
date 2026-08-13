@@ -180,7 +180,7 @@ def main() -> int:
         print(f"  {plan}: FC 달성률={f['fc']['mean_achieved'] if f['fc'] else None} "
               f"★{f['fc']['stars_achieved'] if f['fc'] else '-'} | "
               f"RU r중앙={f['ru']['median_r_total'] if f['ru'] else None} | "
-              f"TB ρ중앙={f['tb'].get('median_rho')} ★{f['tb'].get('stars')} | "
+              f"TB ρP95={f['tb'].get('p95_rho')} ★{f['tb'].get('stars')} | "
               f"SC-의제 최대축={raw['tracks']['sweep'][plan]['sc_issue']['max_issues']['max_issues'] if raw['tracks']['sweep'][plan]['sc_issue'] else None} "
               f"[케이스 {sec_cases}s + 스윕 {sec_sweep}s]")
 
