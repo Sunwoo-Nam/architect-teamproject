@@ -181,7 +181,7 @@ class TestIntentionalChanges:
     def test_time_uses_synth_model_not_wall_clock(self, s01, s01_case):
         """dpca는 `wall_ms` 절대 초 밴드로 시간 별점을 냈다.
 
-        실행 머신 성능에 의존해 재현성이 없으므로 통합본은 24 §6.4 합성 시간 모델을
+        실행 머신 성능에 의존해 재현성이 없으므로 통합본은 24 §4.4 합성 시간 모델을
         쓰고 `wall_ms`는 참고 관측으로만 남긴다.
         """
         from total.qa.tb import synth_time
@@ -253,7 +253,7 @@ class TestEvalCallsAreCounted:
     방안이 무엇이든 같은 값이 나왔고, 실제로 seq2와 pool의 `median_eval_ms`가
     똑같이 5.04ms로 찍혔다. 반면 nparty 쪽(`_vendor/protocol.py`)은 순위표 구축
     + 방안별 재평가를 실제로 센다. **같은 QA 항의 입력을 두 시나리오가 다른
-    방법으로 만들고 있었다** — 24 §6.4-a의 eval 항이 요구하는 것은 호출 수다.
+    방법으로 만들고 있었다** — 24 §4.4-a의 eval 항이 요구하는 것은 호출 수다.
 
     이제 `AgentBeliefs.utility()` 호출을 직접 센다. 두 도메인 모두 "효용 함수가
     실제로 몇 번 불렸나"로 통일된다.

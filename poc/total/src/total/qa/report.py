@@ -25,10 +25,10 @@ QA_KEYS = ("fc", "ru", "cf", "tb", "sc_issue")  # 핵심 서열 (24 §0, 2026-08
 
 QA_TITLES = {
     "fc": "Functional Correctness (24 §1)",
-    "cf": "Confidentiality (24 §7)",
-    "tb": "Time Behaviour (24 §6)",
+    "cf": "Confidentiality (24 §3)",
+    "tb": "Time Behaviour (24 §4)",
     "ru": "Resource Utilization-메모리 (24 §2)",
-    "sc_issue": "Scalability-의제 (24 §4)",
+    "sc_issue": "Scalability-의제 (24 §5)",
 }
 
 
@@ -214,7 +214,7 @@ def _notes(qa: str, data: dict, plans: Sequence[str]) -> list[str]:
                          f"못해 실제 최대는 더 클 수 있다")
         if qa == "sc_issue" and d.get("defect"):
             notes.append(f"`{p}` **완결률 게이트 실패** — 규모가 커질수록 결렬이 늘어 "
-                         f"탄력성이 좋아 보이는 왜곡이다 (24 §4.4). c 별점은 0으로 덮었다")
+                         f"탄력성이 좋아 보이는 왜곡이다 (24 §5.4). c 별점은 0으로 덮었다")
     return list(dict.fromkeys(notes))[:6]      # 순서 유지 중복 제거
 
 
@@ -231,7 +231,7 @@ def render_markdown(meta: RunMeta, raw: dict) -> str:
         f"- 합성 시간 상수: t_phase {m['constants']['t_phase_ms']}ms(편도) · "
         f"t_eval {m['constants']['t_eval_ms']}ms · bw {m['constants']['bw_bytes_per_s']:,.0f} B/s",
         "",
-        "> 별점 사다리 중 일부는 **잠정**이다 (24 §7.3 등). 별점만 보지 말고 원지표를 함께 읽어야 한다.",
+        "> 별점 사다리 중 일부는 **잠정**이다 (24 §3.3 등). 별점만 보지 말고 원지표를 함께 읽어야 한다.",
         "",
     ]
     if m["note"]:

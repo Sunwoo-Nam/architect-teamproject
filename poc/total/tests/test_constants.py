@@ -20,22 +20,22 @@ from total.qa.constants import (
 
 
 class TestSynthTimeConstants:
-    """24 §6.4 — 합성 시간 모델의 세 상수."""
+    """24 §4.4 — 합성 시간 모델의 세 상수."""
 
     def test_t_phase_is_75ms_one_way(self):
-        # 24 §6.4-d: LTE 클라우드 릴레이 구간 분해 → 75ms (편도)
+        # 24 §4.4-d: LTE 클라우드 릴레이 구간 분해 → 75ms (편도)
         assert SYNTH_TIME.t_phase_ms == 75.0
 
     def test_t_eval_is_measured_1p4us(self):
-        # 24 §6.4-b: PoC 실측 1.394µs → 3µs 반올림
-        assert SYNTH_TIME.t_eval_ms == 0.0014  # 실측 1.394µs 채택 — 24 §6.4-b (2026-08-13)
+        # 24 §4.4-b: PoC 실측 1.394µs → 3µs 반올림
+        assert SYNTH_TIME.t_eval_ms == 0.0014  # 실측 1.394µs 채택 — 24 §4.4-b (2026-08-13)
 
     def test_bw_is_20mbps(self):
-        # 24 §6.4-c: LTE 20 Mbps
+        # 24 §4.4-c: LTE 20 Mbps
         assert SYNTH_TIME.bw_bytes_per_s == 2_500_000.0
 
     def test_bandwidth_delay_product(self):
-        # t_phase × bw = BDP. 24 §6.4-c가 방안 우열을 가르는 양으로 지목한 값
+        # t_phase × bw = BDP. 24 §4.4-c가 방안 우열을 가르는 양으로 지목한 값
         assert SYNTH_TIME.bdp_bytes == pytest.approx(0.075 * 2_500_000)
 
     def test_as_dict_for_report(self):
@@ -71,7 +71,7 @@ class TestFcBands:
 
 
 class TestCfBand:
-    """24 §7.3 — 노출 배수 m. 3점 경계가 1:1 등가."""
+    """24 §3.3 — 노출 배수 m. 3점 경계가 1:1 등가."""
 
     def test_ladder(self):
         assert BAND_CF_M.thresholds == [0.25, 0.5, 1.0, 2.0, 4.0]
@@ -85,7 +85,7 @@ class TestCfBand:
         assert BAND_CF_M.stars(1.184) == 2    # dp2 방안 2 실측
 
     def test_note_marks_provisional(self):
-        # 24 §7.3이 "잠정 — PL 조율 예정"이라고 명시한 상태다
+        # 24 §3.3이 "잠정 — PL 조율 예정"이라고 명시한 상태다
         assert "잠정" in BAND_CF_M.note
 
 
@@ -93,7 +93,7 @@ class TestScBands:
     """SC-의제도 지표 2개 — 탄력성 c(구조 특성)와 최대 의제 수(수용 한계)."""
 
     def test_elasticity_band_depends_on_d(self):
-        # 24 §4.3: 하계 1/d. d가 바뀌면 경계가 바뀐다 — 하드코딩 금지
+        # 24 §5.3: 하계 1/d. d가 바뀌면 경계가 바뀐다 — 하드코딩 금지
         b4 = band_sc_elasticity(d=4)
         assert b4.thresholds == pytest.approx([0.40, 0.55, 0.70, 0.85, 1.00])
 
@@ -119,7 +119,7 @@ class TestScBands:
         assert BAND_SC_MAX_ISSUES.thresholds == [12, 9, 7, 5, 4]  # [4,12] 로그 등분 (2026-08-13)
 
     def test_max_issues_stars(self):
-        # 24 §4.3 (2026-08-13) — [요구 4, 실사용 최대 12] 로그 등분
+        # 24 §5.3 (2026-08-13) — [요구 4, 실사용 최대 12] 로그 등분
         assert BAND_SC_MAX_ISSUES.stars(12) == 5   # 실사용 최대 커버 = 만점
         assert BAND_SC_MAX_ISSUES.stars(9) == 4
         assert BAND_SC_MAX_ISSUES.stars(7) == 3

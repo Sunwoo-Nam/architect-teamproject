@@ -1,4 +1,4 @@
-"""[24 §4] Scalability-의제 — 탄력성 c와 최대 의제 수, 지표 2종.
+"""[24 §5] Scalability-의제 — 탄력성 c와 최대 의제 수, 지표 2종.
 
 c는 **구조 특성**(조합이 늘 때 메모리가 어떻게 늘어나는가)이고,
 최대 의제 수는 **수용 한계**(한도 안에서 몇 개까지 되는가)다. 서로 다른 질문이라 병행한다.
@@ -79,7 +79,7 @@ class TestElasticity:
         assert e4.band.thresholds[0] > e10.band.thresholds[0]
 
     def test_reports_ci_spanning_grades(self):
-        # 24 §4.3 — 구간이 3개 이상 등급에 걸치면 재측정 신호
+        # 24 §5.3 — 구간이 3개 이상 등급에 걸치면 재측정 신호
         p = pts([(10, 5), (100, 400), (1000, 100), (10000, 9000)])
         e = elasticity(p, d=4)
         assert isinstance(e.ci_spans_three_grades, bool)
@@ -90,7 +90,7 @@ class TestElasticity:
         assert set(d) >= {"c", "ci_low", "ci_high", "r2", "stars", "band"}
 
     def test_uses_peak_only_base_excluded(self):
-        # 24 §4 (2026-08-13) — 보조 관측 c는 프로토콜 상태만 회귀한다: 기저(설계로 못
+        # 24 §5 (2026-08-13) — 보조 관측 c는 프로토콜 상태만 회귀한다: 기저(설계로 못
         # 줄이는 하한)를 넣으면 전 방안이 c≈1로 수렴해 변별이 죽는다. 판정(최대 의제 수)이
         # 총 점유를 쓰므로 기저는 그쪽에서 반영된다.
         flat_peak = [(10, 50), (100, 50), (1000, 50), (10000, 50)]
@@ -100,7 +100,7 @@ class TestElasticity:
 
 
 class TestCompletionGate:
-    """24 §4.4 — S가 커질 때 빨리 결렬해 메모리가 적게 나오는 왜곡을 잡는다."""
+    """24 §5.4 — S가 커질 때 빨리 결렬해 메모리가 적게 나오는 왜곡을 잡는다."""
 
     def test_passes_when_completion_stable(self):
         p = pts([(10, 10)] * 10 + [(10000, 100)] * 10)
@@ -180,7 +180,7 @@ class TestEvaluate:
         assert "elasticity" in r and "max_issues" in r and "gate" in r
 
     def test_gate_failure_zeroes_elasticity_stars(self):
-        # 24 §4 (2026-08-13) — 게이트 위반은 보조 관측 c의 별점만 0으로 덮는다.
+        # 24 §5 (2026-08-13) — 게이트 위반은 보조 관측 c의 별점만 0으로 덮는다.
         # 판정(최대 의제 수)은 완결 실행만 세므로 defect는 서지 않는다.
         small = [SweepPoint(10, int(0.1 * MB), True, 4) for _ in range(30)]
         mid = [SweepPoint(1000, int(0.1 * MB), True, 8) for _ in range(30)]

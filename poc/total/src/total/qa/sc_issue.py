@@ -1,4 +1,4 @@
-r"""[24 §4] Scalability-의제 — 단일 판정 지표: **최대 의제 수** (PL 확정 2026-08-13).
+r"""[24 §5] Scalability-의제 — 단일 판정 지표: **최대 의제 수** (PL 확정 2026-08-13).
 
 > 협상 몫 한도(RU와 동일, 128MB) 안에서 **단말 총 점유(기저 1인분 + 프로토콜 상태)**로
 > 정상 완결 가능한 최대 의제(축) 수. nparty·composite 두 시나리오에 같은 정의를 쓴다.
@@ -56,7 +56,7 @@ def loglog_fit(points: Sequence[SweepPoint]) -> FitResult:
 
     xs, ys = [], []
     for scale in sorted(grouped):
-        # 보조 관측 c는 프로토콜 상태만 회귀한다 (24 §4 — 기저 포함 시 전 방안 c≈1 수렴)
+        # 보조 관측 c는 프로토콜 상태만 회귀한다 (24 §5 — 기저 포함 시 전 방안 c≈1 수렴)
         med = statistics.median(p.peak_bytes for p in grouped[scale])
         xs.append(math.log(scale))
         ys.append(math.log(max(med, 1e-9)))   # 0 바이트 방어 — log(0) 회피
@@ -131,12 +131,12 @@ class GateResult:
             "scale_small": self.scale_small,
             "scale_large": self.scale_large,
             "z": round(self.z, 4),
-            "note": "24 §4.4 — 최소 S 대비 최대 S의 완결률이 유의하게 떨어지면 실패",
+            "note": "24 §5.4 — 최소 S 대비 최대 S의 완결률이 유의하게 떨어지면 실패",
         }
 
 
 def completion_gate(points: Sequence[SweepPoint]) -> GateResult:
-    """완결률 게이트 (24 §4.4). 단측 비율 차 검정 95%.
+    """완결률 게이트 (24 §5.4). 단측 비율 차 검정 95%.
 
     **저하만** 본다 — 큰 S에서 완결률이 오히려 오르는 것은 왜곡이 아니다.
     """
@@ -235,7 +235,7 @@ def evaluate(
     gate = completion_gate(points)
 
     e_dict = e.as_dict()
-    e_dict["auxiliary"] = True  # 판정 아님 — 원인 분석용 (24 §4)
+    e_dict["auxiliary"] = True  # 판정 아님 — 원인 분석용 (24 §5)
     if not gate.ok:
         e_dict["stars"] = 0
         e_dict["stars_overridden_by_gate"] = True

@@ -18,9 +18,9 @@ from total.qa.bands import (
 
 
 class TestStarsAtMost:
-    """낮을수록 좋음 · 경계 포함 (24 §4.3 c, §7.3 m, §2.8 r)."""
+    """낮을수록 좋음 · 경계 포함 (24 §5.3 c, §7.3 m, §2.8 r)."""
 
-    T = [0.40, 0.55, 0.70, 0.85, 1.00]  # 24 §4.3 d=4
+    T = [0.40, 0.55, 0.70, 0.85, 1.00]  # 24 §5.3 d=4
 
     @pytest.mark.parametrize("value,expected", [
         (0.0, 5), (0.24, 5), (0.40, 5),      # 경계 포함
@@ -64,7 +64,7 @@ class TestStarsAtLeast:
 
     def test_integer_thresholds(self):
         # 최대 축 수처럼 정수 지표에도 쓴다
-        t = [12, 9, 7, 5, 4]  # 24 §4.3 — [4,12] 로그 등분 (2026-08-13)
+        t = [12, 9, 7, 5, 4]  # 24 §5.3 — [4,12] 로그 등분 (2026-08-13)
         assert stars_at_least(32, t) == 5
         assert stars_at_least(12, t) == 5
         assert stars_at_least(10, t) == 4
@@ -96,14 +96,14 @@ class TestStarsGreaterThan:
 
 
 class TestEvenBandsBetween:
-    """두 참조점 사이 5등분 (24 §4.3 — 이론 이상 1/d 와 전체 열거 1.0)."""
+    """두 참조점 사이 5등분 (24 §5.3 — 이론 이상 1/d 와 전체 열거 1.0)."""
 
     def test_d4_matches_handbook(self):
-        # 24 §4.3 표: 0.40 / 0.55 / 0.70 / 0.85 / 1.00
+        # 24 §5.3 표: 0.40 / 0.55 / 0.70 / 0.85 / 1.00
         assert even_bands_between(0.25, 1.0) == pytest.approx([0.40, 0.55, 0.70, 0.85, 1.00])
 
     def test_d10_recomputes(self):
-        # "기준 시나리오의 의제 수 d가 바뀌면 하계 1/d와 구간 폭을 갱신한다" (24 §4.3)
+        # "기준 시나리오의 의제 수 d가 바뀌면 하계 1/d와 구간 폭을 갱신한다" (24 §5.3)
         b = even_bands_between(0.1, 1.0)
         assert b[0] == pytest.approx(0.28)
         assert b[-1] == pytest.approx(1.0)
@@ -139,10 +139,10 @@ class TestBand:
 
     def test_carries_definition(self):
         b = Band(name="c", thresholds=[0.4, 0.55, 0.7, 0.85, 1.0], direction="at_most",
-                 note="24 §4.3 d=4")
+                 note="24 §5.3 d=4")
         assert b.stars(0.3) == 5
         assert b.stars(1.5) == 0
-        assert "24 §4.3" in b.note
+        assert "24 §5.3" in b.note
 
     def test_direction_at_least(self):
         b = Band(name="달성률", thresholds=[0.95, 0.9, 0.85, 0.8, 0.7], direction="at_least")
@@ -159,9 +159,9 @@ class TestBand:
 
     def test_serialises_for_report(self):
         b = Band(name="c", thresholds=[0.4, 0.55, 0.7, 0.85, 1.0], direction="at_most",
-                 note="24 §4.3")
+                 note="24 §5.3")
         d = b.as_dict()
         assert d["name"] == "c"
         assert d["direction"] == "at_most"
         assert d["thresholds"] == [0.4, 0.55, 0.7, 0.85, 1.0]
-        assert d["note"] == "24 §4.3"
+        assert d["note"] == "24 §5.3"

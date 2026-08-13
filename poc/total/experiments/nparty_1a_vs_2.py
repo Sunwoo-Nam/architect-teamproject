@@ -116,7 +116,7 @@ def main() -> int:
         plans.append(pr)
         print(f"  {name}: 세션 {len(pr.runs)} · 스윕 {len(pr.sweep)}")
 
-    # 24 §4.3의 d — 탄력성 별점의 하계 1/d. 스윕이 의제 수 3·6·10을 섞으므로
+    # 24 §5.3의 d — 탄력성 별점의 하계 1/d. 스윕이 의제 수 3·6·10을 섞으므로
     # 기준 시나리오를 중앙값으로 잡고, 실제 쓴 값을 결과에 기록한다 (raw.sc_issue.d).
     issue_counts = sorted(p.n_issues for pr in plans for p in pr.sweep)
     d = statistics.median_low(issue_counts) if issue_counts else 4

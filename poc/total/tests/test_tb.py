@@ -1,4 +1,4 @@
-"""[24 §6] Time Behaviour — 합성 시간 모델.
+"""[24 §4] Time Behaviour — 합성 시간 모델.
 
 T = phase×t_phase + (eval÷N)×t_eval + bytes÷bw
 
@@ -29,7 +29,7 @@ class TestSynthTime:
         assert t.phase_ms == pytest.approx(10 * 75.0)
 
     def test_eval_term_is_divided_by_n(self):
-        # 24 §6.4-a — eval_calls는 전 참여자 합. 실제로는 N대가 동시에 한다
+        # 24 §4.4-a — eval_calls는 전 참여자 합. 실제로는 N대가 동시에 한다
         t = synth_time(mk(phases=0, bytes=0, eval_calls=300, participants=["a", "b", "c"]))
         assert t.eval_ms == pytest.approx(300 / 3 * 0.0014)
 
@@ -64,7 +64,7 @@ class TestSynthTime:
 
     def test_single_participant_no_division_error(self):
         t = synth_time(mk(participants=["only"], eval_calls=10, phases=0, bytes=0))
-        assert t.eval_ms == pytest.approx(10 * 0.0014)  # t_eval 실측 1.4µs (24 §6.4-b, 2026-08-13)
+        assert t.eval_ms == pytest.approx(10 * 0.0014)  # t_eval 실측 1.4µs (24 §4.4-b, 2026-08-13)
 
     def test_as_dict(self):
         d = synth_time(mk()).as_dict()

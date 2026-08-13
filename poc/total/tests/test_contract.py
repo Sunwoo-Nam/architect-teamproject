@@ -139,7 +139,7 @@ class TestDataset:
             self._mk(n_issues=3, issue_value_counts=[2, 3, 4, 5])
 
     def test_d_alias_is_n_issues(self):
-        # 24 §4.3의 d = 의제 수. 별점 하계 1/d 계산에 쓴다
+        # 24 §5.3의 d = 의제 수. 별점 하계 1/d 계산에 쓴다
         assert self._mk().d == 4
 
     def test_rejects_zero_participants(self):
