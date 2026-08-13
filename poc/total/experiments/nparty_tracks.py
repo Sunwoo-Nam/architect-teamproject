@@ -107,24 +107,34 @@ def measure_track(name, cases):
             t = tb.synth_time(session)
             b = baselines[bc.case_id]
             rhos.append(tb.rho(t.total_ms, b["T_ms"], b.get("capped", False)))
-            mv, sv = cf.exposure_values([(session, case)], anchor, agreed_only=False)
+            # RAW 스키마: results/nparty-tracks/RAW-SCHEMA.md (측정 전 확정 — PL 지시 2026-08-13)
+            _, sv = cf.exposure_values([(session, case)], anchor, agreed_only=False)
             meta = getattr(bc, "meta", {}) or {}
+            tags = meta.get("tags", []) or []
+            n_cand = len(bc.candidates)
             case_rows.append({
                 "case_id": bc.case_id, "plan": plan,
                 "scenario_type": meta.get("scenario_type"),
+                "variant": "plan2-miss" if any("plan2-miss" in x for x in tags) else "normal",
+                "depth_band": next((x.split(":")[1] for x in tags if x.startswith("depth:")),
+                                   None),
                 "k_feasible": meta.get("common_feasible_count"),
-                "n_participants": len(bc.profiles), "n_candidates": len(bc.candidates),
+                "n_participants": len(bc.profiles), "n_candidates": n_cand,
                 "agreed": session.agreed,
                 "achieved": round(scores[-1].achieved, 6),
+                "stars_achieved": scores[-1].stars_achieved,
                 "baseline_R": round(scores[-1].baseline, 6),
                 "s": round(scores[-1].s, 6),
                 "degenerate": scores[-1].baseline >= 1.0 - 1e-12,
-                "m_victims": [round(x, 4) for x in mv],
-                "m_median": round(__import__("statistics").median(mv), 4),
-                "max_single_depth": round(max(sv), 4),
+                "fr_violations": len(scores[-1].fr_violations),
+                "victim_depths": [round(x, 4) for x in sv],
+                "exposed_counts": [round(x * n_cand) for x in sv],
+                "secret_case_mean": round(1.0 - statistics.fmean(sv), 4),
                 "rho": rhos[-1]["rho"], "rho_defect": rhos[-1]["defect"],
                 "T_ms": round(t.total_ms, 3), "T_phase_ms": round(t.phase_ms, 3),
+                "T_eval_ms": round(t.eval_ms, 4), "T_transfer_ms": round(t.transfer_ms, 3),
                 "T_baseline_ms": b["T_ms"], "baseline_k": b["proposals_k*"],
+                "baseline_capped": bool(b.get("capped", False)),
                 "rounds": session.rounds, "sweeps": session.sweeps,
                 "phases": session.phases, "messages": session.messages,
                 "bytes": session.bytes,
@@ -180,7 +190,24 @@ def main() -> int:
             raise SystemExit(f"알 수 없는 트랙: {sorted(unknown)} (등록: {sorted(tracks)})")
         tracks = {k: v for k, v in tracks.items() if k in want}
     wall0 = time.perf_counter()
-    raw = {"tracks": {}, "combined": {}}
+    import platform
+    import subprocess
+    try:
+        commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"],
+                                capture_output=True, text=True, timeout=5).stdout.strip()
+    except Exception:
+        commit = None
+    from total.qa.constants import BAND_CF_SECRET, BAND_FC_ACHIEVED, SYNTH_TIME
+    raw = {"tracks": {}, "combined": {}, "meta": {
+        "commit": commit, "python": platform.python_version(),
+        "constants": SYNTH_TIME.as_dict(),
+        "raw_schema": "results/nparty-tracks/RAW-SCHEMA.md",
+        "qa_verdicts": {
+            "fc": "달성률 U(r)÷U(x*) 표본 평균 — " + BAND_FC_ACHIEVED.note,
+            "cf": "잔여 비밀률 = 1 − 최악 관찰자 깊이 — " + BAND_CF_SECRET.note,
+            "tb": "ρ = T_설계÷T_naive의 P95 — " + BAND_TB_RHO.note,
+        },
+    }}
     all_rows: list[dict] = []
     pool_all = {p: {"ach": [], "base": [], "m": [], "single": [], "rho": []} for p in PLANS}
     for name, cases in tracks.items():
