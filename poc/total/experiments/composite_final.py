@@ -17,10 +17,12 @@ from __future__ import annotations
 import argparse
 import json
 import platform
+import signal
 import statistics
 import subprocess
 import sys
 import time
+from contextlib import contextmanager
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -78,14 +80,35 @@ def main() -> int:
     print(f"FIN 케이스 {len(scenarios)}건 · 방안 {list(PLAN_NAMES)}")
     wall0 = time.perf_counter()
 
-    baselines = {}
+    @contextmanager
+    def _deadline(seconds):
+        def _h(signum, frame):
+            raise TimeoutError(f"{seconds}s 초과")
+        old = signal.signal(signal.SIGALRM, _h)
+        signal.alarm(seconds)
+        try:
+            yield
+        finally:
+            signal.alarm(0)
+            signal.signal(signal.SIGALRM, old)
+
+    # baseline은 케이스별로 실패할 수 있다 (RS 규모에서 lazy k-best 탐색 한도 —
+    # POP_CAP / 벽시계). 실패는 기록하고 해당 케이스의 ρ만 비운다 — RU는 유효하다.
+    baselines, baseline_failures = {}, []
     t0 = time.perf_counter()
     for sc in scenarios:
-        baselines[sc.id] = baseline_t(sc)
+        try:
+            with _deadline(90):
+                baselines[sc.id] = baseline_t(sc)
+        except Exception as exc:
+            baselines[sc.id] = None
+            baseline_failures.append((sc.id, f"{type(exc).__name__}: {exc}"))
     sec_baseline = round(time.perf_counter() - t0, 1)
-    print(f"  TB baseline {len(baselines)}건 ({sec_baseline}s)")
+    print(f"  TB baseline {len(baselines) - len(baseline_failures)}건 성공 · "
+          f"{len(baseline_failures)}건 실패 ({sec_baseline}s)")
 
     raw = {"qa": ["fc", "ru", "tb"], "plans": {}, "sec_baseline": sec_baseline,
+           "baseline_failures": baseline_failures,
            "meta": {
                "dataset": "composite final (FIN)", "cases": len(scenarios),
                "commit": _git_commit(), "python": platform.python_version(),
@@ -115,8 +138,11 @@ def main() -> int:
                                  extra_violations=case.hard_violations(session.agreement))
                 mem = ru.measure(session)
                 t = tb.synth_time(session)
-                rho = tb.rho(t.total_ms, b["T_ms"], b.get("capped", False))
-                scores.append(score); mems.append(mem); times.append(t); rhos.append(rho)
+                rho = (tb.rho(t.total_ms, b["T_ms"], b.get("capped", False))
+                       if b else {"rho": None, "defect": None})
+                scores.append(score); mems.append(mem); times.append(t)
+                if rho["rho"] is not None:
+                    rhos.append(rho)
                 row.update({
                     "agreed": session.agreed,
                     "achieved": round(score.achieved, 6),
@@ -133,8 +159,11 @@ def main() -> int:
                 session, _ = run_session(sc, plan, light=True)
                 mem = ru.measure(session)
                 tt = _tb_from_counters(sc, session)
-                rho = tb.rho(tt["total_ms"], b["T_ms"], b.get("capped", False))
-                mems.append(mem); rhos.append(rho)
+                rho = (tb.rho(tt["total_ms"], b["T_ms"], b.get("capped", False))
+                       if b else {"rho": None, "defect": None})
+                mems.append(mem)
+                if rho["rho"] is not None:
+                    rhos.append(rho)
                 row.update({
                     "agreed": session.agreed,
                     "achieved": None, "baseline_R": None, "s": None,
@@ -147,7 +176,8 @@ def main() -> int:
                     "over_ceiling": mem.over_ceiling,
                 })
             row.update({
-                "T_baseline_ms": b["T_ms"], "baseline_capped": b["capped"],
+                "T_baseline_ms": b["T_ms"] if b else None,
+                "baseline_capped": b["capped"] if b else None,
                 "rho": rho["rho"], "rho_defect": rho["defect"],
                 "rounds": session.rounds, "phases": session.phases,
                 "messages": session.messages, "bytes": session.bytes,
