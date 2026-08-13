@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>방안 1-A vs 방안 2 — NegMAS 적용 단계 비교</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: light-dark(#f7f8fa, #101318);
+      --surface: light-dark(#ffffff, #171b22);
+      --surface-alt: light-dark(#f3f5f8, #1e242d);
+      --text: light-dark(#20242a, #edf0f5);
+      --muted: light-dark(#626b78, #aab2bf);
+      --border: light-dark(#ccd2da, #3a4350);
+      --left-bg: light-dark(#fff5f5, #281a1b);
+      --left-head: light-dark(#f8cecc, #5b2d2d);
+      --left-border: light-dark(#b85450, #d97a76);
+      --right-bg: light-dark(#f4f8ff, #172233);
+      --right-head: light-dark(#dae8fc, #243b5a);
+      --right-border: light-dark(#6c8ebf, #77a5df);
+      --negmas: light-dark(#c62828, #ff7777);
+      --note-bg: light-dark(#fff7dc, #2b2514);
+      --note-border: light-dark(#d6b656, #b99b44);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.58; }
+    main { width: min(1760px, calc(100% - 32px)); margin: 28px auto 48px; }
+    h1 { margin: 0 0 8px; font-size: clamp(24px, 2.4vw, 38px); line-height: 1.25; }
+    h2 { margin: 34px 0 12px; font-size: 22px; }
+    p { margin: 6px 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .94em; }
+    .subtitle { color: var(--muted); margin-bottom: 18px; }
+    .legend, .premise {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin: 12px 0;
+    }
+    .legend strong, .negmas { color: var(--negmas); }
+    .negmas code { color: inherit; }
+    .premise ul { margin: 0; padding-left: 22px; }
+    .premise li + li { margin-top: 7px; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+    table { width: 100%; min-width: 1120px; border-collapse: collapse; table-layout: fixed; }
+    th, td { width: 50%; padding: 18px 20px; vertical-align: top; border-bottom: 1px solid var(--border); }
+    th + th, td + td { border-left: 1px solid var(--border); }
+    thead th { position: sticky; top: 0; z-index: 1; font-size: 18px; text-align: left; }
+    thead th:first-child { background: var(--left-head); border-bottom: 2px solid var(--left-border); }
+    thead th:last-child { background: var(--right-head); border-bottom: 2px solid var(--right-border); }
+    tbody td:first-child { background: var(--left-bg); }
+    tbody td:last-child { background: var(--right-bg); }
+    tbody tr:last-child td { border-bottom: 0; }
+    .step-title { display: block; margin-bottom: 9px; font-size: 16px; }
+    ol, ul { margin: 0; padding-left: 22px; }
+    li + li { margin-top: 6px; }
+    .scope-row td { padding-top: 22px; padding-bottom: 24px; }
+    .scope-row ul { padding-left: 20px; }
+    .scope-row li + li { margin-top: 9px; }
+    .custom-table th { background: var(--surface-alt) !important; border-bottom: 1px solid var(--border) !important; }
+    .custom-table td { background: var(--surface) !important; }
+    .sources {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+    }
+    .sources li + li { margin-top: 5px; }
+    .footnote { color: var(--muted); font-size: 14px; }
+
+    @media (max-width: 760px) {
+      main { width: min(100% - 20px, 1760px); margin-top: 18px; }
+      th, td { padding: 15px; }
+    }
+
+    @media print {
+      @page { size: A3 landscape; margin: 12mm; }
+      :root { color-scheme: light; }
+      body { background: #fff; }
+      main { width: 100%; margin: 0; }
+      .table-wrap { overflow: visible; }
+      thead th { position: static; }
+      tr { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>방안 1-A vs 방안 2 — NegMAS 적용 단계 비교</h1>
+  <p class="subtitle">기준: NegMAS 0.15.7</p>
+
+  <div class="legend">
+    <span class="negmas"><strong>붉은 글씨</strong></span>는 NegMAS의 API·자료형·실행 기능을 그대로 재사용하는 부분이다.
+    방안별 동기화·상태 관리·합의 판정 로직은 새로 구현하므로 기본 글씨로 표시한다.
+  </div>
+
+  <h2>설계 전제</h2>
+  <div class="premise">
+    <ul>
+      <li><strong>방안 1-A:</strong> P0가 <code>N-1</code>개의 양자 SAO 세션을 동기화한다. 표준 SAO는 후보 하나에 대한 응답만 표현하므로, 익명 후보 목록과 후보별 O/X를 주고받는 응답 어댑터를 둔다.</li>
+      <li><strong>방안 2:</strong> SAO를 사용하지 않고 NegMAS <code>Mechanism</code>을 확장한 <code>CumulativeConsensusMechanism</code>을 구현한다. 이 메커니즘이 동시 제출·누적 상태·전원 교집합 판정을 담당한다.</li>
+      <li>P0는 두 방안 모두에서 <strong>프로토콜 담당자이자 자신의 UFun을 가진 참여자 1인</strong>이다.</li>
+    </ul>
+  </div>
+
+  <h2>단계별 비교</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>방안 1-A — SAO 기반 순차 투표형</th>
+          <th>방안 2 — NegMAS 기반 누적 공통제안형</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <strong class="step-title">1. 협상 구조 초기화</strong>
+            <ol>
+              <li><span class="negmas"><code>OutcomeSpace</code> / <code>Outcome</code></span>으로 협상 후보를 정의한다.</li>
+              <li>각 참여자의 <span class="negmas"><code>BaseUtilityFunction</code></span>을 준비한다.</li>
+              <li>P0가 일반 참여자별로 <span class="negmas"><code>SAOMechanism</code></span> 양자 세션 <code>N-1</code>개를 생성한다.</li>
+              <li><code>Plan1aCoordinator</code>가 <span class="negmas"><code>SAOSyncController</code></span>를 기반으로 세션의 라운드를 맞춘다. 익명화·전원 O 판정은 새로 구현한다.</li>
+              <li>각 참여자는 <span class="negmas"><code>SAONegotiator</code></span>를 확장한 <code>Plan1aNegotiator</code>로 참여한다.</li>
+            </ol>
+          </td>
+          <td>
+            <strong class="step-title">1. 협상 구조 초기화</strong>
+            <ol>
+              <li><span class="negmas"><code>OutcomeSpace</code> / <code>Outcome</code></span>으로 협상 후보를 정의한다.</li>
+              <li>각 참여자의 <span class="negmas"><code>BaseUtilityFunction</code></span>을 준비한다.</li>
+              <li><code>CumulativeConsensusMechanism</code>을 <span class="negmas"><code>Mechanism</code></span> 기반으로 생성한다.</li>
+              <li>각 참여자는 <span class="negmas"><code>Negotiator</code></span>를 확장한 <code>CumulativeNegotiator</code>로 등록한다.</li>
+              <li>P0 내부에 참여자별 누적 제안 집합 <code>Si</code>를 초기화한다.</li>
+            </ol>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <strong class="step-title">2. 선호 순위·threshold 준비</strong>
+            <ol>
+              <li>각 Negotiator가 <span class="negmas"><code>BaseUtilityFunction</code></span>으로 후보 utility를 계산하고 내림차순 순위를 만든다.</li>
+              <li><span class="negmas"><code>PolyAspiration</code></span>으로 현재 바퀴의 revised threshold를 계산한다.</li>
+              <li>바퀴가 시작되면 각 참여자의 순위 포인터를 처음으로 돌린다. P0는 현재 라운드 후보만 유지한다.</li>
+            </ol>
+          </td>
+          <td>
+            <strong class="step-title">2. 선호 순위·threshold 준비</strong>
+            <ol>
+              <li>각 Negotiator가 <span class="negmas"><code>BaseUtilityFunction</code></span>으로 후보 utility를 계산하고 내림차순 순위를 만든다.</li>
+              <li><span class="negmas"><code>PolyAspiration</code></span>으로 현재 바퀴의 revised threshold를 계산한다.</li>
+              <li>바퀴가 시작되면 순위 포인터는 처음으로 돌리지만, P0의 누적 제안 집합 <code>Si</code>는 유지한다.</li>
+            </ol>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <strong class="step-title">3. 바퀴의 첫 후보 수집</strong>
+            <ol>
+              <li>각 <code>Plan1aNegotiator</code>는 <span class="negmas">SAO <code>propose()</code></span>를 통해 threshold 이상의 현재 순위 후보 1개를 제안한다.</li>
+              <li>P0 Coordinator가 양자 세션들의 첫 proposal을 모으고 P0 자신의 후보를 로컬로 추가한다.</li>
+              <li>제안 메시지가 정상 도착한 경우에만 해당 Negotiator의 순위 포인터를 전진시킨다.</li>
+            </ol>
+          </td>
+          <td>
+            <strong class="step-title">3. 라운드 후보 제출</strong>
+            <ol>
+              <li><code>CumulativeConsensusMechanism</code>이 <span class="negmas"><code>MechanismState.step</code></span>을 기준으로 라운드를 시작한다.</li>
+              <li>각 <code>CumulativeNegotiator</code>는 threshold 이상의 현재 순위 후보 1개를 전용 <code>ProposalAction</code>으로 P0에 제출한다.</li>
+              <li><code>ProposalAction</code>에는 참여자 ID·바퀴·순위 번호·<span class="negmas"><code>Outcome</code></span>을 담는다.</li>
+            </ol>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <strong class="step-title">4. 익명 후보 목록 배포 — SAO offer</strong>
+            <ol>
+              <li>P0 Coordinator가 수집한 후보의 제안자 귀속을 제거하고 중복 후보를 하나로 합친다.</li>
+              <li>익명 후보 목록을 전용 <code>BatchOffer</code> <span class="negmas"><code>Outcome</code></span>으로 표현한다.</li>
+              <li><span class="negmas"><code>SAOMechanism</code></span>이 각 양자 세션에 동일한 offer를 전달한다.</li>
+            </ol>
+          </td>
+          <td>
+            <strong class="step-title">4. 제출 수신·누적 상태 갱신</strong>
+            <ol>
+              <li>P0는 수신한 <span class="negmas"><code>Outcome</code></span>이 협상 <code>OutcomeSpace</code>에 속하는지 확인한다.</li>
+              <li>정상 제출을 해당 참여자의 누적 집합에 추가한다: <code>Si(k) = Si(k-1) ∪ {proposal}</code>.</li>
+              <li>제출 라운드를 해당 참여자의 후보 순위로 기록한다.</li>
+              <li>다른 일반 참여자에게는 후보나 중간 판정 결과를 배포하지 않는다.</li>
+            </ol>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <strong class="step-title">5. 후보 평가·SAO response + counter-offer</strong>
+            <ol>
+              <li>각 Negotiator가 목록의 모든 후보를 <span class="negmas"><code>BaseUtilityFunction</code></span>으로 평가한다.</li>
+              <li><code>utility ≥ revised threshold</code>면 O, 아니면 X로 판정해 <code>votes</code> 묶음을 만든다.</li>
+              <li><span class="negmas"><code>SAOResponse</code></span>의 <code>data["votes"]</code>에 O/X 묶음을 담고, <code>outcome</code>에 자기 다음 순위 후보(counter-offer)를 담아 회신한다.</li>
+              <li><span class="negmas"><code>ResponseType</code></span>은 SAO 응답 상태를 표현하고, 후보별 O/X 의미는 어댑터가 해석한다.</li>
+            </ol>
+          </td>
+          <td>
+            <strong class="step-title">5. 누적 상태 완성</strong>
+            <ol>
+              <li>P0가 해당 라운드의 제출 수신을 마감한다.</li>
+              <li>제출한 참여자의 순위 포인터를 전진시킨다. 유실된 제출은 포인터를 전진시키지 않아 다음 시도에서 같은 후보를 다시 낸다.</li>
+              <li>방안 2는 다른 사람의 후보를 평가하거나 O/X를 회신하는 단계가 없다.</li>
+            </ol>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <strong class="step-title">6. 합의 성립 판정</strong>
+            <ol>
+              <li>P0 Coordinator가 모든 양자 세션의 O/X 묶음을 수집한다.</li>
+              <li>현재 익명 후보 집합 <code>Ck</code>에서 <code>∃c ∈ Ck : 전원 O</code>인 후보를 찾는다.</li>
+              <li>응답 하나라도 없거나 X면 해당 후보는 성립하지 않는다. 만장일치 판정은 새로 구현한다.</li>
+            </ol>
+          </td>
+          <td>
+            <strong class="step-title">6. 합의 성립 판정</strong>
+            <ol>
+              <li>P0가 모든 참여자의 누적 집합을 교차한다: <code>G(k) = S1(k) ∩ … ∩ SN(k)</code>.</li>
+              <li><code>G(k) = ∅</code>이면 다음 라운드로 진행한다.</li>
+              <li><code>G(k) ≠ ∅</code>이면 전원이 직접 제안한 공통 후보가 생겼으므로 합의 성립 단계로 이동한다. 교집합 판정은 새로 구현한다.</li>
+            </ol>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <strong class="step-title">7. 동률 후보 해소</strong>
+            <ol>
+              <li>전원 O 후보가 하나면 그대로 확정한다.</li>
+              <li>여러 개면 동률 후보만 다시 공지하고 각 Negotiator가 <span class="negmas"><code>BaseUtilityFunction</code></span>으로 최선안을 골라 1표를 준다.</li>
+              <li>최다 득표 후보를 선택하고, 득표까지 같으면 후보의 결정론적 순서로 확정한다.</li>
+            </ol>
+          </td>
+          <td>
+            <strong class="step-title">7. 동률 후보 해소</strong>
+            <ol>
+              <li>공통 후보가 하나면 그대로 확정한다.</li>
+              <li>여러 개면 P0가 제출 라운드로 복원한 전원 순위의 <strong>합이 가장 작은 후보</strong>를 선택한다.</li>
+              <li>그래도 같으면 <strong>순위 표준편차가 가장 작은 후보</strong>를 선택한다.</li>
+              <li>마지막까지 같으면 각 Negotiator가 <span class="negmas"><code>BaseUtilityFunction</code></span>으로 결선투표한다.</li>
+            </ol>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <strong class="step-title">8. 미성립 시 다음 라운드</strong>
+            <ol>
+              <li>합의가 없으면 P0가 직전 <span class="negmas"><code>SAOResponse.outcome</code></span>들의 counter-offer를 다음 후보 집합으로 삼는다.</li>
+              <li>제안자 귀속을 제거한 다음 <code>BatchOffer</code>를 <span class="negmas"><code>SAOMechanism</code></span>으로 전달한다.</li>
+              <li>별도 미성립 공지는 없으며, 다음 offer가 직전 라운드의 미성립 신호가 된다.</li>
+            </ol>
+          </td>
+          <td>
+            <strong class="step-title">8. 미성립 시 다음 라운드</strong>
+            <ol>
+              <li><code>CumulativeConsensusMechanism</code>이 <span class="negmas"><code>MechanismState.step</code></span>을 증가시킨다.</li>
+              <li>각 Negotiator가 다음 순위 후보를 제출하고, P0는 기존 <code>Si</code>에 추가한다.</li>
+              <li>과거 제안은 제거하지 않으며 라운드가 지나도 계속 판정 근거로 사용한다.</li>
+              <li>일반 참여자에게 다른 사람의 제안이나 미성립 교집합을 공지하지 않는다.</li>
+            </ol>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <strong class="step-title">9. 바퀴 전환·threshold 인하</strong>
+            <ol>
+              <li>모든 Negotiator가 현재 threshold 이상 후보를 소진하면 현재 바퀴를 마친다.</li>
+              <li>합의가 없으면 <span class="negmas"><code>PolyAspiration</code></span>의 다음 시점으로 threshold를 낮춘다.</li>
+              <li>참여자의 순위 포인터를 처음으로 돌리고 바퀴의 첫 proposal 수집부터 다시 시작한다.</li>
+            </ol>
+          </td>
+          <td>
+            <strong class="step-title">9. 바퀴 전환·threshold 인하</strong>
+            <ol>
+              <li>모든 Negotiator가 현재 threshold 이상 후보를 소진하면 현재 바퀴를 마친다.</li>
+              <li>합의가 없으면 <span class="negmas"><code>PolyAspiration</code></span>의 다음 시점으로 threshold를 낮춘다.</li>
+              <li>순위 포인터를 처음으로 돌리되, P0의 누적 제안 집합 <code>Si</code>는 그대로 유지한다.</li>
+            </ol>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <strong class="step-title">10. 합의·결렬 종료</strong>
+            <ol>
+              <li>합의 후보가 결정되면 P0가 전체 양자 세션에 동일한 최종 <span class="negmas"><code>Outcome</code></span>을 설정한다.</li>
+              <li><span class="negmas">NegMAS Mechanism 종료 상태·callback</span>을 통해 각 Negotiator에게 종료를 알린다. 여러 SAO 세션을 동일 결과로 닫는 작업은 P0 Coordinator가 담당한다.</li>
+              <li>최대 5바퀴까지 합의가 없으면 전 세션을 <code>NO_DEAL</code>로 종료한다.</li>
+            </ol>
+          </td>
+          <td>
+            <strong class="step-title">10. 합의·결렬 종료</strong>
+            <ol>
+              <li>합의 후보가 결정되면 <span class="negmas"><code>MechanismStepResult.agreement</code></span>에 최종 <span class="negmas"><code>Outcome</code></span>을 설정한다.</li>
+              <li><span class="negmas">NegMAS Mechanism 종료 상태·callback</span>을 통해 모든 Negotiator에게 종료를 알린다.</li>
+              <li>최대 5바퀴까지 교집합이 없으면 agreement 없이 종료하고 시스템 결과를 <code>NO_DEAL</code>로 매핑한다.</li>
+            </ol>
+          </td>
+        </tr>
+        <tr class="scope-row">
+          <td>
+            <strong class="step-title">NegMAS 활용 범위</strong>
+            <ul>
+              <li><span class="negmas"><code>OutcomeSpace</code> / <code>Outcome</code></span>: 협상 후보 공간과 개별 후보를 표현한다.</li>
+              <li><span class="negmas"><code>BaseUtilityFunction</code></span>: utility 계산, O/X 판정, 결선투표의 최선안 선택에 사용한다.</li>
+              <li><span class="negmas"><code>PolyAspiration</code></span>: 바퀴별 revised threshold를 계산한다.</li>
+              <li><span class="negmas"><code>SAOMechanism</code></span>: P0와 각 일반 참여자 사이의 offer·response·counter-offer 세션을 실행한다.</li>
+              <li><span class="negmas"><code>SAONegotiator</code></span>: 제안·응답 callback과 참여자 생명주기를 제공한다.</li>
+              <li><span class="negmas"><code>SAOResponse</code> / <code>ResponseType</code></span>: 응답 상태, 다음 후보, 확장 데이터를 담는 표준 응답 용기를 제공한다.</li>
+              <li><span class="negmas"><code>SAOSyncController</code></span>: 여러 양자 SAO 세션의 제안·응답 시점을 동기화하는 기반을 제공한다.</li>
+              <li><span class="negmas">Mechanism 종료·시간 제한·callback</span>: 세션 실행 제어와 종료 통지를 제공한다.</li>
+            </ul>
+          </td>
+          <td>
+            <strong class="step-title">NegMAS 활용 범위</strong>
+            <ul>
+              <li><span class="negmas"><code>OutcomeSpace</code> / <code>Outcome</code></span>: 협상 후보 공간과 개별 후보를 표현한다.</li>
+              <li><span class="negmas"><code>BaseUtilityFunction</code></span>: 개인별 utility 계산, 순위 생성, 결선투표의 최선안 선택에 사용한다.</li>
+              <li><span class="negmas"><code>PolyAspiration</code></span>: 바퀴별 revised threshold를 계산한다.</li>
+              <li><span class="negmas"><code>Mechanism</code></span>: 방안 2 전용 메커니즘의 참여자 등록, step, 시간 제한, 종료 생명주기를 제공한다.</li>
+              <li><span class="negmas"><code>Negotiator</code></span>: 참여자 UFun·선호·생명주기를 담는 기반을 제공한다.</li>
+              <li><span class="negmas"><code>MechanismState</code></span>: 현재 step·시간·실행·종료 상태를 표현한다.</li>
+              <li><span class="negmas"><code>MechanismStepResult</code></span>: 단계 완료 여부와 최종 agreement를 NegMAS 실행기에 반환한다.</li>
+              <li><span class="negmas">Mechanism 종료·시간 제한·checkpoint·callback</span>: 실행 제어, 중간 상태 저장, 종료 통지를 제공한다.</li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>NegMAS에 추가로 구현해야 하는 핵심</h2>
+  <div class="table-wrap">
+    <table class="custom-table">
+      <thead>
+        <tr><th>방안 1-A</th><th>방안 2</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>Plan1aCoordinator</code>, 익명 <code>BatchOffer</code>, 후보별 O/X 어댑터, 전원 O 판정, O/X+다음 후보 결합 유실·재시도 정책, 다중 SAO 세션의 공통 종료</td>
+          <td><code>CumulativeConsensusMechanism</code>, <code>CumulativeNegotiator</code>, <code>ProposalAction</code>, 참여자별 누적 제안 집합, 전원 교집합 판정, 순위 합→표준편차→결선투표 동률 해소</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>근거</h2>
+  <div class="sources">
+    <ul>
+      <li>설계: <code>docs/changbae/51-설계후보1-다자-합의-프로토콜.md</code> §3-1, §4, §6</li>
+      <li>현재 PoC의 1-A 판정·회신 의미: <code>poc/dp2-nparty/src/dp2_nparty/protocol_styles.py</code></li>
+      <li>현재 PoC의 바퀴·제출 공통 로직: <code>poc/dp2-nparty/src/dp2_nparty/protocol.py</code></li>
+      <li>Threshold: <code>poc/dp2-nparty/src/dp2_nparty/threshold.py</code></li>
+      <li>동률 해소: <code>poc/dp2-nparty/src/dp2_nparty/tiebreak.py</code></li>
+    </ul>
+    <p class="footnote">본 문서의 SAO·Cumulative 클래스 구조는 현재 PoC 코드가 아니라 NegMAS를 적용해 재구현할 경우의 예상 설계이다.</p>
+  </div>
+</main>
+</body>
+</html>
