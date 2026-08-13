@@ -65,6 +65,10 @@ def load_tracks(limit):
                 except Exception:
                     continue
     tracks["issue-space"] = isc[:limit]
+    main_root = CASES_DIR.parent / "main"
+    if main_root.exists():
+        tracks["main"] = [issue_space.expand(issue_space.load_issue_case(f))
+                          for f in sorted(main_root.glob("*.json"))][:limit]
     return tracks
 
 
@@ -95,8 +99,11 @@ def measure_track(name, cases):
             b = baselines[bc.case_id]
             rhos.append(tb.rho(t.total_ms, b["T_ms"], b.get("capped", False)))
             mv, sv = cf.exposure_values([(session, case)], anchor)
+            meta = getattr(bc, "meta", {}) or {}
             case_rows.append({
                 "case_id": bc.case_id, "plan": plan,
+                "scenario_type": meta.get("scenario_type"),
+                "k_feasible": meta.get("common_feasible_count"),
                 "n_participants": len(bc.profiles), "n_candidates": len(bc.candidates),
                 "agreed": session.agreed,
                 "achieved": round(scores[-1].achieved, 6),
@@ -141,9 +148,17 @@ def measure_track(name, cases):
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--tracks", default=None,
+                    help="쉼표 구분 트랙 선택 (예: main). 생략 시 전체")
     args = ap.parse_args()
 
     tracks = load_tracks(args.limit)
+    if args.tracks:
+        want = {x.strip() for x in args.tracks.split(",")}
+        unknown = want - set(tracks)
+        if unknown:
+            raise SystemExit(f"알 수 없는 트랙: {sorted(unknown)} (등록: {sorted(tracks)})")
+        tracks = {k: v for k, v in tracks.items() if k in want}
     wall0 = time.perf_counter()
     raw = {"tracks": {}, "combined": {}}
     all_rows: list[dict] = []
