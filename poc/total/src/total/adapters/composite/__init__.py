@@ -288,13 +288,20 @@ def run_session(
     scenario: Scenario,
     plan: str,
     case: CompositeCase | None = None,
+    light: bool = False,
     **kw,
 ) -> tuple[SessionResult, CompositeCase]:
-    """전략 1회 실행 → 계약 세션 + 케이스."""
+    """전략 1회 실행 → 계약 세션 + 케이스.
+
+    `light=True`는 **후보 공간을 열거하지 않는** 경량 실행이다 — FC 채점 오라클을
+    만들지 않으므로 조합이 열거 한도를 넘는 대상(S11·대형 fixture)도 RU·TB를 잴 수
+    있다. 반환된 세션은 FC 채점에 쓸 수 없다 (`measure(qa=("ru","tb"))`와 함께 쓸 것).
+    """
     if plan not in PLANS:
         raise KeyError(f"알 수 없는 방안: {plan} (등록: {sorted(PLANS)})")
     case = case or CompositeCase(scenario.id, scenario)
-    case.preferences          # 채점 오라클(x*·순위표)을 협상 구간 밖에서 구축
+    if not light:
+        case.preferences      # 채점 오라클(x*·순위표)을 협상 구간 밖에서 구축
 
     # 기저 = 축 정의 + 자기 선호 표현 1인분 (24 §2.8 — RU B안, PL 확정 2026-08-13).
     # 전체 조합 공간 사본을 기저로 물리지 않는다: 1안(축값)·2안(압축 풀)은 전체 공간을
@@ -310,7 +317,8 @@ def run_session(
     run = run_one(scenario, plan, **kw)
     peak = int(run.peak_kib * 1024)
 
-    pids = case.pids
+    # light 모드에서는 case.pids(→ preferences → 공간 열거)를 피한다 — 벤더 규약과 동일
+    pids = ([f"P{i}" for i in range(scenario.n_participants)] if light else case.pids)
     agreement = NO_AGREEMENT if run.agreement is None else _outcome_key(run.agreement)
     session = SessionResult(
         plan=plan,
@@ -335,8 +343,10 @@ def run_session(
             "proposals": run.proposals,
             "exchanged_items": len(run.observations),
             "scenario_id": scenario.id,
-            # 채점 오라클이 든 전체 공간 사본 — 단말 점유가 아니라 측정 인프라 비용 (참고)
-            "oracle_space_mb": round(oracle_space_bytes(case) / (1024 * 1024), 4),
+            # 채점 오라클이 든 전체 공간 사본 — 단말 점유가 아니라 측정 인프라 비용 (참고).
+            # light 모드는 오라클을 만들지 않으므로 이 값도 없다 (열거 자체가 목적 밖)
+            **({} if light else
+               {"oracle_space_mb": round(oracle_space_bytes(case) / (1024 * 1024), 4)}),
             **run.extra,
         },
     )

@@ -59,11 +59,12 @@ def measure(
     for pr in plans:
         if not pr.runs:
             continue
-        scores = [
-            fc.score(case, session.agreement, extra_violations=v)
-            for (session, case), v in zip(pr.runs, pr.violations)
-        ]
-        if "fc" in qa:
+        # FC 채점은 후보 전수 열거를 요구한다 — qa에 없으면 계산 자체를 하지 않는다
+        # (조합이 거대한 경량 실행에서 case가 열거 불가일 수 있다)
+        scores = ([fc.score(case, session.agreement, extra_violations=v)
+                   for (session, case), v in zip(pr.runs, pr.violations)]
+                  if "fc" in qa else None)
+        if scores is not None:
             raw.setdefault("fc", {})[pr.plan] = fc.aggregate(scores)
 
         times = [tb.synth_time(s) for s, _ in pr.runs]
@@ -91,17 +92,18 @@ def measure(
             raw.setdefault("sc_issue", {})[pr.plan] = _flatten_sc(
                 sc_issue.evaluate(pr.sweep, d=d, memory_limit_bytes=ceiling_bytes))
 
-        for (session, case), score, t, m in zip(pr.runs, scores, times, mems):
+        for (session, case), score, t, m in zip(
+                pr.runs, scores or [None] * len(pr.runs), times, mems):
             rows.append({
                 "plan": pr.plan,
                 "case_id": getattr(case, "case_id", "?"),
                 "n_participants": session.n,
                 "n_issues": getattr(case, "n_issues", None),
                 "agreed": session.agreed,
-                "achieved": round(score.achieved, 6),
-                "stars_achieved": score.stars_achieved,
-                "s": round(score.s, 6),
-                "fr_violations": score.fr_violations,
+                "achieved": round(score.achieved, 6) if score else None,
+                "stars_achieved": score.stars_achieved if score else None,
+                "s": round(score.s, 6) if score else None,
+                "fr_violations": score.fr_violations if score else None,
                 "rounds": session.rounds,
                 "phases": session.phases,
                 "messages": session.messages,

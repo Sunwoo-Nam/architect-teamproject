@@ -22,7 +22,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import signal
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -80,20 +82,59 @@ def targets_all() -> list[tuple[str, Scenario]]:
             for name, p in paths]
 
 
+@contextmanager
+def _deadline(seconds: int):
+    """방안 1회 실행의 벽시계 상한 — 대형 fixture에서 풀 확장이 폭주하면 그 사실을
+    측정 실패로 기록하고 다음 대상으로 넘어간다 (조용히 매달리지 않는다)."""
+
+    def _handler(signum, frame):
+        raise TimeoutError(f"{seconds}s 초과")
+
+    old = signal.signal(signal.SIGALRM, _handler)
+    signal.alarm(seconds)
+    try:
+        yield
+    finally:
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, old)
+
+
 def run_one(name: str, sc: Scenario, plan_names: list[str], limit: int,
-            results_root: Path, stamp: str) -> dict:
-    """케이스 1건: 방안별 실행 → 실행 폴더 1개. 요약 행을 돌려준다."""
+            results_root: Path, stamp: str, light: bool = False,
+            timeout_s: int = 900) -> tuple[dict | None, list[tuple[str, str]]]:
+    """케이스 1건: 방안별 실행 → 실행 폴더 1개. (요약 행, 실패 목록)을 돌려준다.
+
+    `light=True`(조합이 열거 한도 초과): FC 오라클 없이 RU·TB만 잰다 — pool의 압축
+    풀이 큰 축 수에서 어디까지 크는지가 이 경로의 존재 이유다.
+    """
     case = CompositeCase(sc.id, sc, enumeration_limit=limit)
-    tb_baselines = {sc.id: baseline_t(sc)}
+    failures: list[tuple[str, str]] = []
+    qa = ("ru", "tb") if light else QA_COMPOSITE
+
+    try:
+        with _deadline(timeout_s):
+            tb_baselines = {sc.id: baseline_t(sc)}
+    except Exception as exc:
+        failures.append((f"{name}/baseline", f"{type(exc).__name__}: {exc}"))
+        tb_baselines = None
 
     plans: list[PlanRuns] = []
     for pname in plan_names:
+        try:
+            with _deadline(timeout_s):
+                session, _ = run_session(sc, pname, case=case, light=light)
+        except Exception as exc:
+            failures.append((f"{name}/{pname}", f"{type(exc).__name__}: {exc}"))
+            continue
         pr = PlanRuns(pname, PLANS[pname].label)
-        session, _ = run_session(sc, pname, case=case)
-        pr.add(session, case, case.hard_violations(session.agreement))
+        violations = () if light else case.hard_violations(session.agreement)
+        pr.add(session, case, violations)
         plans.append(pr)
 
-    raw, rows = measure(plans, tb_baselines=tb_baselines, qa=QA_COMPOSITE)
+    if not plans:
+        return None, failures
+
+    raw, rows = measure(plans, tb_baselines=tb_baselines, qa=qa)
 
     dataset = Dataset(
         name=f"composite {name}",
@@ -109,16 +150,18 @@ def run_one(name: str, sc: Scenario, plan_names: list[str], limit: int,
         experiment=EXPERIMENT,
         seed=dataset.seed,
         dataset=dataset.as_dict(),
-        plans=plan_names,
-        note=f"개별 케이스 측정 ({name}). 측정 범위 FC·RU·TB (campaign.QA_COMPOSITE — "
-             "PL 지시 2026-08-13, CF는 nparty 담당).",
+        plans=[pr.plan for pr in plans],
+        note=f"개별 케이스 측정 ({name}). 측정 범위 {list(qa)} "
+             "(campaign.QA_COMPOSITE — PL 지시 2026-08-13, CF는 nparty 담당)."
+             + (" 경량 실행 — 조합이 열거 한도를 넘어 FC(전수 채점) 제외, RU·TB만."
+                if light else ""),
     )
     out = write_run(results_root, meta, raw, rows)
-    print(f"  {name}: 저장 {out.name}")
+    print(f"  {name}: 저장 {out.name}" + (" [경량 RU·TB]" if light else ""))
 
     row = {"name": name, "space": sc.space_size(),
            "label": sc.meta.get("conflict_level", "?"),
-           "expected": sc.meta.get("expected", "?")}
+           "expected": sc.meta.get("expected", "?"), "light": light}
     for p in plan_names:
         fc_, ru_, tb_ = (raw.get(k, {}).get(p, {}) for k in ("fc", "ru", "tb"))
         row[p] = {
@@ -129,7 +172,7 @@ def run_one(name: str, sc: Scenario, plan_names: list[str], limit: int,
             "over_ceiling": ru_.get("over_ceiling_sessions"),
             "rho": tb_.get("median_rho"), "stars_rho": tb_.get("stars"),
         }
-    return row
+    return row, failures
 
 
 def summary_md(rows: list[dict], skipped: list[tuple[str, str]],
@@ -146,14 +189,18 @@ def summary_md(rows: list[dict], skipped: list[tuple[str, str]],
         for r in rows:
             d = r[p]
             fmt = lambda v, n=4: "—" if v is None else (f"{v:.{n}f}" if isinstance(v, float) else str(v))
-            L.append(f"| {r['name']} | {r['space']:,} | {r['label']}/{r['expected']} "
+            tag = " ⚡" if r.get("light") else ""
+            L.append(f"| {r['name']}{tag} | {r['space']:,} | {r['label']}/{r['expected']} "
                      f"| {fmt(d['achieved'])} | {d['stars_achieved']} | {fmt(d['s'])} | {d['fr']} "
                      f"| {fmt(d['total_mb'])} | {fmt(d['materialized_mb'])} "
                      f"| {d['stars_ru']} | {d['over_ceiling']} "
                      f"| {fmt(d['rho'], 3)} | {d['stars_rho']} |")
         L.append("")
+    if any(r.get("light") for r in rows):
+        L += ["> ⚡ = 경량 실행 — 조합이 열거 한도를 넘어 FC(전수 채점)는 정의상 불가, "
+              "RU·TB만 측정. 표본 채점으로 대체하지 않는다 (24 §1 전수 원칙).", ""]
     if skipped:
-        L += ["## 제외 (측정하지 않음 — 0이 아니다)", ""]
+        L += ["## 측정 실패 (기록 — 0이 아니다)", ""]
         L += [f"- **{n}**: {why}" for n, why in skipped]
         L.append("")
     return "\n".join(L)
@@ -165,7 +212,9 @@ def main() -> int:
     ap.add_argument("--targets", default=None,
                     help="쉼표 구분 접두 필터 (예: 'S01,S08,fix-hi-04') — 생략 시 전부")
     ap.add_argument("--enumeration-limit", type=int, default=200_000,
-                    help="FC 전수 열거 한도 — 넘는 케이스는 표본 대체 없이 제외")
+                    help="FC 전수 열거 한도 — 넘는 케이스는 경량(RU·TB) 실행으로 전환")
+    ap.add_argument("--per-plan-timeout", type=int, default=900,
+                    help="방안 1회 실행의 벽시계 상한(초) — 초과 시 실패로 기록")
     ap.add_argument("--results", default=str(ROOT / "results"))
     ap.add_argument("--allow-python-mismatch", action="store_true",
                     help="3.14 고정 검사 우회 (수치는 판정에 쓰지 말 것)")
@@ -182,13 +231,15 @@ def main() -> int:
     for name, sc in targets_all():
         if wanted and not any(name.startswith(w) for w in wanted):
             continue
-        if sc.space_size() > args.enumeration_limit:
-            skipped.append((name, f"조합 {sc.space_size():,} > 열거 한도 "
-                                  f"{args.enumeration_limit:,} — FC 전수 원칙상 제외"))
-            print(f"  {name}: 제외 (조합 {sc.space_size():,})")
-            continue
-        rows.append(run_one(name, sc, plan_names, args.enumeration_limit,
-                            results_root, stamp))
+        light = sc.space_size() > args.enumeration_limit
+        if light:
+            print(f"  {name}: 조합 {sc.space_size():,} > 한도 — 경량(RU·TB) 실행")
+        row, failures = run_one(name, sc, plan_names, args.enumeration_limit,
+                                results_root, stamp, light=light,
+                                timeout_s=args.per_plan_timeout)
+        if row is not None:
+            rows.append(row)
+        skipped.extend(failures)
 
     md = summary_md(rows, skipped, plan_names, stamp, args.enumeration_limit)
     summary_path = results_root / EXPERIMENT / f"SUMMARY-{stamp}.md"
