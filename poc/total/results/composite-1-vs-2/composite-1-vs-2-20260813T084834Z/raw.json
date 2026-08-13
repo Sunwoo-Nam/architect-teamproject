@@ -1,0 +1,328 @@
+{
+  "fc": {
+    "seq2": {
+      "cases": 10,
+      "agreed": 9,
+      "mean_achieved": 0.765786,
+      "mean_baseline": 0.739611,
+      "mean_s": 0.100523,
+      "stars_s": 1,
+      "optimal_hit": 0,
+      "fr_violation_cases": 1,
+      "degenerate_cases": 0,
+      "degenerate_missed": 0,
+      "bands": {
+        "s": {
+          "name": "FC 개선 비율 s",
+          "thresholds": [
+            0.8,
+            0.6,
+            0.4,
+            0.2,
+            0.0
+          ],
+          "direction": "greater_than",
+          "note": "24 §1.4 — s = (달성률 − R̄) ÷ (1 − R̄). 무작위 베이스라인 대비 개선. 경계 제외(strict >)"
+        }
+      }
+    },
+    "pool": {
+      "cases": 10,
+      "agreed": 9,
+      "mean_achieved": 0.770578,
+      "mean_baseline": 0.739611,
+      "mean_s": 0.118926,
+      "stars_s": 1,
+      "optimal_hit": 1,
+      "fr_violation_cases": 3,
+      "degenerate_cases": 0,
+      "degenerate_missed": 0,
+      "bands": {
+        "s": {
+          "name": "FC 개선 비율 s",
+          "thresholds": [
+            0.8,
+            0.6,
+            0.4,
+            0.2,
+            0.0
+          ],
+          "direction": "greater_than",
+          "note": "24 §1.4 — s = (달성률 − R̄) ÷ (1 − R̄). 무작위 베이스라인 대비 개선. 경계 제외(strict >)"
+        }
+      }
+    }
+  },
+  "tb": {
+    "seq2": {
+      "sessions": 10,
+      "median_total_ms": 6150.862,
+      "median_phase_ms": 6150.0,
+      "median_eval_ms": 0.5243,
+      "median_transfer_ms": 0.318,
+      "dominant": "phase",
+      "constants": {
+        "t_phase_ms": 75.0,
+        "t_eval_ms": 0.0014,
+        "bw_bytes_per_s": 2500000.0,
+        "bdp_bytes": 187500.0,
+        "note": "24 §4.4 — t_phase는 편도. LTE 클라우드 릴레이 기준"
+      },
+      "median_rho": 0.3468,
+      "max_rho": 1.2885,
+      "stars": 4,
+      "defect_cases": 2,
+      "upper_bound_cases": 0,
+      "band": {
+        "name": "TB 시간 비율 ρ",
+        "thresholds": [
+          0.2,
+          0.4,
+          0.6,
+          0.8,
+          1.0
+        ],
+        "direction": "at_most",
+        "note": "24 §4.3 — ρ = T_설계 ÷ T_naive(SAOP baseline). naive 등가 1.0-순간 완료 0 등분. baseline이 벽시계 상한에 걸리면 T_naive는 하한 → ρ는 상한(보수 판정)"
+      }
+    },
+    "pool": {
+      "sessions": 10,
+      "median_total_ms": 7876.531,
+      "median_phase_ms": 7875.0,
+      "median_eval_ms": 0.13965,
+      "median_transfer_ms": 1.439,
+      "dominant": "phase",
+      "constants": {
+        "t_phase_ms": 75.0,
+        "t_eval_ms": 0.0014,
+        "bw_bytes_per_s": 2500000.0,
+        "bdp_bytes": 187500.0,
+        "note": "24 §4.4 — t_phase는 편도. LTE 클라우드 릴레이 기준"
+      },
+      "median_rho": 0.4539,
+      "max_rho": 1.5237,
+      "stars": 3,
+      "defect_cases": 2,
+      "upper_bound_cases": 0,
+      "band": {
+        "name": "TB 시간 비율 ρ",
+        "thresholds": [
+          0.2,
+          0.4,
+          0.6,
+          0.8,
+          1.0
+        ],
+        "direction": "at_most",
+        "note": "24 §4.3 — ρ = T_설계 ÷ T_naive(SAOP baseline). naive 등가 1.0-순간 완료 0 등분. baseline이 벽시계 상한에 걸리면 T_naive는 하한 → ρ는 상한(보수 판정)"
+      }
+    }
+  },
+  "ru": {
+    "seq2": {
+      "sessions": 10,
+      "median_peak_mb": 0.1043,
+      "median_base_mb": 0.9956,
+      "median_total_mb": 1.0937,
+      "max_total_mb": 54.6538,
+      "ceiling_bytes": 134217728,
+      "median_r_total": 0.008544,
+      "max_r_total": 0.426983,
+      "stars_median": 5,
+      "stars_max": 3,
+      "over_ceiling_sessions": 0,
+      "band": {
+        "name": "RU 사용률 r",
+        "thresholds": [
+          0.15,
+          0.3,
+          0.44999999999999996,
+          0.6,
+          0.75
+        ],
+        "direction": "at_most",
+        "note": "24 §2.8 — r = 피크 ÷ 한도, 15%p 등분. 한도 초과는 0점"
+      },
+      "note": "별점은 단말 총 점유(공통 기저 + 프로토콜 상태) 기준 (24 §2.8 단서). 작은 규모에서는 포화하므로 절대 MB를 함께 읽어야 한다"
+    },
+    "pool": {
+      "sessions": 10,
+      "median_peak_mb": 0.1231,
+      "median_base_mb": 0.9956,
+      "median_total_mb": 1.1052,
+      "max_total_mb": 54.6534,
+      "ceiling_bytes": 134217728,
+      "median_r_total": 0.008635,
+      "max_r_total": 0.42698,
+      "stars_median": 5,
+      "stars_max": 3,
+      "over_ceiling_sessions": 0,
+      "band": {
+        "name": "RU 사용률 r",
+        "thresholds": [
+          0.15,
+          0.3,
+          0.44999999999999996,
+          0.6,
+          0.75
+        ],
+        "direction": "at_most",
+        "note": "24 §2.8 — r = 피크 ÷ 한도, 15%p 등분. 한도 초과는 0점"
+      },
+      "note": "별점은 단말 총 점유(공통 기저 + 프로토콜 상태) 기준 (24 §2.8 단서). 작은 규모에서는 포화하므로 절대 MB를 함께 읽어야 한다"
+    }
+  },
+  "cf": {
+    "seq2": {
+      "m": 0.335,
+      "stars_m": 4,
+      "max_single_depth": 0.009,
+      "victims": 20,
+      "note": "",
+      "band": {
+        "name": "CF 노출 배수 m",
+        "thresholds": [
+          0.25,
+          0.5,
+          1.0,
+          2.0,
+          4.0
+        ],
+        "direction": "at_most",
+        "note": "24 §3.3 — 3점 경계(m=1)가 1:1 협상 등가. **잠정 사다리**(PL 조율 예정)이므로 별점만 보지 말고 m·깊이·노출률 원지표를 함께 읽어야 한다"
+      },
+      "participant_accuracy": 0.0,
+      "participant_random_baseline": 0.0005,
+      "participant_gain_pp": -0.05,
+      "participant_exposure_rate": 0.0,
+      "participant_stars": 5,
+      "participant_samples": 10,
+      "e2": {
+        "depth": 0.028276,
+        "samples": 8,
+        "degenerate": false,
+        "note": "1:1 기준 노출량 — 참조 2인 협상에서 상대 1인이 도달하는 깊이. m의 분모이며 도메인별로 따로 측정한다"
+      },
+      "attacker": "frequency 고정 규칙 3개 (24 §3.4) — 변경 시 전 측정 재실행"
+    },
+    "pool": {
+      "m": 0.682,
+      "stars_m": 3,
+      "max_single_depth": 0.019,
+      "victims": 20,
+      "note": "",
+      "band": {
+        "name": "CF 노출 배수 m",
+        "thresholds": [
+          0.25,
+          0.5,
+          1.0,
+          2.0,
+          4.0
+        ],
+        "direction": "at_most",
+        "note": "24 §3.3 — 3점 경계(m=1)가 1:1 협상 등가. **잠정 사다리**(PL 조율 예정)이므로 별점만 보지 말고 m·깊이·노출률 원지표를 함께 읽어야 한다"
+      },
+      "participant_accuracy": 0.3,
+      "participant_random_baseline": 0.0005,
+      "participant_gain_pp": 29.95,
+      "participant_exposure_rate": 0.2996,
+      "participant_stars": 4,
+      "participant_samples": 10,
+      "e2": {
+        "depth": 0.028276,
+        "samples": 8,
+        "degenerate": false,
+        "note": "1:1 기준 노출량 — 참조 2인 협상에서 상대 1인이 도달하는 깊이. m의 분모이며 도메인별로 따로 측정한다"
+      },
+      "attacker": "frequency 고정 규칙 3개 (24 §3.4) — 변경 시 전 측정 재실행"
+    }
+  },
+  "sc_issue": {
+    "seq2": {
+      "c": 0.1113,
+      "ci_low": -0.0013,
+      "ci_high": 0.2239,
+      "r2": 0.9005,
+      "stars_c": 5,
+      "ci_spans_three_grades": false,
+      "max_issues": 10,
+      "stars_max_issues": 4,
+      "censored": true,
+      "gate_ok": true,
+      "gate_rate_small": 1.0,
+      "gate_rate_large": 1.0,
+      "defect": false,
+      "d": 6,
+      "bands": {
+        "c": {
+          "name": "SC-의제 탄력성 c (d=6)",
+          "thresholds": [
+            0.33333333333333337,
+            0.5,
+            0.6666666666666666,
+            0.8333333333333334,
+            1.0000000000000002
+          ],
+          "direction": "at_most",
+          "note": "24 §5.3 — 이론 이상 1/d=0.167 와 전체 열거 1.0 사이 5등분"
+        },
+        "max_issues": {
+          "name": "SC-의제 최대 의제 수 (단일 판정 지표)",
+          "thresholds": [
+            12,
+            9,
+            7,
+            5,
+            4
+          ],
+          "direction": "at_least",
+          "note": "24 §5.3 (PL 확정 2026-08-13) — 참조점: 하한 4축(요구 — 기준 시나리오 날짜·시간·영화관·영화, 미달 즉시 결함) · 상한 12축(실사용 최대 — 여행급 협의의 축 열거와 인지 한계·자동 협상 벤치마크 근거, 24 §5.3-a). [4,12] 로그 5등분(4·5.0·6.2·7.7·9.6·12)의 반올림"
+        }
+      }
+    },
+    "pool": {
+      "c": 0.0709,
+      "ci_low": -0.0227,
+      "ci_high": 0.1645,
+      "r2": 0.8415,
+      "stars_c": 5,
+      "ci_spans_three_grades": false,
+      "max_issues": 10,
+      "stars_max_issues": 4,
+      "censored": true,
+      "gate_ok": true,
+      "gate_rate_small": 1.0,
+      "gate_rate_large": 1.0,
+      "defect": false,
+      "d": 6,
+      "bands": {
+        "c": {
+          "name": "SC-의제 탄력성 c (d=6)",
+          "thresholds": [
+            0.33333333333333337,
+            0.5,
+            0.6666666666666666,
+            0.8333333333333334,
+            1.0000000000000002
+          ],
+          "direction": "at_most",
+          "note": "24 §5.3 — 이론 이상 1/d=0.167 와 전체 열거 1.0 사이 5등분"
+        },
+        "max_issues": {
+          "name": "SC-의제 최대 의제 수 (단일 판정 지표)",
+          "thresholds": [
+            12,
+            9,
+            7,
+            5,
+            4
+          ],
+          "direction": "at_least",
+          "note": "24 §5.3 (PL 확정 2026-08-13) — 참조점: 하한 4축(요구 — 기준 시나리오 날짜·시간·영화관·영화, 미달 즉시 결함) · 상한 12축(실사용 최대 — 여행급 협의의 축 열거와 인지 한계·자동 협상 벤치마크 근거, 24 §5.3-a). [4,12] 로그 5등분(4·5.0·6.2·7.7·9.6·12)의 반올림"
+        }
+      }
+    }
+  }
+}

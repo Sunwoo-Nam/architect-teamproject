@@ -111,6 +111,15 @@ def main() -> int:
         cases.append(CompositeCase(sc.id, sc))
     print(f"시나리오 {len(scenarios)}건 · 방안 {plan_names}")
 
+    from total.adapters.composite.baseline import baseline_t
+
+    tb_baselines = {}
+    for sc in scenarios:
+        b = baseline_t(sc)
+        tb_baselines[sc.id] = b
+        print(f"  TB baseline {sc.id}: k*={b['proposals_k*']} T={b['T_ms']/1000:.1f}s"
+              + (" (하한)" if b["capped"] else ""))
+
     anchor = e2_anchor(scenarios, cases)
     print(f"e₂ 앵커 (참조 {E2_REFERENCE_PLAN}, {anchor.samples}표본): "
           f"깊이={anchor.depth:.4f}")
@@ -128,7 +137,8 @@ def main() -> int:
     issue_counts = sorted(p.n_issues for pr in plans for p in pr.sweep)
     d = statistics.median_low(issue_counts) if issue_counts else 4
 
-    raw, rows = measure(plans, e2=anchor, d=d, viewpoints=_viewpoints())
+    raw, rows = measure(plans, e2=anchor, d=d, viewpoints=_viewpoints(),
+                        tb_baselines=tb_baselines)
 
     base = scenarios[0]
     dataset = Dataset(

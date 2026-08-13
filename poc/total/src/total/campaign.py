@@ -37,6 +37,7 @@ def measure(
     viewpoints: Sequence[cf.Viewpoint],
     d: int,
     ceiling_bytes: int = RU_CEILING_BYTES,
+    tb_baselines: dict | None = None,
 ) -> tuple[dict, list[dict]]:
     """QA 5종 집계와 케이스별 행을 만든다. 반환 (raw, cases).
 
@@ -57,6 +58,14 @@ def measure(
 
         times = [tb.synth_time(s) for s, _ in pr.runs]
         raw.setdefault("tb", {})[pr.plan] = tb.aggregate(times)
+        if tb_baselines:
+            rhos = []
+            for (session, case), t in zip(pr.runs, times):
+                b = tb_baselines.get(getattr(case, "case_id", None))
+                if b:
+                    rhos.append(tb.rho(t.total_ms, b["T_ms"], b.get("capped", False)))
+            if rhos:
+                raw["tb"][pr.plan].update(tb.aggregate_rho(rhos))
 
         mems = [ru.measure(s, ceiling_bytes) for s, _ in pr.runs]
         raw.setdefault("ru", {})[pr.plan] = ru.aggregate(mems)
