@@ -1,0 +1,126 @@
+{
+  "tb": {
+    "seq2": {
+      "sessions": 1,
+      "median_total_ms": 8026.287,
+      "median_phase_ms": 8025.0,
+      "median_eval_ms": 0.6846,
+      "median_transfer_ms": 0.602,
+      "dominant": "phase",
+      "constants": {
+        "t_phase_ms": 75.0,
+        "t_eval_ms": 0.0014,
+        "bw_bytes_per_s": 2500000.0,
+        "bdp_bytes": 187500.0,
+        "note": "24 §4.4 — t_phase는 편도. LTE 클라우드 릴레이 기준"
+      },
+      "p95_rho": 0.0146,
+      "stars": 5,
+      "median_rho": 0.0146,
+      "max_rho": 0.0146,
+      "defect_cases": 0,
+      "upper_bound_cases": 0,
+      "band": {
+        "name": "TB 시간 비율 ρ",
+        "thresholds": [
+          0.2,
+          0.4,
+          0.6,
+          0.8,
+          1.0
+        ],
+        "direction": "at_most",
+        "note": "24 §4.3 — ρ = T_설계 ÷ T_naive(SAOP baseline). naive 등가 1.0-순간 완료 0 등분. baseline이 벽시계 상한에 걸리면 T_naive는 하한 → ρ는 상한(보수 판정)"
+      }
+    },
+    "pool": {
+      "sessions": 1,
+      "median_total_ms": 6604.744,
+      "median_phase_ms": 6600.0,
+      "median_eval_ms": 0.3752,
+      "median_transfer_ms": 4.368,
+      "dominant": "phase",
+      "constants": {
+        "t_phase_ms": 75.0,
+        "t_eval_ms": 0.0014,
+        "bw_bytes_per_s": 2500000.0,
+        "bdp_bytes": 187500.0,
+        "note": "24 §4.4 — t_phase는 편도. LTE 클라우드 릴레이 기준"
+      },
+      "p95_rho": 0.012,
+      "stars": 5,
+      "median_rho": 0.012,
+      "max_rho": 0.012,
+      "defect_cases": 0,
+      "upper_bound_cases": 0,
+      "band": {
+        "name": "TB 시간 비율 ρ",
+        "thresholds": [
+          0.2,
+          0.4,
+          0.6,
+          0.8,
+          1.0
+        ],
+        "direction": "at_most",
+        "note": "24 §4.3 — ρ = T_설계 ÷ T_naive(SAOP baseline). naive 등가 1.0-순간 완료 0 등분. baseline이 벽시계 상한에 걸리면 T_naive는 하한 → ρ는 상한(보수 판정)"
+      }
+    }
+  },
+  "ru": {
+    "seq2": {
+      "sessions": 1,
+      "median_peak_mb": 0.2044,
+      "median_base_mb": 0.001,
+      "median_materialized_mb": 0.001,
+      "median_total_mb": 0.2054,
+      "max_total_mb": 0.2054,
+      "ceiling_bytes": 134217728,
+      "median_r_total": 0.001605,
+      "max_r_total": 0.001605,
+      "stars_median": 5,
+      "stars_max": 5,
+      "over_ceiling_sessions": 0,
+      "band": {
+        "name": "RU 사용률 r",
+        "thresholds": [
+          0.15,
+          0.3,
+          0.44999999999999996,
+          0.6,
+          0.75
+        ],
+        "direction": "at_most",
+        "note": "24 §2.8 — r = 피크 ÷ 한도, 15%p 등분. 한도 초과는 0점"
+      },
+      "note": "별점은 단말 총 점유(공통 기저 + 프로토콜 상태) 기준 (24 §2.8 단서). 작은 규모에서는 포화하므로 절대 MB를 함께 읽어야 한다"
+    },
+    "pool": {
+      "sessions": 1,
+      "median_peak_mb": 0.0978,
+      "median_base_mb": 0.001,
+      "median_materialized_mb": 0.0533,
+      "median_total_mb": 0.0988,
+      "max_total_mb": 0.0988,
+      "ceiling_bytes": 134217728,
+      "median_r_total": 0.000772,
+      "max_r_total": 0.000772,
+      "stars_median": 5,
+      "stars_max": 5,
+      "over_ceiling_sessions": 0,
+      "band": {
+        "name": "RU 사용률 r",
+        "thresholds": [
+          0.15,
+          0.3,
+          0.44999999999999996,
+          0.6,
+          0.75
+        ],
+        "direction": "at_most",
+        "note": "24 §2.8 — r = 피크 ÷ 한도, 15%p 등분. 한도 초과는 0점"
+      },
+      "note": "별점은 단말 총 점유(공통 기저 + 프로토콜 상태) 기준 (24 §2.8 단서). 작은 규모에서는 포화하므로 절대 MB를 함께 읽어야 한다"
+    }
+  }
+}
