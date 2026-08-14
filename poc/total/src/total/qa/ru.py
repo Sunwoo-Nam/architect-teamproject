@@ -132,12 +132,13 @@ def measure(
 
 
 def aggregate(measures: Sequence[RuMeasure]) -> dict:
-    """세션 여러 건의 집계 — **표본 판정 = r 최대값** (2026-08-14 재개정, 24 §2.8).
+    """세션 여러 건의 집계 — **표본 별점 = P95·최대값 2케이스 병행** (24 §2.8 3차).
 
-    OS는 평균이 아니라 "한 순간의 최악"으로 죽인다(24 §2.6) — OOM은 크리티컬
-    사건이라 표본 대표값도 최악 기준으로 판정한다 (PL 확정 2026-08-14. 구 판정
-    P95는 병기로 강등 — TB는 사용자 체감 품질이라 P95 유지, RU만 max). 중앙값
-    (전형)·P95(꼬리)를 병기해 최악이 이상치인지 추세인지를 함께 읽는다.
+    두 통계를 각각 별점으로 산출해 나란히 보고한다 (PL 지시 2026-08-14):
+    케이스 1 P95 = "케이스 95%에서 보장되는 여유" (꼬리 관점, 표본 안정),
+    케이스 2 최대값 = "최악 케이스에서의 여유" (OOM은 최악 1건이 크리티컬).
+    단일 인용 시 대표는 최대값(보수 기준). 중앙값(전형)은 참고 병기.
+    TB의 ρ는 P95 단일 판정 유지 — 체감 품질은 꼬리 분위수가 맞다.
     """
     if not measures:
         raise ValueError("집계할 측정이 없다")
@@ -160,10 +161,10 @@ def aggregate(measures: Sequence[RuMeasure]) -> dict:
         "ceiling_bytes": ceiling,
         "median_r_total": round(med_total / ceiling, 6),
         "max_r_total": round(max_total / ceiling, 6),
-        # **표본 판정 = 최대값** (2026-08-14 재개정, 24 §2.8 — 구 P95에서 교체, PL 확정).
-        # OOM은 단 한 번의 최악으로 발생하는 크리티컬 사건이라 등급도 최악 기준이다.
-        # P95(꼬리)·중앙값(전형)은 병기 — 최악이 이상치인지 추세인지를 같이 읽는다.
-        # (TB의 ρ는 사용자 체감 품질이라 P95 판정 유지 — 두 QA의 통계가 다른 이유)
+        # **표본 별점 = P95·최대값 2케이스 병행** (24 §2.8 3차, 2026-08-14 PL 지시).
+        # 케이스 1 P95 = 꼬리 여유(표본 안정) · 케이스 2 최대값 = 최악 안전(OOM 크리티컬).
+        # 두 별점이 갈리면 그 간극이 곧 "평소 여유 vs 최악 리스크"의 정보다.
+        # 단일 인용 시 대표는 최대값(보수 기준). 중앙값은 참고 병기.
         "p95_r_total": round(p95_total / ceiling, 6),
         "stars_max": band_ru_usage().stars(max_total / ceiling),
         "stars_p95": band_ru_usage().stars(p95_total / ceiling),
@@ -171,6 +172,6 @@ def aggregate(measures: Sequence[RuMeasure]) -> dict:
         "over_ceiling_sessions": sum(1 for m in measures if m.over_ceiling),
         "band": band_ru_usage().as_dict(),
         "note": "별점은 단말 총 점유(공통 기저 + 프로토콜 상태) 기준 (24 §2.8 단서). "
-                "표본 판정은 r 최대값 (2026-08-14 재개정 — OOM은 최악 1건이 크리티컬) "
-                "— P95(꼬리)·중앙값(전형)을 병기해 읽는다",
+                "표본 별점은 P95·최대값 2케이스 병행 (24 §2.8 3차 — 단일 인용 대표는 "
+                "최대값). 중앙값(전형)은 참고 병기",
     }
