@@ -5,9 +5,12 @@
 읽을 수 있고, 값이 십진 자릿수 여러 개를 넘나드는 꼬리 분포라 x는 로그축이다.
 
 산출물 (케이스×방안 원값 cases.jsonl에서 — 재시뮬레이션 없음):
-- fig-tb-rho-ecdf.tex / fig-ru-r-ecdf.tex — standalone pgfplots (논문 삽입용,
-  pdflatex 컴파일 가능. 한글 의존을 피하려고 그림 내 라벨은 영문)
-- fig-tb-rho-ecdf.png / fig-ru-r-ecdf.png — 동일 설계의 래스터 (md 삽입용, 300dpi)
+- fig-{tb-rho,ru-r}-ecdf.{tex,png} — 누적분포(ECDF). P95 판정을 직접 읽는 그림
+- fig-{tb-rho,ru-r}-hist.{tex,png} — 밀도(PDF) 추정: 로그 등간격 히스토그램,
+  y = 구간당 케이스 비율(%). 연속 측정값이라 PMF가 아니라 PDF의 추정이 맞고,
+  x 로그축과 정합하도록 십진 자릿수당 4구간의 로그 구간을 쓴다
+- .tex는 standalone pgfplots (논문 삽입용, pdflatex 컴파일 가능. 한글 의존을
+  피하려고 그림 내 라벨은 영문), .png는 동일 설계의 래스터 (md 삽입용, 300dpi)
 
 색: seq2 #3A6FE0(실선) / pool #D5484A(파선) — dataviz 검증기 6종 통과
 (라이트 표면, CVD ΔE 23.4). 선 스타일 이중 부호화로 흑백 인쇄에서도 구분된다.
@@ -34,6 +37,29 @@ def ecdf(values):
 def p95(values):
     xs = sorted(values)
     return xs[min(len(xs) - 1, int(P95 * len(xs)))]
+
+
+def log_bins(values_all, per_decade=4):
+    """전 방안 공통의 로그 등간격 구간 — 두 방안이 같은 구간을 써야 비교된다."""
+    import math
+    lo = min(v for v in values_all if v > 0)
+    hi = max(values_all)
+    e0 = math.floor(math.log10(lo) * per_decade) / per_decade
+    e1 = math.ceil(math.log10(hi) * per_decade) / per_decade
+    n = int(round((e1 - e0) * per_decade))
+    return [10 ** (e0 + i / per_decade) for i in range(n + 1)]
+
+
+def hist_pct(values, edges):
+    """구간당 케이스 비율(%) — 밀도(PDF) 추정의 로그축 표현."""
+    counts = [0] * (len(edges) - 1)
+    for v in values:
+        for i in range(len(counts)):
+            if edges[i] <= v < edges[i + 1] or (i == len(counts) - 1 and v == edges[-1]):
+                counts[i] += 1
+                break
+    n = len(values)
+    return [100.0 * c / n for c in counts]
 
 
 def load(run_dir: Path):
@@ -88,6 +114,93 @@ TEX_SERIES = r"""\addplot[{color}, {dash}, line width=1.1pt] coordinates {{
 """
 
 TEX_TAIL = "\\end{axis}\n\\end{tikzpicture}\n\\end{document}\n"
+
+TEX_HIST_HEAD = r"""% 자동 생성: scripts/plot_composite_final_dist.py — 수정은 스크립트에서
+% 데이터: {run} cases.jsonl ({note})
+\documentclass[tikz,border=2pt]{{standalone}}
+\usepackage{{pgfplots}}
+\pgfplotsset{{compat=1.18}}
+\definecolor{{seqblue}}{{HTML}}{{3A6FE0}}
+\definecolor{{poolred}}{{HTML}}{{D5484A}}
+\begin{{document}}
+\begin{{tikzpicture}}
+\begin{{axis}}[
+  width=11cm, height=7cm,
+  xmode=log,
+  xlabel={{{xlabel}}},
+  ylabel={{share of cases per bin (\%)}},
+  ymin=0,
+  grid=major, grid style={{gray!20}},
+  axis line style={{gray!60}},
+  tick label style={{font=\small}},
+  label style={{font=\small}},
+  legend style={{at={{(0.03,0.97)}}, anchor=north west, font=\small,
+                 draw=gray!40, fill=white, fill opacity=0.9, text opacity=1}},
+  legend cell align=left,
+]
+\draw[gray!70, thin] (axis cs:1,0) -- (axis cs:1,\pgfkeysvalueof{{/pgfplots/ymax}});
+\node[gray!50!black, font=\scriptsize, anchor=south west, rotate=90]
+  at (axis cs:1,0.3) {{{boundary}}};
+"""
+
+TEX_HIST_SERIES = r"""\addplot[{color}, {dash}, line width=1.1pt, const plot,
+  fill={color}, fill opacity=0.10, draw opacity=1] coordinates {{
+{coords}}} \closedcycle;
+\addlegendentry{{{label}}}
+"""
+
+
+def write_hist_tex(path: Path, run: str, series: dict, xlabel: str, boundary: str,
+                   note: str):
+    edges = log_bins([v for vals in series.values() for v in vals])
+    parts = [TEX_HIST_HEAD.format(run=run, xlabel=xlabel, boundary=boundary, note=note)]
+    for plan, vals in series.items():
+        pct = hist_pct(vals, edges)
+        pairs = [f"({edges[i]:.6g},{pct[i]:.3f})" for i in range(len(pct))]
+        pairs.append(f"({edges[-1]:.6g},{pct[-1]:.3f})")
+        wrapped = "\n".join("".join(pairs[i:i + 5]) for i in range(0, len(pairs), 5))
+        parts.append(TEX_HIST_SERIES.format(
+            color="seqblue" if plan == "seq2" else "poolred",
+            dash=DASHES[plan], coords=wrapped,
+            label="plan 1 (seq2)" if plan == "seq2" else "plan 2 (pool)"))
+    parts.append(TEX_TAIL)
+    path.write_text("".join(parts))
+
+
+def write_hist_png(path: Path, series: dict, xlabel: str, boundary: str):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    edges = log_bins([v for vals in series.values() for v in vals])
+    fig, ax = plt.subplots(figsize=(7.2, 4.4), dpi=300)
+    for plan, vals in series.items():
+        pct = hist_pct(vals, edges)
+        xs, ys = [], []
+        for i, h in enumerate(pct):
+            xs += [edges[i], edges[i + 1]]
+            ys += [h, h]
+        ax.fill_between(xs, ys, step=None, color=COLORS[plan], alpha=0.10)
+        ax.plot(xs, ys, color=COLORS[plan], linewidth=1.5,
+                linestyle="-" if DASHES[plan] == "solid" else (0, (5, 2.2)),
+                label="plan 1 (seq2)" if plan == "seq2" else "plan 2 (pool)")
+    ax.set_xscale("log")
+    ax.axvline(1.0, color="0.62", linewidth=0.8, zorder=1)
+    ax.text(1.0, 0.4, " " + boundary, rotation=90, va="bottom", ha="left",
+            fontsize=8, color="0.35")
+    ax.set_ylim(bottom=0)
+    ax.set_xlabel(xlabel, fontsize=10)
+    ax.set_ylabel("share of cases per bin (%)", fontsize=10)
+    ax.grid(True, which="major", color="0.90", linewidth=0.7)
+    ax.tick_params(labelsize=9)
+    for sp in ("top", "right"):
+        ax.spines[sp].set_visible(False)
+    for sp in ("left", "bottom"):
+        ax.spines[sp].set_color("0.55")
+    ax.legend(loc="upper left", fontsize=9, framealpha=0.9, edgecolor="0.75")
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)
 
 
 def write_tex(path: Path, run: str, series: dict, xlabel: str, boundary: str,
@@ -169,6 +282,12 @@ def main():
     write_png(out / "fig-tb-rho-ecdf.png", rho,
               xlabel=r"time ratio  $\rho = T_\mathrm{design}\,/\,T_\mathrm{naive}$",
               boundary=r"$\rho$=1 (defect boundary)")
+    write_hist_tex(out / "fig-tb-rho-hist.tex", run, rho,
+                   xlabel=r"time ratio $\rho = T_{\mathrm{design}} / T_{\mathrm{naive}}$",
+                   boundary=r"$\rho=1$ (defect boundary)", note=f"rho, n={n_rho}")
+    write_hist_png(out / "fig-tb-rho-hist.png", rho,
+                   xlabel=r"time ratio  $\rho = T_\mathrm{design}\,/\,T_\mathrm{naive}$",
+                   boundary=r"$\rho$=1 (defect boundary)")
 
     n_rt = {p: len(v) for p, v in rt.items()}
     write_tex(out / "fig-ru-r-ecdf.tex", run, rt,
@@ -178,10 +297,16 @@ def main():
     write_png(out / "fig-ru-r-ecdf.png", rt,
               xlabel=r"memory usage ratio  $r$ = device footprint / 128 MB",
               boundary=r"$r$=1 (ceiling)")
+    write_hist_tex(out / "fig-ru-r-hist.tex", run, rt,
+                   xlabel=r"memory usage ratio $r$ = device footprint / 128\,MB",
+                   boundary=r"$r=1$ (ceiling)", note=f"r_total, n={n_rt}")
+    write_hist_png(out / "fig-ru-r-hist.png", rt,
+                   xlabel=r"memory usage ratio  $r$ = device footprint / 128 MB",
+                   boundary=r"$r$=1 (ceiling)")
 
     for p in ("seq2", "pool"):
         print(f"{p}: ρ n={n_rho[p]} P95={p95(rho[p]):.4f} · r n={n_rt[p]} P95={p95(rt[p]):.6f}")
-    print(f"저장: {out}/fig-{{tb-rho,ru-r}}-ecdf.{{tex,png}}")
+    print(f"저장: {out}/fig-{{tb-rho,ru-r}}-{{ecdf,hist}}.{{tex,png}}")
 
 
 if __name__ == "__main__":

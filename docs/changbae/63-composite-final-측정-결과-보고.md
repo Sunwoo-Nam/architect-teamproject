@@ -210,13 +210,17 @@ RS 트랙 (경량 — RU·TB, 수준당 20건):
 
 ## H. 분포 분석 — 대표값이 못 보여주는 것
 
-판정이 P95(분위수)이므로 전체 분포를 함께 공개한다. 아래 두 그림은 cases.jsonl 원값 전체의 **누적분포(ECDF, x 로그축)** 다 — 곡선과 y=0.95 판정선의 교점이 곧 P95이고, 곡선이 경계선(x=1)을 넘는 높이가 결함 비율이다. 논문 삽입용 벡터 원본(pgfplots `.tex`)과 생성 스크립트는 그림 캡션에 병기했다.
+판정이 P95(분위수)이므로 전체 분포를 함께 공개한다. 각 지표마다 그림 2장씩이다: **(a) 누적분포(ECDF, x 로그축)** — 곡선과 y=0.95 판정선의 교점이 곧 P95이고, 곡선이 경계선(x=1)에서 갖는 높이가 "경계 이내 비율"이다. **(b) 밀도(PDF 추정)** — 로그 등간격 구간(십진 자릿수당 4구간)당 케이스 비율(%)의 히스토그램으로, 질량이 어느 규모 대역에 모여 있는지를 보인다 (ρ·r는 연속 측정값이라 이산 변수의 PMF가 아니라 PDF의 추정이 맞다). 논문 삽입용 벡터 원본(pgfplots `.tex`)과 생성 스크립트는 그림 캡션에 병기했다.
 
-**그림 H-1 — TB: 시간 비율 ρ의 전체 분포** (baseline 성립 492건/방안):
+**그림 H-1a — TB: 시간 비율 ρ의 누적분포** (baseline 성립 492건/방안):
 
 ![TB ρ ECDF](figures/63/fig-tb-rho-ecdf.png)
 
-> 원본: [`figures/63/fig-tb-rho-ecdf.tex`](figures/63/fig-tb-rho-ecdf.tex) (standalone pgfplots) · 생성: [`poc/total/scripts/plot_composite_final_dist.py`](../../poc/total/scripts/plot_composite_final_dist.py)
+**그림 H-1b — TB: ρ의 밀도(로그 구간 히스토그램).** 방안 2(pool)의 질량은 ρ=1 왼쪽에 집중되고 경계 너머는 급감하는 반면, 방안 1(seq2)은 경계 오른쪽(1-10배 구간)에 뚜렷한 두 번째 봉우리가 있다 — P95 격차(0.63 vs 4.24)의 실체가 이 꼬리 봉우리다:
+
+![TB ρ 밀도](figures/63/fig-tb-rho-hist.png)
+
+> 원본: [`figures/63/fig-tb-rho-ecdf.tex`](figures/63/fig-tb-rho-ecdf.tex) · [`fig-tb-rho-hist.tex`](figures/63/fig-tb-rho-hist.tex) (standalone pgfplots) · 생성: [`poc/total/scripts/plot_composite_final_dist.py`](../../poc/total/scripts/plot_composite_final_dist.py)
 
 ρ 분위 (전 케이스, baseline 성립 492건):
 
@@ -225,11 +229,15 @@ RS 트랙 (경량 — RU·TB, 수준당 20건):
 | seq2 | 0.43 | 1.22 | 2.52 | **4.24** | 16.32 |
 | pool | 0.10 | 0.26 | 0.49 | **0.63** | 1.49 |
 
-**그림 H-2 — RU: 사용률 r의 전체 분포** (500건/방안):
+**그림 H-2a — RU: 사용률 r의 누적분포** (500건/방안):
 
 ![RU r ECDF](figures/63/fig-ru-r-ecdf.png)
 
-> 원본: [`figures/63/fig-ru-r-ecdf.tex`](figures/63/fig-ru-r-ecdf.tex) (standalone pgfplots) · 생성: 동일 스크립트
+**그림 H-2b — RU: r의 밀도(로그 구간 히스토그램).** 방안 1(seq2)은 r ≈ 0.1% 부근의 좁은 봉우리로 끝나는 반면, 방안 2(pool)는 봉우리 위치는 비슷하지만 오른쪽으로 세 자릿수 넘게 이어지는 꼬리가 있고 그 끝이 한도(r=1)를 넘는다 — "평소엔 동급, 규모 꼬리에서 죽는다"는 압축 풀의 리스크 프로파일:
+
+![RU r 밀도](figures/63/fig-ru-r-hist.png)
+
+> 원본: [`figures/63/fig-ru-r-ecdf.tex`](figures/63/fig-ru-r-ecdf.tex) · [`fig-ru-r-hist.tex`](figures/63/fig-ru-r-hist.tex) (standalone pgfplots) · 생성: 동일 스크립트
 
 r 분위 (전 케이스 500건):
 
