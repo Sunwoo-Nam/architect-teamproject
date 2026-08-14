@@ -236,6 +236,18 @@ FC는 깊이에 둔감(배치 편향 없음). **CF는 깊이에 강하게 의존
 
 전형(P50)은 대등하고 꼬리로 갈수록 벌어진다 — P95 판정의 실증 근거.
 
+**분포 전체 공개** (판정이 P95 분위수이므로 — 63 H절과 동일 규약): (a) 누적분포(ECDF, x 로그축)는 곡선과 y=0.95 판정선의 교점이 곧 P95이고, (b) 밀도(PDF 추정)는 로그 등간격 구간당 케이스 비율(%)로 질량이 어느 규모 대역에 모이는지를 보인다. nparty에서 P95 판정 항목은 TB의 ρ 하나다 (FC·CF는 평균 판정 — 24 §0).
+
+**그림 H-1a — TB: 시간 비율 ρ의 누적분포** (480건/방안, 결렬 포함):
+
+![TB ρ ECDF](figures/60/fig-tb-rho-ecdf.png)
+
+**그림 H-1b — TB: ρ의 밀도(로그 구간 히스토그램).** 두 곡선의 봉우리는 같은 대역(0.1-0.3)에 있지만, 경계(naive 등가) 직전 구간(ρ 0.6-1.0)의 질량이 방안 2는 7.7%, 1-A는 0.6%다 — P95 격차(0.543 vs 0.660)의 실체가 이 꼬리 질량이다:
+
+![TB ρ 밀도](figures/60/fig-tb-rho-hist.png)
+
+> 원본: [`figures/60/fig-tb-rho-ecdf.tex`](figures/60/fig-tb-rho-ecdf.tex) · [`fig-tb-rho-hist.tex`](figures/60/fig-tb-rho-hist.tex) (standalone pgfplots) · 생성: [`poc/total/scripts/plot_nparty_dist.py`](../../poc/total/scripts/plot_nparty_dist.py) (cases.jsonl 재집계 — 재시뮬레이션 없음)
+
 ## I. 통신·시간 관측 (N별 중앙값)
 
 | N | 방안 | 라운드 | 메시지 | 전송량 | 합성 T |
