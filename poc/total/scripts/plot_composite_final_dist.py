@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """63 보고서 그림 — TB(ρ)·RU(r) 전체 분포 ECDF (PL 지시 2026-08-14).
 
-판정이 P95(분위수)이므로 분포 표현은 ECDF를 쓴다 — 누적분포에서 P95를 직접
-읽을 수 있고, 값이 십진 자릿수 여러 개를 넘나드는 꼬리 분포라 x는 로그축이다.
+분포 표현은 ECDF — 누적분포에서 판정 통계(TB = P95, RU = 최대값; 24 §0,
+RU는 2026-08-14 재개정)를 직접 읽을 수 있고, 값이 십진 자릿수 여러 개를
+넘나드는 꼬리 분포라 x는 로그축이다.
 
 산출물 (케이스×방안 원값 cases.jsonl에서 — 재시뮬레이션 없음):
-- fig-{tb-rho,ru-r}-ecdf.{tex,png} — 누적분포(ECDF). P95 판정을 직접 읽는 그림
+- fig-{tb-rho,ru-r}-ecdf.{tex,png} — 누적분포(ECDF). 판정 통계(ρ P95 / r 최대)를 직접 읽는 그림
 - fig-{tb-rho,ru-r}-hist.{tex,png} — 밀도(PDF) 추정: 로그 등간격 히스토그램,
   y = 구간당 케이스 비율(%). 연속 측정값이라 PMF가 아니라 PDF의 추정이 맞고,
   x 로그축과 정합하도록 십진 자릿수당 4구간의 로그 구간을 쓴다
@@ -97,20 +98,17 @@ TEX_HEAD = r"""% 자동 생성: scripts/plot_composite_final_dist.py — 수정�
                  draw=gray!40, fill=white, fill opacity=0.9, text opacity=1}},
   legend cell align=left,
 ]
-% P95 판정선과 경계선
-\addplot[gray!70, dashed, thin, domain={dom}] {{0.95}};
-\draw[black!65, line width=0.9pt] (axis cs:1,0) -- (axis cs:1,1.02);
+% 판정 통계선(있으면)과 경계선
+{statline}\draw[black!65, line width=0.9pt] (axis cs:1,0) -- (axis cs:1,1.02);
 \node[gray!50!black, font=\scriptsize, anchor=south west, rotate=90]
   at (axis cs:1,0.02) {{{boundary}}};
-\node[gray!50!black, font=\scriptsize, anchor=south east]
-  at (rel axis cs:0.99,0.955) {{P95}};
 """
 
 TEX_SERIES = r"""\addplot[{color}, {dash}, line width=1.1pt] coordinates {{
 {coords}}};
 \addlegendentry{{{label}}}
-\addplot[{color}, mark=*, mark size=1.6pt, only marks] coordinates {{({px},0.95)}};
-\node[{color}, font=\scriptsize, anchor=north west, xshift=3pt, yshift=-3pt] at (axis cs:{px},0.95) {{{ptxt}}};
+\addplot[{color}, mark=*, mark size=1.6pt, only marks] coordinates {{({px},{py})}};
+\node[{color}, font=\scriptsize, anchor=north west, xshift=3pt, yshift=-3pt] at (axis cs:{px},{py}) {{{ptxt}}};
 """
 
 TEX_TAIL = "\\end{axis}\n\\end{tikzpicture}\n\\end{document}\n"
@@ -204,20 +202,26 @@ def write_hist_png(path: Path, series: dict, xlabel: str, boundary: str):
 
 
 def write_tex(path: Path, run: str, series: dict, xlabel: str, boundary: str,
-              dom: str, note: str):
+              dom: str, note: str, stat: str = "p95"):
+    # stat: 판정 통계 — TB는 "p95", RU는 "max" (24 §0, 2026-08-14 재개정)
+    statline = ("\\addplot[gray!70, dashed, thin, domain=%s] {0.95};\n"
+                "\\node[gray!50!black, font=\\scriptsize, anchor=south east]\n"
+                "  at (rel axis cs:0.99,0.955) {P95};\n" % dom) if stat == "p95" else ""
     parts = [TEX_HEAD.format(run=run, xlabel=xlabel, boundary=boundary,
-                             dom=dom, note=note)]
+                             statline=statline, note=note)]
     for plan, vals in series.items():
         pairs = [f"({x:.6g},{y:.4f})" for x, y in ecdf(vals)]
         # 줄바꿈은 좌표쌍 경계에서만 (5쌍/줄)
         wrapped = "\n".join("".join(pairs[i:i + 5]) for i in range(0, len(pairs), 5))
-        px = p95(vals)
+        px = p95(vals) if stat == "p95" else max(vals)
+        py = "0.95" if stat == "p95" else "1.0"
+        label_stat = "P95" if stat == "p95" else "max"
         parts.append(TEX_SERIES.format(
             color="seqblue" if plan == "seq2" else "poolred",
             dash=DASHES[plan], coords=wrapped,
             label=f"plan 1 (seq2)" if plan == "seq2" else "plan 2 (pool)",
-            px=f"{px:.6g}",
-            ptxt=f"P95={px:.3g}"))
+            px=f"{px:.6g}", py=py,
+            ptxt=f"{label_stat}={px:.3g}"))
     parts.append(TEX_TAIL)
     path.write_text("".join(parts))
 
@@ -226,7 +230,7 @@ def write_tex(path: Path, run: str, series: dict, xlabel: str, boundary: str,
 # matplotlib (.png) — md 삽입용, 동일 설계
 # ---------------------------------------------------------------------------------------
 
-def write_png(path: Path, series: dict, xlabel: str, boundary: str):
+def write_png(path: Path, series: dict, xlabel: str, boundary: str, stat: str = "p95"):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -239,16 +243,21 @@ def write_png(path: Path, series: dict, xlabel: str, boundary: str):
                 linestyle="-" if DASHES[plan] == "solid" else (0, (5, 2.2)),
                 linewidth=1.6,
                 label="plan 1 (seq2)" if plan == "seq2" else "plan 2 (pool)")
-        px = p95(vals)
-        ax.plot([px], [P95], "o", color=COLORS[plan], markersize=4.5, zorder=5)
-        # 주석은 점의 우하단 — 두 그림 모두 ECDF가 P95 위로 지나가 이 영역이 빈다
-        ax.annotate(f"P95={px:.3g}", (px, P95), textcoords="offset points",
-                    xytext=(8, -17), ha="left", fontsize=8.5,
-                    color=COLORS[plan])
+        if stat == "p95":
+            px, py = p95(vals), P95
+            txt, xy = f"P95={px:.3g}", (8, -17)      # 우하단 — ECDF가 P95 위로 지나 빈 영역
+        else:
+            px, py = max(vals), 1.0
+            txt, xy = f"max={px:.3g}", (-6, -14)     # 상단 끝점 — 좌하단으로 빼서 겹침 회피
+        ax.plot([px], [py], "o", color=COLORS[plan], markersize=4.5, zorder=5)
+        ax.annotate(txt, (px, py), textcoords="offset points",
+                    xytext=xy, ha="left" if stat == "p95" else "right",
+                    fontsize=8.5, color=COLORS[plan])
     ax.set_xscale("log")
-    ax.axhline(P95, color="0.62", linewidth=0.8, linestyle="--", zorder=1)
-    ax.text(0.99, P95 + 0.008, "P95", transform=ax.get_yaxis_transform(),
-            ha="right", va="bottom", fontsize=8, color="0.35")
+    if stat == "p95":
+        ax.axhline(P95, color="0.62", linewidth=0.8, linestyle="--", zorder=1)
+        ax.text(0.99, P95 + 0.008, "P95", transform=ax.get_yaxis_transform(),
+                ha="right", va="bottom", fontsize=8, color="0.35")
     ax.axvline(1.0, color="0.30", linewidth=1.2, zorder=1)
     ax.text(1.0, 0.02, " " + boundary, rotation=90, va="bottom", ha="left",
             fontsize=8, color="0.25")
@@ -293,10 +302,10 @@ def main():
     write_tex(out / "fig-ru-r-ecdf.tex", run, rt,
               xlabel=r"memory usage ratio $r$ = device footprint / 128\,MB",
               boundary=r"$r=1$ (ceiling)",
-              dom="0.00005:50", note=f"r_total, n={n_rt}")
+              dom="0.00005:50", note=f"r_total, n={n_rt}", stat="max")
     write_png(out / "fig-ru-r-ecdf.png", rt,
               xlabel=r"memory usage ratio  $r$ = device footprint / 128 MB",
-              boundary=r"$r$=1 (ceiling)")
+              boundary=r"$r$=1 (ceiling)", stat="max")
     write_hist_tex(out / "fig-ru-r-hist.tex", run, rt,
                    xlabel=r"memory usage ratio $r$ = device footprint / 128\,MB",
                    boundary=r"$r=1$ (ceiling)", note=f"r_total, n={n_rt}")

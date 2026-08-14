@@ -21,13 +21,13 @@
                  draw=gray!40, fill=white, fill opacity=0.9, text opacity=1},
   legend cell align=left,
 ]
-% P95 판정선과 경계선
+% 판정 통계선(있으면)과 경계선
 \addplot[gray!70, dashed, thin, domain=0.0005:20] {0.95};
+\node[gray!50!black, font=\scriptsize, anchor=south east]
+  at (rel axis cs:0.99,0.955) {P95};
 \draw[black!65, line width=0.9pt] (axis cs:1,0) -- (axis cs:1,1.02);
 \node[gray!50!black, font=\scriptsize, anchor=south west, rotate=90]
   at (axis cs:1,0.02) {$\rho=1$ (defect boundary)};
-\node[gray!50!black, font=\scriptsize, anchor=south east]
-  at (rel axis cs:0.99,0.955) {P95};
 \addplot[seqblue, solid, line width=1.1pt] coordinates {
 (0,0.0020)(0,0.0041)(0,0.0061)(0,0.0081)(0,0.0102)
 (0,0.0122)(0.0001,0.0142)(0.0001,0.0163)(0.0001,0.0183)(0.0001,0.0203)

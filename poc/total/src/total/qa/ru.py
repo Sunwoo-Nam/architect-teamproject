@@ -132,11 +132,12 @@ def measure(
 
 
 def aggregate(measures: Sequence[RuMeasure]) -> dict:
-    """세션 여러 건의 집계 — **표본 판정 = r P95** (2026-08-13 개정, 24 §2.8).
+    """세션 여러 건의 집계 — **표본 판정 = r 최대값** (2026-08-14 재개정, 24 §2.8).
 
-    중앙값(전형)과 최댓값(최악)을 병기한다 — OS는 평균이 아니라 "한 순간의 최악"으로
-    죽이므로(24 §2.6) 최댓값이 위험을 말해 주지만, 표본 대표값이 이상치 1건에 정해지면
-    안 되므로 판정은 p95다 (TB의 ρ P95와 같은 SLO 논리).
+    OS는 평균이 아니라 "한 순간의 최악"으로 죽인다(24 §2.6) — OOM은 크리티컬
+    사건이라 표본 대표값도 최악 기준으로 판정한다 (PL 확정 2026-08-14. 구 판정
+    P95는 병기로 강등 — TB는 사용자 체감 품질이라 P95 유지, RU만 max). 중앙값
+    (전형)·P95(꼬리)를 병기해 최악이 이상치인지 추세인지를 함께 읽는다.
     """
     if not measures:
         raise ValueError("집계할 측정이 없다")
@@ -159,16 +160,17 @@ def aggregate(measures: Sequence[RuMeasure]) -> dict:
         "ceiling_bytes": ceiling,
         "median_r_total": round(med_total / ceiling, 6),
         "max_r_total": round(max_total / ceiling, 6),
-        # **표본 판정 = P95** (2026-08-13 개정, 24 §2.8) — 메모리 한도 관리도 TB처럼
-        # 꼬리 지표다: OS는 "한 순간의 최악"으로 죽이지만(§2.6) 최댓값 하나로 판정하면
-        # 이상치 1건이 표본 대표값을 정하고, 중앙값은 소형 케이스에서 포화해 뭉갠다.
-        # p95는 "케이스 95%에서 보장되는 여유"로, TB의 ρ P95와 같은 SLO 논리다
+        # **표본 판정 = 최대값** (2026-08-14 재개정, 24 §2.8 — 구 P95에서 교체, PL 확정).
+        # OOM은 단 한 번의 최악으로 발생하는 크리티컬 사건이라 등급도 최악 기준이다.
+        # P95(꼬리)·중앙값(전형)은 병기 — 최악이 이상치인지 추세인지를 같이 읽는다.
+        # (TB의 ρ는 사용자 체감 품질이라 P95 판정 유지 — 두 QA의 통계가 다른 이유)
         "p95_r_total": round(p95_total / ceiling, 6),
+        "stars_max": band_ru_usage().stars(max_total / ceiling),
         "stars_p95": band_ru_usage().stars(p95_total / ceiling),
         "stars_median": band_ru_usage().stars(med_total / ceiling),
-        "stars_max": band_ru_usage().stars(max_total / ceiling),
         "over_ceiling_sessions": sum(1 for m in measures if m.over_ceiling),
         "band": band_ru_usage().as_dict(),
         "note": "별점은 단말 총 점유(공통 기저 + 프로토콜 상태) 기준 (24 §2.8 단서). "
-                "표본 판정은 r P95 — 중앙값(전형)·최댓값(최악)을 병기해 읽는다",
+                "표본 판정은 r 최대값 (2026-08-14 재개정 — OOM은 최악 1건이 크리티컬) "
+                "— P95(꼬리)·중앙값(전형)을 병기해 읽는다",
     }

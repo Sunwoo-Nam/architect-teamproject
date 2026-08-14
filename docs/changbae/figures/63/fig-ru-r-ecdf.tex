@@ -21,13 +21,10 @@
                  draw=gray!40, fill=white, fill opacity=0.9, text opacity=1},
   legend cell align=left,
 ]
-% P95 판정선과 경계선
-\addplot[gray!70, dashed, thin, domain=0.00005:50] {0.95};
+% 판정 통계선(있으면)과 경계선
 \draw[black!65, line width=0.9pt] (axis cs:1,0) -- (axis cs:1,1.02);
 \node[gray!50!black, font=\scriptsize, anchor=south west, rotate=90]
   at (axis cs:1,0.02) {$r=1$ (ceiling)};
-\node[gray!50!black, font=\scriptsize, anchor=south east]
-  at (rel axis cs:0.99,0.955) {P95};
 \addplot[seqblue, solid, line width=1.1pt] coordinates {
 (7.682e-05,0.0020)(8.129e-05,0.0040)(8.76e-05,0.0060)(0.00047573,0.0080)(0.00050639,0.0100)
 (0.00051142,0.0120)(0.00051662,0.0140)(0.00051723,0.0160)(0.00052652,0.0180)(0.00053202,0.0200)
@@ -130,8 +127,8 @@
 (0.00369476,0.9820)(0.00372749,0.9840)(0.00373737,0.9860)(0.00373947,0.9880)(0.00422964,0.9900)
 (0.00461067,0.9920)(0.00562783,0.9940)(0.00784666,0.9960)(0.00785138,0.9980)(0.00957841,1.0000)};
 \addlegendentry{plan 1 (seq2)}
-\addplot[seqblue, mark=*, mark size=1.6pt, only marks] coordinates {(0.00302781,0.95)};
-\node[seqblue, font=\scriptsize, anchor=north west, xshift=3pt, yshift=-3pt] at (axis cs:0.00302781,0.95) {P95=0.00303};
+\addplot[seqblue, mark=*, mark size=1.6pt, only marks] coordinates {(0.00957841,1.0)};
+\node[seqblue, font=\scriptsize, anchor=north west, xshift=3pt, yshift=-3pt] at (axis cs:0.00957841,1.0) {max=0.00958};
 \addplot[poolred, dashed, line width=1.1pt] coordinates {
 (0.00019206,0.0020)(0.00020851,0.0040)(0.00020905,0.0060)(0.00021322,0.0080)(0.0002224,0.0100)
 (0.00022496,0.0120)(0.00023611,0.0140)(0.00025041,0.0160)(0.00025131,0.0180)(0.00025453,0.0200)
@@ -234,8 +231,8 @@
 (1.1573,0.9820)(1.58973,0.9840)(1.71589,0.9860)(1.71622,0.9880)(2.24143,0.9900)
 (2.3117,0.9920)(2.31518,0.9940)(2.31539,0.9960)(19.731,0.9980)(36.9209,1.0000)};
 \addlegendentry{plan 2 (pool)}
-\addplot[poolred, mark=*, mark size=1.6pt, only marks] coordinates {(0.481736,0.95)};
-\node[poolred, font=\scriptsize, anchor=north west, xshift=3pt, yshift=-3pt] at (axis cs:0.481736,0.95) {P95=0.482};
+\addplot[poolred, mark=*, mark size=1.6pt, only marks] coordinates {(36.9209,1.0)};
+\node[poolred, font=\scriptsize, anchor=north west, xshift=3pt, yshift=-3pt] at (axis cs:36.9209,1.0) {max=36.9};
 \end{axis}
 \end{tikzpicture}
 \end{document}

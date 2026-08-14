@@ -128,6 +128,13 @@ class TestRealDataRegression:
 
 
 class TestAggregate:
+    def test_verdict_is_max_based(self):
+        # 표본 판정 = r 최대값 (24 §2.8, 2026-08-14 재개정 — OOM은 최악 1건이 크리티컬)
+        rows = [measure(mk(peak_bytes=p * MB)) for p in (1, 1, 60)]
+        agg = aggregate(rows)
+        assert agg["stars_max"] == 1      # 60/128 = 46.9% — 최악이 등급을 정한다
+        assert agg["stars_median"] == 5   # 1/128 = 0.78% — 전형은 병기
+
     def test_median_across_sessions(self):
         rows = [measure(mk(peak_bytes=p * MB)) for p in (1, 5, 9)]
         agg = aggregate(rows)

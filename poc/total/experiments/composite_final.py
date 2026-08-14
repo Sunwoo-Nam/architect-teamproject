@@ -226,8 +226,8 @@ def main() -> int:
         f_ = raw["plans"][plan]
         print(f"  {plan}: FC={f_['fc']['mean_achieved'] if f_['fc'] else None} "
               f"★{f_['fc']['stars_achieved'] if f_['fc'] else '-'} · "
-              f"RU rP95 {f_['ru']['p95_r_total']} ★{f_['ru']['stars_p95']} "
-              f"(중앙 ★{f_['ru']['stars_median']} · max ★{f_['ru']['stars_max']}) · "
+              f"RU r최대 {f_['ru']['max_r_total']} ★{f_['ru']['stars_max']} "
+              f"(P95 ★{f_['ru']['stars_p95']} · 중앙 ★{f_['ru']['stars_median']}) · "
               f"TB ρP95 {f_['tb'].get('p95_rho')} ★{f_['tb'].get('stars')} [{sec}s]")
 
     raw["wall_seconds"] = round(time.perf_counter() - wall0, 1)
