@@ -63,6 +63,8 @@ PLANS: dict[str, PlanSpec] = {
     "pool": PlanSpec("pool", "2안 정본 — 개인별 후보군 압축 후 복합 협상"),
     "pool2": PlanSpec("pool2", "2안 개선 — 유효-only 조건부 확장"),
     "full": PlanSpec("full", "baseline 전수 나열 (c≈1 앵커 · CF 참조 프로토콜)"),
+    # 보완 택틱 방안 (65 문서 — 어댑터 계층 변형, tactics.py)
+    "poolka": PlanSpec("poolka", "2안 + P6 k 비대칭 배분 (예산제 탐욕 — PL 채택 2026-08-14)"),
 }
 
 #: CF의 e₂ 앵커로 쓰는 참조 프로토콜. 전체 조합을 그대로 교환하는 평범한 양자 SAO라
@@ -365,7 +367,9 @@ def run_session(
     # 피크는 원본 러너가 협상 구간에서 이미 tracemalloc으로 잰다. 밖에서 한 번 더
     # 감싸면 내부 stop()이 추적을 꺼 버려 0이 나온다 — 원본 값을 그대로 쓴다.
     # 실물화 후보 구조는 협상 구간 안에서 만들어지므로 피크에 포함된다 (이중 계상 없음).
-    run = run_one(scenario, plan, **kw)
+    from . import tactics as _tactics
+    run = (_tactics.run_one_tactic(scenario, plan, **kw)
+           if plan in _tactics.TACTIC_PLANS else run_one(scenario, plan, **kw))
     peak = int(run.peak_kib * 1024)
 
     # light 모드에서는 case.pids(→ preferences → 공간 열거)를 피한다 — 벤더 규약과 동일
@@ -413,7 +417,9 @@ def run_sweep_point(scenario: Scenario, plan: str, n_issues: int, **kw) -> Sweep
     """
     if plan not in PLANS:
         raise KeyError(f"알 수 없는 방안: {plan} (등록: {sorted(PLANS)})")
-    run = run_one(scenario, plan, **kw)
+    from . import tactics as _tactics
+    run = (_tactics.run_one_tactic(scenario, plan, **kw)
+           if plan in _tactics.TACTIC_PLANS else run_one(scenario, plan, **kw))
     # 기저 1인분 근사 (24 §5 — 판정은 단말 총 점유): 복합 의제의 단말 기저는 조합 표가
     # 아니라 **축 수준 표현**(축 정의 + 자기 선호 스펙)이다 — 조합 열거 없이 계산 가능.
     base = deep_size(scenario.axes) + deep_size(scenario.participants) // max(

@@ -76,10 +76,15 @@ def _tb_from_counters(scenario, run) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--limit", type=int, default=None, help="케이스 수 상한 (파일럿용)")
+    ap.add_argument("--plans", default=None,
+                    help="측정 방안 쉼표 목록 (기본 seq2,pool — 택틱 비교는 예: poolka)")
+    ap.add_argument("--baseline-from", default=None,
+                    help="TB baseline을 기존 run의 cases.jsonl에서 재사용 (동일 fixture 전제)")
     ap.add_argument("--only", default=None, help="유형 필터 (예: pool_trap)")
     ap.add_argument("--allow-python-mismatch", action="store_true")
     args = ap.parse_args()
     pyversion.require(args.allow_python_mismatch)
+    plan_names = tuple(args.plans.split(",")) if args.plans else PLAN_NAMES
 
     paths = sorted(FINAL_DIR.glob("FIN-*.json"))
     if args.only:
@@ -87,7 +92,7 @@ def main() -> int:
     if args.limit:
         paths = paths[: args.limit]
     scenarios = [load_fixture(p) for p in paths]
-    print(f"FIN 케이스 {len(scenarios)}건 · 방안 {list(PLAN_NAMES)}")
+    print(f"FIN 케이스 {len(scenarios)}건 · 방안 {list(plan_names)}")
     wall0 = time.perf_counter()
 
     @contextmanager
@@ -106,13 +111,29 @@ def main() -> int:
     # POP_CAP / 벽시계). 실패는 기록하고 해당 케이스의 ρ만 비운다 — RU는 유효하다.
     baselines, baseline_failures = {}, []
     t0 = time.perf_counter()
-    for sc in scenarios:
-        try:
-            with _deadline(90):
-                baselines[sc.id] = baseline_t(sc)
-        except Exception as exc:
-            baselines[sc.id] = None
-            baseline_failures.append((sc.id, f"{type(exc).__name__}: {exc}"))
+    if args.baseline_from:
+        # 동일 fixture의 기존 run에서 케이스별 baseline을 이월 — 결정론이라 재계산과 등가
+        prior = {}
+        with open(Path(args.baseline_from) / "cases.jsonl") as fh:
+            for line in fh:
+                r = json.loads(line)
+                prior[r["case_id"]] = r
+        for sc in scenarios:
+            r = prior.get(sc.id)
+            if r and r.get("T_baseline_ms") is not None:
+                baselines[sc.id] = {"T_ms": r["T_baseline_ms"],
+                                    "capped": bool(r.get("baseline_capped"))}
+            else:
+                baselines[sc.id] = None
+                baseline_failures.append((sc.id, "이월 원본에 baseline 없음"))
+    else:
+        for sc in scenarios:
+            try:
+                with _deadline(90):
+                    baselines[sc.id] = baseline_t(sc)
+            except Exception as exc:
+                baselines[sc.id] = None
+                baseline_failures.append((sc.id, f"{type(exc).__name__}: {exc}"))
     sec_baseline = round(time.perf_counter() - t0, 1)
     print(f"  TB baseline {len(baselines) - len(baseline_failures)}건 성공 · "
           f"{len(baseline_failures)}건 실패 ({sec_baseline}s)")
@@ -124,11 +145,12 @@ def main() -> int:
                "commit": _git_commit(), "python": platform.python_version(),
                "constants": SYNTH_TIME.as_dict(), "session_cap": SESSION_CAP,
                "ru_band": band_ru_usage().as_dict(),
+               "plans": list(plan_names), "baseline_from": args.baseline_from,
                "judgement": "FC=달성률 · RU=사용률 r P95 로그 사다리(2026-08-13 개정) · TB=ρ P95",
            }}
     case_rows = []
 
-    for plan in PLAN_NAMES:
+    for plan in plan_names:
         t0 = time.perf_counter()
         scores, mems, times, rhos = [], [], [], []
         for sc, path in zip(scenarios, paths):
