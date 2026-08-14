@@ -142,18 +142,19 @@ class TestRuBand:
         assert RU_STEP == 0.15
 
     def test_band_from_ceiling(self):
-        # 로그(데케이드) 사다리 — 2026-08-13 개정: 지수 성장 도메인에서 선형 등분은
-        # 상·하 포화 (실측: 4~16축 전부 ★5 → 20축 ★0 절벽). 1칸 = 10배 여유
+        # [1%,100%] 로그 4등분 (반 데케이드) — 2026-08-14 재개정 (PL 확정):
+        # ★5 경계 1% = 실사용 최대(≈10축)까지의 성장(약 100배, 실측 ×2.1/축) 여유
         b = band_ru_usage()
-        assert b.thresholds == pytest.approx([1e-4, 1e-3, 1e-2, 1e-1, 1.0])
+        assert b.thresholds == pytest.approx([1e-2, 10 ** -1.5, 1e-1, 10 ** -0.5, 1.0])
         assert b.direction == "at_most"
 
     def test_usage_stars(self):
         b = band_ru_usage()
-        assert b.stars(0.03) == 2     # dpca pool 16축 — 3% (구 선형에선 ★5로 포화)
-        assert b.stars(0.53) == 1     # dpca pool 20축 — 53%: 한도 접근이 별점에 보인다
-        assert b.stars(2.2) == 0      # dpca pool 22축 — 한도 초과
-        assert b.stars(0.002) == 3    # seq 계열 실측 구간
+        assert b.stars(0.003) == 5    # seq2 P95 0.30% — 실사용 최대까지 여유 = 만점
+        assert b.stars(0.03) == 4     # 3% — ★4 (≤3.2%)
+        assert b.stars(0.09) == 3     # 9% — ★3
+        assert b.stars(0.482) == 1    # pool P95 48.2% — ★1 (32-100%)
+        assert b.stars(2.2) == 0      # 한도 초과 — 즉시 결함
 
     def test_custom_ceiling_changes_nothing_in_band(self):
         # 밴드는 비율이므로 한도가 바뀌어도 경계는 같다 — 바뀌는 것은 r의 분모
