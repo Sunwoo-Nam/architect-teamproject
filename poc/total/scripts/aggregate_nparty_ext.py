@@ -98,8 +98,9 @@ def group(rows, name, keyfn, keys=None):
 
 def main() -> int:
     run_dir = Path(sys.argv[1])
+    track = sys.argv[2] if len(sys.argv) > 2 else "functional-ext2"  # 정본 (2026-08-14 승격)
     rows = [json.loads(l) for l in open(run_dir / "cases.jsonl")]
-    rows = [r for r in rows if r.get("track") == "functional-ext"]
+    rows = [r for r in rows if r.get("track") == track]
     by_plan = {p: [r for r in rows if r["plan"] == p] for p in PLANS}
 
     out = {

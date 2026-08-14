@@ -2,8 +2,8 @@
 """탐색 실험 — nparty 3트랙(functional·scalability·issue-space) 전수에서 FC·CF·TB 측정.
 
 목적 (PL 지시 2026-08-13): 트랙 전수 실행의 실제 소요 시간 확정 + 트랙별/총합 QA 표.
-- 판정 정본은 **functional-ext 트랙** (PL 확정 2026-08-13 — 구 functional의 컨셉 그대로
-  N 3-50 확장 480건). 나머지 트랙은 강건성 관측
+- 판정 정본은 **functional-ext2 트랙** (PL 확정 2026-08-14 — ext의 미끼 배치 인위성
+  제거판, N 3-50 480건). functional-ext·main 등 나머지 트랙은 강건성 관측
 - FC 판정 = **달성률** (PL 확정 2026-08-13 재개정 — s는 보조 관측)
 - e₂ 앵커는 **트랙별로 따로** 잰다 (후보 공간 규모가 달라 남의 앵커는 분모 왜곡 — 24 §3)
 - 총합: FC = 전 케이스 가중 평균 달성률·R̄ → s (정본 환산 규칙), CF·TB = 케이스(피해자)별
@@ -78,8 +78,8 @@ def load_tracks(limit):
         tracks["functional-ext"] = sorted(
             JsonBenchmarkLoader(roots=ext_root, track="functional").cases(),
             key=lambda c: c.case_id)[:limit]
-    # ext2 (2026-08-14, PL 지시): 미끼 주인의 x* 배치 인위성(항상 2순위) 제거판 —
-    # 검증용 별도 트랙. 정본(functional-ext)은 보존, 승격 여부는 PL 결정.
+    # ext2 (2026-08-14, PL 확정): 미끼 주인의 x* 배치 인위성(항상 2순위) 제거판 —
+    # **판정 정본**. 구 정본 functional-ext는 강건성 관측용으로 보존.
     ext2_root = CASES_DIR.parent / "functional-ext2"
     if ext2_root.exists():
         tracks["functional-ext2"] = sorted(
@@ -266,7 +266,7 @@ def main() -> int:
                    "defect_cases": "n/a(케이스별 판정은 트랙 표 참조)"},
         }
     raw["wall_seconds"] = round(time.perf_counter() - wall0, 1)
-    raw["note"] = ("판정 정본은 functional-ext 트랙 (PL 확정 2026-08-13). 그 외 트랙은 "
+    raw["note"] = ("판정 정본은 functional-ext2 트랙 (PL 확정 2026-08-14). 그 외 트랙은 "
                    "강건성 관측. e₂는 트랙별 앵커 (24 §3)")
 
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
