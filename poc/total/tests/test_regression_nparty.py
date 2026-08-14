@@ -172,10 +172,10 @@ class TestCfRegression:
         assert evaluated["plan1a"]["multiple"]["m"] < evaluated["plan2"]["multiple"]["m"]
 
     def test_exposure_verdict_discriminates(self, evaluated):
-        # 판정 = 노출률 (2026-08-14 재개정, 평균 대표값) — functional 3인 표본에서 한 등급 차.
-        # 구 잔여 비밀률 판정(1-A ★5 / 2 ★4)과 동치인지도 함께 고정한다.
-        assert evaluated["plan1a"]["multiple"]["stars_exposure"] == 5   # 노출 0.1903 ≤ 0.2
-        assert evaluated["plan2"]["multiple"]["stars_exposure"] == 4    # 노출 0.283 ≤ 0.4
+        # 판정 = 노출률, 실측 앵커 사다리 (2026-08-14 3차: ★5 ≤12% · ★4 ≤30% · ★3 ≤48%).
+        # functional 3인 표본: 1-A 0.1903 → ★4, 방안 2 0.283 → ★4 (같은 칸 — 원값으로 변별).
+        assert evaluated["plan1a"]["multiple"]["stars_exposure"] == 4   # 노출 0.1903 ≤ 0.30
+        assert evaluated["plan2"]["multiple"]["stars_exposure"] == 4    # 노출 0.283 ≤ 0.30
         assert evaluated["plan1a"]["multiple"]["exposure"] < evaluated["plan2"]["multiple"]["exposure"]
 
 

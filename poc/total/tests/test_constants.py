@@ -73,22 +73,27 @@ class TestFcBands:
 
 
 class TestCfBand:
-    """24 §3.3 — 판정 = 노출률 (PL 확정 2026-08-14 재개정, 잔여 비밀률의 방향 전환), m은 보조."""
+    """24 §3.3 — 판정 = 노출률, 실측 앵커 사다리 (PL 확정 2026-08-14 3차), m은 보조."""
 
     def test_exposure_ladder(self):
         from total.qa.constants import BAND_CF_EXPOSURE
-        assert BAND_CF_EXPOSURE.thresholds == [0.2, 0.4, 0.6, 0.8, 1.0]
+        # 앵커 2점 실측 등분 (2026-08-14 3차): naive SAOP 66% = ★2 · 1:1 30% = ★4, 18%p 간격
+        assert BAND_CF_EXPOSURE.thresholds == [0.12, 0.30, 0.48, 0.66, 0.84]
         assert BAND_CF_EXPOSURE.direction == "at_most"   # 경계 포함 — TB/RU와 통일
-        assert BAND_CF_EXPOSURE.stars(0.2) == 5          # ★5 = 노출 ≤ 20%
-        assert BAND_CF_EXPOSURE.stars(0.636) == 2        # functional-ext 방안 1-A 실측 (노출 63.6%)
-        assert BAND_CF_EXPOSURE.stars(0.139) == 5        # main 방안 1-A 실측 (노출 13.9%)
+        assert BAND_CF_EXPOSURE.stars(0.30) == 4         # 앵커: 1:1 협상 실측 (ext2 e₂ 0.2917)
+        assert BAND_CF_EXPOSURE.stars(0.656) == 2        # 앵커: naive SAOP 유도 실측 65.6%
+        assert BAND_CF_EXPOSURE.stars(0.317) == 3        # ext2 방안 1-A 실측 — ★4 경계 1.7%p 밖
+        assert BAND_CF_EXPOSURE.stars(0.483) == 2        # ext2 방안 2 실측 — ★3 경계 0.3%p 밖
+        assert BAND_CF_EXPOSURE.stars(0.079) == 5        # ext2 방안 2+ 실측
+        assert BAND_CF_EXPOSURE.stars(0.85) == 0         # >84% — 사실상 전량 공개
 
     def test_full_exposure_is_zero_stars(self):
-        # 전량 공개(노출 100%)는 별도 규칙으로 ★0 — 근소한 잔여라도 있으면 ★1
+        # 전량 공개(100%)는 ★0 — 앵커 사다리에서는 >84% ★0에 자연 포섭 (별도 규칙 불요)
         from total.qa.cf import stars_exposure
         assert stars_exposure(1.0) == 0
-        assert stars_exposure(0.999) == 1
-        assert stars_exposure(0.2) == 5
+        assert stars_exposure(0.999) == 0     # 3차 개정: ★1은 ≤84%까지만
+        assert stars_exposure(0.84) == 1
+        assert stars_exposure(0.12) == 5
 
     def test_aux_m_ladder(self):
         assert BAND_CF_M.thresholds == [0.25, 0.5, 1.0, 2.0, 4.0]
