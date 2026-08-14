@@ -78,6 +78,13 @@ def load_tracks(limit):
         tracks["functional-ext"] = sorted(
             JsonBenchmarkLoader(roots=ext_root, track="functional").cases(),
             key=lambda c: c.case_id)[:limit]
+    # ext2 (2026-08-14, PL 지시): 미끼 주인의 x* 배치 인위성(항상 2순위) 제거판 —
+    # 검증용 별도 트랙. 정본(functional-ext)은 보존, 승격 여부는 PL 결정.
+    ext2_root = CASES_DIR.parent / "functional-ext2"
+    if ext2_root.exists():
+        tracks["functional-ext2"] = sorted(
+            JsonBenchmarkLoader(roots=ext2_root, track="functional").cases(),
+            key=lambda c: c.case_id)[:limit]
     return tracks
 
 

@@ -124,6 +124,7 @@ def _rankings(
     depth: str,
     rng: random.Random,
     plan2_miss: bool = False,
+    owner_random_depth: bool = False,
 ):
     """참여자별 (바닥선, 수락 후보 수 k, 순위 나열)를 만든다.
 
@@ -208,7 +209,17 @@ def _rankings(
             accepted = above_free
         elif decoy is not None and j == owner:
             # 미끼가 1순위 — 방안 1은 마지막 바퀴 **첫 라운드**에 여기서 닫힌다
-            accepted = [decoy, primary] + others + above_free
+            if owner_random_depth:
+                # ext2 개정 (2026-08-14, PL 지시): x*를 주인 수락 구간 내 무작위 깊이로.
+                # 구판은 항상 미끼 바로 다음(2순위)에 붙여 "배치 2개 제출" 류 변형이
+                # 구조를 정확히 해독하는 인위성이 있었다 (62 §6.2 실측). 미끼 기능
+                # (주인의 1순위 = 미끼)은 유지된다.
+                tail = others + above_free
+                rng.shuffle(tail)
+                pos = rng.randint(0, len(tail))
+                accepted = [decoy] + tail[:pos] + [primary] + tail[pos:]
+            else:
+                accepted = [decoy, primary] + others + above_free
         elif decoy is not None and plan2_miss and others and j == constrained:
             # 방안 2도 x*를 놓치는 구성 — 이 참여자에게만 x*를 다른 실후보보다 깊게 둔다.
             # 방안 2는 '전원이 낸 순간'이 가장 이른 후보로 닫히므로 얕은 쪽(others)을 고르고,
@@ -240,13 +251,14 @@ def build_case(
     depth: str,
     rng: random.Random,
     plan2_miss: bool = False,
+    owner_random_depth: bool = False,
 ) -> dict:
     cands = [f"S{i + 1:02d}" for i in range(N_CANDIDATES)]
     # 깊은 순위 + plan2-miss 조합은 후보 수가 12개로 고정된 탓에 참여자가 많으면
     # 성립하지 않을 수 있다. 그때는 일반 구성으로 물러난다 (실제 구성은 tags에 남는다).
     for attempt in range(800):
         want_miss = plan2_miss and attempt < 400
-        built = _rankings(spec, n_part, cands, depth, rng, want_miss)
+        built = _rankings(spec, n_part, cands, depth, rng, want_miss, owner_random_depth)
         if built is None:
             continue
         feasible, primary, decoy, per_part = built
@@ -303,7 +315,8 @@ def build_case(
     raise SystemExit(f"{case_id}: 800회 시도에도 불변조건을 만족하는 구성을 찾지 못했다")
 
 
-def generate(n_part: int, per_type: int, seed: int, start: int, out_dir: Path) -> list[Path]:
+def generate(n_part: int, per_type: int, seed: int, start: int, out_dir: Path,
+             owner_random_depth: bool = False) -> list[Path]:
     rng = random.Random(seed)
     out_dir.mkdir(parents=True, exist_ok=True)
     depths = list(DEPTH_BANDS)
@@ -315,7 +328,7 @@ def generate(n_part: int, per_type: int, seed: int, start: int, out_dir: Path) -
             # 절반은 방안 2도 x*를 놓치는 구성 — 표본이 한쪽 방안의 우세를 보장하지 않게 한다
             plan2_miss = spec.n_feasible >= 3 and i % 2 == 1
             case_id = f"F-{n_part}p-{seq:03d}-{spec.scenario_type.replace('_', '-')}"
-            raw = build_case(case_id, spec, n_part, depth, rng, plan2_miss)
+            raw = build_case(case_id, spec, n_part, depth, rng, plan2_miss, owner_random_depth)
             path = out_dir / f"{case_id}.json"
             path.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
             written.append(path)
@@ -331,10 +344,13 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=20260811)
     ap.add_argument("--start", type=int, default=1, help="case_id 일련번호 시작값")
     ap.add_argument("--out", type=Path, default=OUT_DIR)
+    ap.add_argument("--owner-random-depth", action="store_true",
+                    help="ext2 개정 — x*를 미끼 주인 수락 구간 내 무작위 깊이로 (기본: 구판 2순위 고정)")
     args = ap.parse_args()
 
     per_type = 2 if args.pilot else args.per_type
-    written = generate(args.participants, per_type, args.seed, args.start, args.out)
+    written = generate(args.participants, per_type, args.seed, args.start, args.out,
+                       args.owner_random_depth)
     print(f"{len(written)}건 생성 → {args.out}")
     for p in written:
         print(f"  {p.name}")
