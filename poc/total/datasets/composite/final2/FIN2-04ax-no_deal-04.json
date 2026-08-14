@@ -1,0 +1,392 @@
+{
+ "meta": {
+  "id": "FIN2-04ax-no_deal-04",
+  "name": "결렬 정답 — 4축",
+  "conflict_level": "mid",
+  "expected": "no_agreement",
+  "track": "cr",
+  "type": "no_deal",
+  "seed": 0,
+  "_constraints": [
+   {
+    "participant": 0,
+    "axis": "date",
+    "values": [
+     "mon",
+     "tue",
+     "wed"
+    ]
+   },
+   {
+    "participant": 1,
+    "axis": "date",
+    "values": [
+     "thu",
+     "fri",
+     "sat",
+     "sun"
+    ]
+   }
+  ],
+  "oracle": {
+   "valid": 0,
+   "u_xstar": 0.84
+  },
+  "attempts": 1
+ },
+ "axes": [
+  {
+   "name": "date",
+   "generator": "date",
+   "values": [
+    {
+     "name": "mon",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "tue",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "wed",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "thu",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "fri",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "sat",
+     "attrs": {
+      "weekend": true
+     }
+    },
+    {
+     "name": "sun",
+     "attrs": {
+      "weekend": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "time",
+   "generator": "time",
+   "values": [
+    {
+     "name": "11:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "13:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "15:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "17:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "19:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "21:00",
+     "attrs": {
+      "late": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "generator": "region",
+   "values": [
+    {
+     "name": "gangnam",
+     "attrs": {}
+    },
+    {
+     "name": "hongdae",
+     "attrs": {}
+    },
+    {
+     "name": "seongsu",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "movie",
+   "generator": "movie",
+   "values": [
+    {
+     "name": "mv1",
+     "attrs": {}
+    },
+    {
+     "name": "mv2",
+     "attrs": {}
+    },
+    {
+     "name": "mv3",
+     "attrs": {}
+    },
+    {
+     "name": "mv4",
+     "attrs": {}
+    },
+    {
+     "name": "mv5",
+     "attrs": {}
+    },
+    {
+     "name": "mv6",
+     "attrs": {}
+    },
+    {
+     "name": "mv7",
+     "attrs": {}
+    },
+    {
+     "name": "mv8",
+     "attrs": {}
+    },
+    {
+     "name": "mv9",
+     "attrs": {}
+    },
+    {
+     "name": "mv10",
+     "attrs": {}
+    },
+    {
+     "name": "mv11",
+     "attrs": {}
+    },
+    {
+     "name": "mv12",
+     "attrs": {}
+    },
+    {
+     "name": "mv13",
+     "attrs": {}
+    },
+    {
+     "name": "mv14",
+     "attrs": {}
+    },
+    {
+     "name": "mv15",
+     "attrs": {}
+    },
+    {
+     "name": "mv16",
+     "attrs": {}
+    },
+    {
+     "name": "mv17",
+     "attrs": {}
+    },
+    {
+     "name": "mv18",
+     "attrs": {}
+    },
+    {
+     "name": "mv19",
+     "attrs": {}
+    },
+    {
+     "name": "mv20",
+     "attrs": {}
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "type": "hard",
+   "rule": "availability",
+   "subject": "movie",
+   "over": "region",
+   "coverage": 0.72
+  }
+ ],
+ "participants": {
+  "count": 2,
+  "profile_seed": 0,
+  "initial_threshold": [
+   0.42,
+   0.42
+  ],
+  "styles": [
+   "default",
+   "default"
+  ],
+  "constraints": [
+   {
+    "participant": 0,
+    "axis": "date",
+    "values": [
+     "mon",
+     "tue",
+     "wed"
+    ]
+   },
+   {
+    "participant": 1,
+    "axis": "date",
+    "values": [
+     "thu",
+     "fri",
+     "sat",
+     "sun"
+    ]
+   }
+  ]
+ },
+ "agent_view": {
+  "score_dropout": 0.0
+ },
+ "profiles": [
+  {
+   "weights": {
+    "date": 0.3129779988621189,
+    "time": 0.14101469881537482,
+    "region": 0.512399874752999,
+    "movie": 0.03360742756950729
+   },
+   "scores": {
+    "date": {
+     "mon": 0.7298,
+     "tue": 0.8961,
+     "wed": 0.8365,
+     "thu": 0.1167,
+     "fri": 0.3406,
+     "sat": 0.6291,
+     "sun": 0.7223
+    },
+    "time": {
+     "11:00": 0.5344,
+     "13:00": 0.8878,
+     "15:00": 0.8345,
+     "17:00": 0.261,
+     "19:00": 0.0118,
+     "21:00": 0.3493
+    },
+    "region": {
+     "gangnam": 0.5243,
+     "hongdae": 0.5673,
+     "seongsu": 0.0877
+    },
+    "movie": {
+     "mv1": 0.1284,
+     "mv2": 0.4947,
+     "mv3": 0.7045,
+     "mv4": 0.8536,
+     "mv5": 0.6218,
+     "mv6": 0.5272,
+     "mv7": 0.2943,
+     "mv8": 0.9659,
+     "mv9": 0.6007,
+     "mv10": 0.6748,
+     "mv11": 0.3745,
+     "mv12": 0.0539,
+     "mv13": 0.6403,
+     "mv14": 0.4913,
+     "mv15": 0.3169,
+     "mv16": 0.7248,
+     "mv17": 0.0816,
+     "mv18": 0.0024,
+     "mv19": 0.4644,
+     "mv20": 0.6117
+    }
+   },
+   "home_region": "gangnam",
+   "initial_threshold": 0.42
+  },
+  {
+   "weights": {
+    "date": 0.27227989940320174,
+    "time": 0.13726533886982045,
+    "region": 0.44230248116612164,
+    "movie": 0.14815228056085616
+   },
+   "scores": {
+    "date": {
+     "mon": 0.9356,
+     "tue": 0.7971,
+     "wed": 0.0,
+     "thu": 0.2009,
+     "fri": 0.7294,
+     "sat": 0.5619,
+     "sun": 1.0
+    },
+    "time": {
+     "11:00": 0.614,
+     "13:00": 0.8012,
+     "15:00": 0.9081,
+     "17:00": 0.0,
+     "19:00": 1.0,
+     "21:00": 0.9753
+    },
+    "region": {
+     "gangnam": 1.0,
+     "hongdae": 0.8048,
+     "seongsu": 0.0
+    },
+    "movie": {
+     "mv1": 0.5019,
+     "mv2": 0.2603,
+     "mv3": 0.9864,
+     "mv4": 0.964,
+     "mv5": 0.4823,
+     "mv6": 1.0,
+     "mv7": 0.7761,
+     "mv8": 0.2749,
+     "mv9": 0.906,
+     "mv10": 0.4643,
+     "mv11": 0.9293,
+     "mv12": 0.1938,
+     "mv13": 0.0854,
+     "mv14": 0.5753,
+     "mv15": 0.8132,
+     "mv16": 0.0,
+     "mv17": 0.9838,
+     "mv18": 0.1855,
+     "mv19": 0.8852,
+     "mv20": 0.3698
+    }
+   },
+   "home_region": "seongsu",
+   "initial_threshold": 0.42
+  }
+ ]
+}

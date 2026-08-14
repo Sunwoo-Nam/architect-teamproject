@@ -1,0 +1,238 @@
+{
+ "meta": {
+  "id": "FIN2-04ax-plain-17",
+  "name": "현실 모사 — 4축",
+  "conflict_level": "high",
+  "expected": "agreement",
+  "track": "cr",
+  "type": "plain",
+  "seed": 1,
+  "oracle": {
+   "valid": 94,
+   "u_xstar": 1.5269,
+   "r_bar": 0.7803,
+   "corr": -0.5693838929895838,
+   "xstar_slack": 0.3555
+  },
+  "attempts": 2
+ },
+ "axes": [
+  {
+   "name": "date",
+   "generator": "date",
+   "values": [
+    {
+     "name": "mon",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "tue",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "thu",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "sun",
+     "attrs": {
+      "weekend": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "time",
+   "generator": "time",
+   "values": [
+    {
+     "name": "15:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "19:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "21:00",
+     "attrs": {
+      "late": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "generator": "region",
+   "values": [
+    {
+     "name": "hongdae",
+     "attrs": {}
+    },
+    {
+     "name": "seongsu",
+     "attrs": {}
+    },
+    {
+     "name": "jamsil",
+     "attrs": {}
+    },
+    {
+     "name": "gangnam",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "movie",
+   "generator": "movie",
+   "values": [
+    {
+     "name": "mv1",
+     "attrs": {}
+    },
+    {
+     "name": "mv2",
+     "attrs": {}
+    },
+    {
+     "name": "mv3",
+     "attrs": {}
+    },
+    {
+     "name": "mv4",
+     "attrs": {}
+    },
+    {
+     "name": "mv5",
+     "attrs": {}
+    },
+    {
+     "name": "mv6",
+     "attrs": {}
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "type": "hard",
+   "rule": "availability",
+   "subject": "movie",
+   "over": "region",
+   "coverage": 0.84
+  },
+  {
+   "type": "soft",
+   "rule": "conditional_home",
+   "if_axis": "time",
+   "if_values": [
+    "21:00"
+   ],
+   "then_axis": "region",
+   "penalty": 0.2
+  }
+ ],
+ "participants": {
+  "count": 2,
+  "profile_seed": 1,
+  "initial_threshold": [
+   0.38,
+   0.39
+  ],
+  "styles": [
+   "default",
+   "default"
+  ],
+  "constraints": []
+ },
+ "agent_view": {
+  "score_dropout": 0.0
+ },
+ "profiles": [
+  {
+   "weights": {
+    "date": 0.044387795440294454,
+    "time": 0.6719630248912585,
+    "region": 0.18714105719497806,
+    "movie": 0.09650812247346909
+   },
+   "scores": {
+    "date": {
+     "mon": 0.2617,
+     "tue": 0.0262,
+     "thu": 0.0209,
+     "sun": 0.5545
+    },
+    "time": {
+     "15:00": 0.9592,
+     "19:00": 0.6754,
+     "21:00": 0.8652
+    },
+    "region": {
+     "hongdae": 0.8166,
+     "seongsu": 0.9624,
+     "jamsil": 0.4792,
+     "gangnam": 0.4309
+    },
+    "movie": {
+     "mv1": 0.2847,
+     "mv2": 0.3209,
+     "mv3": 0.2043,
+     "mv4": 0.656,
+     "mv5": 0.6031,
+     "mv6": 0.2418
+    }
+   },
+   "home_region": "jamsil",
+   "initial_threshold": 0.38
+  },
+  {
+   "weights": {
+    "date": 0.04819295305600432,
+    "time": 0.5302299641987467,
+    "region": 0.1251641901482234,
+    "movie": 0.29641289259702563
+   },
+   "scores": {
+    "date": {
+     "mon": 0.0,
+     "tue": 1.0,
+     "thu": 0.3334,
+     "sun": 0.283
+    },
+    "time": {
+     "15:00": 0.0,
+     "19:00": 0.1415,
+     "21:00": 1.0
+    },
+    "region": {
+     "hongdae": 0.1161,
+     "seongsu": 0.0,
+     "jamsil": 0.931,
+     "gangnam": 1.0
+    },
+    "movie": {
+     "mv1": 0.0,
+     "mv2": 0.8441,
+     "mv3": 0.5971,
+     "mv4": 1.0,
+     "mv5": 0.4204,
+     "mv6": 0.233
+    }
+   },
+   "home_region": "hongdae",
+   "initial_threshold": 0.39
+  }
+ ]
+}

@@ -1,0 +1,427 @@
+{
+ "meta": {
+  "id": "FIN2-11ax-hard_path-12",
+  "name": "현실 모사 — 11축",
+  "conflict_level": "mid",
+  "expected": "agreement",
+  "track": "cr",
+  "type": "plain",
+  "seed": 0,
+  "fallback_from": "hard_path",
+  "oracle": {
+   "valid": 4576,
+   "u_xstar": 1.4278,
+   "r_bar": 0.7383,
+   "corr": 0.059037577964325696
+  }
+ },
+ "axes": [
+  {
+   "name": "date",
+   "generator": "date",
+   "values": [
+    {
+     "name": "mon",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "tue",
+     "attrs": {
+      "weekend": false
+     }
+    }
+   ]
+  },
+  {
+   "name": "time",
+   "generator": "time",
+   "values": [
+    {
+     "name": "13:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "15:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "17:00",
+     "attrs": {
+      "late": false
+     }
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "generator": "region",
+   "values": [
+    {
+     "name": "hongdae",
+     "attrs": {}
+    },
+    {
+     "name": "gangnam",
+     "attrs": {}
+    },
+    {
+     "name": "jamsil",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "movie",
+   "generator": "movie",
+   "values": [
+    {
+     "name": "mv1",
+     "attrs": {}
+    },
+    {
+     "name": "mv2",
+     "attrs": {}
+    },
+    {
+     "name": "mv3",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "restaurant",
+   "generator": "restaurant",
+   "values": [
+    {
+     "name": "rest-hongdae-1",
+     "attrs": {
+      "region": "hongdae"
+     }
+    },
+    {
+     "name": "rest-gangnam-1",
+     "attrs": {
+      "region": "gangnam"
+     }
+    },
+    {
+     "name": "rest-jamsil-1",
+     "attrs": {
+      "region": "jamsil"
+     }
+    }
+   ]
+  },
+  {
+   "name": "menu",
+   "generator": "menu",
+   "values": [
+    {
+     "name": "vegan",
+     "attrs": {}
+    },
+    {
+     "name": "japanese",
+     "attrs": {}
+    },
+    {
+     "name": "mexican",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "budget",
+   "generator": "budget",
+   "values": [
+    {
+     "name": "high",
+     "attrs": {}
+    },
+    {
+     "name": "low",
+     "attrs": {}
+    },
+    {
+     "name": "mid",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "theater",
+   "generator": "theater",
+   "values": [
+    {
+     "name": "thtr-hongdae-1",
+     "attrs": {
+      "region": "hongdae"
+     }
+    },
+    {
+     "name": "thtr-gangnam-1",
+     "attrs": {
+      "region": "gangnam"
+     }
+    },
+    {
+     "name": "thtr-jamsil-1",
+     "attrs": {
+      "region": "jamsil"
+     }
+    }
+   ]
+  },
+  {
+   "name": "transport",
+   "generator": "transport",
+   "values": [
+    {
+     "name": "taxi",
+     "attrs": {}
+    },
+    {
+     "name": "bus",
+     "attrs": {}
+    },
+    {
+     "name": "walk",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "cafe",
+   "generator": "cafe",
+   "values": [
+    {
+     "name": "cafe-hongdae-1",
+     "attrs": {
+      "region": "hongdae"
+     }
+    },
+    {
+     "name": "cafe-gangnam-1",
+     "attrs": {
+      "region": "gangnam"
+     }
+    },
+    {
+     "name": "cafe-jamsil-1",
+     "attrs": {
+      "region": "jamsil"
+     }
+    }
+   ]
+  },
+  {
+   "name": "activity",
+   "generator": "activity",
+   "values": [
+    {
+     "name": "arcade",
+     "attrs": {}
+    },
+    {
+     "name": "board-game",
+     "attrs": {}
+    },
+    {
+     "name": "bowling",
+     "attrs": {}
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "type": "hard",
+   "rule": "availability",
+   "subject": "movie",
+   "over": "region",
+   "coverage": 0.72
+  },
+  {
+   "type": "hard",
+   "rule": "membership",
+   "subject": "restaurant",
+   "region_axis": "region"
+  },
+  {
+   "type": "hard",
+   "rule": "membership",
+   "subject": "cafe",
+   "region_axis": "region"
+  }
+ ],
+ "participants": {
+  "count": 2,
+  "profile_seed": 0,
+  "initial_threshold": [
+   0.38,
+   0.41
+  ],
+  "styles": [
+   "default",
+   "default"
+  ],
+  "constraints": []
+ },
+ "agent_view": {
+  "score_dropout": 0.0
+ },
+ "profiles": [
+  {
+   "weights": {
+    "date": 0.08651724296035065,
+    "time": 0.21594509446476964,
+    "region": 0.03221572423812934,
+    "movie": 0.0560074676874737,
+    "restaurant": 0.09177794387661513,
+    "menu": 0.05920227248250282,
+    "budget": 0.049687363871486666,
+    "theater": 0.17636131914716446,
+    "transport": 0.01520039424359263,
+    "cafe": 0.05329913042234722,
+    "activity": 0.16378604660556778
+   },
+   "scores": {
+    "date": {
+     "mon": 0.8022,
+     "tue": 0.4955
+    },
+    "time": {
+     "13:00": 0.3445,
+     "15:00": 0.5829,
+     "17:00": 0.0011
+    },
+    "region": {
+     "hongdae": 0.179,
+     "gangnam": 0.9819,
+     "jamsil": 0.4431
+    },
+    "movie": {
+     "mv1": 0.5251,
+     "mv2": 0.2094,
+     "mv3": 0.5369
+    },
+    "restaurant": {
+     "rest-hongdae-1": 0.6855,
+     "rest-gangnam-1": 0.1419,
+     "rest-jamsil-1": 0.5495
+    },
+    "menu": {
+     "vegan": 0.4198,
+     "japanese": 0.804,
+     "mexican": 0.6152
+    },
+    "budget": {
+     "high": 0.9319,
+     "low": 0.8843,
+     "mid": 0.2119
+    },
+    "theater": {
+     "thtr-hongdae-1": 0.2077,
+     "thtr-gangnam-1": 0.5573,
+     "thtr-jamsil-1": 0.313
+    },
+    "transport": {
+     "taxi": 0.1555,
+     "bus": 0.9339,
+     "walk": 0.815
+    },
+    "cafe": {
+     "cafe-hongdae-1": 0.6028,
+     "cafe-gangnam-1": 0.9427,
+     "cafe-jamsil-1": 0.2423
+    },
+    "activity": {
+     "arcade": 0.4105,
+     "board-game": 0.112,
+     "bowling": 0.0487
+    }
+   },
+   "home_region": "jamsil",
+   "initial_threshold": 0.38
+  },
+  {
+   "weights": {
+    "date": 0.09909374966346651,
+    "time": 0.09633249565326986,
+    "region": 0.05050325992109946,
+    "movie": 0.020822897355543653,
+    "restaurant": 0.08467448692980395,
+    "menu": 0.04619196964963894,
+    "budget": 0.013224692615872,
+    "theater": 0.2552113060755863,
+    "transport": 0.15436632647683637,
+    "cafe": 0.02845465983468744,
+    "activity": 0.15112415582419544
+   },
+   "scores": {
+    "date": {
+     "mon": 1.0,
+     "tue": 0.0
+    },
+    "time": {
+     "13:00": 0.9129,
+     "15:00": 0.0,
+     "17:00": 1.0
+    },
+    "region": {
+     "hongdae": 0.461,
+     "gangnam": 1.0,
+     "jamsil": 0.0
+    },
+    "movie": {
+     "mv1": 0.0,
+     "mv2": 1.0,
+     "mv3": 0.5319
+    },
+    "restaurant": {
+     "rest-hongdae-1": 1.0,
+     "rest-gangnam-1": 0.2009,
+     "rest-jamsil-1": 0.0
+    },
+    "menu": {
+     "vegan": 1.0,
+     "japanese": 0.3076,
+     "mexican": 0.0
+    },
+    "budget": {
+     "high": 0.0,
+     "low": 1.0,
+     "mid": 0.9379
+    },
+    "theater": {
+     "thtr-hongdae-1": 0.5955,
+     "thtr-gangnam-1": 1.0,
+     "thtr-jamsil-1": 0.0
+    },
+    "transport": {
+     "taxi": 0.0749,
+     "bus": 1.0,
+     "walk": 0.0
+    },
+    "cafe": {
+     "cafe-hongdae-1": 0.4443,
+     "cafe-gangnam-1": 0.0,
+     "cafe-jamsil-1": 1.0
+    },
+    "activity": {
+     "arcade": 0.7735,
+     "board-game": 0.0,
+     "bowling": 1.0
+    }
+   },
+   "home_region": "jamsil",
+   "initial_threshold": 0.41
+  }
+ ]
+}

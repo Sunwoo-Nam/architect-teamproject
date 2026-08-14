@@ -38,7 +38,7 @@ from total.adapters.composite.baseline import baseline_t  # noqa: E402
 from total.qa import fc, ru, tb  # noqa: E402
 from total.qa.constants import RU_CEILING_BYTES, SYNTH_TIME, band_ru_usage  # noqa: E402
 
-FINAL_DIR = ROOT / "datasets" / "composite" / "final"
+FINAL_DIR = ROOT / "datasets" / "composite" / "final"   # --dataset으로 교체 가능
 PLAN_NAMES = ("seq2", "pool")
 ORACLE_LIMIT = 150_000
 #: 협상 세션당 스텝 예산 — 측정 캠페인 파라미터 (2026-08-13, FIN 정본).
@@ -82,17 +82,20 @@ def main() -> int:
                     help="TB baseline을 기존 run의 cases.jsonl에서 재사용 (동일 fixture 전제)")
     ap.add_argument("--only", default=None, help="유형 필터 (예: pool_trap)")
     ap.add_argument("--allow-python-mismatch", action="store_true")
+    ap.add_argument("--dataset", default="final",
+                    help="datasets/composite/<name> (기본 final — FIN2는 final2)")
     args = ap.parse_args()
     pyversion.require(args.allow_python_mismatch)
     plan_names = tuple(args.plans.split(",")) if args.plans else PLAN_NAMES
 
-    paths = sorted(FINAL_DIR.glob("FIN-*.json"))
+    data_dir = ROOT / "datasets" / "composite" / args.dataset
+    paths = sorted(data_dir.glob("FIN*.json"))
     if args.only:
         paths = [p for p in paths if json.loads(p.read_text())["meta"]["type"] == args.only]
     if args.limit:
         paths = paths[: args.limit]
     scenarios = [load_fixture(p) for p in paths]
-    print(f"FIN 케이스 {len(scenarios)}건 · 방안 {list(plan_names)}")
+    print(f"{args.dataset} 케이스 {len(scenarios)}건 · 방안 {list(plan_names)}")
     wall0 = time.perf_counter()
 
     @contextmanager
@@ -141,7 +144,7 @@ def main() -> int:
     raw = {"qa": ["fc", "ru", "tb"], "plans": {}, "sec_baseline": sec_baseline,
            "baseline_failures": baseline_failures,
            "meta": {
-               "dataset": "composite final (FIN)", "cases": len(scenarios),
+               "dataset": f"composite {args.dataset}", "cases": len(scenarios),
                "commit": _git_commit(), "python": platform.python_version(),
                "constants": SYNTH_TIME.as_dict(), "session_cap": SESSION_CAP,
                "ru_band": band_ru_usage().as_dict(),

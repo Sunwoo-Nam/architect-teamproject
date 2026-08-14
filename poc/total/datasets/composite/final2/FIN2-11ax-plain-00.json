@@ -1,0 +1,438 @@
+{
+ "meta": {
+  "id": "FIN2-11ax-plain-00",
+  "name": "현실 모사 — 11축",
+  "conflict_level": "mid",
+  "expected": "agreement",
+  "track": "cr",
+  "type": "plain",
+  "seed": 0,
+  "oracle": {
+   "valid": 2830,
+   "u_xstar": 1.3566,
+   "r_bar": 0.8238,
+   "corr": -0.27562311987490523,
+   "xstar_slack": 0.1646
+  },
+  "attempts": 1
+ },
+ "axes": [
+  {
+   "name": "date",
+   "generator": "date",
+   "values": [
+    {
+     "name": "thu",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "fri",
+     "attrs": {
+      "weekend": false
+     }
+    }
+   ]
+  },
+  {
+   "name": "time",
+   "generator": "time",
+   "values": [
+    {
+     "name": "11:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "13:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "15:00",
+     "attrs": {
+      "late": false
+     }
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "generator": "region",
+   "values": [
+    {
+     "name": "seongsu",
+     "attrs": {}
+    },
+    {
+     "name": "yeongdeungpo",
+     "attrs": {}
+    },
+    {
+     "name": "jamsil",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "movie",
+   "generator": "movie",
+   "values": [
+    {
+     "name": "mv1",
+     "attrs": {}
+    },
+    {
+     "name": "mv2",
+     "attrs": {}
+    },
+    {
+     "name": "mv3",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "restaurant",
+   "generator": "restaurant",
+   "values": [
+    {
+     "name": "rest-seongsu-1",
+     "attrs": {
+      "region": "seongsu"
+     }
+    },
+    {
+     "name": "rest-yeongdeungpo-1",
+     "attrs": {
+      "region": "yeongdeungpo"
+     }
+    },
+    {
+     "name": "rest-jamsil-1",
+     "attrs": {
+      "region": "jamsil"
+     }
+    }
+   ]
+  },
+  {
+   "name": "menu",
+   "generator": "menu",
+   "values": [
+    {
+     "name": "korean",
+     "attrs": {}
+    },
+    {
+     "name": "japanese",
+     "attrs": {}
+    },
+    {
+     "name": "italian",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "budget",
+   "generator": "budget",
+   "values": [
+    {
+     "name": "premium",
+     "attrs": {}
+    },
+    {
+     "name": "low",
+     "attrs": {}
+    },
+    {
+     "name": "high",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "theater",
+   "generator": "theater",
+   "values": [
+    {
+     "name": "thtr-seongsu-1",
+     "attrs": {
+      "region": "seongsu"
+     }
+    },
+    {
+     "name": "thtr-yeongdeungpo-1",
+     "attrs": {
+      "region": "yeongdeungpo"
+     }
+    },
+    {
+     "name": "thtr-jamsil-1",
+     "attrs": {
+      "region": "jamsil"
+     }
+    }
+   ]
+  },
+  {
+   "name": "transport",
+   "generator": "transport",
+   "values": [
+    {
+     "name": "subway",
+     "attrs": {}
+    },
+    {
+     "name": "walk",
+     "attrs": {}
+    },
+    {
+     "name": "bus",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "cafe",
+   "generator": "cafe",
+   "values": [
+    {
+     "name": "cafe-seongsu-1",
+     "attrs": {
+      "region": "seongsu"
+     }
+    },
+    {
+     "name": "cafe-yeongdeungpo-1",
+     "attrs": {
+      "region": "yeongdeungpo"
+     }
+    },
+    {
+     "name": "cafe-jamsil-1",
+     "attrs": {
+      "region": "jamsil"
+     }
+    }
+   ]
+  },
+  {
+   "name": "activity",
+   "generator": "activity",
+   "values": [
+    {
+     "name": "bowling",
+     "attrs": {}
+    },
+    {
+     "name": "karaoke",
+     "attrs": {}
+    },
+    {
+     "name": "escape-room",
+     "attrs": {}
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "type": "hard",
+   "rule": "availability",
+   "subject": "movie",
+   "over": "region",
+   "coverage": 0.72
+  },
+  {
+   "type": "hard",
+   "rule": "membership",
+   "subject": "theater",
+   "region_axis": "region"
+  },
+  {
+   "type": "hard",
+   "rule": "membership",
+   "subject": "cafe",
+   "region_axis": "region"
+  },
+  {
+   "type": "soft",
+   "rule": "conditional_home",
+   "if_axis": "time",
+   "if_values": [
+    "21:00"
+   ],
+   "then_axis": "region",
+   "penalty": 0.2
+  }
+ ],
+ "participants": {
+  "count": 2,
+  "profile_seed": 0,
+  "initial_threshold": [
+   0.46,
+   0.36
+  ],
+  "styles": [
+   "default",
+   "default"
+  ],
+  "constraints": []
+ },
+ "agent_view": {
+  "score_dropout": 0.0
+ },
+ "profiles": [
+  {
+   "weights": {
+    "date": 0.09276941385182745,
+    "time": 0.06851203382301779,
+    "region": 0.025032353267481953,
+    "movie": 0.21054232628009928,
+    "restaurant": 0.09664327502893957,
+    "menu": 0.17830533830738945,
+    "budget": 0.030392338631915178,
+    "theater": 0.022322598813903912,
+    "transport": 0.043935284880213414,
+    "cafe": 0.1162086133706188,
+    "activity": 0.11533642374459314
+   },
+   "scores": {
+    "date": {
+     "thu": 0.0054,
+     "fri": 0.2911
+    },
+    "time": {
+     "11:00": 0.992,
+     "13:00": 0.6981,
+     "15:00": 0.8569
+    },
+    "region": {
+     "seongsu": 0.037,
+     "yeongdeungpo": 0.4889,
+     "jamsil": 0.8197
+    },
+    "movie": {
+     "mv1": 0.5991,
+     "mv2": 0.4656,
+     "mv3": 0.6248
+    },
+    "restaurant": {
+     "rest-seongsu-1": 0.9625,
+     "rest-yeongdeungpo-1": 0.5039,
+     "rest-jamsil-1": 0.0634
+    },
+    "menu": {
+     "korean": 0.0153,
+     "japanese": 0.9422,
+     "italian": 0.5885
+    },
+    "budget": {
+     "premium": 0.844,
+     "low": 0.1492,
+     "high": 0.3554
+    },
+    "theater": {
+     "thtr-seongsu-1": 0.4082,
+     "thtr-yeongdeungpo-1": 0.4899,
+     "thtr-jamsil-1": 0.2325
+    },
+    "transport": {
+     "subway": 0.3063,
+     "walk": 0.1253,
+     "bus": 0.1195
+    },
+    "cafe": {
+     "cafe-seongsu-1": 0.6072,
+     "cafe-yeongdeungpo-1": 0.1058,
+     "cafe-jamsil-1": 0.9976
+    },
+    "activity": {
+     "bowling": 0.6556,
+     "karaoke": 0.6127,
+     "escape-room": 0.0054
+    }
+   },
+   "home_region": "seongsu",
+   "initial_threshold": 0.46
+  },
+  {
+   "weights": {
+    "date": 0.02650068745658282,
+    "time": 0.0170482832299239,
+    "region": 0.11032942715823903,
+    "movie": 0.5311465598739492,
+    "restaurant": 0.05900184656017477,
+    "menu": 0.09580847928164794,
+    "budget": 0.012791734694479208,
+    "theater": 0.02584933295585574,
+    "transport": 0.02171064210956981,
+    "cafe": 0.06328971647595981,
+    "activity": 0.036523290203617796
+   },
+   "scores": {
+    "date": {
+     "thu": 0.0,
+     "fri": 1.0
+    },
+    "time": {
+     "11:00": 1.0,
+     "13:00": 0.0,
+     "15:00": 0.1892
+    },
+    "region": {
+     "seongsu": 0.0,
+     "yeongdeungpo": 0.0011,
+     "jamsil": 1.0
+    },
+    "movie": {
+     "mv1": 0.0,
+     "mv2": 0.357,
+     "mv3": 1.0
+    },
+    "restaurant": {
+     "rest-seongsu-1": 0.0,
+     "rest-yeongdeungpo-1": 0.1057,
+     "rest-jamsil-1": 1.0
+    },
+    "menu": {
+     "korean": 1.0,
+     "japanese": 0.0,
+     "italian": 0.0291
+    },
+    "budget": {
+     "premium": 1.0,
+     "low": 0.0,
+     "high": 0.2404
+    },
+    "theater": {
+     "thtr-seongsu-1": 1.0,
+     "thtr-yeongdeungpo-1": 0.885,
+     "thtr-jamsil-1": 0.0
+    },
+    "transport": {
+     "subway": 0.2246,
+     "walk": 0.0,
+     "bus": 1.0
+    },
+    "cafe": {
+     "cafe-seongsu-1": 0.0,
+     "cafe-yeongdeungpo-1": 1.0,
+     "cafe-jamsil-1": 0.9334
+    },
+    "activity": {
+     "bowling": 0.5752,
+     "karaoke": 1.0,
+     "escape-room": 0.0
+    }
+   },
+   "home_region": "seongsu",
+   "initial_threshold": 0.36
+  }
+ ]
+}
