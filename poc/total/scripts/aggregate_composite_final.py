@@ -26,10 +26,13 @@ PLANS = ("seq2", "pool")
 
 
 def p95(xs):
+    """P95 규약 = 정렬 후 0-기반 색인 int(0.95·n) — 측정 파이프라인(qa/tb.py·qa/ru.py)과
+    동일. nearest-rank(ceil(0.95n)-1)보다 1랭크 위를 취하는 **상향 보수**로, n ≤ 20에서는
+    최댓값과 일치한다 (제3자 리뷰 2026-08-14에서 이원화 발견 — 파이프라인 쪽으로 통일)."""
     if not xs:
         return None
     ys = sorted(xs)
-    return ys[min(len(ys) - 1, math.ceil(0.95 * len(ys)) - 1)]
+    return ys[min(len(ys) - 1, int(0.95 * len(ys)))]
 
 
 def fc_stars(v):

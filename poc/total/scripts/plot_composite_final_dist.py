@@ -99,7 +99,7 @@ TEX_HEAD = r"""% 자동 생성: scripts/plot_composite_final_dist.py — 수정�
 ]
 % P95 판정선과 경계선
 \addplot[gray!70, dashed, thin, domain={dom}] {{0.95}};
-\draw[gray!70, thin] (axis cs:1,0) -- (axis cs:1,1.02);
+\draw[black!65, line width=0.9pt] (axis cs:1,0) -- (axis cs:1,1.02);
 \node[gray!50!black, font=\scriptsize, anchor=south west, rotate=90]
   at (axis cs:1,0.02) {{{boundary}}};
 \node[gray!50!black, font=\scriptsize, anchor=south east]
@@ -138,7 +138,7 @@ TEX_HIST_HEAD = r"""% 자동 생성: scripts/plot_composite_final_dist.py — �
                  draw=gray!40, fill=white, fill opacity=0.9, text opacity=1}},
   legend cell align=left,
 ]
-\draw[gray!70, thin] (axis cs:1,0) -- (axis cs:1,\pgfkeysvalueof{{/pgfplots/ymax}});
+\draw[black!65, line width=0.9pt] (axis cs:1,0) -- (axis cs:1,\pgfkeysvalueof{{/pgfplots/ymax}});
 \node[gray!50!black, font=\scriptsize, anchor=south west, rotate=90]
   at (axis cs:1,0.3) {{{boundary}}};
 """
@@ -185,9 +185,9 @@ def write_hist_png(path: Path, series: dict, xlabel: str, boundary: str):
                 linestyle="-" if DASHES[plan] == "solid" else (0, (5, 2.2)),
                 label="plan 1 (seq2)" if plan == "seq2" else "plan 2 (pool)")
     ax.set_xscale("log")
-    ax.axvline(1.0, color="0.62", linewidth=0.8, zorder=1)
+    ax.axvline(1.0, color="0.30", linewidth=1.2, zorder=1)
     ax.text(1.0, 0.4, " " + boundary, rotation=90, va="bottom", ha="left",
-            fontsize=8, color="0.35")
+            fontsize=8, color="0.25")
     ax.set_ylim(bottom=0)
     ax.set_xlabel(xlabel, fontsize=10)
     ax.set_ylabel("share of cases per bin (%)", fontsize=10)
@@ -243,15 +243,15 @@ def write_png(path: Path, series: dict, xlabel: str, boundary: str):
         ax.plot([px], [P95], "o", color=COLORS[plan], markersize=4.5, zorder=5)
         # 주석은 점의 우하단 — 두 그림 모두 ECDF가 P95 위로 지나가 이 영역이 빈다
         ax.annotate(f"P95={px:.3g}", (px, P95), textcoords="offset points",
-                    xytext=(7, -15), ha="left", fontsize=8.5,
+                    xytext=(8, -17), ha="left", fontsize=8.5,
                     color=COLORS[plan])
     ax.set_xscale("log")
     ax.axhline(P95, color="0.62", linewidth=0.8, linestyle="--", zorder=1)
     ax.text(0.99, P95 + 0.008, "P95", transform=ax.get_yaxis_transform(),
             ha="right", va="bottom", fontsize=8, color="0.35")
-    ax.axvline(1.0, color="0.62", linewidth=0.8, zorder=1)
+    ax.axvline(1.0, color="0.30", linewidth=1.2, zorder=1)
     ax.text(1.0, 0.02, " " + boundary, rotation=90, va="bottom", ha="left",
-            fontsize=8, color="0.35")
+            fontsize=8, color="0.25")
     ax.set_ylim(0, 1.02)
     ax.set_xlabel(xlabel, fontsize=10)
     ax.set_ylabel("cumulative fraction of cases", fontsize=10)
