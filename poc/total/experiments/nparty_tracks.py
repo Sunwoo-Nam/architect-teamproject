@@ -164,12 +164,11 @@ def measure_track(name, cases, plans=PLANS):
                    "mean_baseline": round(mean_base, 4),
                    "s": round(s_val, 4), "stars_s": BAND_FC_S.stars(s_val),
                    "below_random_defect": s_val <= 0},
-            "cf": {"secret": round(1.0 - statistics.fmean(single_vals), 3),
-                   "stars_secret": cf.BAND_CF_SECRET.stars(
-                       1.0 - statistics.fmean(single_vals)),
+            "cf": {"exposure": round(statistics.fmean(single_vals), 3),
+                   "stars_exposure": cf.stars_exposure(statistics.fmean(single_vals)),
+                   "secret": round(1.0 - statistics.fmean(single_vals), 3),  # 참고 병기
                    "agree_rate": round(agree_rate, 4),  # 모수=합의 세션 — 병기 의무 (24 §3.5)
-                   "m": round(med_m, 3), "stars_m": cf.BAND_CF_M.stars(med_m),
-                   "max_single_depth": round(statistics.fmean(single_vals), 3)},
+                   "m": round(med_m, 3), "stars_m": cf.BAND_CF_M.stars(med_m)},
             "tb": {"p95_rho": round(p95_rho, 4), "stars": BAND_TB_RHO.stars(p95_rho),
                    "median_rho": round(med_rho, 4),  # 전형 성능 (병기)
                    "max_rho": round(max(r["rho"] for r in rhos), 4),
@@ -207,14 +206,14 @@ def main() -> int:
                                 capture_output=True, text=True, timeout=5).stdout.strip()
     except Exception:
         commit = None
-    from total.qa.constants import BAND_CF_SECRET, BAND_FC_ACHIEVED, SYNTH_TIME
+    from total.qa.constants import BAND_CF_EXPOSURE, BAND_FC_ACHIEVED, SYNTH_TIME
     raw = {"tracks": {}, "combined": {}, "meta": {
         "commit": commit, "python": platform.python_version(),
         "constants": SYNTH_TIME.as_dict(),
         "raw_schema": "results/nparty-tracks/RAW-SCHEMA.md",
         "qa_verdicts": {
             "fc": "달성률 U(r)÷U(x*) 표본 평균 — " + BAND_FC_ACHIEVED.note,
-            "cf": "잔여 비밀률 = 1 − 최악 관찰자 깊이 — " + BAND_CF_SECRET.note,
+            "cf": "노출률 = 최악 관찰자 깊이 (전체 후보 분모) — " + BAND_CF_EXPOSURE.note,
             "tb": "ρ = T_설계÷T_naive의 P95 — " + BAND_TB_RHO.note,
         },
     }}
@@ -232,7 +231,7 @@ def main() -> int:
             d = out[p]
             print(f"  {p}: FC 달성률={d['fc']['mean_achieved']} ★{d['fc']['stars_achieved']}"
                   f"(s={d['fc']['s']}) | "
-                  f"CF 잔여비밀={d['cf']['secret']} ★{d['cf']['stars_secret']}"
+                  f"CF 노출률={d['cf']['exposure']} ★{d['cf']['stars_exposure']}"
                   f"(m={d['cf']['m']}) | "
                   f"TB ρP95={d['tb']['p95_rho']} ★{d['tb']['stars']}"
                   f"(중앙 {d['tb']['median_rho']}) "
@@ -255,11 +254,10 @@ def main() -> int:
                    "mean_baseline": round(mean_base, 4),
                    "s": round(s_val, 4), "stars_s": BAND_FC_S.stars(s_val),
                    "below_random_defect": s_val <= 0},
-            "cf": {"secret": round(1.0 - statistics.fmean(d["single"]), 3),
-                   "stars_secret": cf.BAND_CF_SECRET.stars(
-                       1.0 - statistics.fmean(d["single"])),
-                   "m": round(med_m, 3), "stars_m": cf.BAND_CF_M.stars(med_m),
-                   "max_single_depth": round(statistics.fmean(d["single"]), 3)},
+            "cf": {"exposure": round(statistics.fmean(d["single"]), 3),
+                   "stars_exposure": cf.stars_exposure(statistics.fmean(d["single"])),
+                   "secret": round(1.0 - statistics.fmean(d["single"]), 3),
+                   "m": round(med_m, 3), "stars_m": cf.BAND_CF_M.stars(med_m)},
             "tb": {"p95_rho": round(p95_rho, 4), "stars": BAND_TB_RHO.stars(p95_rho),
                    "median_rho": round(med_rho, 4),
                    "max_rho": round(max(d["rho"]), 4),

@@ -2,7 +2,7 @@
 """functional-ext 정본 raw 재집계기 — cases.jsonl만 읽어 모든 분해표를 파생한다.
 
 원칙 (RAW-SCHEMA.md): 측정은 한 번, 이후 분석은 전부 여기서. 재시뮬레이션 금지.
-판정 규칙은 24 §0 (FC 달성률 평균 · CF 잔여 비밀률 평균(합의 모수) · TB ρ P95).
+판정 규칙은 24 §0 (FC 달성률 평균 · CF 노출률 평균(합의 모수) · TB ρ P95).
 
 사용: python scripts/aggregate_nparty_ext.py <run_dir>
 출력: <run_dir>/breakdowns.json + breakdowns.md
@@ -27,9 +27,11 @@ def stars_achieved(a):
     return 0
 
 
-def stars_secret(s):
-    for st, th in ((5, 0.8), (4, 0.6), (3, 0.4), (2, 0.2), (1, 0.0)):
-        if s > th:
+def stars_exposure(e):
+    if e >= 1.0 - 1e-9:
+        return 0  # 전량 공개 별도 규칙 (24 §3.3)
+    for st, th in ((5, 0.2), (4, 0.4), (3, 0.6), (2, 0.8), (1, 1.0)):
+        if e <= th:
             return st
     return 0
 
@@ -54,13 +56,12 @@ def agg(sel):
     deal = [r for r in sel if r["agreed"]]
     if deal:
         depths = [d for r in deal for d in r["victim_depths"]]
-        secrets = [1.0 - d for d in depths]
-        cf_ = {"secret_mean": round(statistics.fmean(secrets), 4),
-               "stars_secret": stars_secret(statistics.fmean(secrets)),
-               "secret_sd": round(statistics.pstdev(secrets), 4),
+        cf_ = {"exposure_mean": round(statistics.fmean(depths), 4),
+               "stars_exposure": stars_exposure(statistics.fmean(depths)),
+               "exposure_sd": round(statistics.pstdev(depths), 4),
                "full_exposed_rate": round(sum(1 for d in depths if d >= 1 - 1e-9) / len(depths), 4)}
     else:
-        cf_ = {"secret_mean": None, "stars_secret": None, "secret_sd": None,
+        cf_ = {"exposure_mean": None, "stars_exposure": None, "exposure_sd": None,
                "full_exposed_rate": None}
     rhos = [r["rho"] for r in sel]
     return {
@@ -105,7 +106,7 @@ def main() -> int:
 
     out = {
         "source": "cases.jsonl 재집계 파생물 (정본은 cases.jsonl — RAW-SCHEMA.md). "
-                  "판정: FC 달성률 평균 · CF 잔여 비밀률 평균(분모 전체 후보, 모수 합의 세션) · "
+                  "판정: FC 달성률 평균 · CF 노출률 평균(분모 전체 후보, 모수 합의 세션) · "
                   "TB ρ P95 (PL 확정 2026-08-13)",
         "overall": {p: agg(by_plan[p]) for p in PLANS},
         "by_n": group(rows, "n", lambda r: r["n_participants"]),
@@ -140,13 +141,14 @@ def main() -> int:
     a_by = {r["case_id"]: r for r in by_plan["plan1a"]}
     b_by = {r["case_id"]: r for r in by_plan["plan2"]}
     t_ratio = [a_by[c]["T_ms"] / b_by[c]["T_ms"] for c in a_by if b_by[c]["T_ms"] > 0]
-    sec_diff = [a_by[c]["secret_case_mean"] - b_by[c]["secret_case_mean"]
+    # 노출률 = 1 − 잔여 비밀률이므로, (2 노출) − (1-A 노출) = (1-A 비밀) − (2 비밀)
+    exp_diff = [a_by[c]["secret_case_mean"] - b_by[c]["secret_case_mean"]
                 for c in a_by if a_by[c]["agreed"]]
     out["paired"] = {
         "t_ratio_1a_over_2_median": round(statistics.median(t_ratio), 4),
         "t_faster_1a_cases": sum(1 for x in t_ratio if x < 1),
-        "secret_diff_1a_minus_2_median": round(statistics.median(sec_diff), 4),
-        "secret_higher_1a_cases": sum(1 for x in sec_diff if x > 0),
+        "exposure_diff_2_minus_1a_median": round(statistics.median(exp_diff), 4),
+        "exposure_lower_1a_cases": sum(1 for x in exp_diff if x > 0),
         "note": "같은 케이스에서 두 방안을 직접 나눈/뺀 값 — 주변 분포가 못 보는 차이",
     }
 
@@ -168,14 +170,14 @@ def main() -> int:
         md.append(f"## {title}")
         md.append("")
         md.append(f"| {key_label} | 1-A 달성률(★) | 2 달성률(★) | 승(1A/무/2) | "
-                  "1-A 잔여비밀(★) | 2 잔여비밀(★) | 1-A ρP95(★) | 2 ρP95(★) |")
+                  "1-A 노출률(★) | 2 노출률(★) | 1-A ρP95(★) | 2 ρP95(★) |")
         md.append("|---|---|---|---|---|---|---|---|")
         for k, v in grp.items():
             a, b = v["plan1a"], v["plan2"]
             def sec_cell(x):
-                if x["secret_mean"] is None:
+                if x["exposure_mean"] is None:
                     return "모수 제외(결렬)"
-                return f"{x['secret_mean'] * 100:.1f}% (★{x['stars_secret']})"
+                return f"{x['exposure_mean'] * 100:.1f}% (★{x['stars_exposure']})"
             md.append(
                 f"| {k} | {a['achieved']:.3f} (★{a['stars_achieved']}) | "
                 f"{b['achieved']:.3f} (★{b['stars_achieved']}) | "

@@ -118,7 +118,7 @@ class TestFcRegression:
 
 
 class TestCfRegression:
-    """CF — 잔여 비밀률(판정)·노출 배수 m(보조). 분모 = 전체 후보, 모수 = 합의 세션,
+    """CF — 후보안 노출률(판정, 2026-08-14 재개정)·노출 배수 m(보조). 분모 = 전체 후보, 모수 = 합의 세션,
     대표값 = 평균 (PL 확정 2026-08-13 — 격자 스냅 회피)."""
 
     @pytest.fixture(scope="class")
@@ -171,11 +171,12 @@ class TestCfRegression:
         # 실측 결론 — 노출 배수는 방안 1-A가 이긴다
         assert evaluated["plan1a"]["multiple"]["m"] < evaluated["plan2"]["multiple"]["m"]
 
-    def test_secret_verdict_discriminates(self, evaluated):
-        # 판정 = 잔여 비밀률 (2026-08-13 재개정, 평균 대표값) — functional 3인 표본에서 한 등급 차
-        assert evaluated["plan1a"]["multiple"]["stars_secret"] == 5
-        assert evaluated["plan2"]["multiple"]["stars_secret"] == 4
-        assert evaluated["plan1a"]["multiple"]["secret"] > evaluated["plan2"]["multiple"]["secret"]
+    def test_exposure_verdict_discriminates(self, evaluated):
+        # 판정 = 노출률 (2026-08-14 재개정, 평균 대표값) — functional 3인 표본에서 한 등급 차.
+        # 구 잔여 비밀률 판정(1-A ★5 / 2 ★4)과 동치인지도 함께 고정한다.
+        assert evaluated["plan1a"]["multiple"]["stars_exposure"] == 5   # 노출 0.1903 ≤ 0.2
+        assert evaluated["plan2"]["multiple"]["stars_exposure"] == 4    # 노출 0.283 ≤ 0.4
+        assert evaluated["plan1a"]["multiple"]["exposure"] < evaluated["plan2"]["multiple"]["exposure"]
 
 
 class TestIntentionalChanges:

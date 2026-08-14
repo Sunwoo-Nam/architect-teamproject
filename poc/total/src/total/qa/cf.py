@@ -8,9 +8,10 @@ r"""[24 §3] Confidentiality — 역추론 방지.
 
 지표는 3층이다 (2026-08-13 재개정 — PL 확정, 판정을 배수 m에서 잔여 비밀률로 교체):
 
-1. **판정 — 잔여 비밀률** = 1 − 최악 관찰자 노출 깊이 (피해자 1인 기준, 표본 중앙값).
-   "협상이 끝나도 공개되지 않고 남은 내 선호의 비율" — 분모는 **전체 후보**(2026-08-13
-   재개정: 거부 후보의 서열도 비밀의 일부다), 모수는 **합의 완료 세션만**.
+1. **판정 — 노출률** = 최악 관찰자 노출 깊이 (피해자 1인 기준, 표본 평균).
+   "협상 중 공개된 내 선호(후보 서열)의 비율" — 분모는 **전체 후보**(거부 후보의
+   서열도 비밀의 일부), 모수는 **합의 완료 세션만**. (2026-08-14 재개정: 잔여
+   비밀률(1 − 노출률)의 표기 방향 전환 — 판정 동치, 경계는 등호 포함 ≤로 통일)
 2. **보조** — 노출 배수 m = Σ(전 관찰자 깊이) ÷ e₂ (관찰자 폭 비교 — 브로드캐스트류용) ·
    정규화 노출률(1순위, 하위 호환)
 3. **원재료** — 역추론 정확도 (2의 계산 입력)
@@ -41,7 +42,7 @@ import statistics
 from dataclasses import dataclass
 from typing import Callable, Sequence
 
-from .constants import BAND_CF_M, BAND_CF_SECRET
+from .constants import BAND_CF_EXPOSURE, BAND_CF_M
 from .contract import Case, Outcome, Preference, SessionResult
 
 #: 관찰 1건 — (바퀴, 라운드, 후보)
@@ -270,10 +271,18 @@ def e2_anchor(runs: Sequence[tuple[SessionResult, Case]]) -> E2Anchor:
     )
 
 
+def stars_exposure(exposure: float) -> int:
+    """노출률 별점 — 전량 공개(=100%)는 사다리와 무관하게 ★0 (24 §3.3)."""
+    if exposure >= 1.0 - 1e-9:
+        return 0
+    return BAND_CF_EXPOSURE.stars(exposure)
+
+
 @dataclass(frozen=True)
 class ExposureMultiple:
-    secret: float              # 잔여 비밀률 (판정) = 1 − 최악 관찰자 깊이, 피해자 중앙값
-    stars_secret: int
+    exposure: float            # 노출률 (판정) = 최악 관찰자 깊이, 피해자 평균
+    stars_exposure: int
+    secret: float              # 잔여 비밀률 = 1 − 노출률 (참고 병기)
     m: float | None            # 보조 — 앵커가 퇴화하면 None (가짜 수를 내지 않는다)
     stars_m: int | None
     max_single_depth: float
@@ -282,14 +291,15 @@ class ExposureMultiple:
 
     def as_dict(self) -> dict:
         return {
+            "exposure": round(self.exposure, 3),
+            "stars_exposure": self.stars_exposure,
             "secret": round(self.secret, 3),
-            "stars_secret": self.stars_secret,
             "m": None if self.m is None else round(self.m, 3),
             "stars_m": self.stars_m,
             "max_single_depth": round(self.max_single_depth, 3),
             "victims": self.victims,
             "note": self.note,
-            "band": {"secret": BAND_CF_SECRET.as_dict(), "m": BAND_CF_M.as_dict()},
+            "band": {"exposure": BAND_CF_EXPOSURE.as_dict(), "m": BAND_CF_M.as_dict()},
         }
 
 
@@ -343,23 +353,24 @@ def exposure_multiple(
         raise ValueError("합의 완료 세션이 없어 CF 모수가 비었다 — 합의율 0인 표본은 "
                          "판정 불가로 보고하라 (결렬 노출은 모수 제외, PL 확정 2026-08-13)")
 
-    mean_single = statistics.fmean(single)
-    secret = 1.0 - mean_single  # 평균의 선형 변환이라 mean(1−e)와 동일
+    exposure = statistics.fmean(single)
     if anchor.degenerate:
-        # 앵커가 0에 가까우면 배수가 의미를 잃는다. 판정(잔여 비밀률)은 앵커와 무관하게
+        # 앵커가 0에 가까우면 배수가 의미를 잃는다. 판정(노출률)은 앵커와 무관하게
         # 유효하므로 그대로 내고, 보조 m만 None으로 비운다 — "안 쟀다"와 "0이다"는 다르다.
         return ExposureMultiple(
-            secret=secret, stars_secret=BAND_CF_SECRET.stars(secret),
+            exposure=exposure, stars_exposure=stars_exposure(exposure),
+            secret=1.0 - exposure,
             m=None, stars_m=None,
-            max_single_depth=mean_single, victims=len(multiples),
+            max_single_depth=exposure, victims=len(multiples),
             note="e₂ 앵커가 0에 가까워 보조 배수 m이 성립하지 않는다 — 참조 2인 협상에서 "
-                 "귀속 노출이 관측되지 않았다는 뜻. 판정(잔여 비밀률)은 앵커 무관 유효",
+                 "귀속 노출이 관측되지 않았다는 뜻. 판정(노출률)은 앵커 무관 유효",
         )
     mean_m = statistics.fmean(multiples)
     return ExposureMultiple(
-        secret=secret, stars_secret=BAND_CF_SECRET.stars(secret),
+        exposure=exposure, stars_exposure=stars_exposure(exposure),
+        secret=1.0 - exposure,
         m=mean_m, stars_m=BAND_CF_M.stars(mean_m),
-        max_single_depth=mean_single, victims=len(multiples),
+        max_single_depth=exposure, victims=len(multiples),
     )
 
 
@@ -368,7 +379,7 @@ def evaluate(
     anchor: E2Anchor,
     viewpoints: Sequence[Viewpoint],
 ) -> dict:
-    """판정(잔여 비밀률)·보조(m) + 관점별 병기 + e₂ 출처를 한 번에.
+    """판정(후보안 노출률)·보조(m) + 관점별 병기 + e₂ 출처를 한 번에.
 
     **별점만 남기지 않는다** — 사다리가 잠정이라 원지표를 항상 함께 낸다.
     """

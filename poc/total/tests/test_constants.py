@@ -73,17 +73,22 @@ class TestFcBands:
 
 
 class TestCfBand:
-    """24 §3.3 — 판정 = 잔여 비밀률 (PL 확정 2026-08-13), m은 보조."""
+    """24 §3.3 — 판정 = 노출률 (PL 확정 2026-08-14 재개정, 잔여 비밀률의 방향 전환), m은 보조."""
 
-    def test_secret_ladder(self):
-        from total.qa.constants import BAND_CF_SECRET
-        assert BAND_CF_SECRET.thresholds == [0.8, 0.6, 0.4, 0.2, 0.0]
-        assert BAND_CF_SECRET.direction == "greater_than"
-        # 전량 공개(잔여 0)는 ★0, 근소한 잔여라도 있으면 ★1
-        assert BAND_CF_SECRET.stars(0.0) == 0
-        assert BAND_CF_SECRET.stars(0.001) == 1
-        assert BAND_CF_SECRET.stars(0.364) == 2   # functional-ext 방안 1-A 실측
-        assert BAND_CF_SECRET.stars(0.861) == 5   # main 방안 1-A 실측
+    def test_exposure_ladder(self):
+        from total.qa.constants import BAND_CF_EXPOSURE
+        assert BAND_CF_EXPOSURE.thresholds == [0.2, 0.4, 0.6, 0.8, 1.0]
+        assert BAND_CF_EXPOSURE.direction == "at_most"   # 경계 포함 — TB/RU와 통일
+        assert BAND_CF_EXPOSURE.stars(0.2) == 5          # ★5 = 노출 ≤ 20%
+        assert BAND_CF_EXPOSURE.stars(0.636) == 2        # functional-ext 방안 1-A 실측 (노출 63.6%)
+        assert BAND_CF_EXPOSURE.stars(0.139) == 5        # main 방안 1-A 실측 (노출 13.9%)
+
+    def test_full_exposure_is_zero_stars(self):
+        # 전량 공개(노출 100%)는 별도 규칙으로 ★0 — 근소한 잔여라도 있으면 ★1
+        from total.qa.cf import stars_exposure
+        assert stars_exposure(1.0) == 0
+        assert stars_exposure(0.999) == 1
+        assert stars_exposure(0.2) == 5
 
     def test_aux_m_ladder(self):
         assert BAND_CF_M.thresholds == [0.25, 0.5, 1.0, 2.0, 4.0]
