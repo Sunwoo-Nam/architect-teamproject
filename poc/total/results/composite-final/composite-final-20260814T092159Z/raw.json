@@ -1,0 +1,184 @@
+{
+ "qa": [
+  "fc",
+  "ru",
+  "tb"
+ ],
+ "plans": {
+  "pool2": {
+   "sec": 1281.5,
+   "fc": {
+    "cases": 400,
+    "agreed": 346,
+    "mean_achieved": 0.932315,
+    "stars_achieved": 4,
+    "mean_baseline": 0.778164,
+    "mean_s": 0.694885,
+    "stars_s": 4,
+    "below_random_defect": false,
+    "optimal_hit": 82,
+    "fr_violation_cases": 0,
+    "degenerate_cases": 45,
+    "degenerate_missed": 0,
+    "bands": {
+     "achieved": {
+      "name": "FC 달성률",
+      "thresholds": [
+       0.95,
+       0.9,
+       0.85,
+       0.8,
+       0.7
+      ],
+      "direction": "at_least",
+      "note": "24 §1.4 — 판정 지표 달성률 U(r)÷U(x*). 만점 1.0부터 5%p 계단(★1은 0.70-0.80) — 잠정. 2026-08-12 병행 시절 경계를 판정으로 승격 (PL 확정 2026-08-13)"
+     },
+     "s": {
+      "name": "FC 개선 비율 s (보조)",
+      "thresholds": [
+       0.8,
+       0.6,
+       0.4,
+       0.2,
+       0.0
+      ],
+      "direction": "greater_than",
+      "note": "24 §1.4 — s = (달성률 − R̄) ÷ (1 − R̄). 판정에서 보조로 강등(PL 확정 2026-08-13). s ≤ 0(무작위 이하)은 달성률 별점과 무관하게 즉시 결함"
+     }
+    }
+   },
+   "ru": {
+    "sessions": 500,
+    "median_peak_mb": 0.1766,
+    "median_base_mb": 0.001,
+    "median_materialized_mb": 0.0282,
+    "median_total_mb": 0.1776,
+    "max_total_mb": 888.6118,
+    "p95_total_mb": 135.9038,
+    "ceiling_bytes": 134217728,
+    "median_r_total": 0.001388,
+    "max_r_total": 6.94228,
+    "p95_r_total": 1.061748,
+    "stars_p95": 0,
+    "stars_median": 5,
+    "stars_max": 0,
+    "over_ceiling_sessions": 26,
+    "band": {
+     "name": "RU 사용률 r (로그)",
+     "thresholds": [
+      0.01,
+      0.03162277660168379,
+      0.1,
+      0.31622776601683794,
+      1.0
+     ],
+     "direction": "at_most",
+     "note": "24 §2.8 재개정 (2026-08-14) — r = 총점유 ÷ 한도, [1%,100%] 로그 4등분: ≤1% ★5 · ≤3.2% ★4 · ≤10% ★3 · ≤32% ★2 · ≤100% ★1 · 초과 ★0(결함). ★5 = 실사용 최대 규모(≈10축)까지의 성장(약 100배, 실측 ×2.1/축)을 견디는 여유. 1칸 = √10 ≈ 3.2배 ≈ 의제 1.6개"
+    },
+    "note": "별점은 단말 총 점유(공통 기저 + 프로토콜 상태) 기준 (24 §2.8 단서). 표본 판정은 r P95 — 중앙값(전형)·최댓값(최악)을 병기해 읽는다"
+   },
+   "tb": {
+    "sessions": 400,
+    "median_total_ms": 1950.551,
+    "median_phase_ms": 1950.0,
+    "median_eval_ms": 0.16765,
+    "median_transfer_ms": 0.961,
+    "dominant": "phase",
+    "constants": {
+     "t_phase_ms": 75.0,
+     "t_eval_ms": 0.0014,
+     "bw_bytes_per_s": 2500000.0,
+     "bdp_bytes": 187500.0,
+     "note": "24 §4.4 — t_phase는 편도. LTE 클라우드 릴레이 기준"
+    },
+    "p95_rho": 0.6331,
+    "stars": 2,
+    "median_rho": 0.0993,
+    "max_rho": 1.5698,
+    "defect_cases": 4,
+    "upper_bound_cases": 37,
+    "band": {
+     "name": "TB 시간 비율 ρ",
+     "thresholds": [
+      0.2,
+      0.4,
+      0.6,
+      0.8,
+      1.0
+     ],
+     "direction": "at_most",
+     "note": "24 §4.3 — ρ = T_설계 ÷ T_naive(SAOP baseline). naive 등가 1.0-순간 완료 0 등분. baseline이 벽시계 상한에 걸리면 T_naive는 하한 → ρ는 상한(보수 판정)"
+    }
+   },
+   "oracle_cases": 400,
+   "light_cases": 100
+  }
+ },
+ "sec_baseline": 0.0,
+ "baseline_failures": [
+  [
+   "FIN-16ax-stress-17",
+   "이월 원본에 baseline 없음"
+  ],
+  [
+   "FIN-18ax-stress-15",
+   "이월 원본에 baseline 없음"
+  ],
+  [
+   "FIN-20ax-stress-01",
+   "이월 원본에 baseline 없음"
+  ],
+  [
+   "FIN-20ax-stress-04",
+   "이월 원본에 baseline 없음"
+  ],
+  [
+   "FIN-20ax-stress-10",
+   "이월 원본에 baseline 없음"
+  ],
+  [
+   "FIN-20ax-stress-15",
+   "이월 원본에 baseline 없음"
+  ],
+  [
+   "FIN-20ax-stress-18",
+   "이월 원본에 baseline 없음"
+  ],
+  [
+   "FIN-20ax-stress-19",
+   "이월 원본에 baseline 없음"
+  ]
+ ],
+ "meta": {
+  "dataset": "composite final (FIN)",
+  "cases": 500,
+  "commit": "ccdf356",
+  "python": "3.14.0rc2",
+  "constants": {
+   "t_phase_ms": 75.0,
+   "t_eval_ms": 0.0014,
+   "bw_bytes_per_s": 2500000.0,
+   "bdp_bytes": 187500.0,
+   "note": "24 §4.4 — t_phase는 편도. LTE 클라우드 릴레이 기준"
+  },
+  "session_cap": 60,
+  "ru_band": {
+   "name": "RU 사용률 r (로그)",
+   "thresholds": [
+    0.01,
+    0.03162277660168379,
+    0.1,
+    0.31622776601683794,
+    1.0
+   ],
+   "direction": "at_most",
+   "note": "24 §2.8 재개정 (2026-08-14) — r = 총점유 ÷ 한도, [1%,100%] 로그 4등분: ≤1% ★5 · ≤3.2% ★4 · ≤10% ★3 · ≤32% ★2 · ≤100% ★1 · 초과 ★0(결함). ★5 = 실사용 최대 규모(≈10축)까지의 성장(약 100배, 실측 ×2.1/축)을 견디는 여유. 1칸 = √10 ≈ 3.2배 ≈ 의제 1.6개"
+  },
+  "plans": [
+   "pool2"
+  ],
+  "baseline_from": "results/composite-final/composite-final-20260813T215301Z",
+  "judgement": "FC=달성률 · RU=사용률 r P95 로그 사다리(2026-08-13 개정) · TB=ρ P95"
+ },
+ "wall_seconds": 1281.5
+}
