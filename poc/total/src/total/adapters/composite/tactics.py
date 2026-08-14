@@ -60,12 +60,18 @@ class KAsymPoolNegotiator(PoolNegotiator):
         axes = self.scenario.axes
         ranked = {ax.name: sorted(ax.values, key=lambda v: -self._marginal(ax.name, v))
                   for ax in axes}
-        alloc = {ax.name: 1 for ax in axes}
-        prod = 1
+        # v2 (1차 측정 관찰 반영): 예산이 균일 k=2 풀(2ⁿ)을 허용하면 **k=2 바닥에서
+        # 시작**한다 — CR 구간(예산 = 2ⁿ)에서는 정본 pool과 동일 풀이 되어 FC 손실이
+        # 없고, 비대칭 배분은 예산이 모자라는 규모(RS)에서만 발동한다. 1차(전 구간
+        # k=1 시작 탐욕)는 CR에서도 풀이 달라져 FC −0.020을 냈다 (65 §7).
+        floor_k = 2 if math.prod(min(2, len(ax.values)) for ax in axes) <= self.budget else 1
+        alloc = {ax.name: min(floor_k, len(ax.values)) for ax in axes}
+        prod = math.prod(alloc.values())
         heap: list[tuple[float, str]] = []
         for ax in axes:
-            if len(ranked[ax.name]) > 1:
-                heapq.heappush(heap, (-self._marginal(ax.name, ranked[ax.name][1]), ax.name))
+            k0 = alloc[ax.name]
+            if len(ranked[ax.name]) > k0:
+                heapq.heappush(heap, (-self._marginal(ax.name, ranked[ax.name][k0]), ax.name))
         while heap:
             _gain, name = heapq.heappop(heap)
             k = alloc[name]
