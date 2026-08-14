@@ -85,9 +85,9 @@ class TestMeasure:
         assert m.r_peak == pytest.approx(0.02)
 
     def test_stars_from_total_usage(self):
-        # r=0.10 → [1%,100%] 로그 4등분(2026-08-14 재개정)에서 ≤10% → 3점
+        # r=0.10 → 20%p 등분(2026-08-14 PL 확정)에서 ≤20% → 5점
         m = measure(mk(peak_bytes=2 * MB, base_bytes=8 * MB), ceiling_bytes=100 * MB)
-        assert m.stars == 3
+        assert m.stars == 5
 
     def test_stars_zero_over_ceiling(self):
         m = measure(mk(peak_bytes=200 * MB, base_bytes=0), ceiling_bytes=100 * MB)
@@ -115,10 +115,11 @@ class TestRealDataRegression:
     """dpca 실측(scaling_raw.jsonl)으로 밴드가 실제로 변별하는지 확인."""
 
     @pytest.mark.parametrize("peak_mb,expected_stars", [
-        # [1%,100%] 로그 4등분 (2026-08-14 재개정, PL 확정) — 구 선형 등분은 0.18과
-        # 8.23을 같은 ★5로 뭉갰다 (46배 차이인데도). 반 데케이드가 실측 지점을 변별한다.
-        (0.18, 5),     # seq2 16축 — r 0.14% (실사용 최대까지 여유 = 만점)
-        (8.23, 3),     # pool 16축 — r 6.4% (★3: 3.2-10%)
+        # 20%p 등분 (2026-08-14 PL 확정 — TB·CF와 눈금 통일). 저사용 실측 지점들은
+        # 한 칸(★5)에 모인다 — 저사용 구간 변별은 원값 병기로 읽는다 (24 §2.8 기록).
+        (0.18, 5),     # seq2 16축 — r 0.14%
+        (8.23, 5),     # pool 16축 — r 6.4% (≤20% ★5)
+        (70.0, 3),     # 합성 지점 — r 54.7% (★3: 40-60%) — 사다리 중간 칸 확인용
         (136.43, 0),   # pool 20축 — 107%: 협상 몫 한도(128MB)에서 즉시 결함
         (563.44, 0),   # pool 22축 — 한도 초과
     ])
@@ -129,10 +130,10 @@ class TestRealDataRegression:
 
 class TestAggregate:
     def test_verdict_is_max_based(self):
-        # 표본 판정 = r 최대값 (24 §2.8, 2026-08-14 재개정 — OOM은 최악 1건이 크리티컬)
+        # 표본 별점 = P95·최대 2케이스 병행, 단일 인용 대표 = 최대 (24 §2.8 3차)
         rows = [measure(mk(peak_bytes=p * MB)) for p in (1, 1, 60)]
         agg = aggregate(rows)
-        assert agg["stars_max"] == 1      # 60/128 = 46.9% — 최악이 등급을 정한다
+        assert agg["stars_max"] == 3      # 60/128 = 46.9% — 최악 케이스의 등급 (20%p ★3)
         assert agg["stars_median"] == 5   # 1/128 = 0.78% — 전형은 병기
 
     def test_median_across_sessions(self):
