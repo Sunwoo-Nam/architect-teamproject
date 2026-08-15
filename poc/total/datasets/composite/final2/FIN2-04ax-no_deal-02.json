@@ -1,0 +1,392 @@
+{
+ "meta": {
+  "id": "FIN2-04ax-no_deal-02",
+  "name": "결렬 정답 — 4축",
+  "conflict_level": "mid",
+  "expected": "no_agreement",
+  "track": "cr",
+  "type": "no_deal",
+  "seed": 0,
+  "_constraints": [
+   {
+    "participant": 0,
+    "axis": "date",
+    "values": [
+     "mon",
+     "tue",
+     "wed"
+    ]
+   },
+   {
+    "participant": 1,
+    "axis": "date",
+    "values": [
+     "thu",
+     "fri",
+     "sat",
+     "sun"
+    ]
+   }
+  ],
+  "oracle": {
+   "valid": 0,
+   "u_xstar": 0.74
+  },
+  "attempts": 1
+ },
+ "axes": [
+  {
+   "name": "date",
+   "generator": "date",
+   "values": [
+    {
+     "name": "mon",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "tue",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "wed",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "thu",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "fri",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "sat",
+     "attrs": {
+      "weekend": true
+     }
+    },
+    {
+     "name": "sun",
+     "attrs": {
+      "weekend": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "time",
+   "generator": "time",
+   "values": [
+    {
+     "name": "11:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "13:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "15:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "17:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "19:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "21:00",
+     "attrs": {
+      "late": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "generator": "region",
+   "values": [
+    {
+     "name": "yeongdeungpo",
+     "attrs": {}
+    },
+    {
+     "name": "hongdae",
+     "attrs": {}
+    },
+    {
+     "name": "gangnam",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "movie",
+   "generator": "movie",
+   "values": [
+    {
+     "name": "mv1",
+     "attrs": {}
+    },
+    {
+     "name": "mv2",
+     "attrs": {}
+    },
+    {
+     "name": "mv3",
+     "attrs": {}
+    },
+    {
+     "name": "mv4",
+     "attrs": {}
+    },
+    {
+     "name": "mv5",
+     "attrs": {}
+    },
+    {
+     "name": "mv6",
+     "attrs": {}
+    },
+    {
+     "name": "mv7",
+     "attrs": {}
+    },
+    {
+     "name": "mv8",
+     "attrs": {}
+    },
+    {
+     "name": "mv9",
+     "attrs": {}
+    },
+    {
+     "name": "mv10",
+     "attrs": {}
+    },
+    {
+     "name": "mv11",
+     "attrs": {}
+    },
+    {
+     "name": "mv12",
+     "attrs": {}
+    },
+    {
+     "name": "mv13",
+     "attrs": {}
+    },
+    {
+     "name": "mv14",
+     "attrs": {}
+    },
+    {
+     "name": "mv15",
+     "attrs": {}
+    },
+    {
+     "name": "mv16",
+     "attrs": {}
+    },
+    {
+     "name": "mv17",
+     "attrs": {}
+    },
+    {
+     "name": "mv18",
+     "attrs": {}
+    },
+    {
+     "name": "mv19",
+     "attrs": {}
+    },
+    {
+     "name": "mv20",
+     "attrs": {}
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "type": "hard",
+   "rule": "availability",
+   "subject": "movie",
+   "over": "region",
+   "coverage": 0.74
+  }
+ ],
+ "participants": {
+  "count": 2,
+  "profile_seed": 0,
+  "initial_threshold": [
+   0.38,
+   0.36
+  ],
+  "styles": [
+   "default",
+   "default"
+  ],
+  "constraints": [
+   {
+    "participant": 0,
+    "axis": "date",
+    "values": [
+     "mon",
+     "tue",
+     "wed"
+    ]
+   },
+   {
+    "participant": 1,
+    "axis": "date",
+    "values": [
+     "thu",
+     "fri",
+     "sat",
+     "sun"
+    ]
+   }
+  ]
+ },
+ "agent_view": {
+  "score_dropout": 0.0
+ },
+ "profiles": [
+  {
+   "weights": {
+    "date": 0.1675137179693471,
+    "time": 0.18057725495998575,
+    "region": 0.35642006426063955,
+    "movie": 0.29548896281002757
+   },
+   "scores": {
+    "date": {
+     "mon": 0.6445,
+     "tue": 0.8391,
+     "wed": 0.7147,
+     "thu": 0.4148,
+     "fri": 0.041,
+     "sat": 0.3497,
+     "sun": 0.0996
+    },
+    "time": {
+     "11:00": 0.4654,
+     "13:00": 0.0176,
+     "15:00": 0.9624,
+     "17:00": 0.6083,
+     "19:00": 0.9552,
+     "21:00": 0.0783
+    },
+    "region": {
+     "yeongdeungpo": 0.8682,
+     "hongdae": 0.2377,
+     "gangnam": 0.3921
+    },
+    "movie": {
+     "mv1": 0.2173,
+     "mv2": 0.6359,
+     "mv3": 0.1661,
+     "mv4": 0.1315,
+     "mv5": 0.4402,
+     "mv6": 0.279,
+     "mv7": 0.6333,
+     "mv8": 0.5852,
+     "mv9": 0.8115,
+     "mv10": 0.5608,
+     "mv11": 0.8535,
+     "mv12": 0.7891,
+     "mv13": 0.9373,
+     "mv14": 0.6341,
+     "mv15": 0.7098,
+     "mv16": 0.9215,
+     "mv17": 0.3964,
+     "mv18": 0.0461,
+     "mv19": 0.423,
+     "mv20": 0.7225
+    }
+   },
+   "home_region": "gangnam",
+   "initial_threshold": 0.38
+  },
+  {
+   "weights": {
+    "date": 0.5299785054287196,
+    "time": 0.19478443373714638,
+    "region": 0.19538821847593055,
+    "movie": 0.07984884235820336
+   },
+   "scores": {
+    "date": {
+     "mon": 0.9942,
+     "tue": 0.1703,
+     "wed": 0.5624,
+     "thu": 1.0,
+     "fri": 0.9618,
+     "sat": 0.7909,
+     "sun": 0.0
+    },
+    "time": {
+     "11:00": 0.3564,
+     "13:00": 0.1881,
+     "15:00": 1.0,
+     "17:00": 0.4895,
+     "19:00": 0.8808,
+     "21:00": 0.0
+    },
+    "region": {
+     "yeongdeungpo": 1.0,
+     "hongdae": 0.0,
+     "gangnam": 0.2631
+    },
+    "movie": {
+     "mv1": 0.6636,
+     "mv2": 0.4616,
+     "mv3": 0.5157,
+     "mv4": 1.0,
+     "mv5": 0.9443,
+     "mv6": 0.1337,
+     "mv7": 0.918,
+     "mv8": 0.618,
+     "mv9": 0.1489,
+     "mv10": 0.0248,
+     "mv11": 0.2574,
+     "mv12": 0.935,
+     "mv13": 0.1511,
+     "mv14": 0.2414,
+     "mv15": 0.7342,
+     "mv16": 0.4283,
+     "mv17": 0.0,
+     "mv18": 0.6119,
+     "mv19": 0.338,
+     "mv20": 0.3948
+    }
+   },
+   "home_region": "gangnam",
+   "initial_threshold": 0.36
+  }
+ ]
+}

@@ -21,7 +21,7 @@ from total.qa.bands import stars_at_least, stars_at_most  # noqa: E402
 
 FC_BAND = [0.95, 0.90, 0.85, 0.80, 0.70]      # 달성률 (24 §1)
 RHO_BAND = [0.2, 0.4, 0.6, 0.8, 1.0]          # ρ (24 §4)
-RU_BAND = [0.2, 0.4, 0.6, 0.8, 1.0]           # r 20%p 등분 (24 §2.8, 2026-08-14 확정)
+RU_BAND = [1e-2, 10 ** -1.5, 1e-1, 10 ** -0.5, 1.0]   # r 로그 사다리 (24 §2.8 최종 — 20%p에서 복귀)
 PLANS = ("seq2", "pool")
 
 

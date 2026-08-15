@@ -1,0 +1,270 @@
+{
+ "meta": {
+  "id": "FIN2-04ax-plain-20",
+  "name": "현실 모사 — 4축",
+  "conflict_level": "high",
+  "expected": "agreement",
+  "track": "cr",
+  "type": "plain",
+  "seed": 1,
+  "oracle": {
+   "valid": 174,
+   "u_xstar": 1.793,
+   "r_bar": 0.7666,
+   "corr": -0.060579953478008534,
+   "xstar_slack": 0.3256
+  },
+  "attempts": 2
+ },
+ "axes": [
+  {
+   "name": "date",
+   "generator": "date",
+   "values": [
+    {
+     "name": "mon",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "wed",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "thu",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "fri",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "sat",
+     "attrs": {
+      "weekend": true
+     }
+    },
+    {
+     "name": "sun",
+     "attrs": {
+      "weekend": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "time",
+   "generator": "time",
+   "values": [
+    {
+     "name": "13:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "15:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "17:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "19:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "21:00",
+     "attrs": {
+      "late": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "generator": "region",
+   "values": [
+    {
+     "name": "yeongdeungpo",
+     "attrs": {}
+    },
+    {
+     "name": "jamsil",
+     "attrs": {}
+    },
+    {
+     "name": "gangnam",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "movie",
+   "generator": "movie",
+   "values": [
+    {
+     "name": "mv1",
+     "attrs": {}
+    },
+    {
+     "name": "mv2",
+     "attrs": {}
+    },
+    {
+     "name": "mv3",
+     "attrs": {}
+    },
+    {
+     "name": "mv4",
+     "attrs": {}
+    },
+    {
+     "name": "mv5",
+     "attrs": {}
+    },
+    {
+     "name": "mv6",
+     "attrs": {}
+    },
+    {
+     "name": "mv7",
+     "attrs": {}
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "type": "hard",
+   "rule": "availability",
+   "subject": "movie",
+   "over": "region",
+   "coverage": 0.68
+  },
+  {
+   "type": "soft",
+   "rule": "conditional_home",
+   "if_axis": "time",
+   "if_values": [
+    "21:00"
+   ],
+   "then_axis": "region",
+   "penalty": 0.2
+  }
+ ],
+ "participants": {
+  "count": 2,
+  "profile_seed": 1,
+  "initial_threshold": [
+   0.48,
+   0.42
+  ],
+  "styles": [
+   "default",
+   "default"
+  ],
+  "constraints": []
+ },
+ "agent_view": {
+  "score_dropout": 0.0
+ },
+ "profiles": [
+  {
+   "weights": {
+    "date": 0.4016850644028381,
+    "time": 0.14330641606974687,
+    "region": 0.07566055973641596,
+    "movie": 0.37934795979099906
+   },
+   "scores": {
+    "date": {
+     "mon": 0.3366,
+     "wed": 0.1078,
+     "thu": 0.8073,
+     "fri": 0.9047,
+     "sat": 0.9714,
+     "sun": 0.4735
+    },
+    "time": {
+     "13:00": 0.5377,
+     "15:00": 0.2615,
+     "17:00": 0.868,
+     "19:00": 0.0697,
+     "21:00": 0.5681
+    },
+    "region": {
+     "yeongdeungpo": 0.4535,
+     "jamsil": 0.6584,
+     "gangnam": 0.4813
+    },
+    "movie": {
+     "mv1": 0.7849,
+     "mv2": 0.8491,
+     "mv3": 0.6359,
+     "mv4": 0.7463,
+     "mv5": 0.7666,
+     "mv6": 0.9682,
+     "mv7": 0.2126
+    }
+   },
+   "home_region": "gangnam",
+   "initial_threshold": 0.48
+  },
+  {
+   "weights": {
+    "date": 0.036176948818432496,
+    "time": 0.04484816155135633,
+    "region": 0.5951785834322426,
+    "movie": 0.3237963061979685
+   },
+   "scores": {
+    "date": {
+     "mon": 0.0806,
+     "wed": 0.4739,
+     "thu": 0.3537,
+     "fri": 0.0,
+     "sat": 0.6517,
+     "sun": 1.0
+    },
+    "time": {
+     "13:00": 0.4537,
+     "15:00": 0.2709,
+     "17:00": 1.0,
+     "19:00": 0.0,
+     "21:00": 0.5367
+    },
+    "region": {
+     "yeongdeungpo": 0.8473,
+     "jamsil": 1.0,
+     "gangnam": 0.0
+    },
+    "movie": {
+     "mv1": 0.0,
+     "mv2": 0.153,
+     "mv3": 1.0,
+     "mv4": 0.7861,
+     "mv5": 0.3031,
+     "mv6": 0.1672,
+     "mv7": 0.2326
+    }
+   },
+   "home_region": "yeongdeungpo",
+   "initial_threshold": 0.42
+  }
+ ]
+}

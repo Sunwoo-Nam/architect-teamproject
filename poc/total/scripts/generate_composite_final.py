@@ -76,6 +76,20 @@ from total.adapters.composite._vendor.common.oracle import analyze  # noqa: E402
 
 OUT = ROOT / "datasets" / "composite" / "final"
 BASE_SEED = 20260813
+PREFIX = "FIN"
+
+# ── v2 (FIN2 — PL 지시 2026-08-14) ──────────────────────────────────────────
+# ① 8·9·10축의 경로 함정 제거 → plain으로 대체 (seq2 백트랙 시간이 결과를 왜곡).
+#    11·12축 함정은 유지 — 경로 의존 검증 자체는 표본에 남긴다.
+# ② RS(stress) 케이스에 안정 불변식 신설: pool의 k 심화(deepening)가 발동하지
+#    않는 판만 채택 (발동 시 시드 교체). 근거: FIN 실측에서 18축 2건만 k=3으로
+#    심화해 실물화 4.7GB/2.5GB — 16축(13.7%)·20축(231%) 사이에서 18축만 3,692%로
+#    튀어 수준 간 규모 성장 비교를 깨는 특이점이었다 (k=2 유지 시 18축 최악 ≈111%).
+#    CR(판정 트랙)에는 이런 선별이 없다 — 방안 실행 선별은 RS의 규모 관측 목적에
+#    한정한다 (판정 트랙에 적용하면 표본 조작이다).
+OUT_V2 = ROOT / "datasets" / "composite" / "final2"
+BASE_SEED_V2 = 20260814
+TRAPS_PER_LEVEL_V2 = {11: 14, 12: 14}
 ORACLE_LIMIT = 150_000       # CR 트랙 조합 상한 (FC 전수 열거 여유)
 MAX_RETRY = 40               # 케이스당 시드 재시도 상한
 
@@ -577,7 +591,7 @@ def gen_case(track, n, kind, idx, seed):
         profiles = make_profiles(axes, rng, rho, thr)
         deps = realistic_deps(axes, rng)
 
-    case_id = f"FIN-{n:02d}ax-{kind}-{idx:02d}"
+    case_id = f"{PREFIX}-{n:02d}ax-{kind}-{idx:02d}"
     label = {"hard_path": "경로 함정", "soft_synergy": "압축 함정", "mixed": "이중 함정",
              "plain": "현실 모사", "no_deal": "결렬 정답", "stress": "규모 스트레스"}[kind]
     if trap_info:
@@ -627,7 +641,7 @@ def cr_plan(pilot=False):
     plan = []
     for n in range(4, 13):
         path_here = (1 if pilot else TRAPS_PER_LEVEL.get(n, 0)) if n >= 8 else 0
-        plain_here = 4 if pilot else (40 if n < 8 else 39 - TRAPS_PER_LEVEL[n])
+        plain_here = 4 if pilot else (40 if n < 8 else 39 - TRAPS_PER_LEVEL.get(n, 0))
         nd_here = 1 if pilot else 5
         plan += [(n, "hard_path")] * path_here + [(n, "plain")] * plain_here
         plan += [(n, "no_deal")] * nd_here
@@ -643,7 +657,14 @@ def main():
     ap.add_argument("--pilot", action="store_true",
                     help="수준당 축소판 (유형별 1~2건) — 반복 설계용")
     ap.add_argument("--only", default=None, help="유형 필터 (예: pool_trap)")
+    ap.add_argument("--v2", action="store_true",
+                    help="FIN2 생성 — 8-10축 함정 제거 + RS 안정 불변식 (PL 지시 2026-08-14)")
     args = ap.parse_args()
+
+    global OUT, BASE_SEED, PREFIX, TRAPS_PER_LEVEL
+    if args.v2:
+        OUT, BASE_SEED, PREFIX = OUT_V2, BASE_SEED_V2, "FIN2"
+        TRAPS_PER_LEVEL = TRAPS_PER_LEVEL_V2
 
     OUT.mkdir(parents=True, exist_ok=True)
     rs_per = 2 if args.pilot else 20
@@ -657,15 +678,53 @@ def main():
     for track, n, kind in plan:
         idx = counters.setdefault((n, kind), 0)
         counters[(n, kind)] += 1
+        # resume — 결정론 생성이므로 기존 파일은 그대로 재사용 (MANIFEST 행만 복원)
+        prior = OUT / f"{PREFIX}-{n:02d}ax-{kind}-{idx:02d}.json"
+        if prior.exists():
+            fx = json.loads(prior.read_text())
+            made.append((fx["meta"]["id"], track, n,
+                         fx["meta"].get("type", kind) if not fx["meta"].get("fallback_from")
+                         else f"{fx['meta']['type']}(대체)",
+                         math.prod(len(a["values"]) for a in fx["axes"])))
+            continue
         ok = False
         for attempt in range(MAX_RETRY):
             fix = gen_case(track, n, kind, idx, seed=attempt)
-            if track == "rs":         # 오라클 불가 — 스키마 로드만 검증
+            if track == "rs":         # 오라클 불가 — 스키마 로드 (+v2: 안정 불변식)
                 tmp = OUT / "__tmp__.json"
                 tmp.write_text(json.dumps(fix, ensure_ascii=False))
                 try:
-                    load_fixture(tmp)
+                    sc = load_fixture(tmp)
                     ok, summary = True, {"light": True}
+                    if args.v2:
+                        # 심화가 "발동하는 순간" 예외로 즉시 중단한다 — 완주 후 확인
+                        # 방식은 검사 자체가 k 심화 폭주(20축 k=3 = 3.5×10^9 실물화,
+                        # 수십 GB)를 실행해 버린다 (초판 결함 — 3시간 행 실측).
+                        from total.adapters.composite._vendor.harness.runner import (
+                            run_one as _run_one)
+                        from total.adapters.composite._vendor.strategies import (
+                            pool as _pool_mod)
+
+                        class _DeepeningTriggered(Exception):
+                            pass
+
+                        _orig = _pool_mod.PoolNegotiator._replenish
+
+                        def _no_deepen(self):
+                            raise _DeepeningTriggered()
+
+                        _pool_mod.PoolNegotiator._replenish = _no_deepen
+                        try:
+                            run = _run_one(sc, "pool", n_steps=60)  # SESSION_CAP 동일
+                            summary = {"light": True, "pool_deepening": 0,
+                                       "pool_materialized_mb":
+                                       round(run.materialized_bytes / 2**20, 2)}
+                        except _DeepeningTriggered:
+                            ok = False
+                            summary = {"rs_stability":
+                                       "pool k 심화 발동 — 시드 교체 (v2 불변식)"}
+                        finally:
+                            _pool_mod.PoolNegotiator._replenish = _orig
                 finally:
                     tmp.unlink(missing_ok=True)
             else:
@@ -697,7 +756,7 @@ def main():
         if not ok and kind in ("hard_path", "soft_synergy", "mixed"):
             for attempt in range(MAX_RETRY):
                 fix = gen_case(track, n, "plain", idx + 90, seed=attempt)
-                fix["meta"]["id"] = f"FIN-{n:02d}ax-{kind}-{idx:02d}"
+                fix["meta"]["id"] = f"{PREFIX}-{n:02d}ax-{kind}-{idx:02d}"
                 fix["meta"]["type"] = "plain"
                 fix["meta"]["fallback_from"] = kind
                 ok, summary = _oracle_check(fix, "agreement")
@@ -710,12 +769,17 @@ def main():
                     print(f"  대체: {n}축 {kind} #{idx} → plain (불변식 미충족)")
                     break
         if not ok:
-            failed.append((f"FIN-{n:02d}ax-{kind}-{idx:02d}", summary))
+            failed.append((f"{PREFIX}-{n:02d}ax-{kind}-{idx:02d}", summary))
             print(f"  실패: {n}축 {kind} #{idx} — {summary}")
 
-    lines = ["# composite final 데이터셋 — MANIFEST", "",
-             f"생성: `scripts/generate_composite_final.py` (BASE_SEED {BASE_SEED}) · "
-             f"총 {len(made)}건 (실패 {len(failed)})", "",
+    lines = [f"# composite {'final2 (FIN2)' if args.v2 else 'final'} 데이터셋 — MANIFEST", "",
+             f"생성: `scripts/generate_composite_final.py{' --v2' if args.v2 else ''}` "
+             f"(BASE_SEED {BASE_SEED}) · 총 {len(made)}건 (실패 {len(failed)})", ""]
+    if args.v2:
+        lines += ["FIN 대비 변경 (PL 지시 2026-08-14): ① 8-10축 경로 함정 제거(plain 대체 — "
+                  "seq2 백트랙 시간 왜곡 해소, 11-12축 함정은 유지) ② RS 안정 불변식 "
+                  "(pool k 심화 발동 판 시드 교체 — 18축 특이점 완화). 그 외 구성 동일.", ""]
+    lines += [
              "| 케이스 | 트랙 | 축 수 | 유형 | 조합 수 |", "|---|---|---|---|---|"]
     for cid, track, n, kind, S in made:
         lines.append(f"| {cid} | {track} | {n} | {kind} | {S:,} |")

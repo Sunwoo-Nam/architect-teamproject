@@ -1,0 +1,380 @@
+{
+ "meta": {
+  "id": "FIN2-08ax-plain-18",
+  "name": "현실 모사 — 8축",
+  "conflict_level": "mid",
+  "expected": "agreement",
+  "track": "cr",
+  "type": "plain",
+  "seed": 0,
+  "oracle": {
+   "valid": 860,
+   "u_xstar": 1.7737,
+   "r_bar": 0.7119,
+   "corr": 0.5678377040359885,
+   "xstar_slack": 0.4458
+  },
+  "attempts": 1
+ },
+ "axes": [
+  {
+   "name": "date",
+   "generator": "date",
+   "values": [
+    {
+     "name": "tue",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "wed",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "fri",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "sun",
+     "attrs": {
+      "weekend": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "time",
+   "generator": "time",
+   "values": [
+    {
+     "name": "11:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "13:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "15:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "19:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "21:00",
+     "attrs": {
+      "late": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "generator": "region",
+   "values": [
+    {
+     "name": "gangnam",
+     "attrs": {}
+    },
+    {
+     "name": "jamsil",
+     "attrs": {}
+    },
+    {
+     "name": "yeongdeungpo",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "movie",
+   "generator": "movie",
+   "values": [
+    {
+     "name": "mv1",
+     "attrs": {}
+    },
+    {
+     "name": "mv2",
+     "attrs": {}
+    },
+    {
+     "name": "mv3",
+     "attrs": {}
+    },
+    {
+     "name": "mv4",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "restaurant",
+   "generator": "restaurant",
+   "values": [
+    {
+     "name": "rest-gangnam-1",
+     "attrs": {
+      "region": "gangnam"
+     }
+    },
+    {
+     "name": "rest-jamsil-1",
+     "attrs": {
+      "region": "jamsil"
+     }
+    },
+    {
+     "name": "rest-yeongdeungpo-1",
+     "attrs": {
+      "region": "yeongdeungpo"
+     }
+    }
+   ]
+  },
+  {
+   "name": "menu",
+   "generator": "menu",
+   "values": [
+    {
+     "name": "japanese",
+     "attrs": {}
+    },
+    {
+     "name": "italian",
+     "attrs": {}
+    },
+    {
+     "name": "korean",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "budget",
+   "generator": "budget",
+   "values": [
+    {
+     "name": "low",
+     "attrs": {}
+    },
+    {
+     "name": "high",
+     "attrs": {}
+    },
+    {
+     "name": "premium",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "theater",
+   "generator": "theater",
+   "values": [
+    {
+     "name": "thtr-gangnam-1",
+     "attrs": {
+      "region": "gangnam"
+     }
+    },
+    {
+     "name": "thtr-jamsil-1",
+     "attrs": {
+      "region": "jamsil"
+     }
+    },
+    {
+     "name": "thtr-yeongdeungpo-1",
+     "attrs": {
+      "region": "yeongdeungpo"
+     }
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "type": "hard",
+   "rule": "availability",
+   "subject": "movie",
+   "over": "region",
+   "coverage": 0.63
+  },
+  {
+   "type": "hard",
+   "rule": "membership",
+   "subject": "restaurant",
+   "region_axis": "region"
+  },
+  {
+   "type": "hard",
+   "rule": "membership",
+   "subject": "theater",
+   "region_axis": "region"
+  },
+  {
+   "type": "soft",
+   "rule": "conditional_home",
+   "if_axis": "time",
+   "if_values": [
+    "21:00"
+   ],
+   "then_axis": "region",
+   "penalty": 0.2
+  }
+ ],
+ "participants": {
+  "count": 2,
+  "profile_seed": 0,
+  "initial_threshold": [
+   0.37,
+   0.46
+  ],
+  "styles": [
+   "default",
+   "default"
+  ],
+  "constraints": []
+ },
+ "agent_view": {
+  "score_dropout": 0.0
+ },
+ "profiles": [
+  {
+   "weights": {
+    "date": 0.0591349923915304,
+    "time": 0.1941515546743474,
+    "region": 0.05203219963662482,
+    "movie": 0.047831455631150266,
+    "restaurant": 0.11722260974887258,
+    "menu": 0.417270413545801,
+    "budget": 0.07168527152852525,
+    "theater": 0.04067150284314833
+   },
+   "scores": {
+    "date": {
+     "tue": 0.4537,
+     "wed": 0.019,
+     "fri": 0.0704,
+     "sun": 0.6683
+    },
+    "time": {
+     "11:00": 0.8953,
+     "13:00": 0.9773,
+     "15:00": 0.7881,
+     "19:00": 0.2748,
+     "21:00": 0.5336
+    },
+    "region": {
+     "gangnam": 0.9149,
+     "jamsil": 0.6915,
+     "yeongdeungpo": 0.5989
+    },
+    "movie": {
+     "mv1": 0.4408,
+     "mv2": 0.8562,
+     "mv3": 0.0493,
+     "mv4": 0.3969
+    },
+    "restaurant": {
+     "rest-gangnam-1": 0.4885,
+     "rest-jamsil-1": 0.9507,
+     "rest-yeongdeungpo-1": 0.6932
+    },
+    "menu": {
+     "japanese": 0.827,
+     "italian": 0.238,
+     "korean": 0.4122
+    },
+    "budget": {
+     "low": 0.976,
+     "high": 0.2419,
+     "premium": 0.2095
+    },
+    "theater": {
+     "thtr-gangnam-1": 0.8172,
+     "thtr-jamsil-1": 0.1115,
+     "thtr-yeongdeungpo-1": 0.9862
+    }
+   },
+   "home_region": "yeongdeungpo",
+   "initial_threshold": 0.37
+  },
+  {
+   "weights": {
+    "date": 0.3259544793020115,
+    "time": 0.011153865373995769,
+    "region": 0.07750002499034926,
+    "movie": 0.04928180274831321,
+    "restaurant": 0.13274547639380962,
+    "menu": 0.302277722751439,
+    "budget": 0.058933398913093564,
+    "theater": 0.0421532295269881
+   },
+   "scores": {
+    "date": {
+     "tue": 0.6769,
+     "wed": 0.0,
+     "fri": 0.7035,
+     "sun": 1.0
+    },
+    "time": {
+     "11:00": 0.7823,
+     "13:00": 1.0,
+     "15:00": 0.9103,
+     "19:00": 0.0,
+     "21:00": 0.3467
+    },
+    "region": {
+     "gangnam": 0.1718,
+     "jamsil": 0.0,
+     "yeongdeungpo": 1.0
+    },
+    "movie": {
+     "mv1": 0.8357,
+     "mv2": 0.0,
+     "mv3": 0.1089,
+     "mv4": 1.0
+    },
+    "restaurant": {
+     "rest-gangnam-1": 0.4826,
+     "rest-jamsil-1": 0.0,
+     "rest-yeongdeungpo-1": 1.0
+    },
+    "menu": {
+     "japanese": 1.0,
+     "italian": 0.0,
+     "korean": 0.8524
+    },
+    "budget": {
+     "low": 1.0,
+     "high": 0.0,
+     "premium": 0.3847
+    },
+    "theater": {
+     "thtr-gangnam-1": 1.0,
+     "thtr-jamsil-1": 0.7567,
+     "thtr-yeongdeungpo-1": 0.0
+    }
+   },
+   "home_region": "jamsil",
+   "initial_threshold": 0.46
+  }
+ ]
+}

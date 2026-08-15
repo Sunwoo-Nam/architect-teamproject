@@ -1,0 +1,371 @@
+{
+ "meta": {
+  "id": "FIN2-07ax-no_deal-01",
+  "name": "결렬 정답 — 7축",
+  "conflict_level": "mid",
+  "expected": "no_agreement",
+  "track": "cr",
+  "type": "no_deal",
+  "seed": 0,
+  "oracle": {
+   "valid": 0,
+   "u_xstar": 1.42
+  },
+  "attempts": 1
+ },
+ "axes": [
+  {
+   "name": "date",
+   "generator": "date",
+   "values": [
+    {
+     "name": "tue",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "wed",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "thu",
+     "attrs": {
+      "weekend": false
+     }
+    },
+    {
+     "name": "sat",
+     "attrs": {
+      "weekend": true
+     }
+    },
+    {
+     "name": "sun",
+     "attrs": {
+      "weekend": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "time",
+   "generator": "time",
+   "values": [
+    {
+     "name": "13:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "17:00",
+     "attrs": {
+      "late": false
+     }
+    },
+    {
+     "name": "21:00",
+     "attrs": {
+      "late": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "generator": "region",
+   "values": [
+    {
+     "name": "gangnam",
+     "attrs": {}
+    },
+    {
+     "name": "hongdae",
+     "attrs": {}
+    },
+    {
+     "name": "seongsu",
+     "attrs": {}
+    },
+    {
+     "name": "yeongdeungpo",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "movie",
+   "generator": "movie",
+   "values": [
+    {
+     "name": "mv1",
+     "attrs": {}
+    },
+    {
+     "name": "mv2",
+     "attrs": {}
+    },
+    {
+     "name": "mv3",
+     "attrs": {}
+    },
+    {
+     "name": "mv4",
+     "attrs": {}
+    },
+    {
+     "name": "mv5",
+     "attrs": {}
+    },
+    {
+     "name": "mv6",
+     "attrs": {}
+    },
+    {
+     "name": "mv7",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "restaurant",
+   "generator": "restaurant",
+   "values": [
+    {
+     "name": "rest-gangnam-1",
+     "attrs": {
+      "region": "gangnam"
+     }
+    },
+    {
+     "name": "rest-hongdae-1",
+     "attrs": {
+      "region": "hongdae"
+     }
+    },
+    {
+     "name": "rest-seongsu-1",
+     "attrs": {
+      "region": "seongsu"
+     }
+    }
+   ]
+  },
+  {
+   "name": "menu",
+   "generator": "menu",
+   "values": [
+    {
+     "name": "mexican",
+     "attrs": {}
+    },
+    {
+     "name": "chinese",
+     "attrs": {}
+    },
+    {
+     "name": "korean",
+     "attrs": {}
+    },
+    {
+     "name": "japanese",
+     "attrs": {}
+    },
+    {
+     "name": "italian",
+     "attrs": {}
+    }
+   ]
+  },
+  {
+   "name": "budget",
+   "generator": "budget",
+   "values": [
+    {
+     "name": "high",
+     "attrs": {}
+    },
+    {
+     "name": "mid",
+     "attrs": {}
+    },
+    {
+     "name": "premium",
+     "attrs": {}
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "type": "hard",
+   "rule": "availability",
+   "subject": "movie",
+   "over": "region",
+   "coverage": 0.78
+  },
+  {
+   "type": "soft",
+   "rule": "conditional_home",
+   "if_axis": "time",
+   "if_values": [
+    "21:00"
+   ],
+   "then_axis": "region",
+   "penalty": 0.2
+  },
+  {
+   "type": "soft",
+   "rule": "conditional_pref",
+   "if_axis": "budget",
+   "if_values": [
+    "low"
+   ],
+   "then_axis": "menu",
+   "preferred": [
+    "korean",
+    "chinese"
+   ],
+   "penalty": 0.15
+  }
+ ],
+ "participants": {
+  "count": 2,
+  "profile_seed": 0,
+  "initial_threshold": [
+   0.73,
+   0.69
+  ],
+  "styles": [
+   "default",
+   "default"
+  ],
+  "constraints": []
+ },
+ "agent_view": {
+  "score_dropout": 0.0
+ },
+ "profiles": [
+  {
+   "weights": {
+    "date": 0.2567509316538796,
+    "time": 0.06427029259836807,
+    "region": 0.3344736288088168,
+    "movie": 0.022502854598688518,
+    "restaurant": 0.06062217403580932,
+    "menu": 0.18070579006753743,
+    "budget": 0.08067432823690027
+   },
+   "scores": {
+    "date": {
+     "tue": 0.0416,
+     "wed": 0.8543,
+     "thu": 0.5519,
+     "sat": 0.2515,
+     "sun": 0.5865
+    },
+    "time": {
+     "13:00": 0.5382,
+     "17:00": 0.2938,
+     "21:00": 0.8013
+    },
+    "region": {
+     "gangnam": 0.642,
+     "hongdae": 0.1446,
+     "seongsu": 0.6758,
+     "yeongdeungpo": 0.9009
+    },
+    "movie": {
+     "mv1": 0.525,
+     "mv2": 0.9079,
+     "mv3": 0.0939,
+     "mv4": 0.7025,
+     "mv5": 0.3519,
+     "mv6": 0.4752,
+     "mv7": 0.0234
+    },
+    "restaurant": {
+     "rest-gangnam-1": 0.9784,
+     "rest-hongdae-1": 0.7245,
+     "rest-seongsu-1": 0.6055
+    },
+    "menu": {
+     "mexican": 0.8363,
+     "chinese": 0.7731,
+     "korean": 0.3521,
+     "japanese": 0.1307,
+     "italian": 0.0335
+    },
+    "budget": {
+     "high": 0.3433,
+     "mid": 0.791,
+     "premium": 0.2821
+    }
+   },
+   "home_region": "yeongdeungpo",
+   "initial_threshold": 0.73
+  },
+  {
+   "weights": {
+    "date": 0.12358102043804471,
+    "time": 0.1419671654083105,
+    "region": 0.07784031368459324,
+    "movie": 0.06359066575558396,
+    "restaurant": 0.010481097432467126,
+    "menu": 0.2726293759900788,
+    "budget": 0.3099103612909217
+   },
+   "scores": {
+    "date": {
+     "tue": 1.0,
+     "wed": 0.0,
+     "thu": 0.3633,
+     "sat": 0.333,
+     "sun": 0.4919
+    },
+    "time": {
+     "13:00": 1.0,
+     "17:00": 0.5112,
+     "21:00": 0.0
+    },
+    "region": {
+     "gangnam": 1.0,
+     "hongdae": 0.6148,
+     "seongsu": 0.2146,
+     "yeongdeungpo": 0.0
+    },
+    "movie": {
+     "mv1": 0.6593,
+     "mv2": 0.0,
+     "mv3": 0.7869,
+     "mv4": 0.2807,
+     "mv5": 0.7924,
+     "mv6": 0.8557,
+     "mv7": 1.0
+    },
+    "restaurant": {
+     "rest-gangnam-1": 0.6373,
+     "rest-hongdae-1": 1.0,
+     "rest-seongsu-1": 0.0
+    },
+    "menu": {
+     "mexican": 0.0,
+     "chinese": 0.262,
+     "korean": 0.6784,
+     "japanese": 0.2908,
+     "italian": 1.0
+    },
+    "budget": {
+     "high": 0.0,
+     "mid": 0.4243,
+     "premium": 1.0
+    }
+   },
+   "home_region": "hongdae",
+   "initial_threshold": 0.69
+  }
+ ]
+}

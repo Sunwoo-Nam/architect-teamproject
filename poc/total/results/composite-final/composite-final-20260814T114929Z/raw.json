@@ -1,0 +1,289 @@
+{
+ "qa": [
+  "fc",
+  "ru",
+  "tb"
+ ],
+ "plans": {
+  "seq2": {
+   "sec": 331.0,
+   "fc": {
+    "cases": 400,
+    "agreed": 346,
+    "mean_achieved": 0.922157,
+    "stars_achieved": 4,
+    "mean_baseline": 0.773585,
+    "mean_s": 0.656191,
+    "stars_s": 4,
+    "below_random_defect": false,
+    "optimal_hit": 90,
+    "fr_violation_cases": 0,
+    "degenerate_cases": 45,
+    "degenerate_missed": 0,
+    "bands": {
+     "achieved": {
+      "name": "FC 달성률",
+      "thresholds": [
+       0.95,
+       0.9,
+       0.85,
+       0.8,
+       0.7
+      ],
+      "direction": "at_least",
+      "note": "24 §1.4 — 판정 지표 달성률 U(r)÷U(x*). 만점 1.0부터 5%p 계단(★1은 0.70-0.80) — 잠정. 2026-08-12 병행 시절 경계를 판정으로 승격 (PL 확정 2026-08-13)"
+     },
+     "s": {
+      "name": "FC 개선 비율 s (보조)",
+      "thresholds": [
+       0.8,
+       0.6,
+       0.4,
+       0.2,
+       0.0
+      ],
+      "direction": "greater_than",
+      "note": "24 §1.4 — s = (달성률 − R̄) ÷ (1 − R̄). 판정에서 보조로 강등(PL 확정 2026-08-13). s ≤ 0(무작위 이하)은 달성률 별점과 무관하게 즉시 결함"
+     }
+    }
+   },
+   "ru": {
+    "sessions": 500,
+    "median_peak_mb": 0.2223,
+    "median_base_mb": 0.001,
+    "median_materialized_mb": 0.001,
+    "median_total_mb": 0.2231,
+    "max_total_mb": 1.7748,
+    "p95_total_mb": 0.5509,
+    "ceiling_bytes": 134217728,
+    "median_r_total": 0.001743,
+    "max_r_total": 0.013866,
+    "p95_r_total": 0.004304,
+    "stars_max": 5,
+    "stars_p95": 5,
+    "stars_median": 5,
+    "over_ceiling_sessions": 0,
+    "band": {
+     "name": "RU 사용률 r (20%p)",
+     "thresholds": [
+      0.2,
+      0.4,
+      0.6000000000000001,
+      0.8,
+      1.0
+     ],
+     "direction": "at_most",
+     "note": "24 §2.8 확정 (2026-08-14, PL) — r = 총점유 ÷ 한도, 20%p 등분: ≤20% ★5 · ≤40% ★4 · ≤60% ★3 · ≤80% ★2 · ≤100% ★1 · 초과 ★0(결함). TB·CF와 동일 눈금. 저사용 구간의 변별은 원값(r %) 병기로 읽는다"
+    },
+    "note": "별점은 단말 총 점유(공통 기저 + 프로토콜 상태) 기준 (24 §2.8 단서). 표본 별점은 P95·최대값 2케이스 병행 (24 §2.8 3차 — 단일 인용 대표는 최대값). 중앙값(전형)은 참고 병기"
+   },
+   "tb": {
+    "sessions": 400,
+    "median_total_ms": 8363.601,
+    "median_phase_ms": 8362.5,
+    "median_eval_ms": 0.56175,
+    "median_transfer_ms": 0.462,
+    "dominant": "phase",
+    "constants": {
+     "t_phase_ms": 75.0,
+     "t_eval_ms": 0.0014,
+     "bw_bytes_per_s": 2500000.0,
+     "bdp_bytes": 187500.0,
+     "note": "24 §4.4 — t_phase는 편도. LTE 클라우드 릴레이 기준"
+    },
+    "p95_rho": 2.2065,
+    "stars": 0,
+    "median_rho": 0.3302,
+    "max_rho": 9.4524,
+    "defect_cases": 103,
+    "upper_bound_cases": 30,
+    "band": {
+     "name": "TB 시간 비율 ρ",
+     "thresholds": [
+      0.2,
+      0.4,
+      0.6,
+      0.8,
+      1.0
+     ],
+     "direction": "at_most",
+     "note": "24 §4.3 — ρ = T_설계 ÷ T_naive(SAOP baseline). naive 등가 1.0-순간 완료 0 등분. baseline이 벽시계 상한에 걸리면 T_naive는 하한 → ρ는 상한(보수 판정)"
+    }
+   },
+   "oracle_cases": 400,
+   "light_cases": 100
+  },
+  "pool": {
+   "sec": 699.8,
+   "fc": {
+    "cases": 400,
+    "agreed": 355,
+    "mean_achieved": 0.937804,
+    "stars_achieved": 4,
+    "mean_baseline": 0.773585,
+    "mean_s": 0.725302,
+    "stars_s": 4,
+    "below_random_defect": false,
+    "optimal_hit": 76,
+    "fr_violation_cases": 0,
+    "degenerate_cases": 45,
+    "degenerate_missed": 0,
+    "bands": {
+     "achieved": {
+      "name": "FC 달성률",
+      "thresholds": [
+       0.95,
+       0.9,
+       0.85,
+       0.8,
+       0.7
+      ],
+      "direction": "at_least",
+      "note": "24 §1.4 — 판정 지표 달성률 U(r)÷U(x*). 만점 1.0부터 5%p 계단(★1은 0.70-0.80) — 잠정. 2026-08-12 병행 시절 경계를 판정으로 승격 (PL 확정 2026-08-13)"
+     },
+     "s": {
+      "name": "FC 개선 비율 s (보조)",
+      "thresholds": [
+       0.8,
+       0.6,
+       0.4,
+       0.2,
+       0.0
+      ],
+      "direction": "greater_than",
+      "note": "24 §1.4 — s = (달성률 − R̄) ÷ (1 − R̄). 판정에서 보조로 강등(PL 확정 2026-08-13). s ≤ 0(무작위 이하)은 달성률 별점과 무관하게 즉시 결함"
+     }
+    }
+   },
+   "ru": {
+    "sessions": 500,
+    "median_peak_mb": 0.1626,
+    "median_base_mb": 0.001,
+    "median_materialized_mb": 0.0398,
+    "median_total_mb": 0.1638,
+    "max_total_mb": 704.0749,
+    "p95_total_mb": 52.8977,
+    "ceiling_bytes": 134217728,
+    "median_r_total": 0.00128,
+    "max_r_total": 5.500585,
+    "p95_r_total": 0.413263,
+    "stars_max": 0,
+    "stars_p95": 3,
+    "stars_median": 5,
+    "over_ceiling_sessions": 10,
+    "band": {
+     "name": "RU 사용률 r (20%p)",
+     "thresholds": [
+      0.2,
+      0.4,
+      0.6000000000000001,
+      0.8,
+      1.0
+     ],
+     "direction": "at_most",
+     "note": "24 §2.8 확정 (2026-08-14, PL) — r = 총점유 ÷ 한도, 20%p 등분: ≤20% ★5 · ≤40% ★4 · ≤60% ★3 · ≤80% ★2 · ≤100% ★1 · 초과 ★0(결함). TB·CF와 동일 눈금. 저사용 구간의 변별은 원값(r %) 병기로 읽는다"
+    },
+    "note": "별점은 단말 총 점유(공통 기저 + 프로토콜 상태) 기준 (24 §2.8 단서). 표본 별점은 P95·최대값 2케이스 병행 (24 §2.8 3차 — 단일 인용 대표는 최대값). 중앙값(전형)은 참고 병기"
+   },
+   "tb": {
+    "sessions": 400,
+    "median_total_ms": 2175.72,
+    "median_phase_ms": 2175.0,
+    "median_eval_ms": 0.161,
+    "median_transfer_ms": 1.045,
+    "dominant": "phase",
+    "constants": {
+     "t_phase_ms": 75.0,
+     "t_eval_ms": 0.0014,
+     "bw_bytes_per_s": 2500000.0,
+     "bdp_bytes": 187500.0,
+     "note": "24 §4.4 — t_phase는 편도. LTE 클라우드 릴레이 기준"
+    },
+    "p95_rho": 0.5788,
+    "stars": 3,
+    "median_rho": 0.0798,
+    "max_rho": 1.7128,
+    "defect_cases": 8,
+    "upper_bound_cases": 30,
+    "band": {
+     "name": "TB 시간 비율 ρ",
+     "thresholds": [
+      0.2,
+      0.4,
+      0.6,
+      0.8,
+      1.0
+     ],
+     "direction": "at_most",
+     "note": "24 §4.3 — ρ = T_설계 ÷ T_naive(SAOP baseline). naive 등가 1.0-순간 완료 0 등분. baseline이 벽시계 상한에 걸리면 T_naive는 하한 → ρ는 상한(보수 판정)"
+    }
+   },
+   "oracle_cases": 400,
+   "light_cases": 100
+  }
+ },
+ "sec_baseline": 1897.2,
+ "baseline_failures": [
+  [
+   "FIN2-14ax-stress-08",
+   "RuntimeError: POP_CAP 2000000 도달"
+  ],
+  [
+   "FIN2-16ax-stress-08",
+   "RuntimeError: POP_CAP 2000000 도달"
+  ],
+  [
+   "FIN2-16ax-stress-14",
+   "RuntimeError: POP_CAP 2000000 도달"
+  ],
+  [
+   "FIN2-18ax-stress-06",
+   "TimeoutError: 90s 초과"
+  ],
+  [
+   "FIN2-20ax-stress-04",
+   "TimeoutError: 90s 초과"
+  ],
+  [
+   "FIN2-20ax-stress-11",
+   "TimeoutError: 90s 초과"
+  ],
+  [
+   "FIN2-20ax-stress-16",
+   "TimeoutError: 90s 초과"
+  ]
+ ],
+ "meta": {
+  "dataset": "composite final2",
+  "cases": 500,
+  "commit": "e4e4e37",
+  "python": "3.14.4",
+  "constants": {
+   "t_phase_ms": 75.0,
+   "t_eval_ms": 0.0014,
+   "bw_bytes_per_s": 2500000.0,
+   "bdp_bytes": 187500.0,
+   "note": "24 §4.4 — t_phase는 편도. LTE 클라우드 릴레이 기준"
+  },
+  "session_cap": 60,
+  "ru_band": {
+   "name": "RU 사용률 r (20%p)",
+   "thresholds": [
+    0.2,
+    0.4,
+    0.6000000000000001,
+    0.8,
+    1.0
+   ],
+   "direction": "at_most",
+   "note": "24 §2.8 확정 (2026-08-14, PL) — r = 총점유 ÷ 한도, 20%p 등분: ≤20% ★5 · ≤40% ★4 · ≤60% ★3 · ≤80% ★2 · ≤100% ★1 · 초과 ★0(결함). TB·CF와 동일 눈금. 저사용 구간의 변별은 원값(r %) 병기로 읽는다"
+  },
+  "plans": [
+   "seq2",
+   "pool"
+  ],
+  "baseline_from": null,
+  "judgement": "FC=달성률 · RU=사용률 r P95 로그 사다리(2026-08-13 개정) · TB=ρ P95"
+ },
+ "wall_seconds": 2928.0
+}

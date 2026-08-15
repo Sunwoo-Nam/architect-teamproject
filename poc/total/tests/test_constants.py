@@ -148,34 +148,34 @@ class TestRuBand:
         # 협상 몫 한도 = 256MB × 75%(GC 여유) − 64MB(앱 기본, 잠정) = 128MB — 24 §2.8 (2026-08-13)
         assert RU_CEILING_BYTES == 128 * 1024 * 1024
 
-    def test_step_is_handbook_20pp(self):
-        assert RU_STEP == 0.20   # 2026-08-14 PL 확정 — 20%p 등분
+    def test_step_kept_for_20pp_reference(self):
+        assert RU_STEP == 0.20   # 구 20%p 등분의 폭 — band_ru_usage_20pp 이력용
 
     def test_band_from_ceiling(self):
-        # 20%p 등분 — 2026-08-14 PL 확정 (TB·CF와 눈금 통일)
+        # [1%,100%] 로그 4등분 — 2026-08-14 최종 확정 (20%p에서 복귀, PL):
+        # ★5 경계 1% = 실사용 최대(≈10축)까지의 성장(약 100배, 실측 ×2.1/축) 여유
         b = band_ru_usage()
-        assert b.thresholds == pytest.approx([0.2, 0.4, 0.6, 0.8, 1.0])
+        assert b.thresholds == pytest.approx([1e-2, 10 ** -1.5, 1e-1, 10 ** -0.5, 1.0])
         assert b.direction == "at_most"
 
     def test_usage_stars(self):
         b = band_ru_usage()
-        assert b.stars(0.003) == 5    # seq2 P95 0.30%
-        assert b.stars(0.20) == 5     # 경계 포함 (≤) — TB·CF와 동일 규약
-        assert b.stars(0.482) == 3    # pool P95 48.2% — ★3 (40-60%)
-        assert b.stars(0.75) == 2     # ★2 (60-80%)
-        assert b.stars(0.99) == 1     # 한도 직하 — ★1
+        assert b.stars(0.003) == 5    # seq2 P95 0.30% — 실사용 최대까지 여유 = 만점
+        assert b.stars(0.014) == 4    # FIN2 seq2 r 최대 1.4% — ★4 (1-3.2%)
+        assert b.stars(0.0486) == 3   # FIN2 P6 r 최대 4.86% — ★3 (3.2-10%)
+        assert b.stars(0.413) == 1    # FIN2 pool P95 41.3% — ★1 (32-100%)
         assert b.stars(2.2) == 0      # 한도 초과 — 즉시 결함
 
     def test_custom_ceiling_changes_nothing_in_band(self):
         # 밴드는 비율이므로 한도가 바뀌어도 경계는 같다 — 바뀌는 것은 r의 분모
         assert band_ru_usage().thresholds == band_ru_usage(step=0.20).thresholds
 
-    def test_log_band_kept_for_reference(self):
-        # 구 로그([1%,100%] 반 데케이드) 사다리 — 저사용 구간 변별 참조용 이력
-        from total.qa.constants import band_ru_usage_log
+    def test_20pp_band_kept_for_reference(self):
+        # 구 20%p 등분 — 한때 확정 후 변별 상실(FIN2 보고)로 로그 복귀. 이력 보존
+        from total.qa.constants import band_ru_usage_20pp
 
-        b = band_ru_usage_log()
-        assert b.thresholds == pytest.approx([1e-2, 10 ** -1.5, 1e-1, 10 ** -0.5, 1.0])
+        b = band_ru_usage_20pp()
+        assert b.thresholds == pytest.approx([0.2, 0.4, 0.6, 0.8, 1.0])
 
     def test_linear_band_kept_for_reference(self):
         from total.qa.constants import band_ru_usage_linear
