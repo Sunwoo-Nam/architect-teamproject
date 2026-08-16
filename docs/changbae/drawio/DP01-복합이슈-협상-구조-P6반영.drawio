@@ -1,0 +1,433 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="dp01-structure-p6" name="DP01 구조 — pool 보완 vs poolka">
+    <mxGraphModel dx="2600" dy="840" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2600" pageHeight="840" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===== 제목 ===== -->
+        <mxCell id="tL" value="(1안) 이슈별 순차 협상 (Pipe &amp; Filters) — seq2" style="text;html=1;fontSize=15;fontStyle=1;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="46" width="600" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="tM" value="(2안) 개인별 후보군 압축 협상 (Filter-then-Negotiate) — pool 구조 보완판" style="text;html=1;fontSize=15;fontStyle=1;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="820" y="46" width="660" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="tR" value="(2안 + P6) poolka — k 비대칭 배분 (예산제 탐욕)" style="text;html=1;fontSize=15;fontStyle=1;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1680" y="46" width="700" height="28" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 단말 경계 ===== -->
+        <mxCell id="bL" value="단말" style="rounded=0;dashed=1;fillColor=none;strokeColor=#999999;verticalAlign=top;align=left;spacingLeft=6;fontSize=12;fontColor=#666666;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="90" width="580" height="690" as="geometry" />
+        </mxCell>
+        <mxCell id="bM" value="단말" style="rounded=0;dashed=1;fillColor=none;strokeColor=#999999;verticalAlign=top;align=left;spacingLeft=6;fontSize=12;fontColor=#666666;html=1;" vertex="1" parent="1">
+          <mxGeometry x="820" y="90" width="640" height="690" as="geometry" />
+        </mxCell>
+        <mxCell id="bR" value="단말" style="rounded=0;dashed=1;fillColor=none;strokeColor=#999999;verticalAlign=top;align=left;spacingLeft=6;fontSize=12;fontColor=#666666;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1680" y="90" width="700" height="690" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- 1안 (seq2)                                                    -->
+        <!-- ============================================================ -->
+        <mxCell id="l2" value="Planner" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="70" y="130" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l3" value="Issue Catalog" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="70" y="210" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l4" value="Issue Sequencer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEEEEE;strokeColor=#666666;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="290" width="150" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="l5" value="Catalog Validator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="70" y="320" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l5b" value="Ordering Policy" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="70" y="370" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l6" value="Negotiate Trigger" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="330" y="130" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l7" value="Issue Dispatcher" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="330" y="210" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="l8" value="Issue Session (이슈별 생성 · 반복)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F2F9F1;strokeColor=#82B366;verticalAlign=top;fontSize=12;fontStyle=1;fontColor=#4D7A44;" vertex="1" parent="1">
+          <mxGeometry x="270" y="310" width="310" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="l9" value="Constraint Filter" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="290" y="360" width="125" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="l10" value="Candidates Builder" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="435" y="360" width="125" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="l11" value="Issue Negotiator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="350" y="470" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="l12" value="상대 단말&lt;br&gt;Issue Negotiator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#666666;dashed=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="640" y="470" width="130" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="l13" value="Preference Data" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="70" y="700" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="l14" value="SubAgent / Tool" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="240" y="700" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="l15" value="Utility Function" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="410" y="700" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;" edge="1" parent="1" source="l2" target="l3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;" edge="1" parent="1" source="l3" target="l4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="Issue + Constraint Hint" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;fontSize=11;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="l4" target="l7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="255" y="355" />
+              <mxPoint x="255" y="235" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;" edge="1" parent="1" source="l6" target="l7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.45;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="l7" target="l8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82B366;" edge="1" parent="1" source="l9" target="l10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" value="이슈 후보" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82B366;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="l10" target="l11">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="497" y="437" />
+              <mxPoint x="425" y="437" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" value="합의 값 → 다음 제약" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;fontSize=11;exitX=1;exitY=0.33;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="l8" target="l7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="610" y="392" />
+              <mxPoint x="610" y="235" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" value="결렬 → 앞 이슈 재개 (백트랙 · seq2)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#9673A6;strokeWidth=2;dashed=1;fontColor=#6B4E80;fontSize=11;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="l11" target="l7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="240" y="495" />
+              <mxPoint x="240" y="285" />
+              <mxPoint x="370" y="285" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="l11" target="l12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#BBBBBB;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.2;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="l13" target="l11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#BBBBBB;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="l14" target="l11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#BBBBBB;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.8;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="l15" target="l11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- 2안 pool — 구조 보완판 (P6 없음)                              -->
+        <!-- ============================================================ -->
+        <mxCell id="m2" value="Planner" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="850" y="130" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m3" value="Issue Catalog" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="850" y="210" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m4" value="Issue Sequencer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEEEEE;strokeColor=#666666;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="840" y="290" width="150" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="m5" value="Catalog Validator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="850" y="320" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m6" value="Ordering Policy" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="850" y="370" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m7" value="Negotiate Trigger" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="130" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m8" value="Issue Dispatcher" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="210" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="m9" value="Candidate Reducer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F0F6FC;strokeColor=#6C8EBF;verticalAlign=top;align=left;spacingLeft=8;fontSize=12;fontStyle=1;fontColor=#3B5B80;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="310" width="410" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="m10" value="Partial Evaluator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1045" y="355" width="120" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="m11" value="Constraint Filter" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="355" width="120" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="m12" value="Top-W Selector" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1315" y="355" width="115" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="m14" value="Issue Expander" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="470" width="140" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="m15" value="※ 보완 — 평가·선별을 전개보다 앞에 둔다: 전체 조합은 어느 시점에도 실물화되지 않음" style="text;html=1;fontSize=10;fontStyle=2;fontColor=#6B4E80;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1045" y="538" width="385" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="m16" value="Package Negotiator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="630" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="m17" value="상대 단말&lt;br&gt;Package Negotiator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#666666;dashed=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1480" y="625" width="150" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m18" value="Preference Data" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="850" y="700" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="m19" value="SubAgent / Tool" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="700" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="m20" value="Utility Function" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1310" y="700" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="g1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;" edge="1" parent="1" source="m2" target="m3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="g2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;" edge="1" parent="1" source="m3" target="m4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="g3" value="Issue + Constraint Hint" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;fontSize=11;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="m4" target="m8">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1015" y="355" />
+              <mxPoint x="1015" y="235" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="g4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;" edge="1" parent="1" source="m7" target="m8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="g5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.4;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="m8" target="m9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="g6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#6C8EBF;" edge="1" parent="1" source="m10" target="m11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="g7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#6C8EBF;" edge="1" parent="1" source="m11" target="m12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="g8" value="다음 이슈 반복" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#6C8EBF;dashed=1;fontSize=10;fontColor=#3B5B80;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="m12" target="m10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1372" y="337" />
+              <mxPoint x="1105" y="337" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="g9" value="선별된 값만 전개" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#6C8EBF;fontSize=10;fontColor=#3B5B80;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.6;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="m12" target="m14">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1372" y="437" />
+              <mxPoint x="1324" y="437" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="g11" value="Package[W]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#6C8EBF;fontSize=11;fontColor=#3B5B80;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.85;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="m14" target="m16">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1452" y="492" />
+              <mxPoint x="1452" y="608" />
+              <mxPoint x="1283" y="608" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="g12" value="심화: 양보선 &lt; 풀 하한 → 전역 W+1 → 전 이슈 재압축" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#9673A6;strokeWidth=2;dashed=1;fontColor=#6B4E80;fontSize=11;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="m16" target="m9">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1005" y="655" />
+              <mxPoint x="1005" y="445" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="g13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="m16" target="m17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="g14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#BBBBBB;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.1;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="m18" target="m16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="g15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#BBBBBB;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.4;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="m19" target="m16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="g16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#BBBBBB;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.8;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="m20" target="m16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- 2안 + P6 (poolka)                                             -->
+        <!-- ============================================================ -->
+        <mxCell id="p2" value="Planner" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1710" y="130" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="Issue Catalog" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1710" y="210" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" value="Issue Sequencer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEEEEE;strokeColor=#666666;verticalAlign=top;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1700" y="290" width="150" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="p5" value="Catalog Validator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1710" y="320" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p6" value="Ordering Policy" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1710" y="370" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p7" value="Negotiate Trigger" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1980" y="130" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p8" value="Issue Dispatcher" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1980" y="210" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p9" value="Candidate Reducer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F0F6FC;strokeColor=#6C8EBF;verticalAlign=top;align=left;spacingLeft=8;fontSize=12;fontStyle=1;fontColor=#3B5B80;" vertex="1" parent="1">
+          <mxGeometry x="1900" y="310" width="460" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="p10" value="Partial Evaluator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1920" y="355" width="130" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="p11" value="Constraint Filter" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="2070" y="355" width="130" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="p12" value="Top-kᵢ Selector (구 Top-W)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#D79B00;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="2215" y="355" width="130" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="p13" value="k 배분기 (P6 · poolka)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1920" y="470" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p14" value="Issue Expander" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="2200" y="470" width="140" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="p15" value="※ 보완 — 평가·선별을 전개보다 앞에 둔다: 전체 조합은 어느 시점에도 실물화되지 않음" style="text;html=1;fontSize=10;fontStyle=2;fontColor=#6B4E80;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1915" y="538" width="435" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="p16" value="Package Negotiator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="2050" y="630" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p17" value="상대 단말&lt;br&gt;Package Negotiator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#666666;dashed=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="2400" y="625" width="150" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p18" value="Preference Data" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1710" y="700" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p19" value="SubAgent / Tool" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1880" y="700" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p20" value="Utility Function" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="2230" y="700" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="h1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;" edge="1" parent="1" source="p2" target="p3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;" edge="1" parent="1" source="p3" target="p4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h3" value="Issue + Constraint Hint" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;fontSize=11;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="p4" target="p8">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1885" y="355" />
+              <mxPoint x="1885" y="235" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="h4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;" edge="1" parent="1" source="p7" target="p8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.35;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="p8" target="p9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#6C8EBF;" edge="1" parent="1" source="p10" target="p11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#6C8EBF;" edge="1" parent="1" source="p11" target="p12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h8" value="다음 이슈 반복" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#6C8EBF;dashed=1;fontSize=10;fontColor=#3B5B80;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="p12" target="p10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2280" y="337" />
+              <mxPoint x="1985" y="337" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="h9" value="선별된 값만 전개" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#6C8EBF;fontSize=10;fontColor=#3B5B80;exitX=0.42;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="p12" target="p14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h10" value="이슈별 kᵢ (∏kᵢ ≤ 예산 B)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#D79B00;strokeWidth=2;dashed=1;fontColor=#B26800;fontSize=11;fontStyle=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.12;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="p13" target="p12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1995" y="435" />
+              <mxPoint x="2231" y="435" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="h11" value="Package[∏kᵢ ≤ B] (구 Package[W])" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#6C8EBF;fontSize=11;fontColor=#3B5B80;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.85;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="p14" target="p16">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2372" y="492" />
+              <mxPoint x="2372" y="608" />
+              <mxPoint x="2203" y="608" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="h12" value="심화: 양보선 &lt; 풀 하한 → 예산 ×2 재배분 (구: 전역 k+1)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#D79B00;strokeWidth=2;dashed=1;fontColor=#B26800;fontSize=11;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="p16" target="p13">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1875" y="655" />
+              <mxPoint x="1875" y="495" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="h13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#666666;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="p16" target="p17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h14" value="가중치 · 값 점수" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#D79B00;strokeWidth=2;dashed=1;fontColor=#B26800;fontSize=11;fontStyle=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;" edge="1" parent="1" source="p18" target="p13">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1785" y="485" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="h15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#BBBBBB;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="p19" target="p16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#BBBBBB;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="p20" target="p16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 범례 ===== -->
+        <mxCell id="lg0" value="범례" style="text;html=1;fontSize=12;fontStyle=1;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="2400" y="96" width="160" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lg1" style="rounded=0;fillColor=#F5F5F5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="2400" y="124" width="22" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2" value="원안 유지" style="text;html=1;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="2428" y="120" width="160" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="lg3" style="rounded=0;fillColor=#E1D5E7;strokeColor=#9673A6;" vertex="1" parent="1">
+          <mxGeometry x="2400" y="148" width="22" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lg4" value="구조 보완 (코드에 있으나 원안 그림에 없던 요소: 백트랙 · 심화 · 순서)" style="text;html=1;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="2428" y="138" width="170" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="lg5" style="rounded=0;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="1">
+          <mxGeometry x="2400" y="188" width="22" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lg6" value="P6(poolka) 전용 신규 · 변경" style="text;html=1;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="2428" y="184" width="170" height="22" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
